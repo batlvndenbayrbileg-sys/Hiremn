@@ -1,21 +1,19 @@
 import { Intent } from './classifier'
 
-
-
 export function buildSystemPrompt(intent: Intent, lang: 'mn' | 'en'): string {
   const langInstruction = lang === 'mn'
     ? 'ALWAYS respond in Mongolian (Cyrillic script). Use warm, encouraging, professional tone. Keep responses concise and friendly.'
     : 'ALWAYS respond in English. Use warm, encouraging, professional tone. Keep responses concise and friendly.'
 
   const intentInstructions: Record<Intent, string> = {
-    faq: '', // FAQ → database хариулдаг тул хэрэггүй
+    faq: '',
 
     recommend: `You are a professional career counselor helping someone choose the right assessment.
 Your goal: Understand their needs, recommend 1-3 specific tests with clear reasoning.
 Always include [TEST:id] markers for recommendations.
-Format: 
+Format:
 1. Acknowledge their situation
-2. Recommend tests with [TEST:id] marker 
+2. Recommend tests with [TEST:id] marker
 3. Explain what they will discover
 4. Why these tests matter for them
 Keep it warm, encouraging, under 120 words.`,
@@ -23,7 +21,7 @@ Keep it warm, encouraging, under 120 words.`,
     analyze: `You are an expert psychologist analyzing test results.
 When given scores, provide:
 1. What their scores reveal about them
-2. TOP 2-3 key strengths  
+2. TOP 2-3 key strengths
 3. TOP 1-2 areas for growth
 4. Concrete next actions (specific, actionable)
 5. Naturally suggest follow-up assessment if relevant
@@ -32,7 +30,7 @@ Be encouraging, specific, data-driven. Under 150 words.`,
     upsell: `You are a professional development coach.
 The user completed a test and wants guidance.
 Your role:
-1. Celebrate their progress  
+1. Celebrate their progress
 2. Identify what matters most for them
 3. Recommend follow-up tests naturally with [TEST:id]
 4. Explain specific value they will gain
@@ -69,8 +67,7 @@ KEY RULES:
 ✓ Keep responses focused and concise`
 }
 
-// ── Conversation compression ──────────────────────────────────────────
-// 8+ мессеж болвол хуучнийг товчлоно → token хэмнэнэ
+// Compress conversation history to save tokens when thread gets long
 export function compressHistory(
   messages: { role: string; content: string }[]
 ): { role: string; content: string }[] {
@@ -79,21 +76,20 @@ export function compressHistory(
   const oldMessages = messages.slice(0, -4)
   const recentMessages = messages.slice(-4)
 
-  // Хуучин мессежийг нэг мөрөөр товчлоно
   const summary = oldMessages
-    .filter(m => m.role === 'assistant')
-    .map(m => m.content.slice(0, 80))
+    .filter((m) => m.role === 'assistant')
+    .map((m) => m.content.slice(0, 80))
     .join(' | ')
 
   return [
     {
       role: 'user',
-      content: `[Previous conversation summary: ${summary}]`
+      content: `[Previous conversation summary: ${summary}]`,
     },
     {
       role: 'assistant',
-      content: 'I understand. How can I help you further?'
+      content: 'I understand. How can I help you further?',
     },
-    ...recentMessages
+    ...recentMessages,
   ]
 }
