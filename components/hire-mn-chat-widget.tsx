@@ -553,8 +553,8 @@ export function HireMnChatWidget() {
               display: "flex", flexDirection: "column", overflow: "hidden",
             }}>
 
-        {/* HEADER */}
-        <div style={{
+              {/* HEADER */}
+              <div style={{
           background: "#E8541A", padding: "0 16px", height: 72,
           display: "flex", alignItems: "center", gap: 12,
           flexShrink: 0, position: "relative", overflow: "hidden",
@@ -718,7 +718,7 @@ export function HireMnChatWidget() {
         }}>
           hire.mn AI · Ухаалаг туслагч
         </div>
-      </div>{/* end .hire-widget */}
+            </div>{/* end .hire-widget */}
           </div>{/* end animation wrapper */}
         )}{/* end isOpen */}
 
