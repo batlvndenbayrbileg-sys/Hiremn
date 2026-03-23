@@ -557,15 +557,69 @@ function TestCard({ test, lang }: { test: TestInfo; lang: Language }) {
   )
 }
 
-// Test cards container for multiple recommendations
-function TestCardsContainer({ testIds, lang }: { testIds: number[]; lang: Language }) {
+// Test cards carousel for multiple recommendations
+function TestCardsCarousel({ testIds, lang }: { testIds: number[]; lang: Language }) {
+  const [currentIndex, setCurrentIndex] = useState(0)
   const tests = testIds.map(id => getTestById(id)).filter(Boolean) as TestInfo[]
+  
   if (tests.length === 0) return null
+  
+  const showCarousel = tests.length > 1
+  const displayTests = showCarousel ? [tests[currentIndex]] : tests
+
   return (
-    <div className="flex flex-col gap-2 mt-2">
-      {tests.map((test) => (
+    <div className="mt-3 space-y-2">
+      {displayTests.map((test) => (
         <TestCard key={test.id} test={test} lang={lang} />
       ))}
+      
+      {/* Carousel controls */}
+      {showCarousel && (
+        <div className="flex items-center justify-between gap-2 px-2">
+          <button
+            onClick={() => setCurrentIndex((prev) => (prev - 1 + tests.length) % tests.length)}
+            className="p-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all hover:scale-110 active:scale-95"
+            aria-label="Previous test"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          {/* Indicator dots */}
+          <div className="flex gap-1.5 flex-1 justify-center">
+            {tests.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentIndex(i)}
+                className={`h-1.5 rounded-full transition-all ${
+                  i === currentIndex
+                    ? "bg-primary w-5"
+                    : "bg-primary/20 w-1.5 hover:bg-primary/40"
+                }`}
+                aria-label={`Test ${i + 1}`}
+              />
+            ))}
+          </div>
+          
+          <button
+            onClick={() => setCurrentIndex((prev) => (prev + 1) % tests.length)}
+            className="p-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all hover:scale-110 active:scale-95"
+            aria-label="Next test"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      )}
+      
+      {/* Counter */}
+      {showCarousel && (
+        <div className="text-center text-xs text-foreground/50 font-medium">
+          {currentIndex + 1} / {tests.length}
+        </div>
+      )}
     </div>
   )
 }
@@ -610,9 +664,9 @@ function MessageBubble({ message, isLatest, lang }: { message: Message; isLatest
           <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
         </div>
         
-        {/* Render test cards if present */}
+        {/* Render test cards carousel if present */}
         {hasTestCards && (
-          <TestCardsContainer testIds={message.testIds!} lang={lang} />
+          <TestCardsCarousel testIds={message.testIds!} lang={lang} />
         )}
         
         <div className={`text-[10px] text-foreground/40 mt-1 font-medium ${isUser ? "text-right mr-1" : "ml-1"}`}>
@@ -895,12 +949,12 @@ export function HireMnChatWidget() {
       } catch (error) {
         const errMsg = error instanceof Error ? error.message : "Unknown error"
         console.error("[v0] Chat error:", errMsg)
+        
+        // Show actual error for debugging
         const errorMsg: Message = {
           id: (Date.now() + 1).toString(),
           role: "bot",
-          content: lang === "mn" 
-            ? "Уучлаарай, алдаа гарлаа. Дахин оролдоно уу."
-            : "Sorry, something went wrong. Please try again.",
+          content: `[ERROR] ${errMsg}`,
           timestamp: new Date(),
         }
         setIsTyping(false)
