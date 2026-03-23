@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { classify } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/brain'
+import { parseTestMarkers, TEST_DATABASE } from '@/lib/test-db'
 
 export const maxDuration = 30
 
@@ -33,11 +34,31 @@ export async function POST(req: Request) {
     const { intent, useLLM, detectedLang } = classify(lastMessage)
     const lang: 'mn' | 'en' = forcedLang === 'mn' || forcedLang === 'en' ? forcedLang : detectedLang
 
+    // Helper: convert TestInfo → widget-compatible shape
+    const shapeTest = (id: number) => {
+      const t = TEST_DATABASE[id]
+      if (!t) return null
+      const isFree = t.price === 'Uneggui' || t.priceEn === 'Free'
+      return {
+        id: t.id,
+        name: lang === 'mn' ? t.name : t.nameEn,
+        desc: lang === 'mn' ? t.desc : t.descEn,
+        url: t.url,
+        price: isFree ? 'Үнэгүй' : `${t.price}₮`,
+        duration: t.time,
+        emoji: t.emoji,
+        color: t.color,
+        free: isFree,
+      }
+    }
+
     // 2. FAQ lookup — free, instant, zero AI cost
     if (!useLLM || intent === 'faq') {
       const faqAnswer = findFAQ(lastMessage, lang)
       if (faqAnswer) {
-        return Response.json({ reply: faqAnswer, source: 'faq', intent, tokens_used: 0 })
+        const { cleanText, testIds } = parseTestMarkers(faqAnswer)
+        const tests = testIds.map(shapeTest).filter(Boolean)
+        return Response.json({ reply: cleanText, tests, source: 'faq', intent, tokens_used: 0 })
       }
     }
 
@@ -62,11 +83,16 @@ export async function POST(req: Request) {
       messages: formattedMessages,
     })
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : ''
+    const rawText = response.content[0].type === 'text' ? response.content[0].text : ''
     const tokensUsed = (response.usage?.input_tokens ?? 0) + (response.usage?.output_tokens ?? 0)
 
+    // Parse [TEST:id] markers out of the LLM reply
+    const { cleanText, testIds } = parseTestMarkers(rawText)
+    const tests = testIds.map(shapeTest).filter(Boolean)
+
     return Response.json({
-      reply: text,
+      reply: cleanText,
+      tests,
       source: 'llm',
       intent,
       tokens_used: tokensUsed,
