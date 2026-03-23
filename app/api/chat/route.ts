@@ -3,25 +3,32 @@ import { classify } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/ai-brain'
 
+export const maxDuration = 30
+
 export async function POST(req: Request) {
   try {
+    const contentType = req.headers.get('content-type') ?? ''
+    if (!contentType.includes('application/json')) {
+      return Response.json({ error: 'Content-Type must be application/json' }, { status: 415 })
+    }
+
     const body = await req.json()
     const { messages, lang: forcedLang } = body
 
-    if (!messages?.length) {
-      return Response.json({ error: 'messages required' }, { status: 400 })
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return Response.json({ error: 'messages array is required' }, { status: 400 })
     }
 
     const lastMessage = messages[messages.length - 1]?.content as string
-    if (!lastMessage) {
-      return Response.json({ error: 'last message content missing' }, { status: 400 })
+    if (!lastMessage?.trim()) {
+      return Response.json({ error: 'last message content is empty' }, { status: 400 })
     }
 
-    // STEP 1: Classify intent + detect language
+    // 1. Classify intent and detect language
     const { intent, useLLM, detectedLang } = classify(lastMessage)
-    const lang = (forcedLang === 'mn' || forcedLang === 'en') ? forcedLang : detectedLang
+    const lang: 'mn' | 'en' = forcedLang === 'mn' || forcedLang === 'en' ? forcedLang : detectedLang
 
-    // STEP 2: FAQ lookup — free, instant, no LLM cost
+    // 2. FAQ lookup — free, instant, zero AI cost
     if (!useLLM || intent === 'faq') {
       const faqAnswer = findFAQ(lastMessage, lang)
       if (faqAnswer) {
@@ -29,15 +36,19 @@ export async function POST(req: Request) {
       }
     }
 
-    // STEP 3: LLM — only when needed
+    // 3. LLM — only when truly needed
     const systemPrompt = buildSystemPrompt(intent, lang)
-    const compressedMessages = compressHistory(messages)
+    const compressed = compressHistory(messages)
 
-    // Normalize roles: bot → assistant
-    const formattedMessages = compressedMessages.map((m: { role: string; content: string }) => ({
-      role: (m.role === 'bot' ? 'assistant' : m.role) as 'user' | 'assistant' | 'system',
-      content: m.content,
-    }))
+    // Normalize roles: 'bot' → 'assistant', keep only user/assistant
+    const formattedMessages = compressed
+      .filter((m: { role: string; content: string }) =>
+        m.role === 'user' || m.role === 'assistant' || m.role === 'bot'
+      )
+      .map((m: { role: string; content: string }) => ({
+        role: (m.role === 'bot' ? 'assistant' : m.role) as 'user' | 'assistant',
+        content: String(m.content),
+      }))
 
     const { text, usage } = await generateText({
       model: 'openai/gpt-4o-mini',

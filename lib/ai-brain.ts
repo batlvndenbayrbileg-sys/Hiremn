@@ -1,4 +1,4 @@
-// ai-brain.ts — hire.mn assistant logic
+// ai-brain.ts — hire.mn assistant logic (canonical)
 import { Intent } from './classifier'
 
 export function buildSystemPrompt(intent: Intent, lang: 'mn' | 'en'): string {

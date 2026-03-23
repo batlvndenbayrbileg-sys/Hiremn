@@ -508,6 +508,7 @@ export function HireMnChatWidget() {
           .map((m) => ({ role: m.role === "bot" ? "assistant" : "user", content: m.content }))
         history.push({ role: "user", content: messageText })
 
+        console.log("[v0] sending to /api/chat:", { messageCount: history.length, lang })
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -553,7 +554,8 @@ export function HireMnChatWidget() {
             isError: true,
           },
         ])
-        console.error("[widget] chat error:", errMsg)
+        console.error("[v0] chat error full:", errMsg)
+        console.error("[v0] err object:", err)
       }
     },
     [inputValue, lang, messages]
