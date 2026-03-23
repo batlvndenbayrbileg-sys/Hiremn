@@ -1,7 +1,7 @@
 import { generateText } from 'ai'
 import { classify } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'
-import { buildSystemPrompt, compressHistory } from '@/lib/ai-brain'
+import { buildSystemPrompt, compressHistory } from '@/lib/brain'
 
 export const maxDuration = 30
 
