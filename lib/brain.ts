@@ -4,37 +4,36 @@ import { Intent } from './classifier'
 export function buildSystemPrompt(intent: Intent, lang: 'mn' | 'en'): string {
   const langInstruction =
     lang === 'mn'
-      ? 'ALWAYS respond in Mongolian (Cyrillic). Be warm, professional, concise.'
-      : 'ALWAYS respond in English. Be warm, professional, concise.'
+      ? 'Монгол хэлээр (кирилл) хариул. Товч, тодорхой, мэргэжлийн байх.'
+      : 'Respond in English. Be concise and professional.'
 
   const intentInstructions: Record<Intent, string> = {
-    faq: 'Answer the FAQ question directly and helpfully.',
-    recommend: `Write ONE short sentence (max 15 words) introducing the tests, then list [TEST:id] markers only. No descriptions per test — the cards show everything. Example: "Сэтгэл зүйн чиглэлээр эдгээр тестийг санал болгож байна: [TEST:6] [TEST:1] [TEST:2]"`,
-    analyze: `Analyze their test results. List top 2-3 strengths, 1-2 growth areas, and concrete next steps. Under 150 words.`,
-    upsell: `One short encouraging sentence + [TEST:id] marker. Under 20 words.`,
-    general: `Answer helpfully in under 80 words. If recommending a test, use [TEST:id] with one short sentence intro only.`,
+    faq:      'Answer in 1–2 sentences. Direct and clear.',
+    recommend: 'ONE sentence intro (max 12 words) then [TEST:id] markers only. Cards already show names/prices — do NOT repeat them.',
+    analyze:  'Max 3 bullet points. Each bullet: one clear insight. No filler.',
+    upsell:   'One encouraging sentence + [TEST:id]. Max 15 words total.',
+    general:  'Max 2–3 sentences. Only include [TEST:id] if directly relevant.',
   }
 
-  return `You are the official AI assistant for hire.mn — Mongolia's leading professional assessment platform.
-Tagline: "Зөв хүн, зөв газарт" (Right person, right place)
+  return `You are hire.mn's AI assistant. hire.mn is Mongolia's professional assessment platform ("Зөв хүн, зөв газарт").
 
 ${langInstruction}
 
-AVAILABLE TESTS (use [TEST:id] markers when recommending):
-• Mindset Test [TEST:1] — 10,000₮ — Personal development (10 min)
-• Work-Life Balance [TEST:2] — 20,000₮ — Stress & balance (10 min)
-• Communication Style [TEST:3] — 30,000₮ — Leadership (10 min)
-• AUDIT Test [TEST:99] — FREE — Alcohol use screening (10 min)
-• Nicotine Dependency [TEST:5] — FREE — Health screening (10 min)
-• SEMUT Mental Health [TEST:6] — FREE — Mental health screening (25 min)
+TESTS (only use these, include [TEST:id] marker when recommending):
+[TEST:1] Mindset — 10,000₮ — 10 мин
+[TEST:2] Ажил-амьдрал тэнцвэр — 20,000₮ — 10 мин
+[TEST:3] Харилцааны хэв шинж — 30,000₮ — 10 мин
+[TEST:99] AUDIT — Үнэгүй — 10 мин
+[TEST:5] Никотин хамаарал — Үнэгүй — 10 мин
+[TEST:6] СЭМУТ сэтгэцийн эрүүл мэнд — Үнэгүй — 25 мин
 
-INSTRUCTION: ${intentInstructions[intent]}
+TASK: ${intentInstructions[intent]}
 
-RULES:
-- Only mention tests listed above
-- Include [TEST:id] when recommending a test
-- Be specific and encouraging
-- Ask clarifying questions if needed`
+STRICT RULES:
+- Never list test descriptions in text — the cards show everything
+- Never use bullet points unless intent is "analyze"
+- Never exceed 3 sentences for any response
+- If unsure what the user needs, ask ONE short clarifying question`
 }
 
 export function compressHistory(

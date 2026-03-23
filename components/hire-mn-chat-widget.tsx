@@ -503,61 +503,76 @@ export function HireMnChatWidget() {
 
               {/* HEADER */}
               <div style={{
-                background: "#1A1A1A",
-                padding: "0 16px",
-                height: 66,
-                display: "flex", alignItems: "center", gap: 12,
+                background: "#fff",
+                padding: "0 14px 0 16px",
+                height: 68,
+                display: "flex", alignItems: "center", gap: 11,
                 flexShrink: 0,
                 position: "relative",
+                borderBottom: "1px solid #F0EBE7",
               }}>
+                {/* Accent line top */}
+                <div style={{
+                  position: "absolute", top: 0, left: 0, right: 0, height: 3,
+                  background: "linear-gradient(90deg, #E8541A 0%, #F5A07A 100%)",
+                  borderRadius: "20px 20px 0 0",
+                }} />
+
                 {/* Avatar */}
                 <div style={{
-                  width: 40, height: 40,
-                  borderRadius: 12,
-                  background: "rgba(232,84,26,.15)",
-                  border: "1px solid rgba(232,84,26,.3)",
+                  width: 38, height: 38,
+                  borderRadius: 11,
+                  background: "#FEF3EE",
+                  border: "1.5px solid #FDDCCC",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   flexShrink: 0,
-                  animation: "hire-float 3s ease-in-out infinite",
                 }}>
-                  <BrainIcon size={22} color="white" />
+                  <BrainIcon size={22} color="#E8541A" />
                 </div>
 
                 {/* Title */}
                 <div style={{ flex: 1 }}>
-                  <div style={{ color: "#fff", fontWeight: 600, fontSize: 14, lineHeight: 1.2 }}>
+                  <div style={{ color: "#111", fontWeight: 700, fontSize: 14, letterSpacing: "-0.2px", lineHeight: 1.2 }}>
                     hire.mn
+                    <span style={{
+                      marginLeft: 7,
+                      fontSize: 9.5, fontWeight: 600, letterSpacing: "0.5px",
+                      color: "#E8541A", background: "#FEF3EE",
+                      border: "1px solid #FDDCCC",
+                      padding: "2px 7px", borderRadius: 20,
+                      textTransform: "uppercase",
+                    }}>AI</span>
                   </div>
                   <div style={{
-                    color: "rgba(255,255,255,.45)", fontSize: 11.5, marginTop: 2,
+                    color: "#9CA3AF", fontSize: 11, marginTop: 3,
                     display: "flex", alignItems: "center", gap: 5,
                   }}>
                     <span style={{
-                      width: 6, height: 6, borderRadius: "50%", background: "#4ADE80",
-                      display: "inline-block",
-                      animation: "hire-bounce 2.4s ease-in-out infinite",
+                      width: 6, height: 6, borderRadius: "50%", background: "#22C55E",
+                      display: "inline-block", flexShrink: 0,
                     }} />
-                    Онлайн
+                    Онлайн — Туслахад бэлэн
                   </div>
                 </div>
 
                 {/* Controls */}
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   {/* Font size */}
                   <button
                     onClick={() => setShowFontSlider(s => !s)}
                     title="Үсгийн хэмжээ"
                     style={{
-                      width: 32, height: 32, borderRadius: 8,
-                      background: showFontSlider ? "rgba(232,84,26,.25)" : "rgba(255,255,255,.08)",
-                      border: showFontSlider ? "1px solid rgba(232,84,26,.5)" : "1px solid rgba(255,255,255,.12)",
-                      color: "#fff", cursor: "pointer",
+                      width: 30, height: 30, borderRadius: 8,
+                      background: showFontSlider ? "#FEF3EE" : "transparent",
+                      border: showFontSlider ? "1px solid #FDDCCC" : "1px solid transparent",
+                      color: showFontSlider ? "#E8541A" : "#9CA3AF",
+                      cursor: "pointer",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      transition: "background .15s",
+                      transition: "all .15s",
                     }}
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                      <path d="M4 20V7M4 7l4-4M4 7L0 11M20 20V4M20 4l-3 3M20 4l3 3M9 20h6M11 10h2" />
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M4 20h4M6 20V7l-3 3M14 20h4M16 20V4l-3 3M20 4l-3 3M10 13h4" />
                     </svg>
                   </button>
 
@@ -565,12 +580,21 @@ export function HireMnChatWidget() {
                   <button
                     onClick={() => setLang(l => l === "МН" ? "EN" : "МН")}
                     style={{
-                      height: 32, paddingLeft: 10, paddingRight: 10,
+                      height: 30, paddingLeft: 9, paddingRight: 9,
                       borderRadius: 8,
-                      background: "rgba(255,255,255,.08)",
-                      border: "1px solid rgba(255,255,255,.12)",
-                      color: "rgba(255,255,255,.8)", fontSize: 11, fontWeight: 600,
+                      background: "transparent",
+                      border: "1px solid transparent",
+                      color: "#9CA3AF", fontSize: 11, fontWeight: 600,
                       cursor: "pointer",
+                      transition: "all .15s",
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.background = "#F5F5F5"
+                      ;(e.currentTarget as HTMLElement).style.color = "#333"
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.background = "transparent"
+                      ;(e.currentTarget as HTMLElement).style.color = "#9CA3AF"
                     }}
                   >
                     {lang === "МН" ? "EN" : "МН"}
@@ -580,14 +604,23 @@ export function HireMnChatWidget() {
                   <button
                     onClick={() => setIsOpen(false)}
                     style={{
-                      width: 32, height: 32, borderRadius: 8,
-                      background: "rgba(255,255,255,.08)",
-                      border: "1px solid rgba(255,255,255,.12)",
-                      color: "#fff", cursor: "pointer",
+                      width: 30, height: 30, borderRadius: 8,
+                      background: "transparent",
+                      border: "1px solid transparent",
+                      color: "#9CA3AF", cursor: "pointer",
                       display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "all .15s",
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.background = "#FEF2F2"
+                      ;(e.currentTarget as HTMLElement).style.color = "#EF4444"
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.background = "transparent"
+                      ;(e.currentTarget as HTMLElement).style.color = "#9CA3AF"
                     }}
                   >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
                       <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
                   </button>
@@ -597,13 +630,13 @@ export function HireMnChatWidget() {
               {/* Font size slider — collapsed panel */}
               {showFontSlider && (
                 <div style={{
-                  background: "#1A1A1A",
-                  borderTop: "1px solid rgba(255,255,255,.06)",
-                  padding: "10px 16px 12px",
+                  background: "#FAFAFA",
+                  borderBottom: "1px solid #F0EBE7",
+                  padding: "10px 16px",
                   flexShrink: 0,
                   display: "flex", alignItems: "center", gap: 10,
                 }}>
-                  <span style={{ fontSize: 10, color: "rgba(255,255,255,.35)", fontWeight: 500, minWidth: 18 }}>A</span>
+                  <span style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 600, minWidth: 18 }}>A</span>
                   <input
                     type="range"
                     min={11}
@@ -614,9 +647,9 @@ export function HireMnChatWidget() {
                     className="hire-font-slider"
                     style={{ "--val": fontSize } as React.CSSProperties}
                   />
-                  <span style={{ fontSize: 15, color: "rgba(255,255,255,.35)", fontWeight: 500, minWidth: 14 }}>A</span>
+                  <span style={{ fontSize: 15, color: "#9CA3AF", fontWeight: 600, minWidth: 14 }}>A</span>
                   <span style={{
-                    fontSize: 10, color: "rgba(255,255,255,.3)",
+                    fontSize: 10, color: "#C0B0A8",
                     minWidth: 28, textAlign: "right",
                   }}>{fontSize}px</span>
                 </div>
