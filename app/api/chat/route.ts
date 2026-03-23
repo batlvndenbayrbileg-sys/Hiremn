@@ -1,3 +1,4 @@
+// hire.mn chat API — v2
 import { generateText } from 'ai'
 import { classify } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'

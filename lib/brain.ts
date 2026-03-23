@@ -1,3 +1,4 @@
+// brain.ts — hire.mn AI logic (single source of truth)
 import { Intent } from './classifier'
 
 export function buildSystemPrompt(intent: Intent, lang: 'mn' | 'en'): string {
