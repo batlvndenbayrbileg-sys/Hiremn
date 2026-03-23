@@ -555,172 +555,172 @@ export function HireMnChatWidget() {
 
               {/* HEADER */}
               <div style={{
-          background: "#E8541A", padding: "0 16px", height: 72,
-          display: "flex", alignItems: "center", gap: 12,
-          flexShrink: 0, position: "relative", overflow: "hidden",
-        }}>
-          <div style={{ position: "absolute", right: -20, top: -20, width: 85, height: 85, borderRadius: "50%", background: "rgba(255,255,255,.07)" }} />
-          <div style={{ position: "absolute", right: 22, top: 36, width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,.05)" }} />
-          <div style={{
-            width: 48, height: 48, background: "rgba(255,255,255,.18)",
-            border: "1.5px solid rgba(255,255,255,.28)", borderRadius: 14,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0, animation: "hire-float 3.5s ease-in-out infinite", position: "relative", zIndex: 1,
-          }}>
-            <BrainIcon size={26} />
-          </div>
-          <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
-            <div style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>hire.mn Туслах</div>
-            <div style={{ color: "rgba(255,255,255,.72)", fontSize: 11, display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
-              <div style={{ width: 6, height: 6, background: "#4ADE80", borderRadius: "50%", animation: "hire-bounce 2s ease-in-out infinite" }} />
-              Онлайн байна
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1 }}>
-            <button
-              onClick={() => setLang(l => l === "МН" ? "EN" : "МН")}
-              style={{
-                background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.32)",
-                color: "#fff", borderRadius: 18, padding: "5px 12px",
-                fontSize: 11, fontWeight: 700, cursor: "pointer",
-              }}
-            >
-              {lang === "МН" ? "EN" : "МН"}
-            </button>
-            <button
-              onClick={() => setIsOpen(false)}
-              style={{
-                background: "rgba(255,255,255,.15)", border: "1.5px solid rgba(255,255,255,.28)",
-                color: "#fff", borderRadius: "50%", width: 30, height: 30,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                cursor: "pointer",
-              }}
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* TICKER */}
-        <div style={{
-          background: "#FFF0EB", borderBottom: "1px solid #F5DDD4",
-          height: 28, display: "flex", alignItems: "center",
-          overflow: "hidden", flexShrink: 0,
-        }}>
-          <div style={{ display: "flex", gap: 20, animation: "hire-ticker 24s linear infinite", whiteSpace: "nowrap" }}>
-            {tripled.map((item, i) => (
-              <span key={i} style={{
-                fontSize: 10.5, fontWeight: 600, color: "#C04010",
-                display: "inline-flex", alignItems: "center", gap: 5, flexShrink: 0,
-                paddingLeft: i === 0 ? 14 : 0,
+                background: "#E8541A", padding: "0 16px", height: 72,
+                display: "flex", alignItems: "center", gap: 12,
+                flexShrink: 0, position: "relative", overflow: "hidden",
               }}>
-                <span style={{ width: 5, height: 5, background: "#E8541A", borderRadius: "50%", display: "inline-block" }} />
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
+                <div style={{ position: "absolute", right: -20, top: -20, width: 85, height: 85, borderRadius: "50%", background: "rgba(255,255,255,.07)" }} />
+                <div style={{ position: "absolute", right: 22, top: 36, width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,.05)" }} />
+                <div style={{
+                  width: 48, height: 48, background: "rgba(255,255,255,.18)",
+                  border: "1.5px solid rgba(255,255,255,.28)", borderRadius: 14,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0, animation: "hire-float 3.5s ease-in-out infinite", position: "relative", zIndex: 1,
+                }}>
+                  <BrainIcon size={26} />
+                </div>
+                <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
+                  <div style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>hire.mn Туслах</div>
+                  <div style={{ color: "rgba(255,255,255,.72)", fontSize: 11, display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
+                    <div style={{ width: 6, height: 6, background: "#4ADE80", borderRadius: "50%", animation: "hire-bounce 2s ease-in-out infinite" }} />
+                    Онлайн байна
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1 }}>
+                  <button
+                    onClick={() => setLang(l => l === "МН" ? "EN" : "МН")}
+                    style={{
+                      background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.32)",
+                      color: "#fff", borderRadius: 18, padding: "5px 12px",
+                      fontSize: 11, fontWeight: 700, cursor: "pointer",
+                    }}
+                  >
+                    {lang === "МН" ? "EN" : "МН"}
+                  </button>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    style={{
+                      background: "rgba(255,255,255,.15)", border: "1.5px solid rgba(255,255,255,.28)",
+                      color: "#fff", borderRadius: "50%", width: 30, height: 30,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
 
-        {/* MESSAGES */}
-        <div className="hire-scroll" style={{
-          flex: 1, overflowY: "auto", padding: "14px 13px 8px",
-          display: "flex", flexDirection: "column", gap: 10, background: "#FFFCFB",
-        }}>
-          {messages.map((msg, i) => (
-            <div key={i} className="hire-msg">
-              {msg.role === "assistant"
-                ? <BotMessage message={msg} />
-                : <UserMessage content={msg.content} />
-              }
-            </div>
-          ))}
+              {/* TICKER */}
+              <div style={{
+                background: "#FFF0EB", borderBottom: "1px solid #F5DDD4",
+                height: 28, display: "flex", alignItems: "center",
+                overflow: "hidden", flexShrink: 0,
+              }}>
+                <div style={{ display: "flex", gap: 20, animation: "hire-ticker 24s linear infinite", whiteSpace: "nowrap" }}>
+                  {tripled.map((item, i) => (
+                    <span key={i} style={{
+                      fontSize: 10.5, fontWeight: 600, color: "#C04010",
+                      display: "inline-flex", alignItems: "center", gap: 5, flexShrink: 0,
+                      paddingLeft: i === 0 ? 14 : 0,
+                    }}>
+                      <span style={{ width: 5, height: 5, background: "#E8541A", borderRadius: "50%", display: "inline-block" }} />
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
-          {isTyping && (
-            <div className="hire-msg">
-              <TypingIndicator />
-            </div>
-          )}
+              {/* MESSAGES */}
+              <div className="hire-scroll" style={{
+                flex: 1, overflowY: "auto", padding: "14px 13px 8px",
+                display: "flex", flexDirection: "column", gap: 10, background: "#FFFCFB",
+              }}>
+                {messages.map((msg, i) => (
+                  <div key={i} className="hire-msg">
+                    {msg.role === "assistant"
+                      ? <BotMessage message={msg} />
+                      : <UserMessage content={msg.content} />
+                    }
+                  </div>
+                ))}
 
-          {showQuickReplies && !isTyping && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
-              {QUICK_REPLIES.map(qr => (
-                <button
-                  key={qr}
-                  className="hire-chip"
-                  onClick={() => sendMessage(qr)}
-                  style={{
-                    background: "#fff", border: "1.5px solid #F0C4AD", color: "#E8541A",
-                    borderRadius: 18, padding: "6px 12px", fontSize: 12, fontWeight: 600,
-                    cursor: "pointer", whiteSpace: "nowrap", transition: "all .15s",
+                {isTyping && (
+                  <div className="hire-msg">
+                    <TypingIndicator />
+                  </div>
+                )}
+
+                {showQuickReplies && !isTyping && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+                    {QUICK_REPLIES.map(qr => (
+                      <button
+                        key={qr}
+                        className="hire-chip"
+                        onClick={() => sendMessage(qr)}
+                        style={{
+                          background: "#fff", border: "1.5px solid #F0C4AD", color: "#E8541A",
+                          borderRadius: 18, padding: "6px 12px", fontSize: 12, fontWeight: 600,
+                          cursor: "pointer", whiteSpace: "nowrap", transition: "all .15s",
+                        }}
+                      >
+                        {qr}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* INPUT */}
+              <div style={{
+                padding: "10px 13px 12px", borderTop: "1px solid #F5EFEC",
+                display: "flex", gap: 8, alignItems: "flex-end",
+                flexShrink: 0, background: "#fff",
+              }}>
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={e => {
+                    setInput(e.target.value)
+                    e.target.style.height = "auto"
+                    e.target.style.height = Math.min(e.target.scrollHeight, 90) + "px"
                   }}
+                  onKeyDown={handleKey}
+                  placeholder="Асуулт бичнэ үү..."
+                  rows={1}
+                  style={{
+                    flex: 1, border: "1.5px solid #EDDFDA", borderRadius: 13,
+                    padding: "9px 13px", fontSize: 13, outline: "none", resize: "none",
+                    maxHeight: 90, lineHeight: 1.4, color: "#1A1A1A",
+                    background: "#FDFCFC", transition: "border-color .15s",
+                  }}
+                  onFocus={e => (e.target.style.borderColor = "#E8541A")}
+                  onBlur={e => (e.target.style.borderColor = "#EDDFDA")}
+                />
+                <button
+                  onClick={() => sendMessage(input)}
+                  disabled={!input.trim() || isTyping}
+                  style={{
+                    width: 40, height: 40, borderRadius: 12,
+                    background: input.trim() && !isTyping ? "#E8541A" : "#E8D5CF",
+                    border: "none", cursor: input.trim() && !isTyping ? "pointer" : "not-allowed",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0, transition: "background .15s, transform .15s",
+                  }}
+                  onMouseEnter={e => { if (input.trim()) (e.currentTarget as HTMLElement).style.transform = "scale(1.08)" }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1)" }}
                 >
-                  {qr}
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" fill="white" stroke="none" />
+                  </svg>
                 </button>
-              ))}
+              </div>
+
+              {/* FOOTER */}
+              <div style={{
+                textAlign: "center", fontSize: 10, color: "#C8B4AE",
+                padding: "0 0 8px", background: "#fff", flexShrink: 0,
+              }}>
+                hire.mn AI · Ухаалаг туслагч
+              </div>
             </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* INPUT */}
-        <div style={{
-          padding: "10px 13px 12px", borderTop: "1px solid #F5EFEC",
-          display: "flex", gap: 8, alignItems: "flex-end",
-          flexShrink: 0, background: "#fff",
-        }}>
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={e => {
-              setInput(e.target.value)
-              e.target.style.height = "auto"
-              e.target.style.height = Math.min(e.target.scrollHeight, 90) + "px"
-            }}
-            onKeyDown={handleKey}
-            placeholder="Асуулт бичнэ үү..."
-            rows={1}
-            style={{
-              flex: 1, border: "1.5px solid #EDDFDA", borderRadius: 13,
-              padding: "9px 13px", fontSize: 13, outline: "none", resize: "none",
-              maxHeight: 90, lineHeight: 1.4, color: "#1A1A1A",
-              background: "#FDFCFC", transition: "border-color .15s",
-            }}
-            onFocus={e => (e.target.style.borderColor = "#E8541A")}
-            onBlur={e => (e.target.style.borderColor = "#EDDFDA")}
-          />
-          <button
-            onClick={() => sendMessage(input)}
-            disabled={!input.trim() || isTyping}
-            style={{
-              width: 40, height: 40, borderRadius: 12,
-              background: input.trim() && !isTyping ? "#E8541A" : "#E8D5CF",
-              border: "none", cursor: input.trim() && !isTyping ? "pointer" : "not-allowed",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              flexShrink: 0, transition: "background .15s, transform .15s",
-            }}
-            onMouseEnter={e => { if (input.trim()) (e.currentTarget as HTMLElement).style.transform = "scale(1.08)" }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1)" }}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13" />
-              <polygon points="22 2 15 22 11 13 2 9 22 2" fill="white" stroke="none" />
-            </svg>
-          </button>
-        </div>
-
-        {/* FOOTER */}
-        <div style={{
-          textAlign: "center", fontSize: 10, color: "#C8B4AE",
-          padding: "0 0 8px", background: "#fff", flexShrink: 0,
-        }}>
-          hire.mn AI · Ухаалаг туслагч
-        </div>
-            </div>{/* end .hire-widget */}
-          </div>{/* end animation wrapper */}
-        )}{/* end isOpen */}
+          </div>
+        )}
 
         {/* Mascot row: tooltip + button */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
