@@ -347,7 +347,7 @@ function BrainMascot({
 }
 
 // Mini brain avatar for messages - premium version
-function MiniBrain({ isAnimated = false, mood = "happy" as const }: { isAnimated?: boolean; mood?: "happy" | "thinking" | "excited" | "wink" }) {
+function MiniBrain({ isAnimated = false, mood = "happy" }: { isAnimated?: boolean; mood?: "happy" | "thinking" | "excited" | "wink" }) {
   return (
     <div className={`relative w-9 h-9 rounded-full bg-gradient-to-br from-[#FFF5F0] to-[#FFE0D0] flex items-center justify-center shrink-0 shadow-md ring-2 ring-primary/20 ${isAnimated ? "animate-bounce-subtle" : ""}`}>
       <div className="absolute inset-0 rounded-full bg-gradient-to-t from-primary/5 to-transparent" />
