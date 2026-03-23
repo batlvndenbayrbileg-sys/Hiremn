@@ -1,29 +1,33 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { generateText } from 'ai'
 import { classify } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/ai-brain'
 
-export const runtime = 'edge'
+// NOTE: Do NOT use runtime = 'edge' with AI SDK
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const { messages, lang: forcedLang } = await req.json()
+    console.log('[v0] Received messages:', JSON.stringify(messages))
 
     if (!messages?.length) {
-      return NextResponse.json({ error: 'messages required' }, { status: 400 })
+      return Response.json({ error: 'messages required' }, { status: 400 })
     }
 
     const lastMessage = messages[messages.length - 1].content as string
+    console.log('[v0] Last message:', lastMessage)
 
-    // STEP 1: Classify
+    // STEP 1: Classify intent (no LLM cost)
     const { intent, useLLM, detectedLang } = classify(lastMessage)
     const lang = forcedLang || detectedLang
+    console.log('[v0] Classification:', { intent, useLLM, detectedLang, lang })
 
-    // STEP 2: FAQ → Database (fast, $0)
+    // STEP 2: FAQ -> Database (fast, $0)
     if (!useLLM || intent === 'faq') {
       const faqAnswer = findFAQ(lastMessage, lang)
+      console.log('[v0] FAQ answer found:', !!faqAnswer)
       if (faqAnswer) {
-        return NextResponse.json({
+        return Response.json({
           reply: faqAnswer,
           source: 'faq',
           intent,
@@ -32,44 +36,40 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // STEP 3: LLM (for complex questions)
+    // STEP 3: LLM for complex questions using Vercel AI Gateway
     const systemPrompt = buildSystemPrompt(intent, lang)
     const compressedMessages = compressHistory(messages)
+    console.log('[v0] Using LLM for intent:', intent)
 
-    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY!,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-haiku-20241022',
-        max_tokens: 512,
-        system: systemPrompt,
-        messages: compressedMessages,
-      }),
+    // Format messages for AI SDK
+    const formattedMessages = compressedMessages.map((m: { role: string; content: string }) => ({
+      role: m.role === 'bot' ? 'assistant' as const : m.role as 'user' | 'assistant',
+      content: m.content,
+    }))
+
+    // Use Vercel AI Gateway - no API key needed in v0
+    console.log('[v0] Calling generateText with openai/gpt-4o-mini...')
+    const result = await generateText({
+      model: 'openai/gpt-4o-mini',
+      system: systemPrompt,
+      messages: formattedMessages,
+      maxOutputTokens: 500,
     })
+    console.log('[v0] LLM response received:', result.text?.substring(0, 100))
 
-    if (!anthropicRes.ok) {
-      const err = await anthropicRes.json()
-      throw new Error(err.error?.message || 'Anthropic API error')
-    }
-
-    const data = await anthropicRes.json()
-    const reply = data.content[0].text
-
-    return NextResponse.json({
-      reply,
+    return Response.json({
+      reply: result.text,
       source: 'llm',
       intent,
-      tokens_used: data.usage?.input_tokens + data.usage?.output_tokens,
+      tokens_used: result.usage?.totalTokens || 0,
     })
 
   } catch (err) {
-    console.error('Chat API error:', err)
-    return NextResponse.json(
-      { error: 'Error occurred. Please try again.' },
+    console.error('[v0] Chat API error:', err)
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+    console.error('[v0] Error details:', errorMessage)
+    return Response.json(
+      { error: 'Error occurred. Please try again.', details: errorMessage },
       { status: 500 }
     )
   }
