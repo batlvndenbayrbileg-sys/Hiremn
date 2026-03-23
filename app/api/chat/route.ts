@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateText } from 'ai'
 import { classify } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/ai-brain'
 
-// NOTE: Do NOT use runtime = 'edge' with AI SDK
+export const runtime = 'edge'
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,11 +15,11 @@ export async function POST(req: NextRequest) {
 
     const lastMessage = messages[messages.length - 1].content as string
 
-    // STEP 1: Classify the intent
+    // STEP 1: Classify
     const { intent, useLLM, detectedLang } = classify(lastMessage)
     const lang = forcedLang || detectedLang
 
-    // STEP 2: FAQ -> Database (fast, $0 cost)
+    // STEP 2: FAQ → Database (fast, $0)
     if (!useLLM || intent === 'faq') {
       const faqAnswer = findFAQ(lastMessage, lang)
       if (faqAnswer) {
@@ -33,42 +32,44 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // STEP 3: LLM for complex questions
-    // Using Vercel AI Gateway - zero config, works automatically in v0
+    // STEP 3: LLM (for complex questions)
     const systemPrompt = buildSystemPrompt(intent, lang)
     const compressedMessages = compressHistory(messages)
 
-    // Convert messages to AI SDK format
-    const aiMessages = compressedMessages.map((msg: { role: string; content: string }) => ({
-      role: msg.role === 'assistant' ? 'assistant' as const : 'user' as const,
-      content: msg.content,
-    }))
-
-    const result = await generateText({
-      model: 'anthropic/claude-3-5-haiku-20241022',
-      system: systemPrompt,
-      messages: aiMessages,
-      maxOutputTokens: 512,
+    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY!,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-haiku-20241022',
+        max_tokens: 512,
+        system: systemPrompt,
+        messages: compressedMessages,
+      }),
     })
 
+    if (!anthropicRes.ok) {
+      const err = await anthropicRes.json()
+      throw new Error(err.error?.message || 'Anthropic API error')
+    }
+
+    const data = await anthropicRes.json()
+    const reply = data.content[0].text
+
     return NextResponse.json({
-      reply: result.text,
+      reply,
       source: 'llm',
       intent,
-      tokens_used: (result.usage?.promptTokens || 0) + (result.usage?.completionTokens || 0),
+      tokens_used: data.usage?.input_tokens + data.usage?.output_tokens,
     })
 
   } catch (err) {
     console.error('Chat API error:', err)
-    
-    // Provide a helpful fallback response
-    const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-    
     return NextResponse.json(
-      { 
-        error: 'Error occurred. Please try again.',
-        details: errorMessage 
-      },
+      { error: 'Error occurred. Please try again.' },
       { status: 500 }
     )
   }
