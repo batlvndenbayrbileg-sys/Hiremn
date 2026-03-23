@@ -89,103 +89,244 @@ function TypingIndicator() {
   )
 }
 
-function TestCard({ test }: { test: Test }) {
+function TestCard({ test, index = 0 }: { test: Test; index?: number }) {
   return (
     <a
       href={test.url}
       target="_blank"
       rel="noopener noreferrer"
+      className="hire-test-card"
       style={{
         display: "block",
         background: "#fff",
-        border: "1px solid #F0EBE8",
-        borderRadius: 14,
+        border: "1.5px solid #F0EBE8",
+        borderRadius: 16,
         overflow: "hidden",
         textDecoration: "none",
-        marginBottom: 8,
-        transition: "transform 0.2s, box-shadow 0.2s",
         cursor: "pointer",
-      }}
-      onMouseEnter={e => {
-        (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
-        ;(e.currentTarget as HTMLElement).style.boxShadow = "0 6px 20px rgba(232,84,26,.14)"
-        ;(e.currentTarget as HTMLElement).style.borderColor = "#F0C4AD"
-      }}
-      onMouseLeave={e => {
-        (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
-        ;(e.currentTarget as HTMLElement).style.boxShadow = "none"
-        ;(e.currentTarget as HTMLElement).style.borderColor = "#F0EBE8"
+        minWidth: 200,
+        maxWidth: 220,
+        flexShrink: 0,
+        animation: `hire-card-in 0.4s cubic-bezier(.34,1.56,.64,1) ${index * 0.1}s both`,
       }}
     >
       <div style={{
-        height: 72,
-        background: `linear-gradient(135deg, ${test.color}, ${test.color}cc)`,
+        height: 80,
+        background: `linear-gradient(145deg, ${test.color}, ${test.color}dd)`,
         display: "flex", alignItems: "center", justifyContent: "center",
-        position: "relative", fontSize: 30,
+        position: "relative", fontSize: 34,
       }}>
-        {test.emoji}
-        <span style={{ position: "absolute", top: 7, right: 9, fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,.85)" }}>Hire.mn</span>
-        <span style={{
-          position: "absolute", bottom: 6, left: 8,
-          background: "rgba(255,255,255,.22)", border: "1px solid rgba(255,255,255,.3)",
-          color: "#fff", fontSize: 9.5, fontWeight: 600, padding: "2px 8px", borderRadius: 8,
-        }}>Өөрийн үнэлгээ</span>
+        <span className="hire-emoji">{test.emoji}</span>
+        <span style={{ 
+          position: "absolute", top: 8, right: 10, 
+          fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,.9)",
+          letterSpacing: 0.5,
+        }}>Hire.mn</span>
+        {test.free && (
+          <span style={{
+            position: "absolute", bottom: 8, left: 10,
+            background: "rgba(255,255,255,.95)", 
+            color: test.color, fontSize: 9, fontWeight: 700, 
+            padding: "3px 10px", borderRadius: 10,
+            boxShadow: "0 2px 8px rgba(0,0,0,.1)",
+          }}>ҮНЭГҮЙ</span>
+        )}
       </div>
-      <div style={{ padding: "10px 12px" }}>
-        <div style={{ fontSize: 12.5, fontWeight: 700, color: "#1A1A1A", lineHeight: 1.35, marginBottom: 4 }}>{test.name}</div>
-        <div style={{ fontSize: 11, color: "#6B7280", lineHeight: 1.4, marginBottom: 8 }}>{test.desc}</div>
+      <div style={{ padding: "12px 14px" }}>
+        <div style={{ 
+          fontSize: 13, fontWeight: 700, color: "#1A1A1A", 
+          lineHeight: 1.35, marginBottom: 6,
+          overflow: "hidden", textOverflow: "ellipsis",
+          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+        }}>{test.name}</div>
+        <div style={{ 
+          fontSize: 11, color: "#6B7280", lineHeight: 1.45, marginBottom: 10,
+          overflow: "hidden", textOverflow: "ellipsis",
+          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+        }}>{test.desc}</div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{
-              background: test.free ? "#F3F4F6" : "#E8541A",
-              color: test.free ? "#6B7280" : "#fff",
-              fontSize: 10.5, fontWeight: 700, padding: "3px 9px", borderRadius: 14,
+              background: test.free ? "#ECFDF5" : "#FDF0EB",
+              color: test.free ? "#059669" : "#E8541A",
+              fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 12,
             }}>{test.price}</span>
-            <span style={{ fontSize: 10, color: "#9CA3AF" }}>🕐 {test.duration}</span>
           </div>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 4,
-            background: "#FDF0EB", color: "#E8541A", fontSize: 11, fontWeight: 700,
-            padding: "5px 10px", borderRadius: 10, border: "1.5px solid #F0C4AD",
-          }}>
-            Авах
-            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2" strokeLinecap="round">
-              <path d="M3 8h10M9 4l4 4-4 4" />
+          <span style={{ fontSize: 10, color: "#9CA3AF", display: "flex", alignItems: "center", gap: 3 }}>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6" stroke="#9CA3AF" strokeWidth="1.5"/>
+              <path d="M8 5v3l2 1.5" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
-          </div>
+            {test.duration}
+          </span>
         </div>
+        <button style={{
+          width: "100%", marginTop: 10,
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+          background: "linear-gradient(135deg, #E8541A, #D44810)",
+          color: "#fff", fontSize: 11.5, fontWeight: 700,
+          padding: "8px 12px", borderRadius: 10, border: "none",
+          cursor: "pointer",
+          boxShadow: "0 2px 8px rgba(232,84,26,.25)",
+        }}>
+          Тест авах
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
+            <path d="M3 8h10M9 4l4 4-4 4" />
+          </svg>
+        </button>
       </div>
     </a>
   )
 }
 
+function TestCarousel({ tests }: { tests: Test[] }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
+
+  const checkScroll = () => {
+    if (!scrollRef.current) return
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
+    setCanScrollLeft(scrollLeft > 5)
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5)
+  }
+
+  useEffect(() => {
+    checkScroll()
+  }, [tests])
+
+  const scroll = (direction: "left" | "right") => {
+    if (!scrollRef.current) return
+    const scrollAmount = 230
+    scrollRef.current.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    })
+    setTimeout(checkScroll, 350)
+  }
+
+  if (tests.length <= 3) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {tests.map((test, i) => (
+          <TestCard key={test.id} test={test} index={i} />
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ position: "relative" }}>
+      {/* Scroll buttons */}
+      {canScrollLeft && (
+        <button
+          onClick={() => scroll("left")}
+          style={{
+            position: "absolute", left: -8, top: "50%", transform: "translateY(-50%)",
+            width: 32, height: 32, borderRadius: "50%",
+            background: "#fff", border: "1.5px solid #F0EBE8",
+            boxShadow: "0 2px 10px rgba(0,0,0,.1)",
+            cursor: "pointer", zIndex: 10,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M10 4l-4 4 4 4" />
+          </svg>
+        </button>
+      )}
+      {canScrollRight && (
+        <button
+          onClick={() => scroll("right")}
+          style={{
+            position: "absolute", right: -8, top: "50%", transform: "translateY(-50%)",
+            width: 32, height: 32, borderRadius: "50%",
+            background: "#fff", border: "1.5px solid #F0EBE8",
+            boxShadow: "0 2px 10px rgba(0,0,0,.1)",
+            cursor: "pointer", zIndex: 10,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M6 4l4 4-4 4" />
+          </svg>
+        </button>
+      )}
+
+      {/* Carousel container */}
+      <div
+        ref={scrollRef}
+        onScroll={checkScroll}
+        className="hire-carousel"
+        style={{
+          display: "flex", gap: 12,
+          overflowX: "auto", overflowY: "hidden",
+          scrollSnapType: "x mandatory",
+          paddingBottom: 8, paddingTop: 4,
+          marginLeft: -4, marginRight: -4, paddingLeft: 4, paddingRight: 4,
+        }}
+      >
+        {tests.map((test, i) => (
+          <div key={test.id} style={{ scrollSnapAlign: "start" }}>
+            <TestCard test={test} index={i} />
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination dots */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 10 }}>
+        {tests.map((_, i) => (
+          <div
+            key={i}
+            style={{
+              width: i === 0 ? 16 : 6, height: 6,
+              borderRadius: 3,
+              background: i === 0 ? "#E8541A" : "#F0DDD4",
+              transition: "all 0.2s",
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function BotMessage({ message }: { message: Message }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {message.content && (
-        <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+        <div className="hire-bot-msg" style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
           <BrainAvatar />
           <div style={{
             maxWidth: "78%", background: "#fff", border: "1px solid #F0EBE8",
-            borderRadius: 16, borderBottomLeftRadius: 4, padding: "10px 13px",
-            fontSize: 13, lineHeight: 1.58, color: "#1A1A1A",
-            boxShadow: "0 1px 5px rgba(0,0,0,.04)", whiteSpace: "pre-wrap", wordBreak: "break-word",
+            borderRadius: 16, borderBottomLeftRadius: 4, padding: "12px 14px",
+            fontSize: 13, lineHeight: 1.6, color: "#1A1A1A",
+            boxShadow: "0 2px 8px rgba(0,0,0,.04)", whiteSpace: "pre-wrap", wordBreak: "break-word",
           }}>
             {message.content}
           </div>
         </div>
       )}
       {message.tests && message.tests.length > 0 && (
-        <div style={{ marginLeft: 40 }}>
-          <div style={{ fontSize: 11.5, fontWeight: 700, color: "#E8541A", marginBottom: 8, display: "flex", alignItems: "center", gap: 5 }}>
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-              <path d="M8 1l1.5 3 3.5.5-2.5 2.5.5 3.5L8 9l-3 1.5.5-3.5L3 4.5 6.5 4z" fill="#E8541A" />
-            </svg>
-            Санал болгож буй тестүүд
+        <div className="hire-tests-section" style={{ marginLeft: 40, marginTop: 4 }}>
+          <div style={{ 
+            fontSize: 12, fontWeight: 700, color: "#E8541A", marginBottom: 12, 
+            display: "flex", alignItems: "center", gap: 6,
+            paddingLeft: 2,
+          }}>
+            <div style={{
+              width: 22, height: 22, borderRadius: 8,
+              background: "linear-gradient(135deg, #FDF0EB, #FFEEE6)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              border: "1px solid #F5DDD4",
+            }}>
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                <path d="M8 1l1.5 3 3.5.5-2.5 2.5.5 3.5L8 9l-3 1.5.5-3.5L3 4.5 6.5 4z" fill="#E8541A" />
+              </svg>
+            </div>
+            Санал болгож буй тестүүд ({message.tests.length})
           </div>
-          {message.tests.map(test => (
-            <TestCard key={test.id} test={test} />
-          ))}
+          <TestCarousel tests={message.tests} />
         </div>
       )}
     </div>
@@ -296,6 +437,7 @@ export function HireMnChatWidget() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         .hire-widget * { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
+        
         @keyframes hire-bounce {
           0%, 60%, 100% { transform: translateY(0); }
           30% { transform: translateY(-6px); }
@@ -309,14 +451,67 @@ export function HireMnChatWidget() {
           100% { transform: translateX(-33.333%); }
         }
         @keyframes hire-pop {
-          from { transform: scale(0.9); opacity: 0; }
-          to   { transform: scale(1);   opacity: 1; }
+          from { transform: scale(0.92) translateY(8px); opacity: 0; }
+          to   { transform: scale(1) translateY(0); opacity: 1; }
         }
-        .hire-msg { animation: hire-pop 0.22s cubic-bezier(.34,1.56,.64,1); }
-        .hire-chip:hover { background: #E8541A !important; color: #fff !important; border-color: #E8541A !important; }
+        @keyframes hire-card-in {
+          from { transform: scale(0.9) translateY(12px); opacity: 0; }
+          to   { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        @keyframes hire-slide-up {
+          from { transform: translateY(16px); opacity: 0; }
+          to   { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes hire-emoji-pop {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.2); }
+          100% { transform: scale(1); }
+        }
+        @keyframes hire-shine {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        
+        .hire-msg { animation: hire-pop 0.35s cubic-bezier(.34,1.56,.64,1); }
+        .hire-bot-msg { animation: hire-slide-up 0.4s ease-out; }
+        .hire-tests-section { animation: hire-slide-up 0.5s ease-out 0.15s both; }
+        
+        .hire-test-card {
+          transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), 
+                      box-shadow 0.25s ease,
+                      border-color 0.2s ease;
+        }
+        .hire-test-card:hover {
+          transform: translateY(-4px) scale(1.02);
+          box-shadow: 0 12px 28px rgba(232,84,26,.18);
+          border-color: #F0C4AD;
+        }
+        .hire-test-card:hover .hire-emoji {
+          animation: hire-emoji-pop 0.4s ease-in-out;
+        }
+        .hire-test-card:hover button {
+          background: linear-gradient(135deg, #D44810, #C03A08) !important;
+          box-shadow: 0 4px 12px rgba(232,84,26,.35);
+        }
+        
+        .hire-chip { 
+          transition: all 0.2s cubic-bezier(.34,1.56,.64,1); 
+        }
+        .hire-chip:hover { 
+          background: #E8541A !important; 
+          color: #fff !important; 
+          border-color: #E8541A !important;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(232,84,26,.25);
+        }
+        
         .hire-scroll::-webkit-scrollbar { width: 4px; }
         .hire-scroll::-webkit-scrollbar-track { background: transparent; }
         .hire-scroll::-webkit-scrollbar-thumb { background: rgba(232,84,26,.25); border-radius: 4px; }
+        
+        .hire-carousel::-webkit-scrollbar { height: 4px; }
+        .hire-carousel::-webkit-scrollbar-track { background: transparent; }
+        .hire-carousel::-webkit-scrollbar-thumb { background: rgba(232,84,26,.2); border-radius: 4px; }
       `}</style>
 
       <div className="hire-widget" style={{
