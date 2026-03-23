@@ -778,23 +778,60 @@ export function HireMnChatWidget() {
       setIsTyping(true)
       setBrainMood("thinking")
 
-      await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 500))
+      try {
+        // Call the AI backend API
+        const apiMessages = messages.map((msg) => ({
+          role: msg.role === "bot" ? "assistant" : "user",
+          content: msg.content,
+        }))
+        apiMessages.push({ role: "user", content: messageText })
 
-      const response = getSmartResponse(messageText, lang)
-      const botMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "bot",
-        content: response.text,
-        timestamp: new Date(),
-        isRichCard: response.isRichCard,
-        richData: response.richData,
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: apiMessages,
+            lang: lang === "mn" ? "mn" : "en",
+          }),
+        })
+
+        const data = await response.json()
+        
+        if (!response.ok) {
+          throw new Error(data.error || "API error")
+        }
+
+        const botMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "bot",
+          content: data.reply || "",
+          timestamp: new Date(),
+          source: data.source,
+        }
+
+        setIsTyping(false)
+        setBrainMood(data.source === "faq" ? "happy" : "excited")
+        setMessages((prev) => [...prev, botMsg])
+        
+        // Add slight delay before showing happy mood
+        setTimeout(() => setBrainMood("happy"), 1500)
+      } catch (error) {
+        console.error("Chat error:", error)
+        const errorMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "bot",
+          content:
+            lang === "mn"
+              ? "Уучлаарай, алдаа гарлаа. Дахин оролдоно уу."
+              : "Sorry, something went wrong. Please try again.",
+          timestamp: new Date(),
+        }
+        setIsTyping(false)
+        setBrainMood("happy")
+        setMessages((prev) => [...prev, errorMsg])
       }
-
-      setIsTyping(false)
-      setBrainMood("happy")
-      setMessages((prev) => [...prev, botMsg])
     },
-    [inputValue, lang]
+    [inputValue, lang, messages]
   )
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
