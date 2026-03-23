@@ -1,10 +1,14 @@
-// hire.mn chat API — v2
-import { generateText } from 'ai'
+// hire.mn chat API — v2 with Anthropic SDK
+import Anthropic from '@anthropic-ai/sdk'
 import { classify } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/brain'
 
 export const maxDuration = 30
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+})
 
 export async function POST(req: Request) {
   try {
@@ -51,29 +55,30 @@ export async function POST(req: Request) {
         content: String(m.content),
       }))
 
-    const { text, usage } = await generateText({
-      model: 'openai/gpt-4o-mini',
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 500,
       system: systemPrompt,
       messages: formattedMessages,
-      maxOutputTokens: 500,
-      temperature: 0.7,
     })
+
+    const text = response.content[0].type === 'text' ? response.content[0].text : ''
+    const tokensUsed = (response.usage?.input_tokens ?? 0) + (response.usage?.output_tokens ?? 0)
 
     return Response.json({
       reply: text,
       source: 'llm',
       intent,
-      tokens_used: usage?.totalTokens ?? 0,
+      tokens_used: tokensUsed,
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('[chat/route] error:', message)
     
-    // Check for AI Gateway credit card requirement
-    if (message.includes('credit card') || message.includes('AI Gateway')) {
+    if (message.includes('API key')) {
       return Response.json({ 
-        error: 'AI Gateway requires setup. Please add a credit card at Vercel AI settings.',
-        code: 'AI_GATEWAY_SETUP_REQUIRED'
+        error: 'Anthropic API key is missing or invalid.',
+        code: 'API_KEY_ERROR'
       }, { status: 503 })
     }
     
