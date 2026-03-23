@@ -3,6 +3,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  generateBuildId: async () => `build-${Date.now()}`,
   images: {
     unoptimized: true,
   },

@@ -343,8 +343,8 @@ export function HireMnChatWidget() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        .hw-root, .hw-root * { font-family: 'Inter', -apple-system, sans-serif !important; box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700&display=swap');
+        .hw-root, .hw-root * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important; box-sizing: border-box; }
 
         @keyframes hw-bounce {
           0%, 60%, 100% { transform: translateY(0); }
@@ -423,15 +423,17 @@ export function HireMnChatWidget() {
       `}</style>
 
       <div className="hw-root" style={{
-        position: "fixed", bottom: 24, right: 24, zIndex: 99999,
-        display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 14,
+        position: "fixed", bottom: 20, right: 20, zIndex: 99999,
+        display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 12,
       }}>
 
         {/* Chat panel */}
         {isOpen && (
           <div style={{ animation: "hw-chat-open 0.28s cubic-bezier(.34,1.56,.64,1)" }}>
             <div style={{
-              width: 380, height: 600, borderRadius: 20,
+              width: 360,
+              height: "min(520px, calc(100vh - 110px))",
+              borderRadius: 20,
               background: "#FAFAFA",
               boxShadow: "0 24px 64px rgba(0,0,0,.14), 0 2px 12px rgba(0,0,0,.06)",
               display: "flex", flexDirection: "column", overflow: "hidden",
