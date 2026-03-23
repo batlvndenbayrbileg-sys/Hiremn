@@ -1,33 +1,6 @@
 import { Intent } from './classifier'
 
-// ── Conversation compression ──────────────────────────────────────────
-// 8+ мессеж болвол хуучнийг товчлоно → token хэмнэнэ
-export function compressHistory(
-  messages: { role: string; content: string }[]
-): { role: string; content: string }[] {
-  if (messages.length <= 8) return messages
 
-  const oldMessages = messages.slice(0, -4)
-  const recentMessages = messages.slice(-4)
-
-  // Хуучин мессежийг нэг мөрөөр товчлоно
-  const summary = oldMessages
-    .filter(m => m.role === 'assistant')
-    .map(m => m.content.slice(0, 80))
-    .join(' | ')
-
-  return [
-    {
-      role: 'user',
-      content: `[Previous conversation summary: ${summary}]`
-    },
-    {
-      role: 'assistant',
-      content: 'I understand. How can I help you further?'
-    },
-    ...recentMessages
-  ]
-}
 
 export function buildSystemPrompt(intent: Intent, lang: 'mn' | 'en'): string {
   const langInstruction = lang === 'mn'
