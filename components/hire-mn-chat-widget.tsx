@@ -341,6 +341,8 @@ function UserMessage({ content }: { content: string }) {
 }
 
 export function HireMnChatWidget() {
+  const [isOpen, setIsOpen] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -430,6 +432,7 @@ export function HireMnChatWidget() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         .hire-widget * { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
+        .hire-launcher-wrap * { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
         
         @keyframes hire-bounce {
           0%, 60%, 100% { transform: translateY(0); }
@@ -505,13 +508,50 @@ export function HireMnChatWidget() {
         .hire-carousel::-webkit-scrollbar { height: 4px; }
         .hire-carousel::-webkit-scrollbar-track { background: transparent; }
         .hire-carousel::-webkit-scrollbar-thumb { background: rgba(232,84,26,.2); border-radius: 4px; }
+
+        @keyframes hire-chat-open {
+          from { opacity: 0; transform: scale(0.88) translateY(20px); transform-origin: bottom right; }
+          to   { opacity: 1; transform: scale(1) translateY(0); transform-origin: bottom right; }
+        }
+        @keyframes hire-chat-close {
+          from { opacity: 1; transform: scale(1) translateY(0); transform-origin: bottom right; }
+          to   { opacity: 0; transform: scale(0.88) translateY(20px); transform-origin: bottom right; }
+        }
+        @keyframes hire-mascot-pulse {
+          0%, 100% { box-shadow: 0 4px 20px rgba(232,84,26,.35), 0 0 0 0 rgba(232,84,26,.3); }
+          50%       { box-shadow: 0 4px 20px rgba(232,84,26,.35), 0 0 0 10px rgba(232,84,26,0); }
+        }
+        @keyframes hire-tooltip-in {
+          from { opacity: 0; transform: translateX(8px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        .hire-mascot-btn {
+          transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+          animation: hire-mascot-pulse 2.8s ease-in-out infinite;
+        }
+        .hire-mascot-btn:hover {
+          transform: scale(1.1);
+          animation: none;
+          box-shadow: 0 8px 28px rgba(232,84,26,.45);
+        }
       `}</style>
 
-      <div className="hire-widget" style={{
-        width: 390, height: 620, borderRadius: 24,
-        background: "#FFFCFB", boxShadow: "0 20px 70px rgba(0,0,0,.16)",
-        display: "flex", flexDirection: "column", overflow: "hidden",
+      {/* Floating launcher — mascot button + tooltip + chat panel */}
+      <div className="hire-launcher-wrap" style={{
+        position: "fixed", bottom: 24, right: 24, zIndex: 99999,
+        display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 14,
       }}>
+
+        {/* Chat panel */}
+        {isOpen && (
+          <div style={{
+            animation: "hire-chat-open 0.3s cubic-bezier(.34,1.56,.64,1)",
+          }}>
+            <div className="hire-widget" style={{
+              width: 390, height: 620, borderRadius: 24,
+              background: "#FFFCFB", boxShadow: "0 20px 70px rgba(0,0,0,.18)",
+              display: "flex", flexDirection: "column", overflow: "hidden",
+            }}>
 
         {/* HEADER */}
         <div style={{
@@ -536,16 +576,31 @@ export function HireMnChatWidget() {
               Онлайн байна
             </div>
           </div>
-          <button
-            onClick={() => setLang(l => l === "МН" ? "EN" : "МН")}
-            style={{
-              background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.32)",
-              color: "#fff", borderRadius: 18, padding: "5px 12px",
-              fontSize: 11, fontWeight: 700, cursor: "pointer", position: "relative", zIndex: 1,
-            }}
-          >
-            {lang === "МН" ? "EN" : "МН"}
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1 }}>
+            <button
+              onClick={() => setLang(l => l === "МН" ? "EN" : "МН")}
+              style={{
+                background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.32)",
+                color: "#fff", borderRadius: 18, padding: "5px 12px",
+                fontSize: 11, fontWeight: 700, cursor: "pointer",
+              }}
+            >
+              {lang === "МН" ? "EN" : "МН"}
+            </button>
+            <button
+              onClick={() => setIsOpen(false)}
+              style={{
+                background: "rgba(255,255,255,.15)", border: "1.5px solid rgba(255,255,255,.28)",
+                color: "#fff", borderRadius: "50%", width: 30, height: 30,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* TICKER */}
@@ -663,7 +718,86 @@ export function HireMnChatWidget() {
         }}>
           hire.mn AI · Ухаалаг туслагч
         </div>
-      </div>
+      </div>{/* end .hire-widget */}
+          </div>{/* end animation wrapper */}
+        )}{/* end isOpen */}
+
+        {/* Mascot row: tooltip + button */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
+
+          {/* Tooltip — visible on hover when chat is closed */}
+          {isHovered && !isOpen && (
+            <div style={{
+              animation: "hire-tooltip-in 0.2s ease-out",
+              background: "#fff",
+              border: "1.5px solid #F0DDD4",
+              borderRadius: 14,
+              padding: "10px 14px",
+              boxShadow: "0 6px 24px rgba(0,0,0,.1)",
+              maxWidth: 200,
+              pointerEvents: "none",
+            }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, color: "#1A1A1A", marginBottom: 3 }}>
+                hire.mn Туслагч
+              </div>
+              <div style={{ fontSize: 11.5, color: "#6B7280", lineHeight: 1.5 }}>
+                Тест сонгох, мэргэжлийн зөвлөгөө авах — шууд чатлаарай!
+              </div>
+              {/* Arrow */}
+              <div style={{
+                position: "absolute", right: -7, top: "50%", transform: "translateY(-50%)",
+                width: 0, height: 0,
+                borderTop: "6px solid transparent",
+                borderBottom: "6px solid transparent",
+                borderLeft: "7px solid #F0DDD4",
+              }} />
+              <div style={{
+                position: "absolute", right: -5, top: "50%", transform: "translateY(-50%)",
+                width: 0, height: 0,
+                borderTop: "5px solid transparent",
+                borderBottom: "5px solid transparent",
+                borderLeft: "6px solid #fff",
+              }} />
+            </div>
+          )}
+
+          {/* Mascot button */}
+          <button
+            className="hire-mascot-btn"
+            onClick={() => setIsOpen(o => !o)}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            aria-label="hire.mn чат нээх"
+            style={{
+              width: 60, height: 60, borderRadius: "50%",
+              background: "linear-gradient(145deg, #F06030, #E8541A)",
+              border: "3px solid rgba(255,255,255,.9)",
+              cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0,
+              position: "relative",
+            }}
+          >
+            {isOpen ? (
+              /* X icon when open */
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            ) : (
+              <BrainIcon size={30} />
+            )}
+            {/* Online dot */}
+            {!isOpen && (
+              <span style={{
+                position: "absolute", bottom: 2, right: 2,
+                width: 13, height: 13, borderRadius: "50%",
+                background: "#22C55E", border: "2.5px solid #fff",
+              }} />
+            )}
+          </button>
+        </div>
+
+      </div>{/* end launcher-wrap */}
     </>
   )
 }
