@@ -27,18 +27,17 @@ const QUICK_REPLIES = [
   "Үнэ хэд вэ?",
 ]
 
-function BrainIcon({ size = 24 }: { size?: number }) {
+function BrainIcon({ size = 24, color = "white" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={Math.round(size * 0.92)} viewBox="0 0 60 54" fill="none">
-      <ellipse cx="30" cy="27" rx="23" ry="19" fill="white" opacity={0.95} />
-      <path d="M14 21 Q6 16 8 27 Q6 36 14 36" stroke="rgba(232,84,26,.85)" strokeWidth="3.2" fill="none" strokeLinecap="round" />
-      <path d="M46 21 Q54 16 52 27 Q54 36 46 36" stroke="rgba(232,84,26,.85)" strokeWidth="3.2" fill="none" strokeLinecap="round" />
-      <path d="M18 19 Q24 10 30 19 Q36 10 42 19" stroke="rgba(232,84,26,.78)" strokeWidth="2.8" fill="none" strokeLinecap="round" />
-      <line x1="30" y1="13" x2="30" y2="41" stroke="rgba(232,84,26,.38)" strokeWidth="2.2" strokeDasharray="4 4" />
-      <path d="M18 35 Q24 44 30 35 Q36 44 42 35" stroke="rgba(232,84,26,.68)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      <circle cx="22" cy="26" r="2.5" fill="#E8541A" opacity={0.7} />
-      <circle cx="38" cy="26" r="2.5" fill="#E8541A" opacity={0.7} />
-      <circle cx="30" cy="23" r="2" fill="#F4845F" opacity={0.6} />
+      <ellipse cx="30" cy="27" rx="23" ry="19" fill={color === "white" ? "white" : "none"} opacity={0.92} />
+      <path d="M14 21 Q6 16 8 27 Q6 36 14 36" stroke={color === "white" ? "rgba(232,84,26,.9)" : color} strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M46 21 Q54 16 52 27 Q54 36 46 36" stroke={color === "white" ? "rgba(232,84,26,.9)" : color} strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M18 19 Q24 10 30 19 Q36 10 42 19" stroke={color === "white" ? "rgba(232,84,26,.78)" : color} strokeWidth="2.8" fill="none" strokeLinecap="round" />
+      <line x1="30" y1="13" x2="30" y2="41" stroke={color === "white" ? "rgba(232,84,26,.35)" : color} strokeWidth="2" strokeDasharray="4 4" />
+      <path d="M18 35 Q24 44 30 35 Q36 44 42 35" stroke={color === "white" ? "rgba(232,84,26,.65)" : color} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      <circle cx="22" cy="26" r="2.5" fill={color === "white" ? "#E8541A" : color} opacity={0.7} />
+      <circle cx="38" cy="26" r="2.5" fill={color === "white" ? "#E8541A" : color} opacity={0.7} />
     </svg>
   )
 }
@@ -46,19 +45,14 @@ function BrainIcon({ size = 24 }: { size?: number }) {
 function BrainAvatar() {
   return (
     <div style={{
-      width: 32, height: 32,
-      borderRadius: 10,
-      background: "#FDF0EB",
-      border: "1px solid #F0DDD4",
+      width: 30, height: 30,
+      borderRadius: 9,
+      background: "#FEF3EE",
+      border: "1px solid #FDDCCC",
       display: "flex", alignItems: "center", justifyContent: "center",
       flexShrink: 0,
     }}>
-      <svg width="16" height="15" viewBox="0 0 60 54" fill="none">
-        <ellipse cx="30" cy="27" rx="23" ry="19" fill="#FDF0EB" />
-        <path d="M14 21 Q6 16 8 27 Q6 36 14 36" stroke="#E8541A" strokeWidth="3.5" fill="none" strokeLinecap="round" />
-        <path d="M46 21 Q54 16 52 27 Q54 36 46 36" stroke="#E8541A" strokeWidth="3.5" fill="none" strokeLinecap="round" />
-        <path d="M18 19 Q24 10 30 19 Q36 10 42 19" stroke="#E8541A" strokeWidth="3" fill="none" strokeLinecap="round" />
-      </svg>
+      <BrainIcon size={18} color="#E8541A" />
     </div>
   )
 }
@@ -69,19 +63,19 @@ function TypingIndicator() {
       <BrainAvatar />
       <div style={{
         background: "#fff",
-        border: "1px solid #F0EBE8",
-        borderRadius: 16,
-        borderBottomLeftRadius: 4,
-        padding: "12px 16px",
-        display: "flex", gap: 5, alignItems: "center",
-        boxShadow: "0 1px 5px rgba(0,0,0,.04)",
+        border: "1px solid #F0EAE6",
+        borderRadius: 14,
+        borderBottomLeftRadius: 3,
+        padding: "11px 15px",
+        display: "flex", gap: 4, alignItems: "center",
+        boxShadow: "0 1px 4px rgba(0,0,0,.05)",
       }}>
         {[0, 1, 2].map(i => (
           <div key={i} style={{
-            width: 7, height: 7,
-            background: "#F0C4B0",
+            width: 6, height: 6,
+            background: "#E8C4B0",
             borderRadius: "50%",
-            animation: `hire-bounce 1.3s ease-in-out ${i * 0.18}s infinite`,
+            animation: `hire-bounce 1.2s ease-in-out ${i * 0.16}s infinite`,
           }} />
         ))}
       </div>
@@ -89,7 +83,7 @@ function TypingIndicator() {
   )
 }
 
-function TestCard({ test, index = 0 }: { test: Test; index?: number }) {
+function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; fontSize: number }) {
   return (
     <a
       href={test.url}
@@ -99,90 +93,81 @@ function TestCard({ test, index = 0 }: { test: Test; index?: number }) {
       style={{
         display: "block",
         background: "#fff",
-        border: "1.5px solid #F0EBE8",
-        borderRadius: 16,
+        border: "1px solid #F0EAE6",
+        borderRadius: 14,
         overflow: "hidden",
         textDecoration: "none",
         cursor: "pointer",
-        minWidth: 200,
-        maxWidth: 220,
+        minWidth: 190,
+        maxWidth: 210,
         flexShrink: 0,
-        animation: `hire-card-in 0.4s cubic-bezier(.34,1.56,.64,1) ${index * 0.1}s both`,
+        animation: `hire-card-in 0.38s cubic-bezier(.34,1.56,.64,1) ${index * 0.08}s both`,
       }}
     >
       <div style={{
-        height: 80,
-        background: `linear-gradient(145deg, ${test.color}, ${test.color}dd)`,
+        height: 72,
+        background: test.color,
         display: "flex", alignItems: "center", justifyContent: "center",
-        position: "relative", fontSize: 34,
+        position: "relative", fontSize: 30,
       }}>
         <span className="hire-emoji">{test.emoji}</span>
-        <span style={{ 
-          position: "absolute", top: 8, right: 10, 
-          fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,.9)",
-          letterSpacing: 0.5,
-        }}>Hire.mn</span>
         {test.free && (
           <span style={{
-            position: "absolute", bottom: 8, left: 10,
-            background: "rgba(255,255,255,.95)", 
-            color: test.color, fontSize: 9, fontWeight: 700, 
-            padding: "3px 10px", borderRadius: 10,
-            boxShadow: "0 2px 8px rgba(0,0,0,.1)",
+            position: "absolute", bottom: 7, left: 9,
+            background: "rgba(255,255,255,.95)",
+            color: "#059669", fontSize: 9, fontWeight: 700,
+            padding: "2px 8px", borderRadius: 8,
           }}>ҮНЭГҮЙ</span>
         )}
       </div>
-      <div style={{ padding: "12px 14px" }}>
-        <div style={{ 
-          fontSize: 13, fontWeight: 700, color: "#1A1A1A", 
-          lineHeight: 1.35, marginBottom: 6,
+      <div style={{ padding: "11px 12px 12px" }}>
+        <div style={{
+          fontSize: fontSize - 1, fontWeight: 600, color: "#111827",
+          lineHeight: 1.35, marginBottom: 5,
           overflow: "hidden", textOverflow: "ellipsis",
           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
         }}>{test.name}</div>
-        <div style={{ 
-          fontSize: 11, color: "#6B7280", lineHeight: 1.45, marginBottom: 10,
+        <div style={{
+          fontSize: fontSize - 3, color: "#6B7280", lineHeight: 1.45, marginBottom: 9,
           overflow: "hidden", textOverflow: "ellipsis",
           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
         }}>{test.desc}</div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{
-              background: test.free ? "#ECFDF5" : "#FDF0EB",
-              color: test.free ? "#059669" : "#E8541A",
-              fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 12,
-            }}>{test.price}</span>
-          </div>
-          <span style={{ fontSize: 10, color: "#9CA3AF", display: "flex", alignItems: "center", gap: 3 }}>
-            <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-              <circle cx="8" cy="8" r="6" stroke="#9CA3AF" strokeWidth="1.5"/>
-              <path d="M8 5v3l2 1.5" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round"/>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 9 }}>
+          <span style={{
+            background: test.free ? "#ECFDF5" : "#FEF3EE",
+            color: test.free ? "#059669" : "#E8541A",
+            fontSize: fontSize - 3, fontWeight: 600, padding: "3px 9px", borderRadius: 10,
+          }}>{test.price}</span>
+          <span style={{ fontSize: fontSize - 4, color: "#9CA3AF", display: "flex", alignItems: "center", gap: 3 }}>
+            <svg width="9" height="9" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6" stroke="#9CA3AF" strokeWidth="1.5" />
+              <path d="M8 5v3l2 1.5" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             {test.duration}
           </span>
         </div>
-        <button style={{
-          width: "100%", marginTop: 10,
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-          background: "linear-gradient(135deg, #E8541A, #D44810)",
-          color: "#fff", fontSize: 11.5, fontWeight: 700,
-          padding: "8px 12px", borderRadius: 10, border: "none",
-          cursor: "pointer",
-          boxShadow: "0 2px 8px rgba(232,84,26,.25)",
+        <div style={{
+          width: "100%",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+          background: "#E8541A",
+          color: "#fff", fontSize: fontSize - 2, fontWeight: 600,
+          padding: "7px 10px", borderRadius: 9,
+          transition: "background .15s",
         }}>
           Тест авах
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
             <path d="M3 8h10M9 4l4 4-4 4" />
           </svg>
-        </button>
+        </div>
       </div>
     </a>
   )
 }
 
-function TestCarousel({ tests }: { tests: Test[] }) {
+function TestCarousel({ tests, fontSize }: { tests: Test[]; fontSize: number }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
-  const [canScrollRight, setCanScrollRight] = useState(true)
+  const [canScrollRight, setCanScrollRight] = useState(false)
 
   const checkScroll = () => {
     if (!scrollRef.current) return
@@ -197,54 +182,40 @@ function TestCarousel({ tests }: { tests: Test[] }) {
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return
-    const scrollAmount = 230
-    scrollRef.current.scrollBy({
-      left: direction === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth",
-    })
+    scrollRef.current.scrollBy({ left: direction === "left" ? -220 : 220, behavior: "smooth" })
     setTimeout(checkScroll, 350)
   }
 
   return (
     <div style={{ position: "relative" }}>
-      {/* Left scroll button */}
       {canScrollLeft && (
-        <button
-          onClick={() => scroll("left")}
-          style={{
-            position: "absolute", left: -8, top: "50%", transform: "translateY(-50%)",
-            width: 28, height: 28, borderRadius: "50%",
-            background: "#fff", border: "1.5px solid #F0EBE8",
-            boxShadow: "0 2px 10px rgba(0,0,0,.1)",
-            cursor: "pointer", zIndex: 10,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}
-        >
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
+        <button onClick={() => scroll("left")} style={{
+          position: "absolute", left: -10, top: "45%", transform: "translateY(-50%)",
+          width: 26, height: 26, borderRadius: "50%",
+          background: "#fff", border: "1px solid #F0EAE6",
+          boxShadow: "0 2px 8px rgba(0,0,0,.1)",
+          cursor: "pointer", zIndex: 10,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
             <path d="M10 4l-4 4 4 4" />
           </svg>
         </button>
       )}
-      {/* Right scroll button */}
       {canScrollRight && (
-        <button
-          onClick={() => scroll("right")}
-          style={{
-            position: "absolute", right: -8, top: "50%", transform: "translateY(-50%)",
-            width: 28, height: 28, borderRadius: "50%",
-            background: "#fff", border: "1.5px solid #F0EBE8",
-            boxShadow: "0 2px 10px rgba(0,0,0,.1)",
-            cursor: "pointer", zIndex: 10,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}
-        >
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
+        <button onClick={() => scroll("right")} style={{
+          position: "absolute", right: -10, top: "45%", transform: "translateY(-50%)",
+          width: 26, height: 26, borderRadius: "50%",
+          background: "#fff", border: "1px solid #F0EAE6",
+          boxShadow: "0 2px 8px rgba(0,0,0,.1)",
+          cursor: "pointer", zIndex: 10,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
             <path d="M6 4l4 4-4 4" />
           </svg>
         </button>
       )}
-
-      {/* Carousel container — always horizontal */}
       <div
         ref={scrollRef}
         onScroll={checkScroll}
@@ -253,30 +224,25 @@ function TestCarousel({ tests }: { tests: Test[] }) {
           display: "flex", gap: 10,
           overflowX: "auto", overflowY: "hidden",
           scrollSnapType: "x mandatory",
-          paddingBottom: 6, paddingTop: 4,
-          marginLeft: -4, marginRight: -4, paddingLeft: 4, paddingRight: 4,
+          paddingBottom: 4, paddingTop: 2,
+          paddingLeft: 2, paddingRight: 2,
         }}
       >
         {tests.map((test, i) => (
           <div key={test.id} style={{ scrollSnapAlign: "start" }}>
-            <TestCard test={test} index={i} />
+            <TestCard test={test} index={i} fontSize={fontSize} />
           </div>
         ))}
       </div>
-
-      {/* Pagination dots — only if more than 1 test */}
       {tests.length > 1 && (
         <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 8 }}>
           {tests.map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: i === 0 ? 14 : 6, height: 6,
-                borderRadius: 3,
-                background: i === 0 ? "#E8541A" : "#F0DDD4",
-                transition: "all 0.2s",
-              }}
-            />
+            <div key={i} style={{
+              width: i === 0 ? 14 : 5, height: 5,
+              borderRadius: 3,
+              background: i === 0 ? "#E8541A" : "#F0D8CE",
+              transition: "all 0.2s",
+            }} />
           ))}
         </div>
       )}
@@ -284,55 +250,53 @@ function TestCarousel({ tests }: { tests: Test[] }) {
   )
 }
 
-function BotMessage({ message }: { message: Message }) {
+function BotMessage({ message, fontSize }: { message: Message; fontSize: number }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {message.content && (
         <div className="hire-bot-msg" style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
           <BrainAvatar />
           <div style={{
-            maxWidth: "78%", background: "#fff", border: "1px solid #F0EBE8",
-            borderRadius: 16, borderBottomLeftRadius: 4, padding: "12px 14px",
-            fontSize: 13, lineHeight: 1.6, color: "#1A1A1A",
-            boxShadow: "0 2px 8px rgba(0,0,0,.04)", whiteSpace: "pre-wrap", wordBreak: "break-word",
+            maxWidth: "80%", background: "#fff",
+            border: "1px solid #F0EAE6",
+            borderRadius: 14, borderBottomLeftRadius: 3,
+            padding: "11px 14px",
+            fontSize: fontSize, lineHeight: 1.65, color: "#1F2937",
+            boxShadow: "0 1px 4px rgba(0,0,0,.04)",
+            whiteSpace: "pre-wrap", wordBreak: "break-word",
           }}>
             {message.content}
           </div>
         </div>
       )}
       {message.tests && message.tests.length > 0 && (
-        <div className="hire-tests-section" style={{ marginLeft: 40, marginTop: 4 }}>
-          <div style={{ 
-            fontSize: 12, fontWeight: 700, color: "#E8541A", marginBottom: 12, 
-            display: "flex", alignItems: "center", gap: 6,
-            paddingLeft: 2,
+        <div className="hire-tests-section" style={{ marginLeft: 38, marginTop: 2 }}>
+          <div style={{
+            fontSize: fontSize - 2, fontWeight: 600, color: "#9CA3AF",
+            marginBottom: 10, letterSpacing: 0.2,
+            textTransform: "uppercase",
           }}>
-            <div style={{
-              width: 22, height: 22, borderRadius: 8,
-              background: "linear-gradient(135deg, #FDF0EB, #FFEEE6)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              border: "1px solid #F5DDD4",
-            }}>
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-                <path d="M8 1l1.5 3 3.5.5-2.5 2.5.5 3.5L8 9l-3 1.5.5-3.5L3 4.5 6.5 4z" fill="#E8541A" />
-              </svg>
-            </div>
-            Санал болгож буй тестүүд ({message.tests.length})
+            Санал болгох тестүүд
           </div>
-          <TestCarousel tests={message.tests} />
+          <TestCarousel tests={message.tests} fontSize={fontSize} />
         </div>
       )}
     </div>
   )
 }
 
-function UserMessage({ content }: { content: string }) {
+function UserMessage({ content, fontSize }: { content: string; fontSize: number }) {
   return (
     <div style={{ display: "flex", justifyContent: "flex-end" }}>
       <div style={{
-        maxWidth: "78%", background: "#E8541A", color: "#fff",
-        borderRadius: 16, borderBottomRightRadius: 4,
-        padding: "10px 13px", fontSize: 13, lineHeight: 1.58, wordBreak: "break-word",
+        maxWidth: "80%",
+        background: "#E8541A",
+        color: "#fff",
+        borderRadius: 14, borderBottomRightRadius: 3,
+        padding: "10px 14px",
+        fontSize: fontSize, lineHeight: 1.6,
+        wordBreak: "break-word",
+        boxShadow: "0 2px 8px rgba(232,84,26,.2)",
       }}>
         {content}
       </div>
@@ -343,10 +307,12 @@ function UserMessage({ content }: { content: string }) {
 export function HireMnChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+  const [fontSize, setFontSize] = useState(13)
+  const [showFontSlider, setShowFontSlider] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Сайн байна уу! 👋\n\nБи hire.mn-ий ухаалаг туслагч.\nТаны мэргэжлийн хөгжилд туслахад бэлэн байна!",
+      content: "Сайн байна уу!\n\nБи hire.mn-ий ухаалаг туслагч. Тест сонгох, мэргэжлийн зөвлөгөө авах — асуугаарай.",
     }
   ])
   const [input, setInput] = useState("")
@@ -362,7 +328,6 @@ export function HireMnChatWidget() {
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isTyping) return
-
     setShowQuickReplies(false)
     const userMessage: Message = { role: "user", content: text }
     setMessages(prev => [...prev, userMessage])
@@ -374,44 +339,26 @@ export function HireMnChatWidget() {
         role: m.role,
         content: m.content,
       }))
-
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: history, lang: lang === "МН" ? "mn" : "en" }),
       })
-
-      if (!res.ok) {
-        const errText = await res.text()
-        throw new Error(errText)
-      }
-
+      if (!res.ok) throw new Error(await res.text())
       const data = await res.json()
-
       setMessages(prev => [...prev, {
         role: "assistant",
         content: data.reply || "Уучлаарай, хариу авч чадсангүй.",
         tests: data.tests || [],
       }])
     } catch (err) {
-      console.error("[v0] chat error:", err)
       const errorMessage = err instanceof Error ? err.message : String(err)
-      
-      let userFriendlyMessage = "Уучлаарай, холболтын алдаа гарлаа. Дахин оролдоно уу."
-      
-      // Check for specific AI Gateway errors
-      if (errorMessage.includes("credit card") || errorMessage.includes("AI Gateway")) {
-        userFriendlyMessage = "AI үйлчилгээ одоогоор идэвхгүй байна. Системийн админтай холбогдоно уу."
-      } else if (errorMessage.includes("rate limit")) {
-        userFriendlyMessage = "Хэт олон хүсэлт илгээгдлээ. Түр хүлээгээд дахин оролдоно уу."
-      } else if (errorMessage.includes("timeout")) {
-        userFriendlyMessage = "Хариу авахад хэт удсан байна. Дахин оролдоно уу."
-      }
-      
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: userFriendlyMessage,
-      }])
+      let msg = "Уучлаарай, холболтын алдаа гарлаа. Дахин оролдоно уу."
+      if (errorMessage.includes("credit card") || errorMessage.includes("AI Gateway"))
+        msg = "AI үйлчилгээ одоогоор идэвхгүй байна."
+      else if (errorMessage.includes("rate limit"))
+        msg = "Хэт олон хүсэлт. Түр хүлээгээд дахин оролдоно уу."
+      setMessages(prev => [...prev, { role: "assistant", content: msg }])
     } finally {
       setIsTyping(false)
     }
@@ -424,215 +371,269 @@ export function HireMnChatWidget() {
     }
   }
 
-  const tickerItems = ["42+ тест нээлттэй", "3,512+ хэрэглэгч", "Шинэ: СЭМУТ сорил", "Үнэгүй тестүүд байна"]
-  const tripled = [...tickerItems, ...tickerItems, ...tickerItems]
-
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        .hire-widget * { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
-        .hire-launcher-wrap * { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
-        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        .hire-w, .hire-w * {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+          box-sizing: border-box;
+        }
+
         @keyframes hire-bounce {
           0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-6px); }
+          30% { transform: translateY(-5px); }
         }
         @keyframes hire-float {
           0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-4px); }
-        }
-        @keyframes hire-ticker {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-33.333%); }
+          50% { transform: translateY(-3px); }
         }
         @keyframes hire-pop {
-          from { transform: scale(0.92) translateY(8px); opacity: 0; }
+          from { transform: scale(0.94) translateY(6px); opacity: 0; }
           to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         @keyframes hire-card-in {
-          from { transform: scale(0.9) translateY(12px); opacity: 0; }
+          from { transform: scale(0.92) translateY(10px); opacity: 0; }
           to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         @keyframes hire-slide-up {
-          from { transform: translateY(16px); opacity: 0; }
+          from { transform: translateY(12px); opacity: 0; }
           to   { transform: translateY(0); opacity: 1; }
         }
-        @keyframes hire-emoji-pop {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.2); }
-          100% { transform: scale(1); }
-        }
-        @keyframes hire-shine {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-        
-        .hire-msg { animation: hire-pop 0.35s cubic-bezier(.34,1.56,.64,1); }
-        .hire-bot-msg { animation: hire-slide-up 0.4s ease-out; }
-        .hire-tests-section { animation: hire-slide-up 0.5s ease-out 0.15s both; }
-        
-        .hire-test-card {
-          transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), 
-                      box-shadow 0.25s ease,
-                      border-color 0.2s ease;
-        }
-        .hire-test-card:hover {
-          transform: translateY(-4px) scale(1.02);
-          box-shadow: 0 12px 28px rgba(232,84,26,.18);
-          border-color: #F0C4AD;
-        }
-        .hire-test-card:hover .hire-emoji {
-          animation: hire-emoji-pop 0.4s ease-in-out;
-        }
-        .hire-test-card:hover button {
-          background: linear-gradient(135deg, #D44810, #C03A08) !important;
-          box-shadow: 0 4px 12px rgba(232,84,26,.35);
-        }
-        
-        .hire-chip { 
-          transition: all 0.2s cubic-bezier(.34,1.56,.64,1); 
-        }
-        .hire-chip:hover { 
-          background: #E8541A !important; 
-          color: #fff !important; 
-          border-color: #E8541A !important;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(232,84,26,.25);
-        }
-        
-        .hire-scroll::-webkit-scrollbar { width: 4px; }
-        .hire-scroll::-webkit-scrollbar-track { background: transparent; }
-        .hire-scroll::-webkit-scrollbar-thumb { background: rgba(232,84,26,.25); border-radius: 4px; }
-        
-        .hire-carousel::-webkit-scrollbar { height: 4px; }
-        .hire-carousel::-webkit-scrollbar-track { background: transparent; }
-        .hire-carousel::-webkit-scrollbar-thumb { background: rgba(232,84,26,.2); border-radius: 4px; }
-
         @keyframes hire-chat-open {
-          from { opacity: 0; transform: scale(0.88) translateY(20px); transform-origin: bottom right; }
+          from { opacity: 0; transform: scale(0.9) translateY(16px); transform-origin: bottom right; }
           to   { opacity: 1; transform: scale(1) translateY(0); transform-origin: bottom right; }
         }
-        @keyframes hire-chat-close {
-          from { opacity: 1; transform: scale(1) translateY(0); transform-origin: bottom right; }
-          to   { opacity: 0; transform: scale(0.88) translateY(20px); transform-origin: bottom right; }
-        }
-        @keyframes hire-mascot-pulse {
-          0%, 100% { box-shadow: 0 4px 20px rgba(232,84,26,.35), 0 0 0 0 rgba(232,84,26,.3); }
-          50%       { box-shadow: 0 4px 20px rgba(232,84,26,.35), 0 0 0 10px rgba(232,84,26,0); }
+        @keyframes hire-pulse {
+          0%, 100% { box-shadow: 0 4px 18px rgba(232,84,26,.3), 0 0 0 0 rgba(232,84,26,.25); }
+          50%       { box-shadow: 0 4px 18px rgba(232,84,26,.3), 0 0 0 9px rgba(232,84,26,0); }
         }
         @keyframes hire-tooltip-in {
-          from { opacity: 0; transform: translateX(8px); }
+          from { opacity: 0; transform: translateX(6px); }
           to   { opacity: 1; transform: translateX(0); }
         }
+
+        .hire-msg { animation: hire-pop 0.3s cubic-bezier(.34,1.56,.64,1); }
+        .hire-bot-msg { animation: hire-slide-up 0.35s ease-out; }
+        .hire-tests-section { animation: hire-slide-up 0.45s ease-out 0.1s both; }
+
+        .hire-test-card {
+          transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s ease, border-color 0.18s ease;
+        }
+        .hire-test-card:hover {
+          transform: translateY(-3px) scale(1.015);
+          box-shadow: 0 10px 24px rgba(232,84,26,.15);
+          border-color: #F5C8B8;
+        }
+        .hire-test-card:hover .hire-emoji { display: inline-block; transform: scale(1.15); transition: transform .2s; }
+
+        .hire-chip {
+          transition: all 0.18s ease;
+        }
+        .hire-chip:hover {
+          background: #E8541A !important;
+          color: #fff !important;
+          border-color: #E8541A !important;
+          transform: translateY(-1px);
+        }
+
+        .hire-send-btn:hover:not(:disabled) { background: #D44810 !important; }
+        .hire-send-btn:active:not(:disabled) { transform: scale(0.94); }
+
         .hire-mascot-btn {
-          transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
-          animation: hire-mascot-pulse 2.8s ease-in-out infinite;
+          transition: transform 0.22s cubic-bezier(.34,1.56,.64,1);
+          animation: hire-pulse 2.6s ease-in-out infinite;
         }
         .hire-mascot-btn:hover {
-          transform: scale(1.1);
+          transform: scale(1.08);
           animation: none;
-          box-shadow: 0 8px 28px rgba(232,84,26,.45);
+          box-shadow: 0 8px 26px rgba(232,84,26,.4) !important;
+        }
+
+        .hire-scroll::-webkit-scrollbar { width: 3px; }
+        .hire-scroll::-webkit-scrollbar-track { background: transparent; }
+        .hire-scroll::-webkit-scrollbar-thumb { background: rgba(232,84,26,.2); border-radius: 3px; }
+
+        .hire-carousel { scrollbar-width: none; }
+        .hire-carousel::-webkit-scrollbar { display: none; }
+
+        .hire-font-slider {
+          -webkit-appearance: none;
+          width: 100%;
+          height: 3px;
+          border-radius: 2px;
+          background: linear-gradient(to right, #E8541A calc((var(--val) - 11) / 6 * 100%), #F0E4DF calc((var(--val) - 11) / 6 * 100%));
+          outline: none;
+          cursor: pointer;
+        }
+        .hire-font-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 14px; height: 14px;
+          border-radius: 50%;
+          background: #E8541A;
+          border: 2px solid #fff;
+          box-shadow: 0 1px 4px rgba(232,84,26,.4);
+          cursor: pointer;
+        }
+        .hire-font-slider::-moz-range-thumb {
+          width: 14px; height: 14px;
+          border-radius: 50%;
+          background: #E8541A;
+          border: 2px solid #fff;
+          cursor: pointer;
         }
       `}</style>
 
-      {/* Floating launcher — mascot button + tooltip + chat panel */}
-      <div className="hire-launcher-wrap" style={{
+      <div className="hire-w" style={{
         position: "fixed", bottom: 24, right: 24, zIndex: 99999,
-        display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 14,
+        display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 12,
       }}>
 
         {/* Chat panel */}
         {isOpen && (
-          <div style={{
-            animation: "hire-chat-open 0.3s cubic-bezier(.34,1.56,.64,1)",
-          }}>
-            <div className="hire-widget" style={{
-              width: 390, height: 620, borderRadius: 24,
-              background: "#FFFCFB", boxShadow: "0 20px 70px rgba(0,0,0,.18)",
+          <div style={{ animation: "hire-chat-open 0.28s cubic-bezier(.34,1.56,.64,1)" }}>
+            <div style={{
+              width: 380, height: 600, borderRadius: 20,
+              background: "#FAFAFA",
+              boxShadow: "0 24px 64px rgba(0,0,0,.14), 0 2px 12px rgba(0,0,0,.06)",
               display: "flex", flexDirection: "column", overflow: "hidden",
+              border: "1px solid rgba(0,0,0,.06)",
             }}>
 
               {/* HEADER */}
               <div style={{
-                background: "#E8541A", padding: "0 16px", height: 72,
+                background: "#1A1A1A",
+                padding: "0 16px",
+                height: 66,
                 display: "flex", alignItems: "center", gap: 12,
-                flexShrink: 0, position: "relative", overflow: "hidden",
+                flexShrink: 0,
+                position: "relative",
               }}>
-                <div style={{ position: "absolute", right: -20, top: -20, width: 85, height: 85, borderRadius: "50%", background: "rgba(255,255,255,.07)" }} />
-                <div style={{ position: "absolute", right: 22, top: 36, width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,.05)" }} />
+                {/* Avatar */}
                 <div style={{
-                  width: 48, height: 48, background: "rgba(255,255,255,.18)",
-                  border: "1.5px solid rgba(255,255,255,.28)", borderRadius: 14,
+                  width: 40, height: 40,
+                  borderRadius: 12,
+                  background: "rgba(232,84,26,.15)",
+                  border: "1px solid rgba(232,84,26,.3)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0, animation: "hire-float 3.5s ease-in-out infinite", position: "relative", zIndex: 1,
+                  flexShrink: 0,
+                  animation: "hire-float 3s ease-in-out infinite",
                 }}>
-                  <BrainIcon size={26} />
+                  <BrainIcon size={22} color="white" />
                 </div>
-                <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
-                  <div style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>hire.mn Туслах</div>
-                  <div style={{ color: "rgba(255,255,255,.72)", fontSize: 11, display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
-                    <div style={{ width: 6, height: 6, background: "#4ADE80", borderRadius: "50%", animation: "hire-bounce 2s ease-in-out infinite" }} />
-                    Онлайн байна
+
+                {/* Title */}
+                <div style={{ flex: 1 }}>
+                  <div style={{ color: "#fff", fontWeight: 600, fontSize: 14, lineHeight: 1.2 }}>
+                    hire.mn
+                  </div>
+                  <div style={{
+                    color: "rgba(255,255,255,.45)", fontSize: 11.5, marginTop: 2,
+                    display: "flex", alignItems: "center", gap: 5,
+                  }}>
+                    <span style={{
+                      width: 6, height: 6, borderRadius: "50%", background: "#4ADE80",
+                      display: "inline-block",
+                      animation: "hire-bounce 2.4s ease-in-out infinite",
+                    }} />
+                    Онлайн
                   </div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1 }}>
+
+                {/* Controls */}
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  {/* Font size */}
+                  <button
+                    onClick={() => setShowFontSlider(s => !s)}
+                    title="Үсгийн хэмжээ"
+                    style={{
+                      width: 32, height: 32, borderRadius: 8,
+                      background: showFontSlider ? "rgba(232,84,26,.25)" : "rgba(255,255,255,.08)",
+                      border: showFontSlider ? "1px solid rgba(232,84,26,.5)" : "1px solid rgba(255,255,255,.12)",
+                      color: "#fff", cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "background .15s",
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                      <path d="M4 20V7M4 7l4-4M4 7L0 11M20 20V4M20 4l-3 3M20 4l3 3M9 20h6M11 10h2" />
+                    </svg>
+                  </button>
+
+                  {/* Lang toggle */}
                   <button
                     onClick={() => setLang(l => l === "МН" ? "EN" : "МН")}
                     style={{
-                      background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.32)",
-                      color: "#fff", borderRadius: 18, padding: "5px 12px",
-                      fontSize: 11, fontWeight: 700, cursor: "pointer",
+                      height: 32, paddingLeft: 10, paddingRight: 10,
+                      borderRadius: 8,
+                      background: "rgba(255,255,255,.08)",
+                      border: "1px solid rgba(255,255,255,.12)",
+                      color: "rgba(255,255,255,.8)", fontSize: 11, fontWeight: 600,
+                      cursor: "pointer",
                     }}
                   >
                     {lang === "МН" ? "EN" : "МН"}
                   </button>
+
+                  {/* Close */}
                   <button
                     onClick={() => setIsOpen(false)}
                     style={{
-                      background: "rgba(255,255,255,.15)", border: "1.5px solid rgba(255,255,255,.28)",
-                      color: "#fff", borderRadius: "50%", width: 30, height: 30,
+                      width: 32, height: 32, borderRadius: 8,
+                      background: "rgba(255,255,255,.08)",
+                      border: "1px solid rgba(255,255,255,.12)",
+                      color: "#fff", cursor: "pointer",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      cursor: "pointer",
                     }}
                   >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                       <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
               </div>
 
-              {/* TICKER */}
-              <div style={{
-                background: "#FFF0EB", borderBottom: "1px solid #F5DDD4",
-                height: 28, display: "flex", alignItems: "center",
-                overflow: "hidden", flexShrink: 0,
-              }}>
-                <div style={{ display: "flex", gap: 20, animation: "hire-ticker 24s linear infinite", whiteSpace: "nowrap" }}>
-                  {tripled.map((item, i) => (
-                    <span key={i} style={{
-                      fontSize: 10.5, fontWeight: 600, color: "#C04010",
-                      display: "inline-flex", alignItems: "center", gap: 5, flexShrink: 0,
-                      paddingLeft: i === 0 ? 14 : 0,
-                    }}>
-                      <span style={{ width: 5, height: 5, background: "#E8541A", borderRadius: "50%", display: "inline-block" }} />
-                      {item}
-                    </span>
-                  ))}
+              {/* Font size slider — collapsed panel */}
+              {showFontSlider && (
+                <div style={{
+                  background: "#1A1A1A",
+                  borderTop: "1px solid rgba(255,255,255,.06)",
+                  padding: "10px 16px 12px",
+                  flexShrink: 0,
+                  display: "flex", alignItems: "center", gap: 10,
+                }}>
+                  <span style={{ fontSize: 10, color: "rgba(255,255,255,.35)", fontWeight: 500, minWidth: 18 }}>A</span>
+                  <input
+                    type="range"
+                    min={11}
+                    max={17}
+                    step={1}
+                    value={fontSize}
+                    onChange={e => setFontSize(Number(e.target.value))}
+                    className="hire-font-slider"
+                    style={{ "--val": fontSize } as React.CSSProperties}
+                  />
+                  <span style={{ fontSize: 15, color: "rgba(255,255,255,.35)", fontWeight: 500, minWidth: 14 }}>A</span>
+                  <span style={{
+                    fontSize: 10, color: "rgba(255,255,255,.3)",
+                    minWidth: 28, textAlign: "right",
+                  }}>{fontSize}px</span>
                 </div>
-              </div>
+              )}
 
               {/* MESSAGES */}
               <div className="hire-scroll" style={{
-                flex: 1, overflowY: "auto", padding: "14px 13px 8px",
-                display: "flex", flexDirection: "column", gap: 10, background: "#FFFCFB",
+                flex: 1, overflowY: "auto",
+                padding: "16px 14px 10px",
+                display: "flex", flexDirection: "column", gap: 10,
+                background: "#FAFAFA",
               }}>
                 {messages.map((msg, i) => (
                   <div key={i} className="hire-msg">
                     {msg.role === "assistant"
-                      ? <BotMessage message={msg} />
-                      : <UserMessage content={msg.content} />
+                      ? <BotMessage message={msg} fontSize={fontSize} />
+                      : <UserMessage content={msg.content} fontSize={fontSize} />
                     }
                   </div>
                 ))}
@@ -644,16 +645,23 @@ export function HireMnChatWidget() {
                 )}
 
                 {showQuickReplies && !isTyping && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
                     {QUICK_REPLIES.map(qr => (
                       <button
                         key={qr}
                         className="hire-chip"
                         onClick={() => sendMessage(qr)}
                         style={{
-                          background: "#fff", border: "1.5px solid #F0C4AD", color: "#E8541A",
-                          borderRadius: 18, padding: "6px 12px", fontSize: 12, fontWeight: 600,
-                          cursor: "pointer", whiteSpace: "nowrap", transition: "all .15s",
+                          background: "#fff",
+                          border: "1px solid #F0DDD4",
+                          color: "#E8541A",
+                          borderRadius: 20,
+                          padding: "6px 13px",
+                          fontSize: fontSize - 2,
+                          fontWeight: 500,
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                          boxShadow: "0 1px 3px rgba(0,0,0,.05)",
                         }}
                       >
                         {qr}
@@ -667,96 +675,97 @@ export function HireMnChatWidget() {
 
               {/* INPUT */}
               <div style={{
-                padding: "10px 13px 12px", borderTop: "1px solid #F5EFEC",
-                display: "flex", gap: 8, alignItems: "flex-end",
-                flexShrink: 0, background: "#fff",
+                padding: "10px 12px 12px",
+                borderTop: "1px solid #EDE8E5",
+                background: "#fff",
+                flexShrink: 0,
               }}>
-                <textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={e => {
-                    setInput(e.target.value)
-                    e.target.style.height = "auto"
-                    e.target.style.height = Math.min(e.target.scrollHeight, 90) + "px"
-                  }}
-                  onKeyDown={handleKey}
-                  placeholder="Асуулт бичнэ үү..."
-                  rows={1}
-                  style={{
-                    flex: 1, border: "1.5px solid #EDDFDA", borderRadius: 13,
-                    padding: "9px 13px", fontSize: 13, outline: "none", resize: "none",
-                    maxHeight: 90, lineHeight: 1.4, color: "#1A1A1A",
-                    background: "#FDFCFC", transition: "border-color .15s",
-                  }}
-                  onFocus={e => (e.target.style.borderColor = "#E8541A")}
-                  onBlur={e => (e.target.style.borderColor = "#EDDFDA")}
-                />
-                <button
-                  onClick={() => sendMessage(input)}
-                  disabled={!input.trim() || isTyping}
-                  style={{
-                    width: 40, height: 40, borderRadius: 12,
-                    background: input.trim() && !isTyping ? "#E8541A" : "#E8D5CF",
-                    border: "none", cursor: input.trim() && !isTyping ? "pointer" : "not-allowed",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0, transition: "background .15s, transform .15s",
-                  }}
-                  onMouseEnter={e => { if (input.trim()) (e.currentTarget as HTMLElement).style.transform = "scale(1.08)" }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1)" }}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13" />
-                    <polygon points="22 2 15 22 11 13 2 9 22 2" fill="white" stroke="none" />
-                  </svg>
-                </button>
+                <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+                  <textarea
+                    ref={inputRef}
+                    value={input}
+                    onChange={e => {
+                      setInput(e.target.value)
+                      e.target.style.height = "auto"
+                      e.target.style.height = Math.min(e.target.scrollHeight, 88) + "px"
+                    }}
+                    onKeyDown={handleKey}
+                    placeholder="Асуулт бичнэ үү..."
+                    rows={1}
+                    style={{
+                      flex: 1,
+                      border: "1.5px solid #EDE8E5",
+                      borderRadius: 12,
+                      padding: "9px 13px",
+                      fontSize: fontSize,
+                      outline: "none",
+                      resize: "none",
+                      maxHeight: 88,
+                      lineHeight: 1.5,
+                      color: "#1F2937",
+                      background: "#FAFAFA",
+                      transition: "border-color .15s",
+                      fontFamily: "Inter, sans-serif",
+                    }}
+                    onFocus={e => (e.target.style.borderColor = "#E8541A")}
+                    onBlur={e => (e.target.style.borderColor = "#EDE8E5")}
+                  />
+                  <button
+                    className="hire-send-btn"
+                    onClick={() => sendMessage(input)}
+                    disabled={!input.trim() || isTyping}
+                    style={{
+                      width: 40, height: 40, borderRadius: 11,
+                      background: input.trim() && !isTyping ? "#E8541A" : "#F0E0D8",
+                      border: "none",
+                      cursor: input.trim() && !isTyping ? "pointer" : "default",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0,
+                      transition: "background .15s, transform .12s",
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="22" y1="2" x2="11" y2="13" />
+                      <polygon points="22 2 15 22 11 13 2 9 22 2" fill="white" stroke="none" />
+                    </svg>
+                  </button>
+                </div>
+                <div style={{ textAlign: "center", marginTop: 8, fontSize: 10, color: "#D1C4BE" }}>
+                  hire.mn AI
+                </div>
               </div>
 
-              {/* FOOTER */}
-              <div style={{
-                textAlign: "center", fontSize: 10, color: "#C8B4AE",
-                padding: "0 0 8px", background: "#fff", flexShrink: 0,
-              }}>
-                hire.mn AI · Ухаалаг туслагч
-              </div>
             </div>
           </div>
         )}
 
-        {/* Mascot row: tooltip + button */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
+        {/* Mascot row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
 
-          {/* Tooltip — visible on hover when chat is closed */}
+          {/* Tooltip */}
           {isHovered && !isOpen && (
             <div style={{
-              animation: "hire-tooltip-in 0.2s ease-out",
-              background: "#fff",
-              border: "1.5px solid #F0DDD4",
-              borderRadius: 14,
+              animation: "hire-tooltip-in 0.18s ease-out",
+              background: "#1A1A1A",
+              borderRadius: 12,
               padding: "10px 14px",
-              boxShadow: "0 6px 24px rgba(0,0,0,.1)",
-              maxWidth: 200,
+              boxShadow: "0 8px 24px rgba(0,0,0,.15)",
+              maxWidth: 195,
               pointerEvents: "none",
+              position: "relative",
             }}>
-              <div style={{ fontSize: 12.5, fontWeight: 700, color: "#1A1A1A", marginBottom: 3 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: "#fff", marginBottom: 3 }}>
                 hire.mn Туслагч
               </div>
-              <div style={{ fontSize: 11.5, color: "#6B7280", lineHeight: 1.5 }}>
-                Тест сонгох, мэргэжлийн зөвлөгөө авах — шууд чатлаарай!
+              <div style={{ fontSize: 11.5, color: "rgba(255,255,255,.55)", lineHeight: 1.5 }}>
+                Тест сонгох, мэргэжлийн зөвлөгөө авах
               </div>
-              {/* Arrow */}
               <div style={{
-                position: "absolute", right: -7, top: "50%", transform: "translateY(-50%)",
+                position: "absolute", right: -6, top: "50%", transform: "translateY(-50%)",
                 width: 0, height: 0,
                 borderTop: "6px solid transparent",
                 borderBottom: "6px solid transparent",
-                borderLeft: "7px solid #F0DDD4",
-              }} />
-              <div style={{
-                position: "absolute", right: -5, top: "50%", transform: "translateY(-50%)",
-                width: 0, height: 0,
-                borderTop: "5px solid transparent",
-                borderBottom: "5px solid transparent",
-                borderLeft: "6px solid #fff",
+                borderLeft: "6px solid #1A1A1A",
               }} />
             </div>
           )}
@@ -769,35 +778,34 @@ export function HireMnChatWidget() {
             onMouseLeave={() => setIsHovered(false)}
             aria-label="hire.mn чат нээх"
             style={{
-              width: 60, height: 60, borderRadius: "50%",
-              background: "linear-gradient(145deg, #F06030, #E8541A)",
-              border: "3px solid rgba(255,255,255,.9)",
+              width: 56, height: 56, borderRadius: "50%",
+              background: isOpen ? "#1A1A1A" : "linear-gradient(145deg, #F06030, #E8541A)",
+              border: "2.5px solid rgba(255,255,255,.95)",
               cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0,
               position: "relative",
+              transition: "background .2s",
             }}
           >
             {isOpen ? (
-              /* X icon when open */
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
             ) : (
-              <BrainIcon size={30} />
+              <BrainIcon size={28} />
             )}
-            {/* Online dot */}
             {!isOpen && (
               <span style={{
-                position: "absolute", bottom: 2, right: 2,
-                width: 13, height: 13, borderRadius: "50%",
-                background: "#22C55E", border: "2.5px solid #fff",
+                position: "absolute", bottom: 1, right: 1,
+                width: 12, height: 12, borderRadius: "50%",
+                background: "#4ADE80", border: "2px solid #fff",
               }} />
             )}
           </button>
         </div>
 
-      </div>{/* end launcher-wrap */}
+      </div>
     </>
   )
 }
