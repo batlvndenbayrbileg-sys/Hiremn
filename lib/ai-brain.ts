@@ -1,9 +1,11 @@
+// ai-brain.ts — hire.mn assistant logic
 import { Intent } from './classifier'
 
 export function buildSystemPrompt(intent: Intent, lang: 'mn' | 'en'): string {
-  const langInstruction = lang === 'mn'
-    ? 'ALWAYS respond in Mongolian (Cyrillic script). Use warm, encouraging, professional tone. Keep responses concise and friendly.'
-    : 'ALWAYS respond in English. Use warm, encouraging, professional tone. Keep responses concise and friendly.'
+  const langInstruction =
+    lang === 'mn'
+      ? 'ALWAYS respond in Mongolian (Cyrillic script). Use warm, encouraging, professional tone. Keep responses concise and friendly.'
+      : 'ALWAYS respond in English. Use warm, encouraging, professional tone. Keep responses concise and friendly.'
 
   const intentInstructions: Record<Intent, string> = {
     faq: '',
