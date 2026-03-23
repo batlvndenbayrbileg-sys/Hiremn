@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect, useCallback } from "react"
+import { parseTestMarkers, getTestById, type TestInfo } from "@/lib/test-db"
 
 type Language = "mn" | "en"
 type MessageRole = "user" | "bot"
@@ -12,6 +13,7 @@ interface Message {
   timestamp: Date
   isRichCard?: boolean
   richData?: TestResultData
+  testIds?: number[]
 }
 
 interface TestResultData {
@@ -505,8 +507,82 @@ function TestResultCard({ data }: { data: TestResultData }) {
   )
 }
 
+// Test recommendation card - beautiful clickable cards
+function TestCard({ test, lang }: { test: TestInfo; lang: Language }) {
+  const name = lang === "mn" ? test.name : test.nameEn
+  const desc = lang === "mn" ? test.desc : test.descEn
+  const price = lang === "mn" ? test.price : test.priceEn
+  const tag = lang === "mn" ? test.tag : test.tagEn
+
+  return (
+    <a
+      href={test.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group block bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-primary/10"
+    >
+      {/* Header with gradient and emoji */}
+      <div
+        className="relative h-20 flex items-center justify-center"
+        style={{ background: test.color }}
+      >
+        <span className="text-4xl filter drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
+          {test.emoji}
+        </span>
+        <span className="absolute bottom-1 left-2 text-[9px] font-bold text-white/60 tracking-wider uppercase">
+          hire.mn
+        </span>
+        <span className="absolute top-2 right-2 px-2 py-0.5 bg-white/25 backdrop-blur-sm rounded-full text-[10px] font-bold text-white">
+          {tag}
+        </span>
+      </div>
+      
+      {/* Body */}
+      <div className="p-3">
+        <div className="font-bold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
+          {name}
+        </div>
+        <div className="text-xs text-foreground/60 mt-0.5 line-clamp-2">
+          {desc}
+        </div>
+        
+        {/* Footer */}
+        <div className="flex items-center justify-between mt-3 pt-2 border-t border-primary/5">
+          <span className={`text-xs font-bold ${price === "Үнэгүй" || price === "Free" ? "text-green-600" : "text-primary"}`}>
+            {price}
+          </span>
+          <span className="text-[10px] text-foreground/50 flex items-center gap-1">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {test.time}
+          </span>
+          <div className="px-2 py-1 bg-primary/10 rounded-md text-[10px] font-semibold text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+            {lang === "mn" ? "Авах" : "Take"} →
+          </div>
+        </div>
+      </div>
+    </a>
+  )
+}
+
+// Test cards container for multiple recommendations
+function TestCardsContainer({ testIds, lang }: { testIds: number[]; lang: Language }) {
+  const tests = testIds.map(id => getTestById(id)).filter(Boolean) as TestInfo[]
+  
+  if (tests.length === 0) return null
+  
+  return (
+    <div className={`grid gap-3 mt-3 ${tests.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+      {tests.map((test) => (
+        <TestCard key={test.id} test={test} lang={lang} />
+      ))}
+    </div>
+  )
+}
+
 // Enhanced message bubble with hover effects
-function MessageBubble({ message, isLatest }: { message: Message; isLatest: boolean }) {
+function MessageBubble({ message, isLatest, lang }: { message: Message; isLatest: boolean; lang: Language }) {
   const isUser = message.role === "user"
   const [isHovered, setIsHovered] = useState(false)
 
@@ -524,6 +600,9 @@ function MessageBubble({ message, isLatest }: { message: Message; isLatest: bool
     )
   }
 
+  // Check if message has test recommendations
+  const hasTestCards = !isUser && message.testIds && message.testIds.length > 0
+
   return (
     <div 
       className={`flex items-end gap-2.5 ${isLatest ? "animate-slide-up" : ""} ${isUser ? "flex-row-reverse" : ""}`}
@@ -531,16 +610,22 @@ function MessageBubble({ message, isLatest }: { message: Message; isLatest: bool
       onMouseLeave={() => setIsHovered(false)}
     >
       {!isUser && <MiniBrain />}
-      <div className="relative group">
+      <div className="relative group flex-1 max-w-[88%]">
         <div
-          className={`max-w-[280px] px-4 py-3 transition-all duration-200 ${
+          className={`px-4 py-3 transition-all duration-200 ${
             isUser
-              ? "bg-gradient-to-br from-primary to-accent text-white rounded-2xl rounded-br-md shadow-lg shadow-primary/20"
+              ? "bg-gradient-to-br from-primary to-accent text-white rounded-2xl rounded-br-md shadow-lg shadow-primary/20 max-w-[280px] ml-auto"
               : "bg-white/90 backdrop-blur-sm text-foreground border border-primary/10 rounded-2xl rounded-bl-md shadow-md"
-          } ${isHovered ? "scale-[1.02]" : ""}`}
+          } ${isHovered ? "scale-[1.01]" : ""}`}
         >
           <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
         </div>
+        
+        {/* Render test cards if present */}
+        {hasTestCards && (
+          <TestCardsContainer testIds={message.testIds!} lang={lang} />
+        )}
+        
         <div className={`text-[10px] text-foreground/40 mt-1 font-medium ${isUser ? "text-right mr-1" : "ml-1"}`}>
           {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
         </div>
@@ -801,16 +886,19 @@ export function HireMnChatWidget() {
           throw new Error(data.error || "API error")
         }
 
+        // Parse test markers from the response
+        const { cleanText, testIds } = parseTestMarkers(data.reply || "")
+
         const botMsg: Message = {
           id: (Date.now() + 1).toString(),
           role: "bot",
-          content: data.reply || "",
+          content: cleanText,
           timestamp: new Date(),
-          source: data.source,
+          testIds: testIds.length > 0 ? testIds : undefined,
         }
 
         setIsTyping(false)
-        setBrainMood(data.source === "faq" ? "happy" : "excited")
+        setBrainMood(testIds.length > 0 ? "excited" : "happy")
         setMessages((prev) => [...prev, botMsg])
         
         // Add slight delay before showing happy mood
@@ -889,7 +977,7 @@ export function HireMnChatWidget() {
           <div className="flex-1 overflow-y-auto chat-messages p-4 space-y-4">
             <Confetti trigger={confettiTrigger} />
             {messages.map((msg, i) => (
-              <MessageBubble key={msg.id} message={msg} isLatest={i === messages.length - 1} />
+              <MessageBubble key={msg.id} message={msg} isLatest={i === messages.length - 1} lang={lang} />
             ))}
             {isTyping && <TypingIndicator />}
             <div ref={messagesEndRef} />

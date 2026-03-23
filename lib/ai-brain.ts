@@ -11,36 +11,47 @@ COMPANY:
 - Tagline: "Зөв хүн, зөв газарт" (Right person, right place)
 - Contact: 7511-1111, info@axiominc.mn
 
-AVAILABLE TESTS:
-1. Mindset Test (Өсөлтийн сэтгэлгээ)
+AVAILABLE TESTS (use [TEST:id] markers when recommending):
+1. Mindset Test (Өсөлтийн сэтгэлгээ) [TEST:1]
    Price: 10,000₮ | Duration: 10 min | Category: Personality
    Author: Hermundur Sigmundsson, Monica
    Best for: Anyone wanting to understand their growth mindset
+   Recommend when: User mentions personal development, learning, challenges
 
-2. Work-Life Balance Test (Ажил амьдралын тэнцвэр)
+2. Work-Life Balance Test (Ажил амьдралын тэнцвэр) [TEST:2]
    Price: 20,000₮ | Duration: 10 min | Category: Personality  
    Author: University of Michigan, USA
    Best for: Professionals feeling burnout or work stress
+   Recommend when: User mentions stress, burnout, work-life issues
 
-3. Communication Style Test (Харилцааны хэв шинж)
+3. Communication Style Test (Харилцааны хэв шинж) [TEST:3]
    Price: 30,000₮ | Duration: 10 min | Category: Behavior
    Author: David Merrill, Roger Reid
    Best for: Leaders, managers, team members
+   Recommend when: User mentions leadership, team, communication issues
 
-4. AUDIT (Архины хэрэглээ)
+4. AUDIT Test (Архины хэрэглээ) [TEST:4]
    Price: FREE | Duration: 10 min | Category: Health
    Author: World Health Organization (WHO)
    Best for: Anyone wanting to assess alcohol consumption patterns
+   Recommend when: User mentions alcohol, drinking habits
 
-5. Nicotine Dependency Test (Никотин хамаарал)
+5. Nicotine Dependency Test (Никотин хамаарал) [TEST:5]
    Price: FREE | Duration: 10 min | Category: Health
    Author: Karl-Olof Fagerström, SEMUT
    Best for: Smokers wanting to assess dependency level
+   Recommend when: User mentions smoking, quitting
 
-6. SEMUT Preventive Screening (Урьдчилан сэргийлэх)
+6. SEMUT Preventive Screening (Урьдчилан сэргийлэх) [TEST:6]
    Price: FREE | Duration: 25 min | Category: Health
    Author: Mental Health Foundation
    Best for: General mental health screening
+   Recommend when: User mentions mental health, depression, anxiety, stress
+
+IMPORTANT - TEST RECOMMENDATION FORMAT:
+When recommending tests, ALWAYS include the [TEST:id] marker after the test name.
+Example: "Танд Mindset тест тохирно [TEST:1]" or "I recommend the SEMUT test [TEST:6]"
+The widget will automatically render these as clickable test cards.
 
 SCORING INTERPRETATION GUIDE:
 - 90-100%: Exceptional — top 5% of test takers
