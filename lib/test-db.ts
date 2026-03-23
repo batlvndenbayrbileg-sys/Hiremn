@@ -22,97 +22,97 @@ export interface TestInfo {
 export const TEST_DATABASE: Record<number, TestInfo> = {
   1: {
     id: 1,
-    name: "Өсөлтийн сэтгэлгээ",
-    nameEn: "Mindset Test",
-    desc: "Өөрийн хөгжлийн сэтгэлгээг мэдээрэй",
+    name: "Ogsoltiyn setgelgee (Mindset)",
+    nameEn: "Growth Mindset Test",
+    desc: "Ogsoltiyn setgelgeegee medeereh",
     descEn: "Discover your growth mindset potential",
-    url: "https://hire.mn/test/mindset",
-    price: "10,000₮",
-    priceEn: "10,000₮",
-    time: "10 мин",
-    emoji: "🧠",
-    color: "linear-gradient(135deg, #E8541A 0%, #FF8C5A 100%)",
-    tag: "Алдартай",
+    url: "https://hire.mn/test/1",
+    price: "10,000",
+    priceEn: "10,000",
+    time: "10 min",
+    emoji: "🧗",
+    color: "linear-gradient(135deg, #F4A87C 0%, #E8541A 100%)",
+    tag: "Aldartai",
     tagEn: "Popular",
     category: "personality",
   },
   2: {
     id: 2,
-    name: "Ажил амьдралын тэнцвэр",
+    name: "Ajil-amidral tentsver",
     nameEn: "Work-Life Balance",
-    desc: "Амьдралын тэнцвэрт байдлаа шалгаарай",
+    desc: "Amidralyn tentstsereer tailbaar av",
     descEn: "Assess your work-life harmony",
-    url: "https://hire.mn/test/worklife",
-    price: "20,000₮",
-    priceEn: "20,000₮",
-    time: "10 мин",
+    url: "https://hire.mn/test/2",
+    price: "20,000",
+    priceEn: "20,000",
+    time: "10 min",
     emoji: "⚖️",
-    color: "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
-    tag: "Шинэ",
+    color: "linear-gradient(135deg, #F9C784 0%, #F0A830 100%)",
+    tag: "Shine",
     tagEn: "New",
     category: "personality",
   },
   3: {
     id: 3,
-    name: "Харилцааны хэв шинж",
+    name: "Khariltsiany khev shinj",
     nameEn: "Communication Style",
-    desc: "Харилцааны өөрийн хэв шинжийг ойлго",
+    desc: "Khariltsiany ooriin khev shinjiig oilgo",
     descEn: "Understand your communication patterns",
-    url: "https://hire.mn/test/communication",
-    price: "30,000₮",
-    priceEn: "30,000₮",
-    time: "10 мин",
+    url: "https://hire.mn/test/3",
+    price: "30,000",
+    priceEn: "30,000",
+    time: "10 min",
     emoji: "💬",
-    color: "linear-gradient(135deg, #6366F1 0%, #A78BFA 100%)",
-    tag: "Удирдлагад",
+    color: "linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%)",
+    tag: "Udidrlagad",
     tagEn: "For Leaders",
     category: "behavior",
   },
-  4: {
-    id: 4,
-    name: "AUDIT тест",
+  99: {
+    id: 99,
+    name: "AUDIT test",
     nameEn: "AUDIT Test",
-    desc: "Архины хэрэглээний үнэлгээ (WHO)",
+    desc: "Arkhiny kherlegeenii unelgee (WHO)",
     descEn: "Alcohol use assessment by WHO",
-    url: "https://hire.mn/test/audit",
-    price: "Үнэгүй",
+    url: "https://hire.mn/test/99",
+    price: "Uneggui",
     priceEn: "Free",
-    time: "10 мин",
-    emoji: "🍷",
-    color: "linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)",
-    tag: "Үнэгүй",
+    time: "10 min",
+    emoji: "🏥",
+    color: "linear-gradient(135deg, #F5D5B0 0%, #E8A870 100%)",
+    tag: "Uneggui",
     tagEn: "Free",
     category: "health",
   },
   5: {
     id: 5,
-    name: "Никотин хамаарал",
+    name: "Nikotin khamaraal",
     nameEn: "Nicotine Dependency",
-    desc: "Тамхины хамааралтай эсэхийг шалгах",
+    desc: "Tamkhiny khamaarlaltai esekhiig shalga",
     descEn: "Check your nicotine dependency level",
-    url: "https://hire.mn/test/nicotine",
-    price: "Үнэгүй",
+    url: "https://hire.mn/test/5",
+    price: "Uneggui",
     priceEn: "Free",
-    time: "10 мин",
-    emoji: "🚬",
-    color: "linear-gradient(135deg, #64748B 0%, #94A3B8 100%)",
-    tag: "Үнэгүй",
+    time: "10 min",
+    emoji: "🚭",
+    color: "linear-gradient(135deg, #94A3B8 0%, #64748B 100%)",
+    tag: "Uneggui",
     tagEn: "Free",
     category: "health",
   },
   6: {
     id: 6,
-    name: "SEMUT урьдчилан сэргийлэх",
+    name: "SEMUT urridchilan sergiilekh",
     nameEn: "SEMUT Screening",
-    desc: "Сэтгэцийн эрүүл мэндийн шалгаруулалт",
+    desc: "Settsiin eruul mendiin shalgaruulalt",
     descEn: "Mental health preventive screening",
-    url: "https://hire.mn/test/semut",
-    price: "Үнэгүй",
+    url: "https://hire.mn/test/6",
+    price: "Uneggui",
     priceEn: "Free",
-    time: "25 мин",
+    time: "25 min",
     emoji: "🧘",
-    color: "linear-gradient(135deg, #EC4899 0%, #F472B6 100%)",
-    tag: "Чухал",
+    color: "linear-gradient(135deg, #F472B6 0%, #EC4899 100%)",
+    tag: "Chukhul",
     tagEn: "Important",
     category: "health",
   },
@@ -131,25 +131,20 @@ export function parseTestMarkers(text: string): { cleanText: string; testIds: nu
     }
   }
 
-  // Remove the markers from the text for display
   const cleanText = text.replace(/\s*\[TEST:\d+\]/g, "").trim()
-
   return { cleanText, testIds }
 }
 
-// Get test by ID
 export function getTestById(id: number): TestInfo | undefined {
   return TEST_DATABASE[id]
 }
 
-// Get all tests in a category
 export function getTestsByCategory(category: TestInfo["category"]): TestInfo[] {
   return Object.values(TEST_DATABASE).filter((t) => t.category === category)
 }
 
-// Get free tests
 export function getFreeTests(): TestInfo[] {
   return Object.values(TEST_DATABASE).filter(
-    (t) => t.price === "Үнэгүй" || t.priceEn === "Free"
+    (t) => t.price === "Uneggui" || t.priceEn === "Free"
   )
 }

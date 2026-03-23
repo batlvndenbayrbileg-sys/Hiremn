@@ -509,57 +509,48 @@ function TestResultCard({ data }: { data: TestResultData }) {
 
 // Test recommendation card - beautiful clickable cards
 function TestCard({ test, lang }: { test: TestInfo; lang: Language }) {
-  const name = lang === "mn" ? test.name : test.nameEn
-  const desc = lang === "mn" ? test.desc : test.descEn
-  const price = lang === "mn" ? test.price : test.priceEn
-  const tag = lang === "mn" ? test.tag : test.tagEn
+  const isFree = test.priceEn === "Free"
+  const displayPrice = isFree
+    ? (lang === "mn" ? "Үнэгүй" : "Free")
+    : `${test.price}₮`
+  const displayName = test.name
+  const displayDesc = test.descEn
 
   return (
     <a
       href={test.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-primary/10"
+      className="group flex bg-white rounded-xl overflow-hidden border-2 border-primary/20 hover:border-primary transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10 shadow-sm"
     >
-      {/* Header with gradient and emoji */}
+      {/* Color swatch left bar */}
       <div
-        className="relative h-20 flex items-center justify-center"
+        className="w-14 shrink-0 flex flex-col items-center justify-center gap-1 py-3"
         style={{ background: test.color }}
       >
-        <span className="text-4xl filter drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
-          {test.emoji}
-        </span>
-        <span className="absolute bottom-1 left-2 text-[9px] font-bold text-white/60 tracking-wider uppercase">
-          hire.mn
-        </span>
-        <span className="absolute top-2 right-2 px-2 py-0.5 bg-white/25 backdrop-blur-sm rounded-full text-[10px] font-bold text-white">
-          {tag}
-        </span>
+        <span className="text-2xl">{test.emoji}</span>
+        <span className="text-[9px] font-bold text-white/80 tracking-wide uppercase">hire.mn</span>
       </div>
-      
-      {/* Body */}
-      <div className="p-3">
-        <div className="font-bold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
-          {name}
+
+      {/* Content */}
+      <div className="flex-1 px-3 py-2.5 min-w-0">
+        <div className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors">
+          {displayName}
         </div>
-        <div className="text-xs text-foreground/60 mt-0.5 line-clamp-2">
-          {desc}
-        </div>
-        
-        {/* Footer */}
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-primary/5">
-          <span className={`text-xs font-bold ${price === "Үнэгүй" || price === "Free" ? "text-green-600" : "text-primary"}`}>
-            {price}
+        <div className="text-xs text-foreground/50 mt-0.5 truncate">{displayDesc}</div>
+        <div className="flex items-center gap-2 mt-2">
+          <span className={`text-xs font-bold px-1.5 py-0.5 rounded-md ${isFree ? "bg-green-50 text-green-600" : "bg-primary/10 text-primary"}`}>
+            {displayPrice}
           </span>
-          <span className="text-[10px] text-foreground/50 flex items-center gap-1">
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <span className="text-[10px] text-foreground/40 flex items-center gap-0.5">
+            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {test.time}
           </span>
-          <div className="px-2 py-1 bg-primary/10 rounded-md text-[10px] font-semibold text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-            {lang === "mn" ? "Авах" : "Take"} →
-          </div>
+          <span className="ml-auto text-[10px] font-semibold text-primary group-hover:underline">
+            {lang === "mn" ? "Авах" : "Take"} &rarr;
+          </span>
         </div>
       </div>
     </a>
@@ -569,11 +560,9 @@ function TestCard({ test, lang }: { test: TestInfo; lang: Language }) {
 // Test cards container for multiple recommendations
 function TestCardsContainer({ testIds, lang }: { testIds: number[]; lang: Language }) {
   const tests = testIds.map(id => getTestById(id)).filter(Boolean) as TestInfo[]
-  
   if (tests.length === 0) return null
-  
   return (
-    <div className={`grid gap-3 mt-3 ${tests.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+    <div className="flex flex-col gap-2 mt-2">
       {tests.map((test) => (
         <TestCard key={test.id} test={test} lang={lang} />
       ))}
@@ -904,14 +893,12 @@ export function HireMnChatWidget() {
         // Add slight delay before showing happy mood
         setTimeout(() => setBrainMood("happy"), 1500)
       } catch (error) {
-        console.error("Chat error:", error)
+        const errMsg = error instanceof Error ? error.message : "Unknown error"
+        console.error("[v0] Chat error:", errMsg)
         const errorMsg: Message = {
           id: (Date.now() + 1).toString(),
           role: "bot",
-          content:
-            lang === "mn"
-              ? "Уучлаарай, алдаа гарлаа. Дахин оролдоно уу."
-              : "Sorry, something went wrong. Please try again.",
+          content: `[DEBUG] ${errMsg}`,
           timestamp: new Date(),
         }
         setIsTyping(false)
