@@ -205,64 +205,55 @@ function TestCarousel({ tests }: { tests: Test[] }) {
     setTimeout(checkScroll, 350)
   }
 
-  if (tests.length <= 3) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {tests.map((test, i) => (
-          <TestCard key={test.id} test={test} index={i} />
-        ))}
-      </div>
-    )
-  }
-
   return (
     <div style={{ position: "relative" }}>
-      {/* Scroll buttons */}
+      {/* Left scroll button */}
       {canScrollLeft && (
         <button
           onClick={() => scroll("left")}
           style={{
             position: "absolute", left: -8, top: "50%", transform: "translateY(-50%)",
-            width: 32, height: 32, borderRadius: "50%",
+            width: 28, height: 28, borderRadius: "50%",
             background: "#fff", border: "1.5px solid #F0EBE8",
             boxShadow: "0 2px 10px rgba(0,0,0,.1)",
             cursor: "pointer", zIndex: 10,
             display: "flex", alignItems: "center", justifyContent: "center",
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
             <path d="M10 4l-4 4 4 4" />
           </svg>
         </button>
       )}
+      {/* Right scroll button */}
       {canScrollRight && (
         <button
           onClick={() => scroll("right")}
           style={{
             position: "absolute", right: -8, top: "50%", transform: "translateY(-50%)",
-            width: 32, height: 32, borderRadius: "50%",
+            width: 28, height: 28, borderRadius: "50%",
             background: "#fff", border: "1.5px solid #F0EBE8",
             boxShadow: "0 2px 10px rgba(0,0,0,.1)",
             cursor: "pointer", zIndex: 10,
             display: "flex", alignItems: "center", justifyContent: "center",
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
             <path d="M6 4l4 4-4 4" />
           </svg>
         </button>
       )}
 
-      {/* Carousel container */}
+      {/* Carousel container — always horizontal */}
       <div
         ref={scrollRef}
         onScroll={checkScroll}
         className="hire-carousel"
         style={{
-          display: "flex", gap: 12,
+          display: "flex", gap: 10,
           overflowX: "auto", overflowY: "hidden",
           scrollSnapType: "x mandatory",
-          paddingBottom: 8, paddingTop: 4,
+          paddingBottom: 6, paddingTop: 4,
           marginLeft: -4, marginRight: -4, paddingLeft: 4, paddingRight: 4,
         }}
       >
@@ -273,20 +264,22 @@ function TestCarousel({ tests }: { tests: Test[] }) {
         ))}
       </div>
 
-      {/* Pagination dots */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 10 }}>
-        {tests.map((_, i) => (
-          <div
-            key={i}
-            style={{
-              width: i === 0 ? 16 : 6, height: 6,
-              borderRadius: 3,
-              background: i === 0 ? "#E8541A" : "#F0DDD4",
-              transition: "all 0.2s",
-            }}
-          />
-        ))}
-      </div>
+      {/* Pagination dots — only if more than 1 test */}
+      {tests.length > 1 && (
+        <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 8 }}>
+          {tests.map((_, i) => (
+            <div
+              key={i}
+              style={{
+                width: i === 0 ? 14 : 6, height: 6,
+                borderRadius: 3,
+                background: i === 0 ? "#E8541A" : "#F0DDD4",
+                transition: "all 0.2s",
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

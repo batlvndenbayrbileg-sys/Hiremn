@@ -9,10 +9,10 @@ export function buildSystemPrompt(intent: Intent, lang: 'mn' | 'en'): string {
 
   const intentInstructions: Record<Intent, string> = {
     faq: 'Answer the FAQ question directly and helpfully.',
-    recommend: `Recommend 1-3 relevant tests using [TEST:id] markers. Explain the benefit clearly. Under 120 words.`,
+    recommend: `Write ONE short sentence (max 15 words) introducing the tests, then list [TEST:id] markers only. No descriptions per test — the cards show everything. Example: "Сэтгэл зүйн чиглэлээр эдгээр тестийг санал болгож байна: [TEST:6] [TEST:1] [TEST:2]"`,
     analyze: `Analyze their test results. List top 2-3 strengths, 1-2 growth areas, and concrete next steps. Under 150 words.`,
-    upsell: `Celebrate their progress. Suggest a follow-up test with [TEST:id]. Be motivating. Under 120 words.`,
-    general: `Answer helpfully. Mention a relevant test with [TEST:id] if appropriate. Under 150 words.`,
+    upsell: `One short encouraging sentence + [TEST:id] marker. Under 20 words.`,
+    general: `Answer helpfully in under 80 words. If recommending a test, use [TEST:id] with one short sentence intro only.`,
   }
 
   return `You are the official AI assistant for hire.mn — Mongolia's leading professional assessment platform.
