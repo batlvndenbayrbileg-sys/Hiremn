@@ -898,7 +898,9 @@ export function HireMnChatWidget() {
         const errorMsg: Message = {
           id: (Date.now() + 1).toString(),
           role: "bot",
-          content: `[DEBUG] ${errMsg}`,
+          content: lang === "mn" 
+            ? "Уучлаарай, алдаа гарлаа. Дахин оролдоно уу."
+            : "Sorry, something went wrong. Please try again.",
           timestamp: new Date(),
         }
         setIsTyping(false)
