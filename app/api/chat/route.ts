@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     }))
 
     const { text, usage } = await generateText({
-      model: 'anthropic/claude-3-sonnet-20240229',
+      model: 'openai/gpt-4o-mini',
       system: systemPrompt,
       messages: formattedMessages,
       maxOutputTokens: 500,
