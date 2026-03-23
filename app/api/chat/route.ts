@@ -68,6 +68,15 @@ export async function POST(req: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('[chat/route] error:', message)
+    
+    // Check for AI Gateway credit card requirement
+    if (message.includes('credit card') || message.includes('AI Gateway')) {
+      return Response.json({ 
+        error: 'AI Gateway requires setup. Please add a credit card at Vercel AI settings.',
+        code: 'AI_GATEWAY_SETUP_REQUIRED'
+      }, { status: 503 })
+    }
+    
     return Response.json({ error: message }, { status: 500 })
   }
 }

@@ -259,9 +259,22 @@ export function HireMnChatWidget() {
       }])
     } catch (err) {
       console.error("[v0] chat error:", err)
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      
+      let userFriendlyMessage = "Уучлаарай, холболтын алдаа гарлаа. Дахин оролдоно уу."
+      
+      // Check for specific AI Gateway errors
+      if (errorMessage.includes("credit card") || errorMessage.includes("AI Gateway")) {
+        userFriendlyMessage = "AI үйлчилгээ одоогоор идэвхгүй байна. Системийн админтай холбогдоно уу."
+      } else if (errorMessage.includes("rate limit")) {
+        userFriendlyMessage = "Хэт олон хүсэлт илгээгдлээ. Түр хүлээгээд дахин оролдоно уу."
+      } else if (errorMessage.includes("timeout")) {
+        userFriendlyMessage = "Хариу авахад хэт удсан байна. Дахин оролдоно уу."
+      }
+      
       setMessages(prev => [...prev, {
         role: "assistant",
-        content: "Уучлаарай, холболтын алдаа гарлаа. Дахин оролдоно уу.",
+        content: userFriendlyMessage,
       }])
     } finally {
       setIsTyping(false)
