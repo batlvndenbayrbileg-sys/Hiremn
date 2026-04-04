@@ -1,46 +1,55 @@
-// hire.mn API integration service
+// hire.mn API integration
+// Endpoint: GET /api/v1/assessment/all?limit=50&page=1
+// Бодит response: { succeed: true, payload: { data: [ { data: {...}, user: {...}, category: {...} } ], count, total } }
+
 const API_BASE = process.env.HIRE_API_URL || 'https://api.hire.mn/api/v1'
 const API_KEY = process.env.HIRE_API_KEY || ''
 
 interface ApiOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'
   body?: unknown
+  auth?: boolean
 }
 
 async function apiCall<T>(endpoint: string, options: ApiOptions = {}): Promise<T | null> {
-  const { method = 'GET', body } = options
-  
+  const { method = 'GET', body, auth = false } = options
   try {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     }
-    
-    // Add auth header if API key exists
-    if (API_KEY) {
-      headers['Authorization'] = `Bearer ${API_KEY}`
-    }
+    if (auth && API_KEY) headers['Authorization'] = `Bearer ${API_KEY}`
 
     const res = await fetch(`${API_BASE}${endpoint}`, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
-      next: { revalidate: 300 }, // Cache for 5 minutes
+      next: { revalidate: 300 },
     })
 
     if (!res.ok) {
-      console.error(`[hire-api] ${method} ${endpoint} failed:`, res.status, res.statusText)
+      console.error(`[hire-api] ${method} ${endpoint} → ${res.status}`)
       return null
     }
-
     return await res.json()
   } catch (err) {
-    console.error(`[hire-api] ${method} ${endpoint} error:`, err)
+    console.error(`[hire-api] error:`, err)
     return null
   }
 }
 
-// ============ Assessment (Tests) ============
+// ─────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────
+
+export interface AssessmentCategory {
+  id: number
+  index?: number
+  name: string
+  nameEn?: string
+  subcategories?: AssessmentCategory[]
+  parent?: AssessmentCategory | null
+}
 
 export interface Assessment {
   id: number
@@ -48,171 +57,158 @@ export interface Assessment {
   nameEn?: string
   description?: string
   descriptionEn?: string
-  price: number
-  duration?: number // minutes
+  usage?: string   // "Хэн ашиглах вэ"
+  measure?: string   // "Юу хэмжих вэ"
+  price: number   // 0 = үнэгүй
+  duration?: number   // минут
   questionCount?: number
-  image?: string
-  categoryId?: number
+  icons?: string   // зургийн файл нэр
+  author?: string
+  status?: number   // 10=идэвхтэй, 30=идэвхгүй
+  count?: number   // хэдэн хэрэглэгч авсан
   category?: AssessmentCategory
-  isFree?: boolean
-  isActive?: boolean
+  isFree?: boolean  // price===0
+  isActive?: boolean  // status===10
+}
+
+// API-ийн нэг item: { data: Assessment, user: {...}, category: {...} }
+interface AssessmentItem {
+  data: Assessment
+  user?: unknown
+  category?: AssessmentCategory
+}
+
+// /api/v1/assessment/all бүрэн response
+interface AssessmentListResponse {
+  succeed: boolean
+  payload: {
+    data: AssessmentItem[]
+    count: number
+    total: number
+    level: unknown[]
+  }
+}
+
+function normalize(item: AssessmentItem): Assessment {
+  const d = item.data
+  return {
+    ...d,
+    isFree: d.price === 0,
+    isActive: d.status === 10,
+    category: item.category || d.category,
+  }
+}
+
+// ─────────────────────────────────────────
+// Assessment API calls
+// ─────────────────────────────────────────
+
+// 🔒 GET /api/v1/assessment/all?limit=50&page=1
+// Нийт 47 тест байна → limit=50 бол нэг дуудалтаар бүгдийг авна
+export async function getAllAssessments(limit = 50, page = 1): Promise<Assessment[]> {
+  const res = await apiCall<AssessmentListResponse>(
+    `/assessment/all?limit=${limit}&page=${page}`,
+    { auth: true }
+  )
+  if (!res?.succeed || !Array.isArray(res.payload?.data)) return []
+
+  return res.payload.data
+    .map(normalize)
+    .filter(a => a.id && a.isActive) // зөвхөн status=10 тестүүд
+}
+
+// 🔒 GET /api/v1/assessment/home/page
+export async function getHomeAssessments(): Promise<Assessment[]> {
+  const res = await apiCall<AssessmentListResponse>('/assessment/home/page', { auth: true })
+  if (!res?.succeed || !Array.isArray(res.payload?.data)) return []
+  return res.payload.data.map(normalize).filter(a => a.id)
+}
+
+// 🔒 GET /api/v1/assessment/{id}
+export async function getAssessmentById(id: number): Promise<Assessment | null> {
+  const res = await apiCall<{ succeed: boolean; payload: AssessmentItem }>(`/assessment/${id}`, { auth: true })
+  if (!res?.succeed || !res.payload) return null
+  return normalize(res.payload)
+}
+
+// ─────────────────────────────────────────
+// UserAnswer — 🔓 БҮГД PUBLIC (lock байхгүй)
+// ─────────────────────────────────────────
+
+export interface UserAnswerResult {
+  code?: string
+  assessmentId?: number
+  score?: number
+  level?: string
+  levelName?: string
+  completedAt?: string
   createdAt?: string
 }
 
-export interface AssessmentCategory {
-  id: number
-  name: string
-  nameEn?: string
-  description?: string
-  icon?: string
-  color?: string
+// 🔓 GET /api/v1/userAnswer/code/code/{code}
+export async function getResultByCode(code: string): Promise<UserAnswerResult | null> {
+  const res = await apiCall<unknown>(`/userAnswer/code/code/${code}`)
+  if (!res) return null
+  const obj = res as Record<string, unknown>
+  if (obj.succeed && obj.payload) return obj.payload as UserAnswerResult
+  if (obj.code || obj.score !== undefined) return res as UserAnswerResult
+  return null
 }
 
-// Get all assessments
-export async function getAllAssessments(): Promise<Assessment[]> {
-  const data = await apiCall<unknown>('/assessment/all')
-  if (!data) return []
-  
-  // Handle nested response: { succeed: true, payload: { data: [ { data: {...} } ] } }
-  if (typeof data === 'object' && data !== null) {
-    const obj = data as Record<string, unknown>
-    
-    // Try payload.data first (hire.mn response format)
-    if (obj.payload && typeof obj.payload === 'object') {
-      const payload = obj.payload as Record<string, unknown>
-      if (Array.isArray(payload.data)) {
-        const items = payload.data as Array<Record<string, unknown>>
-        // If each item has a nested "data" property, extract it
-        return items
-          .map(item => (item.data && typeof item.data === 'object' ? (item.data as Assessment) : (item as Assessment)))
-          .filter(a => a && a.id)
-      }
-    }
-    
-    // Fallback: try direct response formats
-    if (Array.isArray(obj.data)) return (obj.data as Assessment[]).filter(a => a && a.id)
-    if (Array.isArray(obj.assessments)) return (obj.assessments as Assessment[]).filter(a => a && a.id)
-    if (Array.isArray(obj.items)) return (obj.items as Assessment[]).filter(a => a && a.id)
-    if (Array.isArray(obj.result)) return (obj.result as Assessment[]).filter(a => a && a.id)
-    if ('id' in obj) return [obj as unknown as Assessment]
-  }
-  
-  if (Array.isArray(data)) return (data as Assessment[]).filter(a => a && a.id)
-  return []
-}
-
-// Get assessment by ID
-export async function getAssessmentById(id: number): Promise<Assessment | null> {
-  return apiCall<Assessment>(`/assessment/${id}`)
-}
-
-// Get home page assessments (featured)
-export async function getHomeAssessments(): Promise<Assessment[]> {
-  const data = await apiCall<Assessment[] | { data: Assessment[] }>('/assessment/home/page')
-  if (!data) return []
-  return Array.isArray(data) ? data : (data.data || [])
-}
-
-// ============ Categories ============
-
-export async function getAllCategories(): Promise<AssessmentCategory[]> {
-  const data = await apiCall<AssessmentCategory[] | { data: AssessmentCategory[] }>('/assessmentCategory')
-  if (!data) return []
-  return Array.isArray(data) ? data : (data.data || [])
-}
-
-export async function getCategoryById(id: number): Promise<AssessmentCategory | null> {
-  return apiCall<AssessmentCategory>(`/assessmentCategory/${id}`)
-}
-
-// ============ Questions ============
-
-export interface Question {
-  id: number
+// 🔓 POST /api/v1/userAnswer
+export async function submitUserAnswers(payload: {
   assessmentId: number
-  text: string
-  textEn?: string
-  type?: string // multiple_choice, scale, etc.
-  order?: number
-  answers?: QuestionAnswer[]
-}
-
-export interface QuestionAnswer {
-  id: number
-  questionId: number
-  text: string
-  textEn?: string
-  value?: number
-  order?: number
-}
-
-// Get questions for an assessment
-export async function getAssessmentQuestions(assessmentId: number): Promise<Question[]> {
-  const data = await apiCall<Question[] | { data: Question[] }>(`/question/assessment/${assessmentId}`)
-  if (!data) return []
-  return Array.isArray(data) ? data : (data.data || [])
-}
-
-// Get all question answers
-export async function getQuestionAnswers(): Promise<QuestionAnswer[]> {
-  const data = await apiCall<QuestionAnswer[] | { data: QuestionAnswer[] }>('/question/answer')
-  if (!data) return []
-  return Array.isArray(data) ? data : (data.data || [])
-}
-
-// ============ User Answers ============
-
-export interface UserAnswerSubmission {
-  assessmentId: number
-  answers: Array<{
-    questionId: number
-    answerId?: number
-    value?: number
-    text?: string
-  }>
+  answers: Array<{ questionId: number; answerId?: number; value?: number }>
   userId?: string
+}): Promise<UserAnswerResult | null> {
+  const res = await apiCall<unknown>('/userAnswer', { method: 'POST', body: payload })
+  if (!res) return null
+  const obj = res as Record<string, unknown>
+  if (obj.succeed && obj.payload) return obj.payload as UserAnswerResult
+  return res as UserAnswerResult
 }
 
-export async function submitUserAnswers(submission: UserAnswerSubmission): Promise<unknown> {
-  return apiCall('/userAnswer', {
-    method: 'POST',
-    body: submission,
-  })
-}
+// ─────────────────────────────────────────
+// Widget formatter
+// ─────────────────────────────────────────
 
-// ============ Helper: Convert API Assessment to Widget Format ============
-
-const CATEGORY_COLORS: Record<string, string> = {
-  'personality': '#E8541A',
-  'career': '#3B82F6',
-  'health': '#22C55E',
-  'mental': '#EC4899',
-  'leadership': '#8B5CF6',
-  'default': '#E8541A',
+export function getIconUrl(icons?: string): string {
+  if (!icons) return ''
+  if (icons.startsWith('http')) return icons
+  return `https://api.hire.mn/uploads/${icons}`
 }
 
 const CATEGORY_EMOJIS: Record<string, string> = {
-  'personality': '🧠',
-  'career': '💼',
-  'health': '🏥',
-  'mental': '🧘',
-  'leadership': '👔',
+  'өөрийн үнэлгээ': '🧠',
+  'зан төлөвийн тест': '🎭',
+  'психометрик тест': '📊',
   'default': '📋',
 }
 
+const CATEGORY_COLORS: Record<string, string> = {
+  'өөрийн үнэлгээ': '#E8541A',
+  'зан төлөвийн тест': '#7C3AED',
+  'психометрик тест': '#3B82F6',
+  'default': '#E8541A',
+}
+
 export function formatAssessmentForWidget(a: Assessment, lang: 'mn' | 'en' = 'mn') {
-  const isFree = a.isFree || a.price === 0
-  const categoryKey = a.category?.name?.toLowerCase() || 'default'
-  
+  const isFree = a.price === 0
+  const categoryKey = (a.category?.name || '').toLowerCase()
+
   return {
     id: a.id,
     name: lang === 'en' && a.nameEn ? a.nameEn : a.name,
     desc: lang === 'en' && a.descriptionEn ? a.descriptionEn : (a.description || ''),
     url: `https://hire.mn/test/${a.id}`,
-    price: isFree ? 'Үнэгүй' : `${a.price?.toLocaleString()}₮`,
+    price: isFree ? 'Үнэгүй' : `${a.price.toLocaleString()}₮`,
     duration: a.duration ? `${a.duration} мин` : '10 мин',
     emoji: CATEGORY_EMOJIS[categoryKey] || CATEGORY_EMOJIS.default,
     color: CATEGORY_COLORS[categoryKey] || CATEGORY_COLORS.default,
     free: isFree,
+    icon: getIconUrl(a.icons),   // зургийн бүрэн URL
+    category: a.category?.name || '',
+    count: a.count || 0,          // хэдэн хэрэглэгч авсан (social proof)
+    author: a.author || '',
   }
 }
