@@ -70,10 +70,38 @@ export interface AssessmentCategory {
 
 // Get all assessments
 export async function getAllAssessments(): Promise<Assessment[]> {
-  const data = await apiCall<Assessment[] | { data: Assessment[] }>('/assessment/all')
+  const data = await apiCall<unknown>('/assessment/all')
+  console.log('[v0] API /assessment/all raw response:', JSON.stringify(data).slice(0, 500))
   if (!data) return []
-  // Handle both array and { data: [] } response formats
-  return Array.isArray(data) ? data : (data.data || [])
+  
+  // Handle various response formats
+  if (Array.isArray(data)) {
+    console.log('[v0] Response is array, length:', data.length)
+    return data as Assessment[]
+  }
+  
+  const obj = data as Record<string, unknown>
+  
+  // Try common response wrapper keys
+  if (obj.data && Array.isArray(obj.data)) {
+    console.log('[v0] Response has data array, length:', obj.data.length)
+    return obj.data as Assessment[]
+  }
+  if (obj.result && Array.isArray(obj.result)) {
+    console.log('[v0] Response has result array, length:', obj.result.length)
+    return obj.result as Assessment[]
+  }
+  if (obj.assessments && Array.isArray(obj.assessments)) {
+    console.log('[v0] Response has assessments array, length:', obj.assessments.length)
+    return obj.assessments as Assessment[]
+  }
+  if (obj.items && Array.isArray(obj.items)) {
+    console.log('[v0] Response has items array, length:', obj.items.length)
+    return obj.items as Assessment[]
+  }
+  
+  console.log('[v0] Unknown response format, keys:', Object.keys(obj))
+  return []
 }
 
 // Get assessment by ID
