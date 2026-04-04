@@ -1,15 +1,33 @@
-// hire.mn chat API — v2 with Anthropic SDK
+// hire.mn chat API — v3 with Anthropic SDK + Real API
 import Anthropic from '@anthropic-ai/sdk'
 import { classify } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/brain'
 import { parseTestMarkers, TEST_DATABASE } from '@/lib/test-db'
+import { getAllAssessments, formatAssessmentForWidget, type Assessment } from '@/lib/hire-api'
 
 export const maxDuration = 30
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
+
+// Cache for assessments (refreshed every 5 min by API service)
+let cachedAssessments: Assessment[] = []
+let cacheTime = 0
+
+async function getAssessments(): Promise<Assessment[]> {
+  const now = Date.now()
+  // Refresh cache every 5 minutes
+  if (cachedAssessments.length === 0 || now - cacheTime > 5 * 60 * 1000) {
+    const fresh = await getAllAssessments()
+    if (fresh.length > 0) {
+      cachedAssessments = fresh
+      cacheTime = now
+    }
+  }
+  return cachedAssessments
+}
 
 export async function POST(req: Request) {
   try {
@@ -34,8 +52,18 @@ export async function POST(req: Request) {
     const { intent, useLLM, detectedLang } = classify(lastMessage)
     const lang: 'mn' | 'en' = forcedLang === 'mn' || forcedLang === 'en' ? forcedLang : detectedLang
 
-    // Helper: convert TestInfo → widget-compatible shape
+    // Fetch real assessments from API
+    const liveAssessments = await getAssessments()
+    const assessmentMap = new Map(liveAssessments.map(a => [a.id, a]))
+
+    // Helper: convert Assessment → widget-compatible shape
+    // First try live API data, fallback to static TEST_DATABASE
     const shapeTest = (id: number) => {
+      const liveTest = assessmentMap.get(id)
+      if (liveTest) {
+        return formatAssessmentForWidget(liveTest, lang)
+      }
+      // Fallback to static data
       const t = TEST_DATABASE[id]
       if (!t) return null
       const isFree = t.price === 'Uneggui' || t.priceEn === 'Free'
@@ -63,7 +91,7 @@ export async function POST(req: Request) {
     }
 
     // 3. LLM — only when truly needed
-    const systemPrompt = buildSystemPrompt(intent, lang)
+    const systemPrompt = buildSystemPrompt(intent, lang, liveAssessments)
     const compressed = compressHistory(messages)
 
     // Normalize roles: 'bot' → 'assistant', keep only user/assistant
