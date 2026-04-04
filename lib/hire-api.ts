@@ -70,10 +70,21 @@ export interface AssessmentCategory {
 
 // Get all assessments
 export async function getAllAssessments(): Promise<Assessment[]> {
-  const data = await apiCall<Assessment[] | { data: Assessment[] }>('/assessment/all')
+  const data = await apiCall<unknown>('/assessment/all')
+  console.log('[v0] RAW API response:', JSON.stringify(data).slice(0, 500))
   if (!data) return []
-  // Handle both array and { data: [] } response formats
-  return Array.isArray(data) ? data : (data.data || [])
+  // Handle various response formats: [], { data: [] }, { assessments: [] }, etc.
+  if (Array.isArray(data)) return data
+  if (typeof data === 'object' && data !== null) {
+    const obj = data as Record<string, unknown>
+    if (Array.isArray(obj.data)) return obj.data as Assessment[]
+    if (Array.isArray(obj.assessments)) return obj.assessments as Assessment[]
+    if (Array.isArray(obj.items)) return obj.items as Assessment[]
+    if (Array.isArray(obj.result)) return obj.result as Assessment[]
+    // If it's a single assessment object with an id, wrap in array
+    if ('id' in obj) return [obj as unknown as Assessment]
+  }
+  return []
 }
 
 // Get assessment by ID
