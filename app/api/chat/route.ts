@@ -116,18 +116,7 @@ export async function POST(req: Request) {
 
     // Parse [TEST:id] markers out of the LLM reply
     const { cleanText, testIds } = parseTestMarkers(rawText)
-    console.log('[v0] rawText from LLM:', rawText)
-    console.log('[v0] testIds parsed:', testIds)
-    console.log('[v0] liveAssessments count:', liveAssessments.length)
-    console.log('[v0] liveAssessments IDs:', liveAssessments.slice(0, 10).map(a => a.id))
-    
-    const tests = testIds.map(id => {
-      const result = shapeTest(id)
-      console.log('[v0] shapeTest for id', id, ':', result ? 'found' : 'NOT FOUND')
-      return result
-    }).filter(Boolean)
-    
-    console.log('[v0] final tests count:', tests.length)
+    const tests = testIds.map(shapeTest).filter(Boolean)
 
     return Response.json({
       reply: cleanText,
