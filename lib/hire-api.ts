@@ -71,19 +71,33 @@ export interface AssessmentCategory {
 // Get all assessments
 export async function getAllAssessments(): Promise<Assessment[]> {
   const data = await apiCall<unknown>('/assessment/all')
-  console.log('[v0] RAW API response:', JSON.stringify(data).slice(0, 500))
   if (!data) return []
-  // Handle various response formats: [], { data: [] }, { assessments: [] }, etc.
-  if (Array.isArray(data)) return data
+  
+  // Handle nested response: { succeed: true, payload: { data: [ { data: {...} } ] } }
   if (typeof data === 'object' && data !== null) {
     const obj = data as Record<string, unknown>
-    if (Array.isArray(obj.data)) return obj.data as Assessment[]
-    if (Array.isArray(obj.assessments)) return obj.assessments as Assessment[]
-    if (Array.isArray(obj.items)) return obj.items as Assessment[]
-    if (Array.isArray(obj.result)) return obj.result as Assessment[]
-    // If it's a single assessment object with an id, wrap in array
+    
+    // Try payload.data first (hire.mn response format)
+    if (obj.payload && typeof obj.payload === 'object') {
+      const payload = obj.payload as Record<string, unknown>
+      if (Array.isArray(payload.data)) {
+        const items = payload.data as Array<Record<string, unknown>>
+        // If each item has a nested "data" property, extract it
+        return items
+          .map(item => (item.data && typeof item.data === 'object' ? (item.data as Assessment) : (item as Assessment)))
+          .filter(a => a && a.id)
+      }
+    }
+    
+    // Fallback: try direct response formats
+    if (Array.isArray(obj.data)) return (obj.data as Assessment[]).filter(a => a && a.id)
+    if (Array.isArray(obj.assessments)) return (obj.assessments as Assessment[]).filter(a => a && a.id)
+    if (Array.isArray(obj.items)) return (obj.items as Assessment[]).filter(a => a && a.id)
+    if (Array.isArray(obj.result)) return (obj.result as Assessment[]).filter(a => a && a.id)
     if ('id' in obj) return [obj as unknown as Assessment]
   }
+  
+  if (Array.isArray(data)) return (data as Assessment[]).filter(a => a && a.id)
   return []
 }
 
