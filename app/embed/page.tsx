@@ -14,6 +14,10 @@ export default function EmbedPage() {
           width: 100%;
           height: 100%;
         }
+        body {
+          transform: scale(1.15);
+          transform-origin: bottom right;
+        }
       `}</style>
       <HireMnChatWidget />
     </>
