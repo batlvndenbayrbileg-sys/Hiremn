@@ -157,11 +157,36 @@ export async function POST(req: Request) {
 
     // ── ROUTE 2: FAQ — instant, no AI cost ────────────────────────────────
     if (!useLLM || intent === 'faq') {
-      const faqAnswer = findFAQ(lastMessage, lang)
-      if (faqAnswer) {
-        const { cleanText, testIds } = parseTestMarkers(faqAnswer)
-        const tests = testIds.map(shapeTest).filter(Boolean)
-        return Response.json({ reply: cleanText, tests, categories: [], source: 'faq', intent, tokens_used: 0 })
+      const faqResult = findFAQ(lastMessage, lang, liveAssessments)
+      if (faqResult) {
+        // FAQ хариултын хамт холбогдох категорийн тестүүдийг санал болгоно
+        let suggestedTests: ReturnType<typeof shapeTest>[] = []
+        if (faqResult.suggestCategories && faqResult.suggestCategories.length > 0) {
+          // Санал болгох категорийн тестүүдийг шүүнэ
+          for (const cat of faqResult.suggestCategories) {
+            const catTests = liveAssessments
+              .filter(a => a.category?.name?.toLowerCase().includes(cat.toLowerCase()))
+              .slice(0, 3)
+              .map(a => formatAssessmentForWidget(a, lang))
+            suggestedTests.push(...catTests)
+          }
+        }
+        // Хэрэв категори тодорхойлогдоогүй бол үнэгүй тестүүдийг санал болгоно
+        if (suggestedTests.length === 0) {
+          suggestedTests = liveAssessments
+            .filter(a => a.price === 0 && a.isActive !== false)
+            .slice(0, 3)
+            .map(a => formatAssessmentForWidget(a, lang))
+        }
+        const categories = [...new Set(suggestedTests.map(t => t?.category).filter(Boolean))] as string[]
+        return Response.json({
+          reply: faqResult.answer,
+          tests: suggestedTests,
+          categories,
+          source: 'faq',
+          intent,
+          tokens_used: 0
+        })
       }
     }
 

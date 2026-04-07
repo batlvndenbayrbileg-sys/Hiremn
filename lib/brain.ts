@@ -1,37 +1,32 @@
-// lib/brain.ts
+// lib/brain.ts — AI system prompt builder
 import { Intent } from './classifier'
 import type { Assessment } from './hire-api'
 
-function formatTestList(assessments: Assessment[], lang: 'mn' | 'en', filterCategory?: string): string {
-  const FALLBACK = [
-    '[TEST:114] AUDIT — Үнэгүй — 10 мин — Эрүүл мэнд',
-    '[TEST:113] Никотин хамаарал — Үнэгүй — 10 мин — Эрүүл мэнд',
-    '[TEST:112] СЭМҮТ — Үнэгүй — 25 мин — Сэтгэл зүй',
-    '[TEST:102] Mindset — 10,000₮ — 10 мин — Хөгжил',
-    '[TEST:99] Ажил-амьдрал тэнцвэр — 20,000₮ — 10 мин — Тэнцвэр',
-    '[TEST:95] Харилцааны хэв шинж — 30,000₮ — 10 мин — Зан төлөв',
-  ].join('\n')
+// Assessment-уудыг LLM-д өгөх форматаар бэлтгэнэ
+function formatTestList(assessments: Assessment[], lang: 'mn' | 'en'): string {
+  if (assessments.length === 0) return '(Тестийн мэдээлэл байхгүй байна)'
 
-  if (assessments.length === 0) return FALLBACK
-
-  let list = assessments.filter(a => a.isActive !== false)
-
-  if (filterCategory) {
-    const filtered = list.filter(a =>
-      (a.category?.name || '').toLowerCase().includes(filterCategory.toLowerCase())
-    )
-    if (filtered.length > 0) list = filtered
-  }
-
-  return list
+  return assessments
+    .filter(a => a.isActive !== false)
     .map(a => {
       const name = lang === 'en' && a.nameEn ? a.nameEn : a.name
       const price = a.price === 0 ? 'Үнэгүй' : `${a.price.toLocaleString()}₮`
-      const duration = a.duration ? `${a.duration} мин` : '10 мин'
+      const duration = a.duration ? `${a.duration} мин` : ''
       const cat = a.category?.name || ''
-      return `[TEST:${a.id}] ${name} — ${price} — ${duration} — ${cat}`
+      const desc = a.description ? a.description.slice(0, 60) : ''
+      return `[TEST:${a.id}] ${name} | ${price} | ${duration} | ${cat} | ${desc}`
     })
     .join('\n')
+}
+
+// Категориудыг summary болгон гаргана
+function formatCategorySummary(assessments: Assessment[]): string {
+  const catMap = new Map<string, number>()
+  for (const a of assessments) {
+    const cat = a.category?.name || 'Бусад'
+    catMap.set(cat, (catMap.get(cat) || 0) + 1)
+  }
+  return [...catMap.entries()].map(([c, n]) => `• ${c}: ${n} тест`).join('\n')
 }
 
 export function buildSystemPrompt(
@@ -40,59 +35,85 @@ export function buildSystemPrompt(
   assessments: Assessment[] = [],
   filterCategory?: string
 ): string {
-  const langInstruction = lang === 'mn'
-    ? 'Монгол хэлээр (кирилл) хариул.'
-    : 'Respond in English.'
+  const testList = formatTestList(assessments, lang)
+  const catSummary = formatCategorySummary(assessments)
+  const freeCount = assessments.filter(a => a.price === 0).length
+  const paidCount = assessments.filter(a => a.price > 0).length
 
-  const testList = formatTestList(assessments, lang, filterCategory)
+  const coreIdentity = `Та hire.mn платформын мэргэжлийн AI зөвлөх. 
+hire.mn = Монголын анхны сэтгэл зүй, зан төлөв, мэргэжлийн чадварын үнэлгээний платформ.
+Уриа: "Зөв хүн, зөв газарт"
 
-  const intentInstructions: Record<Intent, string> = {
-    faq: `1-2 өгүүлбэрээр хариул. Асуултад шууд хариулсны ЭЦЭСТнэгийн санал болгох тест [TEST:id] нэм.`,
+ҮНДСЭН ЗОРИЛГО: Хэрэглэгчийн асуултад мэргэжлийн түвшинд хариулж, тохирох тестийг санал болгож, худалдан авахад урамшуулах.`
 
-    recommend: `Хэрэглэгчийн нөхцөл байдалд тулгуурлан хамгийн тохирох 2-4 тест санал болго.
-1 богино өгүүлбэр (10-аас дахиагүй үг) + [TEST:id] маркерууд.
-Карт дээр нэр/үнэ харагдах тул текстэд давтаж бичихгүй.`,
-
-    analyze: `Хэрэглэгчийн үр дүнг 2-3 bullet point-оор тайлбарла. Дараа нь тохирох [TEST:id] санал болго.`,
-
-    upsell: `1 урамшуулах өгүүлбэр + 1-2 [TEST:id]. 15 үгнээс хэтрэхгүй.`,
-
-    general: `2 өгүүлбэрээс хэтрэхгүй хариул. ЗААВАЛ 1-3 тохирох [TEST:id] оруул.
-Хэрэглэгч ямар чиглэлд сонирхож байгааг таамаглаж тест санал болго.`,
-  }
-
-  return `Та hire.mn AI борлуулагч туслагч. hire.mn = Монголын мэргэжлийн үнэлгээний платформ.
-ҮНДСЭН ЗОРИЛГО: Хэрэглэгчид тохирох тестийг санал болгож, тэдгээрийг худалдан авахад урамшуулах.
-${langInstruction}
-
-ТЕСТҮҮД:
+  const testContext = `
+ОДОО БАЙГАА ТЕСТҮҮД (${assessments.length} ширхэг, ${freeCount} үнэгүй, ${paidCount} төлбөртэй):
 ${testList}
 
-ДААЛГАВАР: ${intentInstructions[intent]}
+КАТЕГОРИУД:
+${catSummary}`
 
-ХАТУУ ДҮРМҮҮД:
-- ЗААВАЛ дор хаяж нэг [TEST:id] оруул (зөвхөн analyze-д заавал биш)
-- Тестийн нэр, үнийг текстэд давтаж бичихгүй
-- 3-аас их өгүүлбэр бичихгүй
-- Категори нэрлэсэн бол тэр категорийн бүх тестийг санал болго`
+  const responseRules = `
+ХАРИУЛАХ ДҮРЭМ:
+1. Монгол хэлээр, ${lang === 'mn' ? 'кирилл' : 'латин'} үсгээр хариул
+2. Мэргэжлийн, найрсаг, итгэл төрүүлэхүйц өнгө аястай бай
+3. Богино, тодорхой хариул (3 өгүүлбэрээс хэтрэхгүй)
+4. ЗААВАЛ холбогдох тест санал болго — [TEST:id] marker ашигла
+5. Тестийн нэр, үнийг текстэд давтаж бичэхгүй — карт дээр автоматаар харагдана
+6. Хэрэглэгчийн нөхцөл байдлыг ойлгож, хамгийн тохирох тестийг сонго
+7. Үнэгүй тестээс эхлэхийг санал болго (шинэ хэрэглэгчдэд)`
+
+  const intentGuides: Record<Intent, string> = {
+    faq: `Асуултад товч, тодорхой хариул. Хариултын төгсгөлд холбогдох 1-2 тест санал болго [TEST:id].`,
+
+    recommend: `Хэрэглэгчийн нөхцөл байдлыг анхааралтай уншиж, яг тохирох 2-4 тест санал болго.
+Жишээ: "Стресстэй байна" → сэтгэл зүйн тестүүд
+"Ажлаа сольмоор байна" → карьер, зан төлөвийн тестүүд
+"Архинд дуртай" → AUDIT тест
+Нэг өгүүлбэрээр яагаад тохирохыг тайлбарла + [TEST:id] маркерууд.`,
+
+    analyze: `Хэрэглэгчийн үр дүнг мэргэжлийн түвшинд тайлбарла:
+• Оноо юу илэрхийлж байна
+• Давуу тал
+• Анхаарах зүйл
+Дараа нь цаашдын хөгжилд тохирох 1-2 тест санал болго [TEST:id].`,
+
+    upsell: `Одоогийн тестийн үр дүнд үндэслэн дараагийн алхамыг санал болго.
+Яагаад энэ тест тохирохыг 1 өгүүлбэрээр тайлбарла + [TEST:id].`,
+
+    general: `Хэрэглэгчийн асуултад хариулж, ЗААВАЛ холбогдох тест санал болго.
+Хэрэв тодорхой биш бол: "Та юу мэдэхийг хүсч байна вэ?" гэж асуу.
+Гэхдээ ямагт 1-2 тест санал болгохоо мартуузай [TEST:id].`
+  }
+
+  const categoryHint = filterCategory
+    ? `\nИЛРҮҮЛСЭН СОНИРХОЛ: "${filterCategory}" чиглэл. Энэ категорийн тестүүдийг давуу эрэмбэлээрэй.`
+    : ''
+
+  return `${coreIdentity}
+${testContext}
+${categoryHint}
+${responseRules}
+
+ДААЛГАВАР (${intent}): ${intentGuides[intent]}`
 }
 
 export function compressHistory(
   messages: { role: string; content: string }[]
 ): { role: string; content: string }[] {
-  if (messages.length <= 8) return messages
+  if (messages.length <= 6) return messages
 
   const old = messages.slice(0, -4)
   const recent = messages.slice(-4)
 
   const summary = old
-    .filter(m => m.role === 'assistant')
-    .map(m => m.content.slice(0, 80))
-    .join(' | ')
+    .filter(m => m.role === 'user')
+    .map(m => m.content.slice(0, 50))
+    .join('; ')
 
   return [
-    { role: 'user', content: `[Conversation summary: ${summary}]` },
-    { role: 'assistant', content: 'Understood. How can I help you?' },
+    { role: 'user', content: `[Өмнөх яриа: ${summary}]` },
+    { role: 'assistant', content: 'Ойлголоо. Та юугаар туслах вэ?' },
     ...recent,
   ]
 }
