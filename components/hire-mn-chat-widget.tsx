@@ -24,6 +24,7 @@ interface Test {
   category?: string
   count?: number
   icon?: string
+  image?: string
 }
 
 // ── Quick replies with icons ──────────────────────────────────────────────────
@@ -179,6 +180,10 @@ function TypingIndicator() {
 // ── Cover image picker ────────────────────────────────────────────────────────
 
 function getCoverImage(test: Test): string {
+  // Use test-specific AI-generated image if available
+  if (test.image) return test.image
+  
+  // Fallback to category-based images
   const name = (test.name || "").toLowerCase()
   const cat = (test.category || "").toLowerCase()
   const combined = name + " " + cat

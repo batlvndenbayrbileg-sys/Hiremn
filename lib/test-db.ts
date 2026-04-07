@@ -17,6 +17,7 @@ export interface TestInfo {
   tag: string
   tagEn: string
   category: "personality" | "health" | "behavior"
+  image: string
 }
 
 export const TEST_DATABASE: Record<number, TestInfo> = {
@@ -35,6 +36,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tag: "Aldartai",
     tagEn: "Popular",
     category: "personality",
+    image: "/images/tests/test-1-growth-mindset.jpg",
   },
   2: {
     id: 2,
@@ -51,6 +53,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tag: "Shine",
     tagEn: "New",
     category: "personality",
+    image: "/images/tests/test-2-work-life-balance.jpg",
   },
   3: {
     id: 3,
@@ -67,6 +70,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tag: "Udidrlagad",
     tagEn: "For Leaders",
     category: "behavior",
+    image: "/images/tests/test-3-communication-style.jpg",
   },
   99: {
     id: 99,
@@ -83,6 +87,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tag: "Uneggui",
     tagEn: "Free",
     category: "health",
+    image: "/images/tests/test-99-audit.jpg",
   },
   5: {
     id: 5,
@@ -99,6 +104,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tag: "Uneggui",
     tagEn: "Free",
     category: "health",
+    image: "/images/tests/test-5-nicotine.jpg",
   },
   6: {
     id: 6,
@@ -115,6 +121,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tag: "Chukhul",
     tagEn: "Important",
     category: "health",
+    image: "/images/tests/test-6-semut.jpg",
   },
 }
 

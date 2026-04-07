@@ -127,6 +127,7 @@ export async function POST(req: Request) {
         emoji: t.emoji,
         color: t.color,
         free: isFree,
+        image: t.image,
         icon: '', category: '', count: 0, author: '',
       }
     }
