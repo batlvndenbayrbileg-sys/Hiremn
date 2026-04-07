@@ -321,126 +321,6 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
   )
 }
 
-// ── Price Filter Tabs ─────────────────────────────────────────────────────────
-
-function PriceFilterTabs({
-  active,
-  onSelect,
-  fontSize,
-  freeCount,
-  paidCount,
-}: {
-  active: "all" | "free" | "paid"
-  onSelect: (filter: "all" | "free" | "paid") => void
-  fontSize: number
-  freeCount: number
-  paidCount: number
-}) {
-  const filters: { key: "all" | "free" | "paid"; label: string; count: number; color: string }[] = [
-    { key: "all", label: "Бүгд", count: freeCount + paidCount, color: "#E8541A" },
-    { key: "free", label: "Үнэгүй", count: freeCount, color: "#059669" },
-    { key: "paid", label: "Төлбөртэй", count: paidCount, color: "#E8541A" },
-  ]
-  
-  return (
-    <div style={{
-      display: "flex", gap: 6,
-      marginBottom: 10,
-    }}>
-      {filters.map(f => {
-        const isActive = active === f.key
-        const isFree = f.key === "free"
-        const isPaid = f.key === "paid"
-        return (
-          <button
-            key={f.key}
-            className="hw-tab"
-            onClick={() => onSelect(f.key)}
-            style={{
-              flexShrink: 0,
-              padding: "5px 12px", borderRadius: 16,
-              border: isActive 
-                ? "none" 
-                : isFree 
-                  ? "1.5px solid #A7F3D0" 
-                  : isPaid 
-                    ? "1.5px solid #FDDCCC" 
-                    : "1.5px solid #F0EAE6",
-              background: isActive 
-                ? isFree 
-                  ? "linear-gradient(135deg, #059669, #10B981)" 
-                  : "linear-gradient(135deg, #E8541A, #F07040)" 
-                : isFree 
-                  ? "#ECFDF5" 
-                  : isPaid 
-                    ? "#FEF3EE" 
-                    : "#fff",
-              color: isActive ? "#fff" : isFree ? "#059669" : isPaid ? "#E8541A" : "#6B7280",
-              fontSize: fontSize - 2, fontWeight: isActive ? 700 : 600,
-              cursor: "pointer", whiteSpace: "nowrap",
-              display: "flex", alignItems: "center", gap: 5,
-              boxShadow: isActive ? `0 3px 10px ${isFree ? "rgba(5,150,105,.25)" : "rgba(232,84,26,.25)"}` : "none",
-            }}
-          >
-            {f.label}
-            <span style={{
-              background: isActive ? "rgba(255,255,255,.25)" : "rgba(0,0,0,.08)",
-              padding: "1px 6px", borderRadius: 10,
-              fontSize: fontSize - 4, fontWeight: 700,
-            }}>{f.count}</span>
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
-// ── Category Tabs ─────────────────────────────────────────────────────────────
-
-function CategoryTabs({
-  categories,
-  active,
-  onSelect,
-  fontSize,
-}: {
-  categories: string[]
-  active: string
-  onSelect: (cat: string) => void
-  fontSize: number
-}) {
-  const all = ["Бүгд", ...categories]
-  return (
-    <div style={{
-      display: "flex", gap: 6,
-      overflowX: "auto", scrollbarWidth: "none",
-      paddingBottom: 6, marginBottom: 6,
-    }}>
-      {all.map(cat => {
-        const isActive = active === cat
-        return (
-          <button
-            key={cat}
-            className="hw-tab"
-            onClick={() => onSelect(cat)}
-            style={{
-              flexShrink: 0,
-              padding: "5px 12px", borderRadius: 16,
-              border: isActive ? "none" : "1.5px solid #F0EAE6",
-              background: isActive ? "linear-gradient(135deg, #E8541A, #F07040)" : "#fff",
-              color: isActive ? "#fff" : "#6B7280",
-              fontSize: fontSize - 2, fontWeight: isActive ? 700 : 500,
-              cursor: "pointer", whiteSpace: "nowrap",
-              boxShadow: isActive ? "0 3px 10px rgba(232,84,26,.25)" : "0 1px 3px rgba(0,0,0,.04)",
-            }}
-          >
-            {cat}
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
 // ── Test Carousel ─────────────────────────────────────────────────────────────
 
 function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categories: string[]; fontSize: number }) {
@@ -502,25 +382,106 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
 
   return (
     <div>
-      {categories.length > 1 && (
-        <CategoryTabs
-          categories={categories}
-          active={activeCategory}
-          onSelect={handleCategorySelect}
-          fontSize={fontSize}
-        />
-      )}
-      
-      {/* Price filter - only show if there are both free and paid tests */}
-      {(freeCount > 0 && paidCount > 0) && (
-        <PriceFilterTabs
-          active={priceFilter}
-          onSelect={handlePriceFilter}
-          fontSize={fontSize}
-          freeCount={freeCount}
-          paidCount={paidCount}
-        />
-      )}
+      {/* Header row: Category tabs + Price toggle */}
+      <div style={{ 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "space-between",
+        marginBottom: 10,
+        gap: 8,
+      }}>
+        {/* Left: Category tabs */}
+        {categories.length > 1 ? (
+          <div style={{
+            display: "flex", gap: 5,
+            overflowX: "auto", scrollbarWidth: "none",
+            flex: 1,
+          }}>
+            {["Бүгд", ...categories].map(cat => {
+              const isActive = activeCategory === cat
+              return (
+                <button
+                  key={cat}
+                  className="hw-tab"
+                  onClick={() => handleCategorySelect(cat)}
+                  style={{
+                    flexShrink: 0,
+                    padding: "5px 11px", borderRadius: 14,
+                    border: isActive ? "none" : "1.5px solid #F0EAE6",
+                    background: isActive ? "linear-gradient(135deg, #E8541A, #F07040)" : "#fff",
+                    color: isActive ? "#fff" : "#6B7280",
+                    fontSize: fontSize - 2, fontWeight: isActive ? 700 : 500,
+                    cursor: "pointer", whiteSpace: "nowrap",
+                    boxShadow: isActive ? "0 2px 8px rgba(232,84,26,.2)" : "none",
+                  }}
+                >
+                  {cat}
+                </button>
+              )
+            })}
+          </div>
+        ) : <div style={{ flex: 1 }} />}
+        
+        {/* Right: Price toggle - compact pill */}
+        {(freeCount > 0 || paidCount > 0) && (
+          <div style={{
+            display: "flex", alignItems: "center",
+            background: "#F5F3F1",
+            borderRadius: 14,
+            padding: 2,
+            flexShrink: 0,
+          }}>
+            <button
+              onClick={() => handlePriceFilter("all")}
+              style={{
+                padding: "3px 8px", borderRadius: 12, border: "none",
+                background: priceFilter === "all" ? "#fff" : "transparent",
+                boxShadow: priceFilter === "all" ? "0 1px 3px rgba(0,0,0,.1)" : "none",
+                color: priceFilter === "all" ? "#374151" : "#9CA3AF",
+                fontSize: 10, fontWeight: 600, cursor: "pointer",
+              }}
+            >
+              Бүгд
+            </button>
+            {freeCount > 0 && (
+              <button
+                onClick={() => handlePriceFilter("free")}
+                style={{
+                  padding: "3px 8px", borderRadius: 12, border: "none",
+                  background: priceFilter === "free" ? "linear-gradient(135deg, #059669, #10B981)" : "transparent",
+                  color: priceFilter === "free" ? "#fff" : "#059669",
+                  fontSize: 10, fontWeight: 600, cursor: "pointer",
+                  display: "flex", alignItems: "center", gap: 3,
+                }}
+              >
+                <span style={{
+                  width: 6, height: 6, borderRadius: "50%",
+                  background: priceFilter === "free" ? "#fff" : "#10B981",
+                }} />
+                Үнэгүй
+              </button>
+            )}
+            {paidCount > 0 && (
+              <button
+                onClick={() => handlePriceFilter("paid")}
+                style={{
+                  padding: "3px 8px", borderRadius: 12, border: "none",
+                  background: priceFilter === "paid" ? "linear-gradient(135deg, #E8541A, #F07040)" : "transparent",
+                  color: priceFilter === "paid" ? "#fff" : "#E8541A",
+                  fontSize: 10, fontWeight: 600, cursor: "pointer",
+                  display: "flex", alignItems: "center", gap: 3,
+                }}
+              >
+                <span style={{
+                  width: 6, height: 6, borderRadius: "50%",
+                  background: priceFilter === "paid" ? "#fff" : "#E8541A",
+                }} />
+                Төлбөртэй
+              </button>
+            )}
+          </div>
+        )}
+      </div>
 
       <div style={{ position: "relative" }}>
         {showArrows && (
@@ -590,7 +551,7 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
   )
 }
 
-// ── Bot Message ───────────────────────────────────────────────────────────────
+// ── Bot Message ────────────────────────���──────────────────────────────────────
 
 function BotMessage({ message, fontSize }: { message: Message; fontSize: number }) {
   return (
