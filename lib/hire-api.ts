@@ -100,6 +100,21 @@ function normalize(item: AssessmentItem): Assessment {
 }
 
 // ─────────────────────────────────────────
+// Category API calls
+// ─────────────────────────────────────────
+
+export interface AssessmentCategoryWithTests extends AssessmentCategory {
+  assessments?: Assessment[]
+}
+
+// 🔓 GET /api/v1/assessmentCategory — бүх категори + тестүүд
+export async function getAssessmentCategories(): Promise<AssessmentCategoryWithTests[]> {
+  const res = await apiCall<{ succeed: boolean; payload: AssessmentCategoryWithTests[] }>('/assessmentCategory')
+  if (!res?.succeed || !Array.isArray(res.payload)) return []
+  return res.payload
+}
+
+// ─────────────────────────────────────────
 // Assessment API calls
 // ─────────────────────────────────────────
 

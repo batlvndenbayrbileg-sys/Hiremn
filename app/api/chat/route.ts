@@ -6,10 +6,12 @@ import { buildSystemPrompt, compressHistory } from '@/lib/brain'
 import { parseTestMarkers, TEST_DATABASE } from '@/lib/test-db'
 import {
   getAllAssessments,
+  getAssessmentCategories,
   formatAssessmentForWidget,
   getResultByCode,
   type Assessment,
   type UserAnswerResult,
+  type AssessmentCategoryWithTests,
 } from '@/lib/hire-api'
 
 export const maxDuration = 30
@@ -18,15 +20,56 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 // ── Cache ────────────────────────────────────────────────────────────────────
 let cachedAssessments: Assessment[] = []
+let cachedCategories: AssessmentCategoryWithTests[] = []
 let cacheTime = 0
 
 async function getAssessments(): Promise<Assessment[]> {
   const now = Date.now()
   if (cachedAssessments.length === 0 || now - cacheTime > 5 * 60 * 1000) {
-    const fresh = await getAllAssessments()
+    const [fresh, cats] = await Promise.all([getAllAssessments(), getAssessmentCategories()])
     if (fresh.length > 0) { cachedAssessments = fresh; cacheTime = now }
+    if (cats.length > 0) cachedCategories = cats
   }
   return cachedAssessments
+}
+
+// Classifier-ийн category keyword-оос API-ийн бодит category нэрийг олж тестүүдийг шүүнэ
+function filterByDetectedCategory(
+  assessments: Assessment[],
+  detectedCategory: string | undefined,
+  categories: AssessmentCategoryWithTests[]
+): Assessment[] {
+  if (!detectedCategory) return assessments
+
+  const needle = detectedCategory.toLowerCase()
+
+  // 1. Exact match — API category нэртэй шууд таарвал тэр категорийн тестүүдийг буцаана
+  const exactCat = categories.find(c => c.name.toLowerCase() === needle)
+  if (exactCat?.assessments?.length) {
+    const ids = new Set(exactCat.assessments.map(a => a.id))
+    const filtered = assessments.filter(a => ids.has(a.id))
+    if (filtered.length > 0) return filtered
+  }
+
+  // 2. Partial match — category нэрэнд keyword агуулагдвал
+  const partialCat = categories.find(c =>
+    c.name.toLowerCase().includes(needle) || needle.includes(c.name.toLowerCase())
+  )
+  if (partialCat?.assessments?.length) {
+    const ids = new Set(partialCat.assessments.map(a => a.id))
+    const filtered = assessments.filter(a => ids.has(a.id))
+    if (filtered.length > 0) return filtered
+  }
+
+  // 3. Assessments-ийн category.name-аар шүүх
+  const filtered = assessments.filter(a =>
+    (a.category?.name || '').toLowerCase().includes(needle) ||
+    needle.includes((a.category?.name || '').toLowerCase())
+  )
+  if (filtered.length > 0) return filtered
+
+  // Таарахгүй бол бүгдийг буцаана
+  return assessments
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -89,15 +132,21 @@ export async function POST(req: Request) {
     }
 
     // ── ROUTE 1: Бүх тест жагсаах — AI зардалгүй ──────────────────────────
-    // "ямар тест байдаг вэ" гэх мэт энгийн хүсэлтэд шууд бүх тестийг буцаана
+    const { category: detectedCategory } = classify(lastMessage)
+
     if (isListAllIntent(lastMessage)) {
-      const tests = liveAssessments.map(a => formatAssessmentForWidget(a, lang))
-      const categories = [...new Set(liveAssessments.map(a => a.category?.name).filter(Boolean))] as string[]
+      // Category илрүүлсэн бол шүүж харуулна, үгүй бол бүгдийг
+      const source = filterByDetectedCategory(liveAssessments, detectedCategory, cachedCategories)
+      const tests = source.map(a => formatAssessmentForWidget(a, lang))
+      const categories = [...new Set(source.map(a => a.category?.name).filter(Boolean))] as string[]
+      const catLabel = detectedCategory && tests.length < liveAssessments.length
+        ? `"${detectedCategory}" категорийн `
+        : 'нийт '
 
       return Response.json({
         reply: lang === 'mn'
-          ? `hire.mn дээр нийт **${tests.length} тест** байна 📋\nКатегориор нь шүүж үзэх боломжтой:`
-          : `hire.mn has **${tests.length} assessments** 📋\nFilter by category:`,
+          ? `hire.mn дээр ${catLabel}**${tests.length} тест** байна. Категориор нь шүүж үзэх боломжтой:`
+          : `hire.mn has **${tests.length} assessments**. You can filter by category:`,
         tests,
         categories,
         source: 'list_all',
@@ -134,8 +183,9 @@ export async function POST(req: Request) {
     }
 
     // ── ROUTE 4: LLM — тест санал болгох үндсэн зорилготой ─────────────
-    const { category: detectedCategory } = classify(lastMessage)
-    const systemPrompt = buildSystemPrompt(intent, lang, liveAssessments, detectedCategory) + examContext
+    // Category илрүүлсэн бол тэр категорийн тестүүдийг LLM-д өгч, карт ч шүүж харуулна
+    const relevantAssessments = filterByDetectedCategory(liveAssessments, detectedCategory, cachedCategories)
+    const systemPrompt = buildSystemPrompt(intent, lang, relevantAssessments, detectedCategory) + examContext
     const compressed = compressHistory(messages)
     const formattedMessages = compressed
       .filter((m: { role: string }) => ['user', 'assistant', 'bot'].includes(m.role))
@@ -160,10 +210,12 @@ export async function POST(req: Request) {
     const { cleanText, testIds } = parseTestMarkers(rawText)
     const tests = testIds.map(shapeTest).filter(Boolean)
 
-    // Category tabs — тестүүд байвал үргэлж category-г буцаана
+    // Category tabs — санал болгосон тестүүдийн категориудаар tab харуулна
     const categories = tests.length > 0
       ? [...new Set(tests.map(t => t?.category).filter(Boolean))] as string[]
-      : []
+      : detectedCategory
+        ? [...new Set(relevantAssessments.map(a => a.category?.name).filter(Boolean))] as string[]
+        : []
 
     return Response.json({
       reply: cleanText,
