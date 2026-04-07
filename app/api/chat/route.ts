@@ -160,14 +160,13 @@ export async function POST(req: Request) {
       const faqResult = findFAQ(lastMessage, lang, liveAssessments)
       if (faqResult) {
         // FAQ хариултын хамт холбогдох категорийн тестүүдийг санал болгоно
-        let suggestedTests: ReturnType<typeof shapeTest>[] = []
+        let suggestedTests: typeof liveAssessments = []
         if (faqResult.suggestCategories && faqResult.suggestCategories.length > 0) {
           // Санал болгох категорийн тестүүдийг шүүнэ
           for (const cat of faqResult.suggestCategories) {
             const catTests = liveAssessments
               .filter(a => a.category?.name?.toLowerCase().includes(cat.toLowerCase()))
               .slice(0, 3)
-              .map(a => formatAssessmentForWidget(a, lang))
             suggestedTests.push(...catTests)
           }
         }
@@ -176,12 +175,12 @@ export async function POST(req: Request) {
           suggestedTests = liveAssessments
             .filter(a => a.price === 0 && a.isActive !== false)
             .slice(0, 3)
-            .map(a => formatAssessmentForWidget(a, lang))
         }
-        const categories = [...new Set(suggestedTests.map(t => t?.category).filter(Boolean))] as string[]
+        const tests = suggestedTests.map(a => formatAssessmentForWidget(a, lang))
+        const categories = [...new Set(tests.map(t => t?.category).filter(Boolean))] as string[]
         return Response.json({
           reply: faqResult.answer,
-          tests: suggestedTests,
+          tests,
           categories,
           source: 'faq',
           intent,
@@ -233,7 +232,7 @@ export async function POST(req: Request) {
 
     // [TEST:id] marker-уудыг parse хийж widget card болгоно
     const { cleanText, testIds } = parseTestMarkers(rawText)
-    let tests = testIds.map(shapeTest).filter(Boolean)
+    let tests = testIds.map(shapeTest).filter((t) => t !== null)
 
     // Хэрэв LLM тест санал болгоогүй ЭСВЭЛ цөөн санал болгосон бол
     // илрүүлсэн категорийн БҮГД тестийг автоматаар нэмнэ
