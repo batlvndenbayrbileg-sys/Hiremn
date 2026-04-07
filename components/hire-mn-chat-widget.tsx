@@ -37,18 +37,72 @@ const QUICK_REPLIES = [
 
 // ── Icons / Avatars ───────────────────────────────────────────────────────────
 
-function BrainIcon({ size = 24, color = "#E8541A" }: { size?: number; color?: string }) {
+// ── Mascot SVG — animated AI orb ─────────────────────────────────────────────
+
+function MascotOrb({ size = 32, white = false }: { size?: number; white?: boolean }) {
+  const c = white ? "#fff" : "#E8541A"
+  const c2 = white ? "rgba(255,255,255,0.55)" : "rgba(232,84,26,0.55)"
+  const c3 = white ? "rgba(255,255,255,0.25)" : "rgba(232,84,26,0.2)"
   return (
-    <svg width={size} height={Math.round(size * 0.92)} viewBox="0 0 60 54" fill="none">
-      <ellipse cx="30" cy="27" rx="23" ry="19" fill="rgba(232,84,26,0.08)" />
-      <path d="M14 21 Q6 16 8 27 Q6 36 14 36" stroke={color} strokeWidth="3.2" fill="none" strokeLinecap="round" />
-      <path d="M46 21 Q54 16 52 27 Q54 36 46 36" stroke={color} strokeWidth="3.2" fill="none" strokeLinecap="round" />
-      <path d="M18 19 Q24 10 30 19 Q36 10 42 19" stroke={color} strokeWidth="2.8" fill="none" strokeLinecap="round" />
-      <line x1="30" y1="13" x2="30" y2="41" stroke={color} strokeWidth="2" strokeDasharray="4 4" opacity="0.4" />
-      <path d="M18 35 Q24 44 30 35 Q36 44 42 35" stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      <circle cx="22" cy="26" r="2.5" fill={color} opacity="0.7" />
-      <circle cx="38" cy="26" r="2.5" fill={color} opacity="0.7" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={{ overflow: "visible" }}>
+      {/* Outer glow ring */}
+      <circle cx="32" cy="32" r="28" stroke={c3} strokeWidth="1.5"
+        style={{ animation: "orb-ring-spin 8s linear infinite", transformOrigin: "32px 32px" }}
+        strokeDasharray="12 6"
+      />
+      {/* Mid orbit ring */}
+      <circle cx="32" cy="32" r="21" stroke={c2} strokeWidth="1"
+        style={{ animation: "orb-ring-spin 5s linear infinite reverse", transformOrigin: "32px 32px" }}
+        strokeDasharray="8 10"
+      />
+      {/* Core orb */}
+      <circle cx="32" cy="32" r="15" fill={white ? "rgba(255,255,255,0.18)" : "rgba(232,84,26,0.12)"}
+        stroke={c} strokeWidth="1.8"
+        style={{ animation: "orb-breathe 3s ease-in-out infinite", transformOrigin: "32px 32px" }}
+      />
+      {/* Inner glow */}
+      <circle cx="32" cy="32" r="9" fill={white ? "rgba(255,255,255,0.3)" : "rgba(232,84,26,0.22)"}
+        style={{ animation: "orb-breathe 3s ease-in-out 0.3s infinite", transformOrigin: "32px 32px" }}
+      />
+      {/* Neural dots */}
+      <circle cx="32" cy="20" r="2.5" fill={c}
+        style={{ animation: "orb-dot1 3s ease-in-out infinite", transformOrigin: "32px 32px" }}
+      />
+      <circle cx="44" cy="32" r="2.5" fill={c}
+        style={{ animation: "orb-dot1 3s ease-in-out 0.75s infinite", transformOrigin: "32px 32px" }}
+      />
+      <circle cx="32" cy="44" r="2.5" fill={c}
+        style={{ animation: "orb-dot1 3s ease-in-out 1.5s infinite", transformOrigin: "32px 32px" }}
+      />
+      <circle cx="20" cy="32" r="2.5" fill={c}
+        style={{ animation: "orb-dot1 3s ease-in-out 2.25s infinite", transformOrigin: "32px 32px" }}
+      />
+      {/* Connection lines */}
+      <line x1="32" y1="23" x2="32" y2="29" stroke={c} strokeWidth="1.2" opacity="0.5" />
+      <line x1="41" y1="32" x2="35" y2="32" stroke={c} strokeWidth="1.2" opacity="0.5" />
+      <line x1="32" y1="41" x2="32" y2="35" stroke={c} strokeWidth="1.2" opacity="0.5" />
+      <line x1="23" y1="32" x2="29" y2="32" stroke={c} strokeWidth="1.2" opacity="0.5" />
+      {/* Center spark */}
+      <circle cx="32" cy="32" r="3.5" fill={c}
+        style={{ animation: "orb-spark 2s ease-in-out infinite", transformOrigin: "32px 32px" }}
+      />
     </svg>
+  )
+}
+
+// Compact avatar version for message bubbles
+function BrainAvatar() {
+  return (
+    <div style={{
+      width: 30, height: 30, borderRadius: "50%",
+      background: "linear-gradient(135deg,#FEF3EE,#FFE8DA)",
+      border: "1.5px solid #FDDCCC",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      flexShrink: 0,
+      boxShadow: "0 2px 8px rgba(232,84,26,.12)",
+    }}>
+      <MascotOrb size={20} />
+    </div>
   )
 }
 
@@ -646,6 +700,23 @@ export function HireMnChatWidget() {
         .hw-tab { transition: all 0.18s cubic-bezier(.34,1.56,.64,1); }
         .hw-tab:hover { transform: translateY(-1px); }
 
+        @keyframes orb-ring-spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        @keyframes orb-breathe {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50%       { transform: scale(1.12); opacity: 0.8; }
+        }
+        @keyframes orb-dot1 {
+          0%, 100% { transform: scale(1); opacity: 0.9; }
+          50%       { transform: scale(1.5); opacity: 0.4; }
+        }
+        @keyframes orb-spark {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50%       { transform: scale(1.35); opacity: 0.6; }
+        }
+
         @media (max-width: 480px) {
           .hw-panel {
             position: fixed !important;
@@ -693,13 +764,15 @@ export function HireMnChatWidget() {
                 }} />
 
                 <div style={{
-                  width: 40, height: 40, borderRadius: 12,
-                  background: "#FEF3EE", border: "1.5px solid #FDDCCC",
+                  width: 40, height: 40, borderRadius: "50%",
+                  background: "linear-gradient(135deg,#FF6535,#E8541A)",
+                  border: "2px solid rgba(255,255,255,.9)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   flexShrink: 0,
+                  boxShadow: "0 4px 14px rgba(232,84,26,.35)",
                   animation: "hw-float 3s ease-in-out infinite",
                 }}>
-                  <BrainIcon size={24} color="#E8541A" />
+                  <MascotOrb size={26} white />
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -956,27 +1029,34 @@ export function HireMnChatWidget() {
             onMouseLeave={() => setIsHovered(false)}
             aria-label="hire.mn чат нээх"
             style={{
-              width: 56, height: 56, borderRadius: "50%",
-              background: "linear-gradient(145deg, #F06030, #E8541A)",
+              width: 60, height: 60, borderRadius: "50%",
+              background: "linear-gradient(145deg, #FF6535, #E8541A, #C93D00)",
               border: "3px solid rgba(255,255,255,.95)",
               cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0, position: "relative",
-              boxShadow: "0 6px 20px rgba(232,84,26,.35)",
+              boxShadow: "0 8px 24px rgba(232,84,26,.45), inset 0 1px 0 rgba(255,255,255,.2)",
             }}
           >
-            {isOpen ? (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
-            ) : (
-              <BrainIcon size={28} color="white" />
-            )}
+            <div style={{
+              transition: "transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.2s",
+              transform: isOpen ? "rotate(90deg) scale(0.85)" : "rotate(0deg) scale(1)",
+            }}>
+              {isOpen ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              ) : (
+                <MascotOrb size={34} white />
+              )}
+            </div>
             {!isOpen && (
               <span style={{
-                position: "absolute", bottom: 1, right: 1,
-                width: 13, height: 13, borderRadius: "50%",
+                position: "absolute", bottom: 2, right: 2,
+                width: 14, height: 14, borderRadius: "50%",
                 background: "#22C55E", border: "2.5px solid #fff",
+                boxShadow: "0 0 0 2px rgba(34,197,94,.3)",
+                animation: "orb-spark 2.5s ease-in-out infinite",
               }} />
             )}
           </button>
