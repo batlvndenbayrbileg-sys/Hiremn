@@ -321,6 +321,80 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
   )
 }
 
+// ── Price Filter Tabs ─────────────────────────────────────────────────────────
+
+function PriceFilterTabs({
+  active,
+  onSelect,
+  fontSize,
+  freeCount,
+  paidCount,
+}: {
+  active: "all" | "free" | "paid"
+  onSelect: (filter: "all" | "free" | "paid") => void
+  fontSize: number
+  freeCount: number
+  paidCount: number
+}) {
+  const filters: { key: "all" | "free" | "paid"; label: string; count: number; color: string }[] = [
+    { key: "all", label: "Бүгд", count: freeCount + paidCount, color: "#E8541A" },
+    { key: "free", label: "Үнэгүй", count: freeCount, color: "#059669" },
+    { key: "paid", label: "Төлбөртэй", count: paidCount, color: "#E8541A" },
+  ]
+  
+  return (
+    <div style={{
+      display: "flex", gap: 6,
+      marginBottom: 10,
+    }}>
+      {filters.map(f => {
+        const isActive = active === f.key
+        const isFree = f.key === "free"
+        const isPaid = f.key === "paid"
+        return (
+          <button
+            key={f.key}
+            className="hw-tab"
+            onClick={() => onSelect(f.key)}
+            style={{
+              flexShrink: 0,
+              padding: "5px 12px", borderRadius: 16,
+              border: isActive 
+                ? "none" 
+                : isFree 
+                  ? "1.5px solid #A7F3D0" 
+                  : isPaid 
+                    ? "1.5px solid #FDDCCC" 
+                    : "1.5px solid #F0EAE6",
+              background: isActive 
+                ? isFree 
+                  ? "linear-gradient(135deg, #059669, #10B981)" 
+                  : "linear-gradient(135deg, #E8541A, #F07040)" 
+                : isFree 
+                  ? "#ECFDF5" 
+                  : isPaid 
+                    ? "#FEF3EE" 
+                    : "#fff",
+              color: isActive ? "#fff" : isFree ? "#059669" : isPaid ? "#E8541A" : "#6B7280",
+              fontSize: fontSize - 2, fontWeight: isActive ? 700 : 600,
+              cursor: "pointer", whiteSpace: "nowrap",
+              display: "flex", alignItems: "center", gap: 5,
+              boxShadow: isActive ? `0 3px 10px ${isFree ? "rgba(5,150,105,.25)" : "rgba(232,84,26,.25)"}` : "none",
+            }}
+          >
+            {f.label}
+            <span style={{
+              background: isActive ? "rgba(255,255,255,.25)" : "rgba(0,0,0,.08)",
+              padding: "1px 6px", borderRadius: 10,
+              fontSize: fontSize - 4, fontWeight: 700,
+            }}>{f.count}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 // ── Category Tabs ─────────────────────────────────────────────────────────────
 
 function CategoryTabs({
@@ -339,7 +413,7 @@ function CategoryTabs({
     <div style={{
       display: "flex", gap: 6,
       overflowX: "auto", scrollbarWidth: "none",
-      paddingBottom: 6, marginBottom: 8,
+      paddingBottom: 6, marginBottom: 6,
     }}>
       {all.map(cat => {
         const isActive = active === cat
@@ -350,13 +424,13 @@ function CategoryTabs({
             onClick={() => onSelect(cat)}
             style={{
               flexShrink: 0,
-              padding: "6px 14px", borderRadius: 20,
+              padding: "5px 12px", borderRadius: 16,
               border: isActive ? "none" : "1.5px solid #F0EAE6",
               background: isActive ? "linear-gradient(135deg, #E8541A, #F07040)" : "#fff",
               color: isActive ? "#fff" : "#6B7280",
               fontSize: fontSize - 2, fontWeight: isActive ? 700 : 500,
               cursor: "pointer", whiteSpace: "nowrap",
-              boxShadow: isActive ? "0 4px 12px rgba(232,84,26,.25)" : "0 1px 3px rgba(0,0,0,.04)",
+              boxShadow: isActive ? "0 3px 10px rgba(232,84,26,.25)" : "0 1px 3px rgba(0,0,0,.04)",
             }}
           >
             {cat}
@@ -372,11 +446,24 @@ function CategoryTabs({
 function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categories: string[]; fontSize: number }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [activeCategory, setActiveCategory] = useState("Бүгд")
+  const [priceFilter, setPriceFilter] = useState<"all" | "free" | "paid">("all")
   const [activeDot, setActiveDot] = useState(0)
 
-  const filtered = activeCategory === "Бүгд"
+  // First filter by category
+  const categoryFiltered = activeCategory === "Бүгд"
     ? tests
     : tests.filter(t => (t.category || "") === activeCategory)
+  
+  // Then filter by price
+  const filtered = priceFilter === "all"
+    ? categoryFiltered
+    : priceFilter === "free"
+      ? categoryFiltered.filter(t => t.free === true)
+      : categoryFiltered.filter(t => t.free !== true)
+
+  // Count for tabs
+  const freeCount = categoryFiltered.filter(t => t.free === true).length
+  const paidCount = categoryFiltered.filter(t => t.free !== true).length
 
   const check = () => {
     if (!scrollRef.current) return
@@ -386,6 +473,7 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
 
   useEffect(() => {
     setActiveCategory("Бүгд")
+    setPriceFilter("all")
     setActiveDot(0)
     scrollRef.current?.scrollTo({ left: 0 })
   }, [tests])
@@ -397,6 +485,13 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
 
   const handleCategorySelect = (cat: string) => {
     setActiveCategory(cat)
+    setPriceFilter("all")
+    setActiveDot(0)
+    setTimeout(() => scrollRef.current?.scrollTo({ left: 0 }), 10)
+  }
+
+  const handlePriceFilter = (filter: "all" | "free" | "paid") => {
+    setPriceFilter(filter)
     setActiveDot(0)
     setTimeout(() => scrollRef.current?.scrollTo({ left: 0 }), 10)
   }
@@ -413,6 +508,17 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
           active={activeCategory}
           onSelect={handleCategorySelect}
           fontSize={fontSize}
+        />
+      )}
+      
+      {/* Price filter - only show if there are both free and paid tests */}
+      {(freeCount > 0 && paidCount > 0) && (
+        <PriceFilterTabs
+          active={priceFilter}
+          onSelect={handlePriceFilter}
+          fontSize={fontSize}
+          freeCount={freeCount}
+          paidCount={paidCount}
         />
       )}
 
