@@ -37,110 +37,60 @@ const QUICK_REPLIES = [
 
 // ── Icons / Avatars ───────────────────────────────────────────────────────────
 
-// ── Mascot — brain-headed robot character ────────────────────────────────────
-// viewBox: 0 0 80 100  (portrait, brain head on top, body + arms + legs below)
+// ── Mascot SVG — animated AI orb ─────────────────────────────────────────────
 
-function MascotRobot({ size = 56, white = false }: { size?: number; white?: boolean }) {
-  const stroke     = white ? "#fff"                    : "#E8541A"
-  const fill1      = white ? "rgba(255,255,255,0.22)"  : "rgba(232,84,26,0.13)"
-  const fill2      = white ? "rgba(255,255,255,0.40)"  : "rgba(232,84,26,0.28)"
-  const fillSolid  = white ? "rgba(255,255,255,0.90)"  : "#E8541A"
-  const fillBody   = white ? "rgba(255,255,255,0.18)"  : "rgba(232,84,26,0.10)"
-  const sw         = white ? 1.6 : 1.8
-
-  const h = Math.round(size * 100 / 80)
-
+function MascotOrb({ size = 32, white = false }: { size?: number; white?: boolean }) {
+  const c = white ? "#fff" : "#E8541A"
+  const c2 = white ? "rgba(255,255,255,0.55)" : "rgba(232,84,26,0.55)"
+  const c3 = white ? "rgba(255,255,255,0.25)" : "rgba(232,84,26,0.2)"
   return (
-    <svg
-      width={size} height={h}
-      viewBox="0 0 80 100"
-      fill="none"
-      style={{ overflow: "visible", display: "block" }}
-    >
-      {/* ── Shadow ── */}
-      <ellipse cx="40" cy="97" rx="14" ry="3" fill={stroke} opacity="0.12"
-        style={{ animation: "rb-shadow 2.4s ease-in-out infinite", transformOrigin: "40px 97px" }}
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={{ overflow: "visible" }}>
+      {/* Outer glow ring */}
+      <circle cx="32" cy="32" r="28" stroke={c3} strokeWidth="1.5"
+        style={{ animation: "orb-ring-spin 8s linear infinite", transformOrigin: "32px 32px" }}
+        strokeDasharray="12 6"
       />
-
-      {/* ── Legs — left & right, walking animation ── */}
-      <g style={{ animation: "rb-leg-l 2.4s ease-in-out infinite", transformOrigin: "35px 74px" }}>
-        <rect x="31" y="74" width="8" height="16" rx="4" fill={fillBody} stroke={stroke} strokeWidth={sw} />
-        {/* foot */}
-        <rect x="28" y="87" width="12" height="6" rx="3" fill={fill2} stroke={stroke} strokeWidth={sw} />
-      </g>
-      <g style={{ animation: "rb-leg-r 2.4s ease-in-out infinite", transformOrigin: "45px 74px" }}>
-        <rect x="41" y="74" width="8" height="16" rx="4" fill={fillBody} stroke={stroke} strokeWidth={sw} />
-        {/* foot */}
-        <rect x="40" y="87" width="12" height="6" rx="3" fill={fill2} stroke={stroke} strokeWidth={sw} />
-      </g>
-
-      {/* ── Body ── */}
-      <rect x="24" y="50" width="32" height="26" rx="8" fill={fillBody} stroke={stroke} strokeWidth={sw} />
-      {/* chest panel */}
-      <rect x="30" y="56" width="20" height="12" rx="4" fill={fill1} stroke={stroke} strokeWidth={sw * 0.7} />
-      {/* chest LED dots */}
-      <circle cx="36" cy="62" r="2" fill={fillSolid}
-        style={{ animation: "rb-led 1.8s ease-in-out infinite", transformOrigin: "36px 62px" }}
+      {/* Mid orbit ring */}
+      <circle cx="32" cy="32" r="21" stroke={c2} strokeWidth="1"
+        style={{ animation: "orb-ring-spin 5s linear infinite reverse", transformOrigin: "32px 32px" }}
+        strokeDasharray="8 10"
       />
-      <circle cx="44" cy="62" r="2" fill={fillSolid}
-        style={{ animation: "rb-led 1.8s ease-in-out 0.6s infinite", transformOrigin: "44px 62px" }}
+      {/* Core orb */}
+      <circle cx="32" cy="32" r="15" fill={white ? "rgba(255,255,255,0.18)" : "rgba(232,84,26,0.12)"}
+        stroke={c} strokeWidth="1.8"
+        style={{ animation: "orb-breathe 3s ease-in-out infinite", transformOrigin: "32px 32px" }}
       />
-
-      {/* ── Arms — left & right, swinging ── */}
-      <g style={{ animation: "rb-arm-l 2.4s ease-in-out infinite", transformOrigin: "24px 56px" }}>
-        <rect x="12" y="52" width="12" height="7" rx="3.5" fill={fillBody} stroke={stroke} strokeWidth={sw} />
-        {/* hand */}
-        <circle cx="12" cy="55.5" r="4" fill={fill2} stroke={stroke} strokeWidth={sw} />
-      </g>
-      <g style={{ animation: "rb-arm-r 2.4s ease-in-out infinite", transformOrigin: "56px 56px" }}>
-        <rect x="56" y="52" width="12" height="7" rx="3.5" fill={fillBody} stroke={stroke} strokeWidth={sw} />
-        {/* hand */}
-        <circle cx="68" cy="55.5" r="4" fill={fill2} stroke={stroke} strokeWidth={sw} />
-      </g>
-
-      {/* ── Neck ── */}
-      <rect x="36" y="44" width="8" height="8" rx="3" fill={fillBody} stroke={stroke} strokeWidth={sw} />
-
-      {/* ── Brain head ── */}
-      {/* Skull base */}
-      <ellipse cx="40" cy="30" rx="18" ry="16" fill={fill1} stroke={stroke} strokeWidth={sw} />
-      {/* Left hemisphere */}
-      <path d="M22 30 Q18 18 28 14 Q32 8 40 12" stroke={stroke} strokeWidth={sw} fill={fill2} />
-      {/* Right hemisphere */}
-      <path d="M58 30 Q62 18 52 14 Q48 8 40 12" stroke={stroke} strokeWidth={sw} fill={fill2} />
-      {/* Center divider */}
-      <line x1="40" y1="14" x2="40" y2="44" stroke={stroke} strokeWidth={sw * 0.5} strokeDasharray="3 3" opacity="0.5" />
-      {/* Brain folds — left */}
-      <path d="M26 26 Q30 22 30 28 Q30 33 26 32" stroke={stroke} strokeWidth={sw * 0.7} fill="none" opacity="0.7" />
-      <path d="M27 35 Q31 31 31 37" stroke={stroke} strokeWidth={sw * 0.7} fill="none" opacity="0.7" />
-      {/* Brain folds — right */}
-      <path d="M54 26 Q50 22 50 28 Q50 33 54 32" stroke={stroke} strokeWidth={sw * 0.7} fill="none" opacity="0.7" />
-      <path d="M53 35 Q49 31 49 37" stroke={stroke} strokeWidth={sw * 0.7} fill="none" opacity="0.7" />
-      {/* Eyes */}
-      <ellipse cx="33" cy="34" rx="4" ry="4.5" fill={fill2} stroke={stroke} strokeWidth={sw * 0.8} />
-      <ellipse cx="47" cy="34" rx="4" ry="4.5" fill={fill2} stroke={stroke} strokeWidth={sw * 0.8} />
-      {/* Pupils — blinking */}
-      <ellipse cx="33" cy="34" rx="2" ry="2"  fill={fillSolid}
-        style={{ animation: "rb-blink 4s ease-in-out infinite", transformOrigin: "33px 34px" }}
+      {/* Inner glow */}
+      <circle cx="32" cy="32" r="9" fill={white ? "rgba(255,255,255,0.3)" : "rgba(232,84,26,0.22)"}
+        style={{ animation: "orb-breathe 3s ease-in-out 0.3s infinite", transformOrigin: "32px 32px" }}
       />
-      <ellipse cx="47" cy="34" rx="2" ry="2" fill={fillSolid}
-        style={{ animation: "rb-blink 4s ease-in-out infinite", transformOrigin: "47px 34px" }}
+      {/* Neural dots */}
+      <circle cx="32" cy="20" r="2.5" fill={c}
+        style={{ animation: "orb-dot1 3s ease-in-out infinite", transformOrigin: "32px 32px" }}
       />
-      {/* Eye shine */}
-      <circle cx="34" cy="33" r="0.7" fill={white ? "rgba(232,84,26,0.6)" : "rgba(255,255,255,0.8)"} />
-      <circle cx="48" cy="33" r="0.7" fill={white ? "rgba(232,84,26,0.6)" : "rgba(255,255,255,0.8)"} />
-      {/* Smile */}
-      <path d="M35 40 Q40 44 45 40" stroke={stroke} strokeWidth={sw} strokeLinecap="round" fill="none" />
-      {/* Antenna */}
-      <line x1="40" y1="14" x2="40" y2="6" stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
-      <circle cx="40" cy="5" r="3" fill={fillSolid}
-        style={{ animation: "rb-led 1.2s ease-in-out infinite", transformOrigin: "40px 5px" }}
+      <circle cx="44" cy="32" r="2.5" fill={c}
+        style={{ animation: "orb-dot1 3s ease-in-out 0.75s infinite", transformOrigin: "32px 32px" }}
+      />
+      <circle cx="32" cy="44" r="2.5" fill={c}
+        style={{ animation: "orb-dot1 3s ease-in-out 1.5s infinite", transformOrigin: "32px 32px" }}
+      />
+      <circle cx="20" cy="32" r="2.5" fill={c}
+        style={{ animation: "orb-dot1 3s ease-in-out 2.25s infinite", transformOrigin: "32px 32px" }}
+      />
+      {/* Connection lines */}
+      <line x1="32" y1="23" x2="32" y2="29" stroke={c} strokeWidth="1.2" opacity="0.5" />
+      <line x1="41" y1="32" x2="35" y2="32" stroke={c} strokeWidth="1.2" opacity="0.5" />
+      <line x1="32" y1="41" x2="32" y2="35" stroke={c} strokeWidth="1.2" opacity="0.5" />
+      <line x1="23" y1="32" x2="29" y2="32" stroke={c} strokeWidth="1.2" opacity="0.5" />
+      {/* Center spark */}
+      <circle cx="32" cy="32" r="3.5" fill={c}
+        style={{ animation: "orb-spark 2s ease-in-out infinite", transformOrigin: "32px 32px" }}
       />
     </svg>
   )
 }
 
-// Compact avatar for message bubbles — just the brain head portion
+// Compact avatar version for message bubbles
 function BrainAvatar() {
   return (
     <div style={{
@@ -150,12 +100,8 @@ function BrainAvatar() {
       display: "flex", alignItems: "center", justifyContent: "center",
       flexShrink: 0,
       boxShadow: "0 2px 8px rgba(232,84,26,.12)",
-      overflow: "hidden",
     }}>
-      {/* Crop to just the head */}
-      <div style={{ marginTop: 6 }}>
-        <MascotRobot size={22} />
-      </div>
+      <MascotOrb size={20} />
     </div>
   )
 }
@@ -675,10 +621,6 @@ export function HireMnChatWidget() {
           0%   { transform: scale(1); opacity: 0.5; }
           100% { transform: scale(1.8); opacity: 0; }
         }
-        @keyframes hw-tooltip-in {
-          from { opacity: 0; transform: translateX(6px); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
 
         .hw-msg { animation: hw-pop 0.38s cubic-bezier(.34,1.56,.64,1) both; }
 
@@ -745,34 +687,21 @@ export function HireMnChatWidget() {
         .hw-tab { transition: all 0.18s cubic-bezier(.34,1.56,.64,1); }
         .hw-tab:hover { transform: translateY(-1px); }
 
-        /* Robot mascot keyframes */
-        @keyframes rb-blink {
-          0%, 90%, 100% { transform: scaleY(1); }
-          95%            { transform: scaleY(0.1); }
+        @keyframes orb-ring-spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
         }
-        @keyframes rb-led {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50%       { opacity: 0.3; transform: scale(0.7); }
+        @keyframes orb-breathe {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50%       { transform: scale(1.12); opacity: 0.8; }
         }
-        @keyframes rb-arm-l {
-          0%, 100% { transform: rotate(-12deg); }
-          50%       { transform: rotate(12deg); }
+        @keyframes orb-dot1 {
+          0%, 100% { transform: scale(1); opacity: 0.9; }
+          50%       { transform: scale(1.5); opacity: 0.4; }
         }
-        @keyframes rb-arm-r {
-          0%, 100% { transform: rotate(12deg); }
-          50%       { transform: rotate(-12deg); }
-        }
-        @keyframes rb-leg-l {
-          0%, 100% { transform: rotate(-8deg) translateY(0px); }
-          50%       { transform: rotate(8deg) translateY(-2px); }
-        }
-        @keyframes rb-leg-r {
-          0%, 100% { transform: rotate(8deg) translateY(-2px); }
-          50%       { transform: rotate(-8deg) translateY(0px); }
-        }
-        @keyframes rb-shadow {
-          0%, 100% { transform: scaleX(1); opacity: 0.12; }
-          50%       { transform: scaleX(0.8); opacity: 0.06; }
+        @keyframes orb-spark {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50%       { transform: scale(1.35); opacity: 0.6; }
         }
 
         @media (max-width: 480px) {
@@ -830,7 +759,7 @@ export function HireMnChatWidget() {
                   boxShadow: "0 4px 14px rgba(232,84,26,.35)",
                   animation: "hw-float 3s ease-in-out infinite",
                 }}>
-                  <MascotRobot size={26} white />
+                  <MascotOrb size={26} white />
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -1105,7 +1034,7 @@ export function HireMnChatWidget() {
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
               ) : (
-                <MascotRobot size={34} white />
+                <MascotOrb size={34} white />
               )}
             </div>
             {!isOpen && (
@@ -1114,7 +1043,7 @@ export function HireMnChatWidget() {
                 width: 14, height: 14, borderRadius: "50%",
                 background: "#22C55E", border: "2.5px solid #fff",
                 boxShadow: "0 0 0 2px rgba(34,197,94,.3)",
-                animation: "rb-led 2.5s ease-in-out infinite",
+                animation: "orb-spark 2.5s ease-in-out infinite",
               }} />
             )}
           </button>

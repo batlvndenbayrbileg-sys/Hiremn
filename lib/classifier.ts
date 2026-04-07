@@ -10,44 +10,18 @@ export interface ClassifyResult {
   confidence: number
   useLLM: boolean
   detectedLang: 'mn' | 'en'
-  category?: string        // хэрэглэгч тодорхой категори нэрлэсэн бол
-  // ── НЭМЭЛТ ──────────────────────────────────────────────────────────────
-  isCategoryQuery: boolean // category-аар шүүх хүсэлт мөн эсэх
-  exactCategory?: string   // API-ийн яг нэртэй category (filter-д ашиглана)
+  category?: string // хэрэглэгч тодорхой категори нэрлэсэн бол
 }
 
 // Категорийн keyword map — intent-ийг нарийвчлахад хэрэглэнэ
 export const CATEGORY_KEYWORDS: Record<string, RegExp> = {
-  'Сэтгэл зүй': /сэтгэл зүй|сэтгэц|mental|stress|стресс|anxiety|түгшүүр|сэтгэлийн/i,
-  'Зан төлөв': /зан төлөв|зан чанар|харилцаа|communicat|personality|хэв шинж/i,
+  'Сэтгэл зүй':    /сэтгэл зүй|сэтгэц|mental|stress|стресс|anxiety|түгшүүр|сэтгэлийн/i,
+  'Зан төлөв':     /зан төлөв|зан чанар|харилцаа|communicat|personality|хэв шинж/i,
   'Ажил мэргэжил': /ажил|мэргэжил|career|leadership|манаж|удирд|ажлын байр/i,
-  'Эрүүл мэнд': /эрүүл мэнд|health|никотин|тамхи|архи|audit|дарс/i,
-  'Хөгжил': /хөгжил|хандлага|mindset|өсөлт|growth|итгэл/i,
-  'Тэнцвэр': /тэнцвэр|balance|амьдрал|амралт|work.?life/i,
+  'Эрүүл мэнд':   /эрүүл мэнд|health|никотин|тамхи|архи|audit|дарс/i,
+  'Хөгжил':        /хөгжил|хандлага|mindset|өсөлт|growth|итгэл/i,
+  'Тэнцвэр':       /тэнцвэр|balance|амьдрал|амралт|work.?life/i,
 }
-
-// ── НЭМЭЛТ: API-ийн яг category нэрүүдтэй тохируулах map ───────────────────
-// CATEGORY_KEYWORDS-ийн key → hire.mn API-ийн яг нэр
-// Шинэ category нэмэгдвэл энд нэг мөр нэмэхэд л хангалттай
-export const CATEGORY_TO_API_NAME: Record<string, string> = {
-  'Сэтгэл зүй': 'Өөрийн үнэлгээ',   // сэтгэцийн тестүүд нь энэ category-д байна
-  'Зан төлөв': 'Зан төлөвийн тест',
-  'Ажил мэргэжил': 'Өөрийн үнэлгээ',
-  'Эрүүл мэнд': 'Өөрийн үнэлгээ',
-  'Хөгжил': 'Өөрийн үнэлгээ',
-  'Тэнцвэр': 'Өөрийн үнэлгээ',
-  'Психометрик': 'Психометрик тест',
-}
-
-// ── НЭМЭЛТ: "category асуулт" гэдгийг илрүүлэх pattern ─────────────────────
-// "стрессийн тест байна уу?" vs "надад стресс их байна"
-// Эхнийх нь → category list, хоёрдугаарх нь → LLM recommend
-const CATEGORY_QUERY_PATTERNS: RegExp[] = [
-  /байна уу|байдаг уу|байна уу\?|байдаг уу\?/i,
-  /харуулаач|жагсаа|санал болго|юу байна|юу байдаг/i,
-  /are there|show me|do you have|what.*available/i,
-  /ямар.*тест|тест.*байна|тестүүд/i,
-]
 
 // Үр дүн шинжилгэх pattern
 const ANALYZE_PATTERNS: RegExp[] = [
@@ -90,44 +64,28 @@ export function classify(message: string): ClassifyResult {
   const lang = detectLang(message)
   const category = detectCategory(message)
 
-  // ── НЭМЭЛТ: category query илрүүлэх ─────────────────────────────────────
-  // Хэрэглэгч "зан төлөвийн тест байна уу?" гэх мэт category-аар асуувал
-  // → isCategoryQuery: true, exactCategory: 'Зан төлөвийн тест'
-  const isCategoryQuery =
-    category !== undefined &&
-    CATEGORY_QUERY_PATTERNS.some(p => p.test(message))
-
-  const exactCategory = category ? CATEGORY_TO_API_NAME[category] : undefined
-
   // 1. Үр дүн шинжилгэх — хамгийн эхэлж
   if (ANALYZE_PATTERNS.some(p => p.test(message))) {
-    return { intent: 'analyze', confidence: 0.9, useLLM: true, detectedLang: lang, category, isCategoryQuery: false }
+    return { intent: 'analyze', confidence: 0.9, useLLM: true, detectedLang: lang, category }
   }
 
   // 2. Дараагийн тест
   if (UPSELL_PATTERNS.some(p => p.test(message))) {
-    return { intent: 'upsell', confidence: 0.88, useLLM: true, detectedLang: lang, category, isCategoryQuery: false }
+    return { intent: 'upsell', confidence: 0.88, useLLM: true, detectedLang: lang, category }
   }
 
   // 3. Компани/платформ талаарх мэдээлэл — FAQ
   if (FAQ_PATTERNS.some(p => p.test(message))) {
-    return { intent: 'faq', confidence: 0.95, useLLM: false, detectedLang: lang, isCategoryQuery: false }
+    return { intent: 'faq', confidence: 0.95, useLLM: false, detectedLang: lang }
   }
 
   // 4. Үнэ, хугацаа, тестийн жагсаалт — FAQ боловч тест санал болгохтой хавсарна
   const isPriceDuration = /үнэ|төлбөр|хэд|мөнгө|үнэгүй|хэдэн минут|хугацаа|price|cost|free|how long/i.test(message)
   if (isPriceDuration) {
-    return { intent: 'faq', confidence: 0.85, useLLM: false, detectedLang: lang, category, isCategoryQuery: false }
+    return { intent: 'faq', confidence: 0.85, useLLM: false, detectedLang: lang, category }
   }
 
   // 5. DEFAULT: recommend — чатботын үндсэн зорилго бол тест санал болгох
-  return {
-    intent: 'recommend',
-    confidence: 0.8,
-    useLLM: true,
-    detectedLang: lang,
-    category,
-    isCategoryQuery,
-    exactCategory,
-  }
+  // Ямар ч асуулт ирсэн ч тесттэй холбон хариулна
+  return { intent: 'recommend', confidence: 0.8, useLLM: true, detectedLang: lang, category }
 }
