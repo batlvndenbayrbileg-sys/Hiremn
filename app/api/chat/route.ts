@@ -233,14 +233,25 @@ export async function POST(req: Request) {
 
     // [TEST:id] marker-уудыг parse хийж widget card болгоно
     const { cleanText, testIds } = parseTestMarkers(rawText)
-    const tests = testIds.map(shapeTest).filter(Boolean)
+    let tests = testIds.map(shapeTest).filter(Boolean)
+
+    // Хэрэв LLM тест санал болгоогүй ЭСВЭЛ цөөн санал болгосон бол
+    // илрүүлсэн категорийн БҮГД тестийг автоматаар нэмнэ
+    if (detectedCategory && tests.length < 2) {
+      const categoryTests = relevantAssessments.map(a => formatAssessmentForWidget(a, lang))
+      // Давхардахгүйгээр нэмнэ
+      const existingIds = new Set(tests.map(t => t?.id))
+      for (const ct of categoryTests) {
+        if (!existingIds.has(ct.id)) {
+          tests.push(ct)
+        }
+      }
+    }
 
     // Category tabs — санал болгосон тестүүдийн категориудаар tab харуулна
     const categories = tests.length > 0
       ? [...new Set(tests.map(t => t?.category).filter(Boolean))] as string[]
-      : detectedCategory
-        ? [...new Set(relevantAssessments.map(a => a.category?.name).filter(Boolean))] as string[]
-        : []
+      : []
 
     return Response.json({
       reply: cleanText,
