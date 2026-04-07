@@ -106,19 +106,6 @@ function BrainAvatar() {
   )
 }
 
-function BrainAvatar() {
-  return (
-    <div style={{
-      width: 30, height: 30, borderRadius: 9,
-      background: "#FEF3EE", border: "1px solid #FDDCCC",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      flexShrink: 0,
-    }}>
-      <BrainIcon size={18} color="#E8541A" />
-    </div>
-  )
-}
-
 // ── Typing indicator ──────────────────────────────────────────────────────────
 
 function TypingIndicator() {
