@@ -89,9 +89,27 @@ function TypingIndicator() {
   )
 }
 
+// ── Cover image picker ────────────────────────────────────────────────────────
+
+function getCoverImage(test: Test): string {
+  const name = (test.name || "").toLowerCase()
+  const cat = (test.category || "").toLowerCase()
+  const combined = name + " " + cat
+  if (combined.match(/сэтгэц|mental|сэмут|semut|сэтгэл/)) return "/covers/mental-health.jpg"
+  if (combined.match(/харилц|communicat|leadership|удирд/)) return "/covers/communication.jpg"
+  if (combined.match(/тэнцвэр|balance|стресс|stress/)) return "/covers/balance.jpg"
+  if (combined.match(/mindset|хандлага|итгэл|өөртөө/)) return "/covers/mindset.jpg"
+  if (combined.match(/никотин|тамхи|audit|архи|дарс|health|эрүүл/)) return "/covers/health.jpg"
+  if (combined.match(/удирд|leader|манаж/)) return "/covers/leadership.jpg"
+  return "/covers/default.jpg"
+}
+
 // ── Test Card ─────────────────────────────────────────────────────────────────
 
 function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; fontSize: number }) {
+  const [imgLoaded, setImgLoaded] = useState(false)
+  const cover = getCoverImage(test)
+
   return (
     <a
       href={test.url}
@@ -100,57 +118,85 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
       className="hw-card"
       style={{
         display: "block", background: "#fff",
-        border: "1px solid #F0EAE6", borderRadius: 14,
+        border: "1px solid #EEEAE8", borderRadius: 16,
         overflow: "hidden", textDecoration: "none",
-        minWidth: 190, maxWidth: 210, flexShrink: 0,
-        animation: `hw-card-in 0.38s cubic-bezier(.34,1.56,.64,1) ${index * 0.08}s both`,
+        minWidth: 192, maxWidth: 212, flexShrink: 0,
+        animation: `hw-card-in 0.42s cubic-bezier(.34,1.56,.64,1) ${index * 0.09}s both`,
       }}
     >
-      {/* Color header */}
+      {/* Cover image header */}
       <div style={{
-        height: 72, background: test.color,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        position: "relative", fontSize: 30,
+        height: 90, position: "relative", overflow: "hidden",
+        background: test.color || "#FEF3EE",
       }}>
-        <span>{test.emoji}</span>
+        <img
+          src={cover}
+          alt={test.name}
+          onLoad={() => setImgLoaded(true)}
+          style={{
+            width: "100%", height: "100%", objectFit: "cover",
+            opacity: imgLoaded ? 1 : 0,
+            transition: "opacity 0.4s ease",
+            display: "block",
+          }}
+        />
+        {/* Gradient overlay */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(160deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.28) 100%)",
+        }} />
+        {/* Emoji badge */}
+        <div style={{
+          position: "absolute", top: 8, right: 9,
+          fontSize: 18, lineHeight: 1,
+          background: "rgba(255,255,255,.18)",
+          backdropFilter: "blur(6px)",
+          borderRadius: 8, padding: "4px 6px",
+          border: "1px solid rgba(255,255,255,.25)",
+        }}>{test.emoji || "📋"}</div>
+
+        {/* Free badge */}
         {test.free && (
-          <span style={{
-            position: "absolute", bottom: 7, left: 9,
+          <div style={{
+            position: "absolute", bottom: 8, left: 9,
             background: "rgba(255,255,255,.95)",
             color: "#059669", fontSize: 9, fontWeight: 700,
-            padding: "2px 8px", borderRadius: 8,
-          }}>ҮНЭГҮЙ</span>
+            padding: "2px 8px", borderRadius: 20,
+            letterSpacing: "0.3px",
+          }}>ҮНЭГҮЙ</div>
         )}
         {test.count && test.count > 0 && (
-          <span style={{
-            position: "absolute", bottom: 7, right: 9,
-            background: "rgba(0,0,0,.35)",
+          <div style={{
+            position: "absolute", bottom: 8, right: 9,
+            background: "rgba(0,0,0,.45)",
+            backdropFilter: "blur(4px)",
             color: "#fff", fontSize: 9, fontWeight: 600,
-            padding: "2px 7px", borderRadius: 8,
-          }}>{test.count}+ авсан</span>
+            padding: "2px 7px", borderRadius: 20,
+          }}>{test.count.toLocaleString()}+ авсан</div>
         )}
       </div>
 
       {/* Body */}
-      <div style={{ padding: "11px 12px 12px" }}>
+      <div style={{ padding: "10px 12px 12px" }}>
         <div style={{
-          fontSize: fontSize - 1, fontWeight: 600, color: "#111827",
-          lineHeight: 1.35, marginBottom: 5,
+          fontSize: fontSize - 1, fontWeight: 700, color: "#111827",
+          lineHeight: 1.3, marginBottom: 4,
           overflow: "hidden", textOverflow: "ellipsis",
           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
         }}>{test.name}</div>
 
         <div style={{
-          fontSize: fontSize - 3, color: "#6B7280", lineHeight: 1.45, marginBottom: 9,
+          fontSize: fontSize - 3, color: "#6B7280", lineHeight: 1.45, marginBottom: 10,
           overflow: "hidden", textOverflow: "ellipsis",
           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
         }}>{test.desc}</div>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 9 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
           <span style={{
             background: test.free ? "#ECFDF5" : "#FEF3EE",
             color: test.free ? "#059669" : "#E8541A",
-            fontSize: fontSize - 3, fontWeight: 600, padding: "3px 9px", borderRadius: 10,
+            fontSize: fontSize - 3, fontWeight: 700, padding: "3px 9px", borderRadius: 20,
+            border: `1px solid ${test.free ? "#A7F3D0" : "#FDDCCC"}`,
           }}>{test.price}</span>
           <span style={{ fontSize: fontSize - 4, color: "#9CA3AF", display: "flex", alignItems: "center", gap: 3 }}>
             <svg width="9" height="9" viewBox="0 0 16 16" fill="none">
@@ -161,14 +207,17 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
           </span>
         </div>
 
-        <div style={{
+        <div className="hw-cta" style={{
           width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
-          background: "#E8541A", color: "#fff",
-          fontSize: fontSize - 2, fontWeight: 600,
-          padding: "7px 10px", borderRadius: 9,
+          background: "linear-gradient(135deg, #E8541A 0%, #F07040 100%)",
+          color: "#fff",
+          fontSize: fontSize - 2, fontWeight: 700,
+          padding: "8px 10px", borderRadius: 10,
+          transition: "all 0.2s ease",
+          boxShadow: "0 3px 10px rgba(232,84,26,.25)",
         }}>
           Тест авах
-          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round">
             <path d="M3 8h10M9 4l4 4-4 4" />
           </svg>
         </div>
@@ -177,7 +226,7 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
   )
 }
 
-// ── Category Tabs ─────────────────────────────────────────────────────────────
+// ── Category Tabs ──────────────────────────────────────────────────���──────────
 
 function CategoryTabs({
   categories,
@@ -471,79 +520,122 @@ export function HireMnChatWidget() {
         .hw-root, .hw-root * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important; box-sizing: border-box; }
 
         @keyframes hw-bounce {
-          0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-5px); }
+          0%, 60%, 100% { transform: translateY(0) scaleY(1); }
+          30% { transform: translateY(-6px) scaleY(0.9); }
         }
         @keyframes hw-float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-3px); }
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          33% { transform: translateY(-2px) rotate(-1deg); }
+          66% { transform: translateY(-3px) rotate(1deg); }
         }
         @keyframes hw-pop {
-          from { transform: scale(0.94) translateY(6px); opacity: 0; }
+          from { transform: scale(0.88) translateY(8px); opacity: 0; }
+          60%  { transform: scale(1.02) translateY(-1px); opacity: 1; }
           to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         @keyframes hw-card-in {
-          from { transform: scale(0.92) translateY(10px); opacity: 0; }
+          from { transform: scale(0.88) translateY(14px) rotate(-1deg); opacity: 0; }
+          70%  { transform: scale(1.02) translateY(-2px) rotate(0deg); opacity: 1; }
           to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         @keyframes hw-slide-up {
-          from { transform: translateY(12px); opacity: 0; }
+          from { transform: translateY(16px); opacity: 0; }
           to   { transform: translateY(0); opacity: 1; }
         }
         @keyframes hw-chat-open {
-          from { opacity: 0; transform: scale(0.9) translateY(16px); transform-origin: bottom right; }
+          from { opacity: 0; transform: scale(0.88) translateY(20px); transform-origin: bottom right; }
+          65%  { transform: scale(1.02) translateY(-3px); transform-origin: bottom right; }
           to   { opacity: 1; transform: scale(1) translateY(0); transform-origin: bottom right; }
         }
         @keyframes hw-pulse {
-          0%, 100% { box-shadow: 0 4px 18px rgba(232,84,26,.3), 0 0 0 0 rgba(232,84,26,.25); }
-          50%       { box-shadow: 0 4px 18px rgba(232,84,26,.3), 0 0 0 9px rgba(232,84,26,0); }
+          0%, 100% { box-shadow: 0 6px 22px rgba(232,84,26,.35), 0 0 0 0 rgba(232,84,26,.3); }
+          50%       { box-shadow: 0 6px 22px rgba(232,84,26,.35), 0 0 0 11px rgba(232,84,26,0); }
         }
-        @keyframes hw-tooltip-in {
-          from { opacity: 0; transform: translateX(6px); }
-          to   { opacity: 1; transform: translateX(0); }
+        @keyframes hw-chip-in {
+          from { transform: scale(0.8) translateY(6px); opacity: 0; }
+          to   { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        @keyframes hw-ring {
+          0%   { transform: scale(1); opacity: 0.5; }
+          100% { transform: scale(1.8); opacity: 0; }
         }
 
-        .hw-msg { animation: hw-pop 0.3s cubic-bezier(.34,1.56,.64,1); }
+        .hw-msg { animation: hw-pop 0.38s cubic-bezier(.34,1.56,.64,1) both; }
 
         .hw-card {
-          transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s ease, border-color 0.18s ease;
+          transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease, border-color 0.2s ease;
+          will-change: transform;
         }
         .hw-card:hover {
-          transform: translateY(-3px) scale(1.015);
-          box-shadow: 0 10px 24px rgba(232,84,26,.15);
+          transform: translateY(-4px) scale(1.018);
+          box-shadow: 0 16px 32px rgba(232,84,26,.18), 0 4px 12px rgba(0,0,0,.08);
           border-color: #F5C8B8 !important;
         }
+        .hw-card:hover .hw-cta {
+          background: linear-gradient(135deg, #D44810 0%, #E8541A 100%) !important;
+          box-shadow: 0 5px 16px rgba(232,84,26,.4) !important;
+          transform: translateY(-1px);
+        }
+        .hw-cta { transition: all 0.2s cubic-bezier(.34,1.56,.64,1); }
 
-        .hw-chip { transition: all 0.18s ease; }
+        .hw-chip {
+          transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
+        }
         .hw-chip:hover {
           background: #E8541A !important;
           color: #fff !important;
           border-color: #E8541A !important;
-          transform: translateY(-1px);
+          transform: translateY(-2px) scale(1.04);
+          box-shadow: 0 4px 12px rgba(232,84,26,.25);
         }
+        .hw-chip:active { transform: scale(0.97); }
 
-        .hw-send:hover:not(:disabled) { background: #D44810 !important; }
-        .hw-send:active:not(:disabled) { transform: scale(0.94); }
+        .hw-send { transition: all 0.18s cubic-bezier(.34,1.56,.64,1); }
+        .hw-send:hover:not(:disabled) {
+          background: linear-gradient(135deg, #D44810 0%, #E8541A 100%) !important;
+          transform: scale(1.06);
+          box-shadow: 0 5px 16px rgba(232,84,26,.35) !important;
+        }
+        .hw-send:active:not(:disabled) { transform: scale(0.93); }
 
         .hw-mascot {
-          transition: transform 0.22s cubic-bezier(.34,1.56,.64,1);
-          animation: hw-pulse 2.6s ease-in-out infinite;
+          transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease;
+          animation: hw-pulse 2.8s ease-in-out infinite;
+          will-change: transform;
         }
         .hw-mascot:hover {
-          transform: scale(1.08);
+          transform: scale(1.1) translateY(-2px);
           animation: none;
-          box-shadow: 0 8px 26px rgba(232,84,26,.4) !important;
+          box-shadow: 0 10px 30px rgba(232,84,26,.45) !important;
         }
+        .hw-mascot:active { transform: scale(0.95); }
 
         .hw-scroll::-webkit-scrollbar { width: 3px; }
         .hw-scroll::-webkit-scrollbar-track { background: transparent; }
-        .hw-scroll::-webkit-scrollbar-thumb { background: rgba(232,84,26,.2); border-radius: 3px; }
+        .hw-scroll::-webkit-scrollbar-thumb { background: rgba(232,84,26,.15); border-radius: 3px; }
+        .hw-scroll::-webkit-scrollbar-thumb:hover { background: rgba(232,84,26,.3); }
 
         .hw-font-slider { -webkit-appearance: none; width: 100%; height: 3px; border-radius: 2px; outline: none; cursor: pointer;
           background: linear-gradient(to right, #E8541A calc((var(--val) - 11) / 6 * 100%), #F0E4DF calc((var(--val) - 11) / 6 * 100%));
         }
-        .hw-font-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #E8541A; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(232,84,26,.4); cursor: pointer; }
-        .hw-font-slider::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #E8541A; border: 2px solid #fff; cursor: pointer; }
+        .hw-font-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%; background: #E8541A; border: 2.5px solid #fff; box-shadow: 0 2px 6px rgba(232,84,26,.4); cursor: pointer; transition: transform 0.15s; }
+        .hw-font-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        .hw-font-slider::-moz-range-thumb { width: 15px; height: 15px; border-radius: 50%; background: #E8541A; border: 2.5px solid #fff; cursor: pointer; }
+
+        .hw-tab { transition: all 0.18s cubic-bezier(.34,1.56,.64,1); }
+        .hw-tab:hover { transform: translateY(-1px); }
+
+        @media (max-width: 480px) {
+          .hw-panel {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100dvh !important;
+            border-radius: 0 !important;
+            bottom: 0 !important;
+            right: 0 !important;
+          }
+        }
       `}</style>
 
       <div className="hw-root" style={{
@@ -554,14 +646,14 @@ export function HireMnChatWidget() {
         {/* ── Chat panel ── */}
         {isOpen && (
           <div style={{ animation: "hw-chat-open 0.28s cubic-bezier(.34,1.56,.64,1)" }}>
-            <div style={{
+            <div className="hw-panel" style={{
               width: 360,
               height: "min(560px, calc(100vh - 110px))",
               borderRadius: 20,
               background: "#FAFAFA",
-              boxShadow: "0 24px 64px rgba(0,0,0,.14), 0 2px 12px rgba(0,0,0,.06)",
+              boxShadow: "0 24px 64px rgba(0,0,0,.16), 0 4px 16px rgba(0,0,0,.08)",
               display: "flex", flexDirection: "column", overflow: "hidden",
-              border: "1px solid rgba(0,0,0,.06)",
+              border: "1px solid rgba(0,0,0,.07)",
             }}>
 
               {/* ── Header ── */}
@@ -719,17 +811,21 @@ export function HireMnChatWidget() {
                 )}
 
                 {showQuickReplies && !isTyping && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
-                    {QUICK_REPLIES.map(qr => (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 6 }}>
+                    {QUICK_REPLIES.map((qr, i) => (
                       <button
                         key={qr}
                         className="hw-chip"
                         onClick={() => sendMessage(qr)}
                         style={{
-                          background: "#fff", border: "1.5px solid #F0C4AD", color: "#E8541A",
-                          borderRadius: 18, padding: "6px 12px",
+                          background: "#fff",
+                          border: "1.5px solid #F0C4AD",
+                          color: "#E8541A",
+                          borderRadius: 20, padding: "7px 13px",
                           fontSize: fontSize - 1, fontWeight: 600,
                           cursor: "pointer", whiteSpace: "nowrap",
+                          animation: `hw-chip-in 0.32s cubic-bezier(.34,1.56,.64,1) ${i * 0.07}s both`,
+                          boxShadow: "0 2px 6px rgba(232,84,26,.08)",
                         }}
                       >
                         {qr}
@@ -822,6 +918,16 @@ export function HireMnChatWidget() {
             </div>
           )}
 
+          {/* Pulsing ring */}
+          {!isOpen && (
+            <div style={{
+              position: "absolute", bottom: 0, right: 0, pointerEvents: "none",
+              width: 56, height: 56, borderRadius: "50%",
+              background: "rgba(232,84,26,.22)",
+              animation: "hw-ring 2.4s ease-out infinite",
+            }} />
+          )}
+
           <button
             className="hw-mascot"
             onClick={() => setIsOpen(o => !o)}
@@ -831,10 +937,11 @@ export function HireMnChatWidget() {
             style={{
               width: 56, height: 56, borderRadius: "50%",
               background: "linear-gradient(145deg, #F06030, #E8541A)",
-              border: "3px solid rgba(255,255,255,.9)",
+              border: "3px solid rgba(255,255,255,.95)",
               cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0, position: "relative",
+              boxShadow: "0 6px 20px rgba(232,84,26,.35)",
             }}
           >
             {isOpen ? (
