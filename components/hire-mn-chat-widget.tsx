@@ -398,6 +398,38 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
 
   return (
     <div>
+      {/* Category tabs — always on top */}
+      {categories.length > 1 && (
+        <div style={{
+          display: "flex", gap: 5,
+          overflowX: "auto", scrollbarWidth: "none",
+          marginBottom: 10,
+        }}>
+          {["Бүгд", ...categories].map(cat => {
+            const isActive = activeCategory === cat
+            return (
+              <button
+                key={cat}
+                className="hw-tab"
+                onClick={() => handleCategorySelect(cat)}
+                style={{
+                  flexShrink: 0,
+                  padding: "6px 12px", borderRadius: 10, border: "none",
+                  background: isActive ? "linear-gradient(135deg,#E8541A,#F07040)" : "rgba(0,0,0,.05)",
+                  color: isActive ? "#fff" : "#6B7280",
+                  fontSize: fontSize - 2, fontWeight: 600,
+                  cursor: "pointer", whiteSpace: "nowrap",
+                  boxShadow: isActive ? "0 2px 8px rgba(232,84,26,.2)" : "none",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                {cat}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       <div style={{ position: "relative" }}>
         {showArrows && (
           <button onClick={() => scroll("left")} className="hw-arrow" style={{
@@ -448,35 +480,33 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
         </div>
       </div>
 
-      {/* Scroll indicator dots - centered */}
-      {filtered.length > 1 && (
-        <div style={{ 
-          display: "flex", justifyContent: "center", gap: 5, 
-          marginTop: 12,
-        }}>
-          {filtered.slice(0, Math.min(filtered.length, 6)).map((_, i) => (
+      {/* Bottom row: dots (left/center) + price dropdown (right) */}
+      <div style={{
+        display: "flex", alignItems: "center",
+        justifyContent: "space-between",
+        marginTop: 12,
+        minHeight: 28,
+      }}>
+        {/* Scroll indicator dots */}
+        <div style={{ display: "flex", alignItems: "center", gap: 5, flex: 1, justifyContent: "center" }}>
+          {filtered.length > 1 && filtered.slice(0, Math.min(filtered.length, 6)).map((_, i) => (
             <div key={i} style={{
               width: i === activeDot ? 18 : 6, height: 6, borderRadius: 6,
-              background: i === activeDot 
-                ? "linear-gradient(90deg, #E8541A, #F07040)" 
+              background: i === activeDot
+                ? "linear-gradient(90deg, #E8541A, #F07040)"
                 : "rgba(232,84,26,.15)",
               transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
             }} />
           ))}
           {filtered.length > 6 && (
-            <span style={{ 
-              fontSize: 9, color: "#9CA3AF", fontWeight: 500,
-              marginLeft: 2,
-            }}>+{filtered.length - 6}</span>
+            <span style={{ fontSize: 9, color: "#9CA3AF", fontWeight: 500 }}>+{filtered.length - 6}</span>
           )}
         </div>
-      )}
 
-      {/* Price filter dropdown — below dots, right-aligned */}
-      {hasBothPriceTypes && (
+        {/* Price filter dropdown */}
+        {hasBothPriceTypes && (
         <div ref={dropdownRef} style={{ 
-          display: "flex", justifyContent: "flex-end",
-          marginTop: 10, position: "relative",
+          position: "relative", flexShrink: 0,
         }}>
           {/* Trigger button */}
           <button
@@ -564,7 +594,8 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
             </div>
           )}
         </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
