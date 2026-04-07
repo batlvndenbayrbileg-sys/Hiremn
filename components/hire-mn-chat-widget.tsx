@@ -44,103 +44,104 @@ function MascotRobot({ size = 48, white = false, waving = false }: { size?: numb
     const handleMouseMove = (e: MouseEvent) => {
       const x = e.clientX
       const y = e.clientY
-      
-      // Calculate angle from center of viewport
       const centerX = window.innerWidth / 2
       const centerY = window.innerHeight / 2
       const angle = Math.atan2(y - centerY, x - centerX)
-      const distance = 3 // Max offset for eyes
-      
+      const distance = 2.5
       setEyePos({
         x: Math.cos(angle) * distance,
         y: Math.sin(angle) * distance,
       })
     }
-    
     window.addEventListener("mousemove", handleMouseMove)
     return () => window.removeEventListener("mousemove", handleMouseMove)
   }, [])
   
   const primary = white ? "#fff" : "#E8541A"
   const secondary = white ? "rgba(255,255,255,0.25)" : "rgba(232,84,26,0.18)"
-  const tertiary = white ? "rgba(255,255,255,0.4)" : "rgba(232,84,26,0.35)"
-  
-  const scale = size / 100
+  const tertiary = white ? "rgba(255,255,255,0.35)" : "rgba(232,84,26,0.28)"
   
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" style={{ overflow: "visible" }}>
-      {/* Main brain shape - larger circular base */}
+    <svg width={size} height={size} viewBox="0 0 100 110" fill="none" style={{ overflow: "visible" }}>
       <defs>
-        <radialGradient id="brainGrad" cx="50%" cy="40%">
+        <radialGradient id="brainGrad" cx="50%" cy="30%">
           <stop offset="0%" stopColor={tertiary} />
           <stop offset="100%" stopColor={secondary} />
         </radialGradient>
       </defs>
       
-      {/* Brain outline - large rounded shape */}
-      <ellipse cx="50" cy="45" rx="32" ry="36" fill="url(#brainGrad)" stroke={primary} strokeWidth="2.2" />
+      {/* Left hemisphere - upper lobe */}
+      <path d="M 25 35 Q 15 25 20 15 Q 30 5 38 10 Q 40 20 38 30 Q 35 40 28 42 Z" 
+        fill="url(#brainGrad)" stroke={primary} strokeWidth="2" />
       
-      {/* Left hemisphere convolutions */}
-      <path d="M30 28 Q28 22 32 20 Q35 18 36 25" stroke={primary} strokeWidth="1.5" fill="none" opacity="0.6" />
-      <path d="M28 35 Q25 32 27 28 Q30 26 32 32" stroke={primary} strokeWidth="1.5" fill="none" opacity="0.5" />
-      <path d="M26 45 Q23 42 25 38 Q28 37 30 44" stroke={primary} strokeWidth="1.5" fill="none" opacity="0.6" />
-      <path d="M28 55 Q26 52 28 48 Q31 47 32 54" stroke={primary} strokeWidth="1.5" fill="none" opacity="0.5" />
+      {/* Right hemisphere - upper lobe */}
+      <path d="M 75 35 Q 85 25 80 15 Q 70 5 62 10 Q 60 20 62 30 Q 65 40 72 42 Z" 
+        fill="url(#brainGrad)" stroke={primary} strokeWidth="2" />
       
-      {/* Right hemisphere convolutions */}
-      <path d="M70 28 Q72 22 68 20 Q65 18 64 25" stroke={primary} strokeWidth="1.5" fill="none" opacity="0.6" />
-      <path d="M72 35 Q75 32 73 28 Q70 26 68 32" stroke={primary} strokeWidth="1.5" fill="none" opacity="0.5" />
-      <path d="M74 45 Q77 42 75 38 Q72 37 70 44" stroke={primary} strokeWidth="1.5" fill="none" opacity="0.6" />
-      <path d="M72 55 Q74 52 72 48 Q69 47 68 54" stroke={primary} strokeWidth="1.5" fill="none" opacity="0.5" />
+      {/* Central bulge - main brain mass */}
+      <ellipse cx="50" cy="50" rx="28" ry="32" fill="url(#brainGrad)" stroke={primary} strokeWidth="2" />
       
-      {/* Center dividing line */}
-      <line x1="50" y1="15" x2="50" y2="75" stroke={primary} strokeWidth="1" strokeDasharray="2,2" opacity="0.4" />
+      {/* Cerebellum - bottom part */}
+      <ellipse cx="50" cy="85" rx="16" ry="10" fill={secondary} stroke={primary} strokeWidth="1.5" opacity="0.7" />
       
-      {/* Left Eye - tracking cursor */}
+      {/* Left hemisphere deep convolutions */}
+      <path d="M 28 32 Q 25 28 28 24" stroke={primary} strokeWidth="1.2" fill="none" opacity="0.7" strokeLinecap="round" />
+      <path d="M 26 40 Q 23 36 25 32" stroke={primary} strokeWidth="1.1" fill="none" opacity="0.6" strokeLinecap="round" />
+      <path d="M 27 48 Q 23 45 25 41" stroke={primary} strokeWidth="1.2" fill="none" opacity="0.65" strokeLinecap="round" />
+      <path d="M 28 56 Q 25 53 27 49" stroke={primary} strokeWidth="1.1" fill="none" opacity="0.6" strokeLinecap="round" />
+      <path d="M 30 64 Q 27 61 30 57" stroke={primary} strokeWidth="1.2" fill="none" opacity="0.7" strokeLinecap="round" />
+      
+      {/* Right hemisphere deep convolutions */}
+      <path d="M 72 32 Q 75 28 72 24" stroke={primary} strokeWidth="1.2" fill="none" opacity="0.7" strokeLinecap="round" />
+      <path d="M 74 40 Q 77 36 75 32" stroke={primary} strokeWidth="1.1" fill="none" opacity="0.6" strokeLinecap="round" />
+      <path d="M 73 48 Q 77 45 75 41" stroke={primary} strokeWidth="1.2" fill="none" opacity="0.65" strokeLinecap="round" />
+      <path d="M 72 56 Q 75 53 73 49" stroke={primary} strokeWidth="1.1" fill="none" opacity="0.6" strokeLinecap="round" />
+      <path d="M 70 64 Q 73 61 70 57" stroke={primary} strokeWidth="1.2" fill="none" opacity="0.7" strokeLinecap="round" />
+      
+      {/* Central sulcus - main divide */}
+      <path d="M 50 15 Q 50 35 50 65 Q 50 80 50 92" 
+        stroke={primary} strokeWidth="1.3" fill="none" opacity="0.4" strokeDasharray="2,1.5" />
+      
+      {/* Left Eye - cursor tracking */}
       <g>
-        {/* Eye white */}
-        <circle cx="35" cy="38" r="7" fill="rgba(255,255,255,.85)" stroke={primary} strokeWidth="1.5" />
-        {/* Pupil follows cursor */}
+        <ellipse cx="32" cy="36" rx="6.5" ry="7" fill="rgba(255,255,255,.92)" stroke={primary} strokeWidth="1.2" />
         <circle 
-          cx={35 + eyePos.x} 
-          cy={38 + eyePos.y} 
-          r="4.5" 
+          cx={32 + eyePos.x} 
+          cy={36 + eyePos.y} 
+          r="3.8" 
           fill={primary}
           style={{ transition: "cx 0.05s ease-out, cy 0.05s ease-out" }}
         />
-        {/* Shine */}
-        <circle cx={36 + eyePos.x * 0.5} cy={36 + eyePos.y * 0.5} r="1.5" fill={white ? primary : "#fff"} opacity="0.9" />
+        <circle cx={32.5 + eyePos.x * 0.4} cy={34.5 + eyePos.y * 0.4} r="1.2" fill={white ? primary : "#fff"} opacity="0.95" />
       </g>
       
-      {/* Right Eye - tracking cursor */}
+      {/* Right Eye - cursor tracking */}
       <g>
-        {/* Eye white */}
-        <circle cx="65" cy="38" r="7" fill="rgba(255,255,255,.85)" stroke={primary} strokeWidth="1.5" />
-        {/* Pupil follows cursor */}
+        <ellipse cx="68" cy="36" rx="6.5" ry="7" fill="rgba(255,255,255,.92)" stroke={primary} strokeWidth="1.2" />
         <circle 
-          cx={65 + eyePos.x} 
-          cy={38 + eyePos.y} 
-          r="4.5" 
+          cx={68 + eyePos.x} 
+          cy={36 + eyePos.y} 
+          r="3.8" 
           fill={primary}
           style={{ transition: "cx 0.05s ease-out, cy 0.05s ease-out" }}
         />
-        {/* Shine */}
-        <circle cx={66 + eyePos.x * 0.5} cy={36 + eyePos.y * 0.5} r="1.5" fill={white ? primary : "#fff"} opacity="0.9" />
+        <circle cx={68.5 + eyePos.x * 0.4} cy={34.5 + eyePos.y * 0.4} r="1.2" fill={white ? primary : "#fff"} opacity="0.95" />
       </g>
       
-      {/* Intelligent pulse glow */}
-      <ellipse cx="50" cy="45" rx="32" ry="36" fill="none" stroke={primary} strokeWidth="1" opacity="0.3">
-        <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.5s" repeatCount="indefinite" />
+      {/* Brain activity pulse animation */}
+      <ellipse cx="50" cy="50" rx="28" ry="32" fill="none" stroke={primary} strokeWidth="1" opacity="0.2">
+        <animate attributeName="opacity" values="0.15;0.5;0.15" dur="2.8s" repeatCount="indefinite" />
       </ellipse>
       
-      {/* Smart indicator - thinking dots */}
-      <g opacity="0.5">
-        <circle cx="20" cy="20" r="1.5" fill={primary}>
+      {/* Intelligence indicator dots */}
+      <g opacity="0.55">
+        <circle cx="12" cy="18" r="1" fill={primary}>
           <animate attributeName="opacity" values="0.2;1;0.2" dur="1.8s" repeatCount="indefinite" />
         </circle>
-        <circle cx="50" cy="12" r="1.5" fill={primary}>
+        <circle cx="50" cy="8" r="1" fill={primary}>
           <animate attributeName="opacity" values="1;0.2;1" dur="1.8s" begin="0.4s" repeatCount="indefinite" />
         </circle>
-        <circle cx="80" cy="20" r="1.5" fill={primary}>
+        <circle cx="88" cy="18" r="1" fill={primary}>
           <animate attributeName="opacity" values="0.2;1;0.2" dur="1.8s" begin="0.8s" repeatCount="indefinite" />
         </circle>
       </g>
