@@ -752,15 +752,11 @@ export default function HireMnChatWidget() {
         .hw-tab { transition: all 0.2s cubic-bezier(.34,1.56,.64,1); }
         .hw-tab:hover { transform: translateY(-2px); }
 
-        @media (max-width: 480px) {
+        @media (max-width: 380px) {
           .hw-panel {
-            position: fixed !important;
-            inset: 0 !important;
-            width: 100vw !important;
-            height: 100dvh !important;
-            border-radius: 0 !important;
-            bottom: 0 !important;
-            right: 0 !important;
+            width: 340px !important;
+            height: 520px !important;
+            border-radius: 16px !important;
           }
         }
       `}</style>

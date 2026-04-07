@@ -10,13 +10,7 @@ export default function EmbedPage() {
           margin: 0;
           padding: 0;
           background: transparent;
-          overflow: hidden;
-          width: 100%;
-          height: 100%;
-        }
-        body {
-          transform: scale(1.15);
-          transform-origin: bottom right;
+          overflow: visible;
         }
       `}</style>
       <HireMnChatWidget />
