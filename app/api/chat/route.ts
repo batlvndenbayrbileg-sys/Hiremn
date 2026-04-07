@@ -144,10 +144,7 @@ export async function POST(req: Request) {
         content: String(m.content),
       }))
 
-    // analyze-д sonnet, бусад бүхэнд haiku (хурдан, хямд)
-    const model = intent === 'analyze'
-      ? 'claude-sonnet-4-20250514'
-      : 'claude-3-haiku-20240307'
+    const model = 'claude-sonnet-4-20250514'
 
     const aiResponse = await anthropic.messages.create({
       model,
