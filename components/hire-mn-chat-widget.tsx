@@ -675,6 +675,10 @@ export function HireMnChatWidget() {
           0%   { transform: scale(1); opacity: 0.5; }
           100% { transform: scale(1.8); opacity: 0; }
         }
+        @keyframes hw-tooltip-in {
+          from { opacity: 0; transform: translateX(6px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
 
         .hw-msg { animation: hw-pop 0.38s cubic-bezier(.34,1.56,.64,1) both; }
 
@@ -1110,7 +1114,7 @@ export function HireMnChatWidget() {
                 width: 14, height: 14, borderRadius: "50%",
                 background: "#22C55E", border: "2.5px solid #fff",
                 boxShadow: "0 0 0 2px rgba(34,197,94,.3)",
-                animation: "orb-spark 2.5s ease-in-out infinite",
+                animation: "rb-led 2.5s ease-in-out infinite",
               }} />
             )}
           </button>
