@@ -384,84 +384,6 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
 
   return (
     <div>
-      {/* Header: Category tabs + Price filter in one elegant row */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 8,
-        marginBottom: 12,
-        flexWrap: "wrap",
-      }}>
-        {/* Category tabs - scrollable */}
-        {categories.length > 1 && (
-          <div style={{
-            display: "flex", gap: 4,
-            overflowX: "auto", scrollbarWidth: "none",
-            flex: "1 1 auto",
-            minWidth: 0,
-          }}>
-            {["Бүгд", ...categories].map(cat => {
-              const isActive = activeCategory === cat
-              return (
-                <button
-                  key={cat}
-                  className="hw-tab"
-                  onClick={() => handleCategorySelect(cat)}
-                  style={{
-                    flexShrink: 0,
-                    padding: "6px 12px", borderRadius: 10,
-                    border: "none",
-                    background: isActive 
-                      ? "linear-gradient(135deg, #E8541A 0%, #F07040 100%)" 
-                      : "rgba(0,0,0,.04)",
-                    color: isActive ? "#fff" : "#6B7280",
-                    fontSize: fontSize - 2, fontWeight: 600,
-                    cursor: "pointer", whiteSpace: "nowrap",
-                    boxShadow: isActive ? "0 2px 8px rgba(232,84,26,.2)" : "none",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  {cat}
-                </button>
-              )
-            })}
-          </div>
-        )}
-
-        {/* Price filter - sleek toggle */}
-        {hasBothPriceTypes && (
-          <div style={{
-            display: "inline-flex",
-            background: "rgba(0,0,0,.04)",
-            borderRadius: 10,
-            padding: 3,
-            gap: 2,
-            flexShrink: 0,
-          }}>
-            {[
-              { key: "all" as const, label: "Бүгд", color: "#6B7280" },
-              { key: "free" as const, label: "Үнэгүй", color: "#059669" },
-              { key: "paid" as const, label: "Төлбөртэй", color: "#E8541A" },
-            ].map(f => (
-              <button
-                key={f.key}
-                onClick={() => handlePriceFilter(f.key)}
-                style={{
-                  padding: "5px 10px", borderRadius: 8, border: "none",
-                  background: priceFilter === f.key 
-                    ? f.key === "free" ? "#059669" : f.key === "paid" ? "#E8541A" : "#fff"
-                    : "transparent",
-                  color: priceFilter === f.key ? "#fff" : f.color,
-                  fontSize: 10, fontWeight: 600, cursor: "pointer",
-                  transition: "all 0.18s ease",
-                  boxShadow: priceFilter === f.key && f.key === "all" ? "0 1px 3px rgba(0,0,0,.08)" : "none",
-                }}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
       <div style={{ position: "relative" }}>
         {showArrows && (
           <button onClick={() => scroll("left")} className="hw-arrow" style={{
@@ -516,7 +438,7 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
       {filtered.length > 1 && (
         <div style={{ 
           display: "flex", justifyContent: "center", gap: 5, 
-          marginTop: 10,
+          marginTop: 12,
         }}>
           {filtered.slice(0, Math.min(filtered.length, 6)).map((_, i) => (
             <div key={i} style={{
@@ -535,6 +457,85 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
           )}
         </div>
       )}
+
+      {/* Filter row - Category tabs + Price filter */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 8,
+        marginTop: 12,
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+      }}>
+        {/* Category tabs - scrollable */}
+        {categories.length > 1 ? (
+          <div style={{
+            display: "flex", gap: 4,
+            overflowX: "auto", scrollbarWidth: "none",
+            flex: "1 1 auto",
+            minWidth: 0,
+          }}>
+            {["Бүгд", ...categories].map(cat => {
+              const isActive = activeCategory === cat
+              return (
+                <button
+                  key={cat}
+                  className="hw-tab"
+                  onClick={() => handleCategorySelect(cat)}
+                  style={{
+                    flexShrink: 0,
+                    padding: "5px 10px", borderRadius: 8,
+                    border: "none",
+                    background: isActive 
+                      ? "linear-gradient(135deg, #E8541A 0%, #F07040 100%)" 
+                      : "rgba(0,0,0,.04)",
+                    color: isActive ? "#fff" : "#6B7280",
+                    fontSize: fontSize - 3, fontWeight: 600,
+                    cursor: "pointer", whiteSpace: "nowrap",
+                    boxShadow: isActive ? "0 2px 6px rgba(232,84,26,.15)" : "none",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  {cat}
+                </button>
+              )
+            })}
+          </div>
+        ) : <div style={{ flex: 1 }} />}
+
+        {/* Price filter - sleek toggle */}
+        {hasBothPriceTypes && (
+          <div style={{
+            display: "inline-flex",
+            background: "rgba(0,0,0,.04)",
+            borderRadius: 8,
+            padding: 2,
+            gap: 1,
+            flexShrink: 0,
+          }}>
+            {[
+              { key: "all" as const, label: "Бүгд", color: "#6B7280" },
+              { key: "free" as const, label: "Үнэгүй", color: "#059669" },
+              { key: "paid" as const, label: "Төлбөртэй", color: "#E8541A" },
+            ].map(f => (
+              <button
+                key={f.key}
+                onClick={() => handlePriceFilter(f.key)}
+                style={{
+                  padding: "4px 8px", borderRadius: 6, border: "none",
+                  background: priceFilter === f.key 
+                    ? f.key === "free" ? "#059669" : f.key === "paid" ? "#E8541A" : "#fff"
+                    : "transparent",
+                  color: priceFilter === f.key ? "#fff" : f.color,
+                  fontSize: 9, fontWeight: 600, cursor: "pointer",
+                  transition: "all 0.18s ease",
+                  boxShadow: priceFilter === f.key && f.key === "all" ? "0 1px 3px rgba(0,0,0,.08)" : "none",
+                }}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -568,7 +569,7 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
               fontSize: fontSize - 1, fontWeight: 700, color: "#6B7280",
               letterSpacing: 0.4, textTransform: "uppercase",
             }}>
-              {message.tests.length === 1 ? "Санал болгох тест" : "Санал болгох тестүүд"}
+              {message.tests.length === 1 ? "Санал болгох тес��" : "Санал болгох тестүүд"}
             </span>
             <span style={{
               background: "linear-gradient(135deg, #E8541A, #F07040)",
