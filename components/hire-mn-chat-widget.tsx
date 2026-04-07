@@ -327,7 +327,9 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
   const scrollRef = useRef<HTMLDivElement>(null)
   const [activeCategory, setActiveCategory] = useState("Бүгд")
   const [priceFilter, setPriceFilter] = useState<"all" | "free" | "paid">("all")
+  const [priceDropdownOpen, setPriceDropdownOpen] = useState(false)
   const [activeDot, setActiveDot] = useState(0)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   // First filter by category
   const categoryFiltered = activeCategory === "Бүгд"
@@ -344,6 +346,18 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
   // Count for tabs
   const freeCount = categoryFiltered.filter(t => t.free === true).length
   const paidCount = categoryFiltered.filter(t => t.free !== true).length
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!priceDropdownOpen) return
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setPriceDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [priceDropdownOpen])
 
   const check = () => {
     if (!scrollRef.current) return
@@ -458,84 +472,99 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
         </div>
       )}
 
-      {/* Filter row - Category tabs + Price filter */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 8,
-        marginTop: 12,
-        flexWrap: "wrap",
-        justifyContent: "space-between",
-      }}>
-        {/* Category tabs - scrollable */}
-        {categories.length > 1 ? (
-          <div style={{
-            display: "flex", gap: 4,
-            overflowX: "auto", scrollbarWidth: "none",
-            flex: "1 1 auto",
-            minWidth: 0,
-          }}>
-            {["Бүгд", ...categories].map(cat => {
-              const isActive = activeCategory === cat
-              return (
+      {/* Price filter dropdown — below dots, right-aligned */}
+      {hasBothPriceTypes && (
+        <div ref={dropdownRef} style={{ 
+          display: "flex", justifyContent: "flex-end",
+          marginTop: 10, position: "relative",
+        }}>
+          {/* Trigger button */}
+          <button
+            onClick={() => setPriceDropdownOpen(o => !o)}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "6px 12px", borderRadius: 10, border: "none",
+              background: priceFilter === "free"
+                ? "linear-gradient(135deg, #059669, #10B981)"
+                : priceFilter === "paid"
+                  ? "linear-gradient(135deg, #E8541A, #F07040)"
+                  : "#F5F3F1",
+              color: priceFilter === "all" ? "#374151" : "#fff",
+              fontSize: 11, fontWeight: 700, cursor: "pointer",
+              boxShadow: priceFilter !== "all"
+                ? priceFilter === "free"
+                  ? "0 2px 8px rgba(5,150,105,.25)"
+                  : "0 2px 8px rgba(232,84,26,.25)"
+                : "none",
+              transition: "all 0.2s ease",
+            }}
+          >
+            {/* Color dot */}
+            <span style={{
+              width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
+              background: priceFilter === "free" ? "rgba(255,255,255,.6)"
+                : priceFilter === "paid" ? "rgba(255,255,255,.6)"
+                : "#9CA3AF",
+            }} />
+            {priceFilter === "free" ? "Үнэгүй" : priceFilter === "paid" ? "Төлбөртэй" : "Бүгд"}
+            {/* Chevron */}
+            <svg
+              width="10" height="10" viewBox="0 0 16 16" fill="none"
+              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+              style={{ transform: priceDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }}
+            >
+              <path d="M4 6l4 4 4-4" />
+            </svg>
+          </button>
+
+          {/* Dropdown panel */}
+          {priceDropdownOpen && (
+            <div style={{
+              position: "absolute", bottom: "calc(100% + 6px)", right: 0,
+              background: "#fff",
+              borderRadius: 12,
+              border: "1.5px solid #F0EAE6",
+              boxShadow: "0 8px 24px rgba(0,0,0,.12)",
+              overflow: "hidden",
+              zIndex: 50,
+              minWidth: 130,
+              animation: "hw-slide-up 0.15s ease-out",
+            }}>
+              {[
+                { key: "all" as const, label: "Бүгд", count: freeCount + paidCount, dot: "#9CA3AF" },
+                { key: "free" as const, label: "Үнэгүй", count: freeCount, dot: "#059669" },
+                { key: "paid" as const, label: "Төлбөртэй", count: paidCount, dot: "#E8541A" },
+              ].map((f, idx, arr) => (
                 <button
-                  key={cat}
-                  className="hw-tab"
-                  onClick={() => handleCategorySelect(cat)}
+                  key={f.key}
+                  onClick={() => { handlePriceFilter(f.key); setPriceDropdownOpen(false) }}
                   style={{
-                    flexShrink: 0,
-                    padding: "5px 10px", borderRadius: 8,
-                    border: "none",
-                    background: isActive 
-                      ? "linear-gradient(135deg, #E8541A 0%, #F07040 100%)" 
-                      : "rgba(0,0,0,.04)",
-                    color: isActive ? "#fff" : "#6B7280",
-                    fontSize: fontSize - 3, fontWeight: 600,
-                    cursor: "pointer", whiteSpace: "nowrap",
-                    boxShadow: isActive ? "0 2px 6px rgba(232,84,26,.15)" : "none",
-                    transition: "all 0.2s ease",
+                    width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                    gap: 8, padding: "9px 14px", border: "none",
+                    background: priceFilter === f.key ? "#FEF3EE" : "#fff",
+                    borderBottom: idx < arr.length - 1 ? "1px solid #F9F5F3" : "none",
+                    cursor: "pointer", transition: "background 0.15s ease",
                   }}
                 >
-                  {cat}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: f.dot, flexShrink: 0 }} />
+                    <span style={{
+                      fontSize: 12, fontWeight: priceFilter === f.key ? 700 : 500,
+                      color: priceFilter === f.key ? "#E8541A" : "#374151",
+                    }}>{f.label}</span>
+                  </div>
+                  <span style={{
+                    fontSize: 10, fontWeight: 600,
+                    color: "#9CA3AF",
+                    background: "#F5F3F1",
+                    padding: "1px 7px", borderRadius: 8,
+                  }}>{f.count}</span>
                 </button>
-              )
-            })}
-          </div>
-        ) : <div style={{ flex: 1 }} />}
-
-        {/* Price filter - sleek toggle */}
-        {hasBothPriceTypes && (
-          <div style={{
-            display: "inline-flex",
-            background: "rgba(0,0,0,.04)",
-            borderRadius: 8,
-            padding: 2,
-            gap: 1,
-            flexShrink: 0,
-          }}>
-            {[
-              { key: "all" as const, label: "Бүгд", color: "#6B7280" },
-              { key: "free" as const, label: "Үнэгүй", color: "#059669" },
-              { key: "paid" as const, label: "Төлбөртэй", color: "#E8541A" },
-            ].map(f => (
-              <button
-                key={f.key}
-                onClick={() => handlePriceFilter(f.key)}
-                style={{
-                  padding: "4px 8px", borderRadius: 6, border: "none",
-                  background: priceFilter === f.key 
-                    ? f.key === "free" ? "#059669" : f.key === "paid" ? "#E8541A" : "#fff"
-                    : "transparent",
-                  color: priceFilter === f.key ? "#fff" : f.color,
-                  fontSize: 9, fontWeight: 600, cursor: "pointer",
-                  transition: "all 0.18s ease",
-                  boxShadow: priceFilter === f.key && f.key === "all" ? "0 1px 3px rgba(0,0,0,.08)" : "none",
-                }}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
