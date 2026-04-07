@@ -1,21 +1,35 @@
 // lib/brain.ts
-// hire.mn AI-ийн тархи — мэргэжлийн түвшний, борлуулалтад чиглэсэн system prompt
-
 import { Intent } from './classifier'
 import type { Assessment } from './hire-api'
 
-function formatTestList(assessments: Assessment[], lang: 'mn' | 'en'): string {
-  if (assessments.length === 0) return '(Тест мэдээлэл ачаалагдаагүй — хэрэглэгчид hire.mn руу зочлохыг зөвлө)'
+function formatTestList(assessments: Assessment[], lang: 'mn' | 'en', filterCategory?: string): string {
+  const FALLBACK = [
+    '[TEST:114] AUDIT — Үнэгүй — 10 мин — Эрүүл мэнд',
+    '[TEST:113] Никотин хамаарал — Үнэгүй — 10 мин — Эрүүл мэнд',
+    '[TEST:112] СЭМҮТ — Үнэгүй — 25 мин — Сэтгэл зүй',
+    '[TEST:102] Mindset — 10,000₮ — 10 мин — Хөгжил',
+    '[TEST:99] Ажил-амьдрал тэнцвэр — 20,000₮ — 10 мин — Тэнцвэр',
+    '[TEST:95] Харилцааны хэв шинж — 30,000₮ — 10 мин — Зан төлөв',
+  ].join('\n')
 
-  return assessments
-    .filter(a => a.isActive !== false)
+  if (assessments.length === 0) return FALLBACK
+
+  let list = assessments.filter(a => a.isActive !== false)
+
+  if (filterCategory) {
+    const filtered = list.filter(a =>
+      (a.category?.name || '').toLowerCase().includes(filterCategory.toLowerCase())
+    )
+    if (filtered.length > 0) list = filtered
+  }
+
+  return list
     .map(a => {
       const name = lang === 'en' && a.nameEn ? a.nameEn : a.name
       const price = a.price === 0 ? 'Үнэгүй' : `${a.price.toLocaleString()}₮`
-      const duration = a.duration ? `${a.duration} мин` : ''
+      const duration = a.duration ? `${a.duration} мин` : '10 мин'
       const cat = a.category?.name || ''
-      const desc = a.description ? a.description.slice(0, 60) : ''
-      return `[TEST:${a.id}] ${name} | ${price} | ${duration} | ${cat} | ${desc}`
+      return `[TEST:${a.id}] ${name} — ${price} — ${duration} — ${cat}`
     })
     .join('\n')
 }
@@ -24,74 +38,43 @@ export function buildSystemPrompt(
   intent: Intent,
   lang: 'mn' | 'en',
   assessments: Assessment[] = [],
-  detectedCategory?: string
+  filterCategory?: string
 ): string {
-  const testList = formatTestList(assessments, lang)
-  const testCount = assessments.filter(a => a.isActive !== false).length
-  const freeTests = assessments.filter(a => a.price === 0 && a.isActive !== false)
-  const paidTests = assessments.filter(a => a.price > 0 && a.isActive !== false)
+  const langInstruction = lang === 'mn'
+    ? 'Монгол хэлээр (кирилл) хариул.'
+    : 'Respond in English.'
 
-  const categoryHint = detectedCategory
-    ? `\n\n🎯 ИЛРҮҮЛСЭН СЭДЭВ: "${detectedCategory}" — энэ чиглэлийн тестүүдийг давуу эрэмбэлж санал болго.`
-    : ''
+  const testList = formatTestList(assessments, lang, filterCategory)
 
-  if (lang === 'en') {
-    return `You are a professional AI consultant for hire.mn, Mongolia's leading psychological assessment platform.
+  const intentInstructions: Record<Intent, string> = {
+    faq: `1-2 өгүүлбэрээр хариул. Асуултад шууд хариулсны ЭЦЭСТнэгийн санал болгох тест [TEST:id] нэм.`,
 
-YOUR ROLE: Expert career and psychology consultant who recommends appropriate assessments.
-CORE MISSION: Help users find the RIGHT test for their situation, then encourage them to take it.
+    recommend: `Хэрэглэгчийн нөхцөл байдалд тулгуурлан хамгийн тохирох 2-4 тест санал болго.
+1 богино өгүүлбэр (10-аас дахиагүй үг) + [TEST:id] маркерууд.
+Карт дээр нэр/үнэ харагдах тул текстэд давтаж бичихгүй.`,
 
-AVAILABLE TESTS (${testCount} total, ${freeTests.length} free):
-${testList}
-${categoryHint}
+    analyze: `Хэрэглэгчийн үр дүнг 2-3 bullet point-оор тайлбарла. Дараа нь тохирох [TEST:id] санал болго.`,
 
-RESPONSE GUIDELINES:
-1. ALWAYS recommend at least 1-3 relevant tests using [TEST:id] markers
-2. Be conversational but professional — like a knowledgeable friend
-3. Match tests to the user's expressed needs, concerns, or curiosity
-4. For vague questions, ask ONE clarifying question while still suggesting a starting point
-5. Keep responses under 3 sentences + test recommendations
-6. Never list prices or durations in text — the cards show this automatically
+    upsell: `1 урамшуулах өгүүлбэр + 1-2 [TEST:id]. 15 үгнээс хэтрэхгүй.`,
 
-INTENT-SPECIFIC BEHAVIOR:
-- recommend: Analyze their situation, suggest 2-4 best-fit tests
-- analyze: Interpret their result thoughtfully, suggest follow-up tests
-- general: Answer helpfully, always connect back to a relevant test
-- faq: Brief answer + suggest a test they might find interesting
-
-TONE: Warm, knowledgeable, encouraging. You genuinely want to help them grow.`
+    general: `2 өгүүлбэрээс хэтрэхгүй хариул. ЗААВАЛ 1-3 тохирох [TEST:id] оруул.
+Хэрэглэгч ямар чиглэлд сонирхож байгааг таамаглаж тест санал болго.`,
   }
 
-  return `Та hire.mn-ийн мэргэжлийн AI зөвлөх. hire.mn = Монголын тэргүүлэгч сэтгэл зүйн үнэлгээний платформ.
+  return `Та hire.mn AI борлуулагч туслагч. hire.mn = Монголын мэргэжлийн үнэлгээний платформ.
+ҮНДСЭН ЗОРИЛГО: Хэрэглэгчид тохирох тестийг санал болгож, тэдгээрийг худалдан авахад урамшуулах.
+${langInstruction}
 
-ТАНЫ ҮЙЛ АЖИЛЛАГАА: Хэрэглэгчийн нөхцөл байдлыг ойлгож, тохирох тестийг мэргэжлийн түвшинд санал болгох.
-ГOЛЬ ЗОРИЛГО: Хүн бүрийг өөрийгөө илүү сайн таниулахад туслах — зөв тест = зөв эхлэл.
-
-ТЕСТҮҮД (нийт ${testCount}, ${freeTests.length} үнэгүй):
+ТЕСТҮҮД:
 ${testList}
-${categoryHint}
 
-ХАРИУЛАХ ЗАРЧИМ:
-1. ЗААВАЛ 1-3 тохирох тест санал болго — [TEST:id] маркер ашиглана
-2. Мэргэжлийн боловч ойлгомжтой, дотно байх — найзлаг зөвлөх шиг
-3. Хэрэглэгчийн илэрхийлсэн санаа зовнил, сонирхолд тулгуурлан тест сонгох
-4. Тодорхойгүй асуултад: НЭГ тодруулах асуулт + эхлэх цэг болох тест санал болгох
-5. 3 өгүүлбэрээс ХЭТРЭХГҮЙ + тест маркерууд
-6. Үнэ, хугацааг текстэд БИЧИХГҮЙ — карт дээр аяндаа харагдана
+ДААЛГАВАР: ${intentInstructions[intent]}
 
-INTENT-ИЙН ДАГУУ:
-- recommend: Нөхцөл байдлыг ойлгож, хамгийн тохирох 2-4 тест санал болгох
-- analyze: Үр дүнг ухаалаг тайлбарлаж, цаашдын хөгжлийн тест санал болгох
-- general: Асуултад хариулаад, холбогдох тест руу чиглүүлэх
-- faq: Товч хариулт + сонирхолтой байж болох тест
-
-ӨНЦ ЧУХАЛ:
-- Стресстэй, санаа зовнилтой хүнд: сэтгэл зүйн тест + эрүүл мэндийн тест
-- Карьер, ажлын асуудалтай: ажил-амьдрал тэнцвэр + mindset тест
-- Өөрийгөө танихыг хүсвэл: зан төлөв + харилцааны тест
-- Ерөнхий сонирхол: үнэгүй тестээс эхлэхийг санал болго
-
-ӨНГӨ АЯС: Халуун дотно, мэдлэгтэй, урамшуулсан. Та үнэхээр тэдний хөгжилд туслахыг хүсдэг.`
+ХАТУУ ДҮРМҮҮД:
+- ЗААВАЛ дор хаяж нэг [TEST:id] оруул (зөвхөн analyze-д заавал биш)
+- Тестийн нэр, үнийг текстэд давтаж бичихгүй
+- 3-аас их өгүүлбэр бичихгүй
+- Категори нэрлэсэн бол тэр категорийн бүх тестийг санал болго`
 }
 
 export function compressHistory(
@@ -108,8 +91,8 @@ export function compressHistory(
     .join(' | ')
 
   return [
-    { role: 'user', content: `[Өмнөх яриа: ${summary}]` },
-    { role: 'assistant', content: 'Тийм ээ, үргэлжлүүлье.' },
+    { role: 'user', content: `[Conversation summary: ${summary}]` },
+    { role: 'assistant', content: 'Understood. How can I help you?' },
     ...recent,
   ]
 }

@@ -139,21 +139,14 @@ export async function POST(req: Request) {
       const source = filterByDetectedCategory(liveAssessments, detectedCategory, cachedCategories)
       const tests = source.map(a => formatAssessmentForWidget(a, lang))
       const categories = [...new Set(source.map(a => a.category?.name).filter(Boolean))] as string[]
-
-      // Динамик статистик
-      const freeCount = source.filter(a => a.price === 0).length
-      const paidCount = source.filter(a => a.price > 0).length
-
       const catLabel = detectedCategory && tests.length < liveAssessments.length
-        ? `"${detectedCategory}" чиглэлээр`
-        : ''
-
-      const reply = lang === 'mn'
-        ? `${catLabel ? catLabel + ' ' : ''}**${tests.length} тест** байна (${freeCount} үнэгүй, ${paidCount} төлбөртэй). Аль нэгийг сонгоод дэлгэрэнгүй мэдээлэл аваарай:`
-        : `${catLabel ? catLabel + ' ' : ''}**${tests.length} tests** available (${freeCount} free, ${paidCount} paid). Select one for details:`
+        ? `"${detectedCategory}" категорийн `
+        : 'нийт '
 
       return Response.json({
-        reply,
+        reply: lang === 'mn'
+          ? `hire.mn дээр ${catLabel}**${tests.length} тест** байна. Категориор нь шүүж үзэх боломжтой:`
+          : `hire.mn has **${tests.length} assessments**. You can filter by category:`,
         tests,
         categories,
         source: 'list_all',
@@ -163,33 +156,12 @@ export async function POST(req: Request) {
     }
 
     // ── ROUTE 2: FAQ — instant, no AI cost ────────────────────────────────
-    // FAQ хариулт олдвол шууд буцаана, recommendTests=true бол тест нэмнэ
     if (!useLLM || intent === 'faq') {
-      const faqResult = findFAQ(lastMessage, lang)
-      if (faqResult) {
-        let tests: ReturnType<typeof shapeTest>[] = []
-        let categories: string[] = []
-
-        // FAQ хариулттай хамт тест санал болгох
-        if (faqResult.recommendTests && liveAssessments.length > 0) {
-          // Категори илрүүлсэн бол тэр категорийн тестүүд, үгүй бол үнэгүй тестүүд
-          const relevant = detectedCategory
-            ? filterByDetectedCategory(liveAssessments, detectedCategory, cachedCategories)
-            : liveAssessments.filter(a => a.price === 0) // Үнэгүй тестүүд default
-
-          const toShow = relevant.slice(0, 4)
-          tests = toShow.map(a => formatAssessmentForWidget(a, lang))
-          categories = [...new Set(toShow.map(a => a.category?.name).filter(Boolean))] as string[]
-        }
-
-        return Response.json({
-          reply: faqResult.answer,
-          tests,
-          categories,
-          source: 'faq',
-          intent,
-          tokens_used: 0
-        })
+      const faqAnswer = findFAQ(lastMessage, lang)
+      if (faqAnswer) {
+        const { cleanText, testIds } = parseTestMarkers(faqAnswer)
+        const tests = testIds.map(shapeTest).filter(Boolean)
+        return Response.json({ reply: cleanText, tests, categories: [], source: 'faq', intent, tokens_used: 0 })
       }
     }
 
@@ -236,22 +208,7 @@ export async function POST(req: Request) {
 
     // [TEST:id] marker-уудыг parse хийж widget card болгоно
     const { cleanText, testIds } = parseTestMarkers(rawText)
-    let tests = testIds.map(shapeTest).filter(Boolean)
-
-    // LLM тест санал болгоогүй бол fallback — үргэлж тест харуулна
-    if (tests.length === 0 && relevantAssessments.length > 0) {
-      // Категори байвал тэр категорийн эхний 3, үгүй бол үнэгүй тестүүд
-      const fallbackSource = detectedCategory
-        ? relevantAssessments.slice(0, 3)
-        : relevantAssessments.filter(a => a.price === 0).slice(0, 3)
-      
-      if (fallbackSource.length === 0) {
-        // Үнэгүй тест байхгүй бол эхний 3-ыг авна
-        tests = relevantAssessments.slice(0, 3).map(a => formatAssessmentForWidget(a, lang))
-      } else {
-        tests = fallbackSource.map(a => formatAssessmentForWidget(a, lang))
-      }
-    }
+    const tests = testIds.map(shapeTest).filter(Boolean)
 
     // Category tabs — санал болгосон тестүүдийн категориудаар tab харуулна
     const categories = tests.length > 0
