@@ -89,140 +89,71 @@ function TypingIndicator() {
   )
 }
 
-// ── Category Images ───────────────────────────────────────────────────────────
-
-const CATEGORY_IMAGES: Record<string, string> = {
-  "Сэтгэл зүй": "/images/categories/psychology.jpg",
-  "Сэтгэцийн эрүүл мэнд": "/images/categories/health.jpg",
-  "Эрүүл мэнд": "/images/categories/health.jpg",
-  "Карьер": "/images/categories/career.jpg",
-  "Мэргэжил": "/images/categories/career.jpg",
-  "Зан чанар": "/images/categories/personality.jpg",
-  "Хувь хүн": "/images/categories/personality.jpg",
-  "Харилцаа": "/images/categories/communication.jpg",
-  "Стресс": "/images/categories/stress.jpg",
-  "Тэнцвэр": "/images/categories/stress.jpg",
-}
-
-function getCategoryImage(category?: string, color?: string): string | null {
-  if (category) {
-    for (const [key, url] of Object.entries(CATEGORY_IMAGES)) {
-      if (category.toLowerCase().includes(key.toLowerCase())) return url
-    }
-  }
-  return null
-}
-
 // ── Test Card ─────────────────────────────────────────────────────────────────
 
 function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; fontSize: number }) {
-  const [imgLoaded, setImgLoaded] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
-  const categoryImg = getCategoryImage(test.category, test.color)
-
   return (
     <a
       href={test.url}
       target="_blank"
       rel="noopener noreferrer"
       className="hw-card"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       style={{
         display: "block", background: "#fff",
-        border: "1px solid #F0EAE6", borderRadius: 16,
+        border: "1px solid #F0EAE6", borderRadius: 14,
         overflow: "hidden", textDecoration: "none",
-        minWidth: 185, maxWidth: 205, flexShrink: 0,
-        animation: `hw-card-in 0.4s cubic-bezier(.34,1.56,.64,1) ${index * 0.07}s both`,
-        boxShadow: isHovered ? "0 12px 28px rgba(232,84,26,.18)" : "0 2px 8px rgba(0,0,0,.04)",
+        minWidth: 190, maxWidth: 210, flexShrink: 0,
+        animation: `hw-card-in 0.38s cubic-bezier(.34,1.56,.64,1) ${index * 0.08}s both`,
       }}
     >
-      {/* Header with category image or gradient */}
+      {/* Color header */}
       <div style={{
-        height: 78, 
-        background: categoryImg ? "transparent" : `linear-gradient(135deg, ${test.color} 0%, ${test.color}dd 100%)`,
+        height: 72, background: test.color,
         display: "flex", alignItems: "center", justifyContent: "center",
-        position: "relative", fontSize: 32,
-        overflow: "hidden",
+        position: "relative", fontSize: 30,
       }}>
-        {categoryImg && (
-          <img
-            src={categoryImg}
-            alt=""
-            onLoad={() => setImgLoaded(true)}
-            style={{
-              position: "absolute", inset: 0,
-              width: "100%", height: "100%",
-              objectFit: "cover",
-              opacity: imgLoaded ? 1 : 0,
-              transition: "opacity 0.3s ease, transform 0.4s ease",
-              transform: isHovered ? "scale(1.08)" : "scale(1)",
-            }}
-          />
-        )}
-        {/* Overlay gradient for text readability */}
-        <div style={{
-          position: "absolute", inset: 0,
-          background: categoryImg 
-            ? "linear-gradient(to top, rgba(0,0,0,.4) 0%, rgba(0,0,0,0) 60%)"
-            : "none",
-        }} />
-        
-        {/* Emoji */}
-        <span style={{ 
-          position: "relative", zIndex: 2,
-          filter: categoryImg ? "drop-shadow(0 2px 4px rgba(0,0,0,.3))" : "none",
-          transform: isHovered ? "scale(1.15) rotate(-5deg)" : "scale(1)",
-          transition: "transform 0.3s cubic-bezier(.34,1.56,.64,1)",
-        }}>
-          {test.emoji}
-        </span>
-        
-        {/* Badges */}
+        <span>{test.emoji}</span>
         {test.free && (
           <span style={{
-            position: "absolute", top: 8, left: 8,
-            background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
-            color: "#fff", fontSize: 9, fontWeight: 700,
-            padding: "3px 9px", borderRadius: 10,
-            boxShadow: "0 2px 6px rgba(5,150,105,.3)",
-            letterSpacing: "0.3px",
+            position: "absolute", bottom: 7, left: 9,
+            background: "rgba(255,255,255,.95)",
+            color: "#059669", fontSize: 9, fontWeight: 700,
+            padding: "2px 8px", borderRadius: 8,
           }}>ҮНЭГҮЙ</span>
         )}
         {test.count && test.count > 0 && (
           <span style={{
-            position: "absolute", bottom: 8, right: 8,
-            background: "rgba(0,0,0,.5)",
-            backdropFilter: "blur(4px)",
+            position: "absolute", bottom: 7, right: 9,
+            background: "rgba(0,0,0,.35)",
             color: "#fff", fontSize: 9, fontWeight: 600,
-            padding: "3px 8px", borderRadius: 10,
-          }}>{test.count.toLocaleString()}+ авсан</span>
+            padding: "2px 7px", borderRadius: 8,
+          }}>{test.count}+ авсан</span>
         )}
       </div>
 
       {/* Body */}
-      <div style={{ padding: "12px 13px 13px" }}>
+      <div style={{ padding: "11px 12px 12px" }}>
         <div style={{
-          fontSize: fontSize, fontWeight: 600, color: "#111827",
-          lineHeight: 1.35, marginBottom: 6,
+          fontSize: fontSize - 1, fontWeight: 600, color: "#111827",
+          lineHeight: 1.35, marginBottom: 5,
           overflow: "hidden", textOverflow: "ellipsis",
           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
         }}>{test.name}</div>
 
         <div style={{
-          fontSize: fontSize - 2, color: "#6B7280", lineHeight: 1.5, marginBottom: 10,
+          fontSize: fontSize - 3, color: "#6B7280", lineHeight: 1.45, marginBottom: 9,
           overflow: "hidden", textOverflow: "ellipsis",
           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
         }}>{test.desc}</div>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 9 }}>
           <span style={{
-            background: test.free ? "linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)" : "linear-gradient(135deg, #FEF3EE 0%, #FDDCCC 100%)",
+            background: test.free ? "#ECFDF5" : "#FEF3EE",
             color: test.free ? "#059669" : "#E8541A",
-            fontSize: fontSize - 2, fontWeight: 700, padding: "4px 10px", borderRadius: 10,
+            fontSize: fontSize - 3, fontWeight: 600, padding: "3px 9px", borderRadius: 10,
           }}>{test.price}</span>
-          <span style={{ fontSize: fontSize - 3, color: "#9CA3AF", display: "flex", alignItems: "center", gap: 4 }}>
-            <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+          <span style={{ fontSize: fontSize - 4, color: "#9CA3AF", display: "flex", alignItems: "center", gap: 3 }}>
+            <svg width="9" height="9" viewBox="0 0 16 16" fill="none">
               <circle cx="8" cy="8" r="6" stroke="#9CA3AF" strokeWidth="1.5" />
               <path d="M8 5v3l2 1.5" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
@@ -231,24 +162,13 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
         </div>
 
         <div style={{
-          width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-          background: isHovered 
-            ? "linear-gradient(135deg, #D44810 0%, #E8541A 100%)" 
-            : "linear-gradient(135deg, #E8541A 0%, #F06030 100%)",
-          color: "#fff",
-          fontSize: fontSize - 1, fontWeight: 600,
-          padding: "9px 12px", borderRadius: 10,
-          boxShadow: isHovered ? "0 4px 12px rgba(232,84,26,.35)" : "0 2px 6px rgba(232,84,26,.2)",
-          transition: "all 0.2s ease",
+          width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+          background: "#E8541A", color: "#fff",
+          fontSize: fontSize - 2, fontWeight: 600,
+          padding: "7px 10px", borderRadius: 9,
         }}>
           Тест авах
-          <svg 
-            width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"
-            style={{
-              transform: isHovered ? "translateX(3px)" : "translateX(0)",
-              transition: "transform 0.2s ease",
-            }}
-          >
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
             <path d="M3 8h10M9 4l4 4-4 4" />
           </svg>
         </div>
@@ -257,7 +177,7 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
   )
 }
 
-// ── Category Tabs ──────────────────────────────────────────────────���──────────
+// ── Category Tabs ─────────────────────────────────────────────────────────────
 
 function CategoryTabs({
   categories,
@@ -483,9 +403,7 @@ function UserMessage({ content, fontSize }: { content: string; fontSize: number 
 
 export function HireMnChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
-  const [isClosing, setIsClosing] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
   const [fontSize, setFontSize] = useState(13)
   const [showFontSlider, setShowFontSlider] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
@@ -501,26 +419,9 @@ export function HireMnChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Detect mobile
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 480)
-    checkMobile()
-    window.addEventListener("resize", checkMobile)
-    return () => window.removeEventListener("resize", checkMobile)
-  }, [])
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, isTyping])
-
-  // Handle close with animation
-  const handleClose = () => {
-    setIsClosing(true)
-    setTimeout(() => {
-      setIsOpen(false)
-      setIsClosing(false)
-    }, 200)
-  }
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isTyping) return
@@ -574,208 +475,94 @@ export function HireMnChatWidget() {
           30% { transform: translateY(-5px); }
         }
         @keyframes hw-float {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          25% { transform: translateY(-2px) rotate(1deg); }
-          50% { transform: translateY(-4px) rotate(0deg); }
-          75% { transform: translateY(-2px) rotate(-1deg); }
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
         }
         @keyframes hw-pop {
-          from { transform: scale(0.9) translateY(8px); opacity: 0; }
+          from { transform: scale(0.94) translateY(6px); opacity: 0; }
           to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         @keyframes hw-card-in {
-          0% { transform: scale(0.85) translateY(15px) rotate(-2deg); opacity: 0; }
-          60% { transform: scale(1.03) translateY(-2px) rotate(0.5deg); opacity: 1; }
-          100% { transform: scale(1) translateY(0) rotate(0deg); opacity: 1; }
+          from { transform: scale(0.92) translateY(10px); opacity: 0; }
+          to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         @keyframes hw-slide-up {
-          from { transform: translateY(16px); opacity: 0; }
+          from { transform: translateY(12px); opacity: 0; }
           to   { transform: translateY(0); opacity: 1; }
         }
         @keyframes hw-chat-open {
-          0% { opacity: 0; transform: scale(0.85) translateY(20px); transform-origin: bottom right; }
-          60% { opacity: 1; transform: scale(1.02) translateY(-3px); transform-origin: bottom right; }
-          100% { opacity: 1; transform: scale(1) translateY(0); transform-origin: bottom right; }
-        }
-        @keyframes hw-chat-close {
-          from { opacity: 1; transform: scale(1) translateY(0); }
-          to { opacity: 0; transform: scale(0.9) translateY(12px); }
+          from { opacity: 0; transform: scale(0.9) translateY(16px); transform-origin: bottom right; }
+          to   { opacity: 1; transform: scale(1) translateY(0); transform-origin: bottom right; }
         }
         @keyframes hw-pulse {
-          0%, 100% { box-shadow: 0 6px 22px rgba(232,84,26,.35), 0 0 0 0 rgba(232,84,26,.3); }
-          50% { box-shadow: 0 6px 22px rgba(232,84,26,.35), 0 0 0 12px rgba(232,84,26,0); }
+          0%, 100% { box-shadow: 0 4px 18px rgba(232,84,26,.3), 0 0 0 0 rgba(232,84,26,.25); }
+          50%       { box-shadow: 0 4px 18px rgba(232,84,26,.3), 0 0 0 9px rgba(232,84,26,0); }
         }
         @keyframes hw-tooltip-in {
-          from { opacity: 0; transform: translateX(8px) scale(0.95); }
-          to   { opacity: 1; transform: translateX(0) scale(1); }
-        }
-        @keyframes hw-shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-        @keyframes hw-glow {
-          0%, 100% { filter: drop-shadow(0 0 2px rgba(232,84,26,.4)); }
-          50% { filter: drop-shadow(0 0 8px rgba(232,84,26,.6)); }
+          from { opacity: 0; transform: translateX(6px); }
+          to   { opacity: 1; transform: translateX(0); }
         }
 
-        .hw-msg { animation: hw-pop 0.35s cubic-bezier(.34,1.56,.64,1); }
+        .hw-msg { animation: hw-pop 0.3s cubic-bezier(.34,1.56,.64,1); }
 
         .hw-card {
-          transition: transform 0.28s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease, border-color 0.2s ease;
+          transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s ease, border-color 0.18s ease;
         }
         .hw-card:hover {
-          transform: translateY(-5px) scale(1.02);
-          box-shadow: 0 14px 32px rgba(232,84,26,.2);
+          transform: translateY(-3px) scale(1.015);
+          box-shadow: 0 10px 24px rgba(232,84,26,.15);
           border-color: #F5C8B8 !important;
         }
-        .hw-card:active {
-          transform: translateY(-2px) scale(0.99);
-        }
 
-        .hw-chip { 
-          transition: all 0.22s cubic-bezier(.34,1.56,.64,1);
-          position: relative;
-          overflow: hidden;
-        }
-        .hw-chip::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
-          transform: translateX(-100%);
-          transition: transform 0.4s ease;
-        }
-        .hw-chip:hover::before {
-          transform: translateX(100%);
-        }
+        .hw-chip { transition: all 0.18s ease; }
         .hw-chip:hover {
-          background: linear-gradient(135deg, #E8541A 0%, #F06030 100%) !important;
+          background: #E8541A !important;
           color: #fff !important;
           border-color: #E8541A !important;
-          transform: translateY(-2px) scale(1.03);
-          box-shadow: 0 4px 12px rgba(232,84,26,.25);
-        }
-        .hw-chip:active {
-          transform: translateY(0) scale(0.98);
+          transform: translateY(-1px);
         }
 
-        .hw-send { 
-          transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
-        }
-        .hw-send:hover:not(:disabled) { 
-          background: linear-gradient(135deg, #D44810 0%, #E8541A 100%) !important;
-          transform: scale(1.05);
-          box-shadow: 0 4px 14px rgba(232,84,26,.4);
-        }
-        .hw-send:active:not(:disabled) { 
-          transform: scale(0.92);
-        }
+        .hw-send:hover:not(:disabled) { background: #D44810 !important; }
+        .hw-send:active:not(:disabled) { transform: scale(0.94); }
 
         .hw-mascot {
-          transition: all 0.28s cubic-bezier(.34,1.56,.64,1);
-          animation: hw-pulse 2.4s ease-in-out infinite;
+          transition: transform 0.22s cubic-bezier(.34,1.56,.64,1);
+          animation: hw-pulse 2.6s ease-in-out infinite;
         }
         .hw-mascot:hover {
-          transform: scale(1.12) rotate(-5deg);
+          transform: scale(1.08);
           animation: none;
-          box-shadow: 0 12px 32px rgba(232,84,26,.45) !important;
-        }
-        .hw-mascot:active {
-          transform: scale(1.05) rotate(-2deg);
+          box-shadow: 0 8px 26px rgba(232,84,26,.4) !important;
         }
 
-        .hw-scroll::-webkit-scrollbar { width: 4px; }
+        .hw-scroll::-webkit-scrollbar { width: 3px; }
         .hw-scroll::-webkit-scrollbar-track { background: transparent; }
-        .hw-scroll::-webkit-scrollbar-thumb { 
-          background: linear-gradient(180deg, rgba(232,84,26,.25), rgba(232,84,26,.15)); 
-          border-radius: 4px; 
-        }
-        .hw-scroll::-webkit-scrollbar-thumb:hover { 
-          background: linear-gradient(180deg, rgba(232,84,26,.4), rgba(232,84,26,.25)); 
-        }
+        .hw-scroll::-webkit-scrollbar-thumb { background: rgba(232,84,26,.2); border-radius: 3px; }
 
-        .hw-font-slider { 
-          -webkit-appearance: none; width: 100%; height: 4px; border-radius: 3px; outline: none; cursor: pointer;
+        .hw-font-slider { -webkit-appearance: none; width: 100%; height: 3px; border-radius: 2px; outline: none; cursor: pointer;
           background: linear-gradient(to right, #E8541A calc((var(--val) - 11) / 6 * 100%), #F0E4DF calc((var(--val) - 11) / 6 * 100%));
-          transition: all 0.15s ease;
         }
-        .hw-font-slider::-webkit-slider-thumb { 
-          -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; 
-          background: linear-gradient(135deg, #E8541A 0%, #F06030 100%); 
-          border: 2.5px solid #fff; 
-          box-shadow: 0 2px 8px rgba(232,84,26,.4); 
-          cursor: pointer; 
-          transition: all 0.2s ease;
-        }
-        .hw-font-slider::-webkit-slider-thumb:hover {
-          transform: scale(1.15);
-          box-shadow: 0 3px 12px rgba(232,84,26,.5);
-        }
-        .hw-font-slider::-moz-range-thumb { 
-          width: 16px; height: 16px; border-radius: 50%; 
-          background: linear-gradient(135deg, #E8541A 0%, #F06030 100%); 
-          border: 2.5px solid #fff; cursor: pointer; 
-        }
-
-        /* Mobile responsive */
-        @media (max-width: 480px) {
-          .hw-panel-mobile {
-            position: fixed !important;
-            inset: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            max-height: 100% !important;
-            border-radius: 0 !important;
-          }
-          .hw-root-mobile {
-            bottom: 16px !important;
-            right: 16px !important;
-          }
-        }
-        
-        /* Tablet */
-        @media (min-width: 481px) and (max-width: 768px) {
-          .hw-panel-tablet {
-            width: 340px !important;
-          }
-        }
-
-        /* Reduce motion for accessibility */
-        @media (prefers-reduced-motion: reduce) {
-          .hw-msg, .hw-card, .hw-chip, .hw-mascot, .hw-send {
-            animation: none !important;
-            transition: none !important;
-          }
-        }
+        .hw-font-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #E8541A; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(232,84,26,.4); cursor: pointer; }
+        .hw-font-slider::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #E8541A; border: 2px solid #fff; cursor: pointer; }
       `}</style>
 
-      <div className={`hw-root ${isMobile ? "hw-root-mobile" : ""}`} style={{
-        position: "fixed", 
-        bottom: isMobile ? 12 : 20, 
-        right: isMobile ? 12 : 20, 
-        zIndex: 99999,
+      <div className="hw-root" style={{
+        position: "fixed", bottom: 20, right: 20, zIndex: 99999,
         display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 12,
       }}>
 
         {/* ── Chat panel ── */}
         {isOpen && (
-          <div style={{ 
-            animation: isClosing 
-              ? "hw-chat-close 0.2s ease-out forwards" 
-              : "hw-chat-open 0.35s cubic-bezier(.34,1.56,.64,1)",
-          }}>
-            <div 
-              className={isMobile ? "hw-panel-mobile" : ""}
-              style={{
-                width: isMobile ? "100vw" : 380,
-                height: isMobile ? "100vh" : "min(580px, calc(100vh - 100px))",
-                borderRadius: isMobile ? 0 : 22,
-                background: "#FAFAFA",
-                boxShadow: isMobile ? "none" : "0 25px 70px rgba(0,0,0,.16), 0 3px 14px rgba(0,0,0,.07)",
-                display: "flex", flexDirection: "column", overflow: "hidden",
-                border: isMobile ? "none" : "1px solid rgba(0,0,0,.05)",
-              }}
-            >
+          <div style={{ animation: "hw-chat-open 0.28s cubic-bezier(.34,1.56,.64,1)" }}>
+            <div style={{
+              width: 360,
+              height: "min(560px, calc(100vh - 110px))",
+              borderRadius: 20,
+              background: "#FAFAFA",
+              boxShadow: "0 24px 64px rgba(0,0,0,.14), 0 2px 12px rgba(0,0,0,.06)",
+              display: "flex", flexDirection: "column", overflow: "hidden",
+              border: "1px solid rgba(0,0,0,.06)",
+            }}>
 
               {/* ── Header ── */}
               <div style={{
