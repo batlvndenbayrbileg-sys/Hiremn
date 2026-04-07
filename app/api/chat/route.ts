@@ -42,6 +42,24 @@ function isListAllIntent(msg: string): boolean {
   return /^(ямар тест|тестүүд|жагсаалт|бүх тест|бүгдийг харуул|what tests|all tests|show all|list all)/i.test(msg.trim())
 }
 
+// ── НЭМЭЛТ: Category-аар тест шүүх ──────────────────────────────────────────
+// exactCategory = API-ийн яг category нэр (жишээ: 'Зан төлөвийн тест')
+// keyword = classifier-ийн category нэр (жишээ: 'Зан төлөв')
+function filterByCategory(assessments: Assessment[], exactCategory?: string, keyword?: string): Assessment[] {
+  // 1. Яг API нэрээр шүүнэ
+  if (exactCategory) {
+    const exact = assessments.filter(a => a.category?.name === exactCategory)
+    if (exact.length > 0) return exact
+  }
+  // 2. Keyword pattern-аар тестийн нэр дотроос хайна (fallback)
+  if (keyword) {
+    const { CATEGORY_KEYWORDS } = require('@/lib/classifier')
+    const pattern: RegExp | undefined = CATEGORY_KEYWORDS[keyword]
+    if (pattern) return assessments.filter(a => pattern.test(a.name))
+  }
+  return []
+}
+
 // ── Main handler ─────────────────────────────────────────────────────────────
 export async function POST(req: Request) {
   try {
@@ -60,7 +78,7 @@ export async function POST(req: Request) {
       return Response.json({ error: 'empty message' }, { status: 400 })
 
     // Intent + хэл тодорхойлох
-    const { intent, useLLM, detectedLang } = classify(lastMessage)
+    const { intent, useLLM, detectedLang, category, isCategoryQuery, exactCategory } = classify(lastMessage)
     const lang: 'mn' | 'en' = forcedLang === 'mn' || forcedLang === 'en' ? forcedLang : detectedLang
 
     // API-аас тестүүд татах
@@ -89,7 +107,6 @@ export async function POST(req: Request) {
     }
 
     // ── ROUTE 1: Бүх тест жагсаах — AI зардалгүй ──────────────────────────
-    // "ямар тест байдаг вэ" гэх мэт энгийн хүсэлтэд шууд бүх тестийг буцаана
     if (isListAllIntent(lastMessage)) {
       const tests = liveAssessments.map(a => formatAssessmentForWidget(a, lang))
       const categories = [...new Set(liveAssessments.map(a => a.category?.name).filter(Boolean))] as string[]
@@ -106,7 +123,46 @@ export async function POST(req: Request) {
       })
     }
 
-    // ── ROUTE 2: FAQ — instant, no AI cost ────────────────────────────────
+    // ── НЭМЭЛТ ROUTE 2: Category-аар шүүх — AI зардалгүй ─────────────────
+    // "зан төлөвийн тест байна уу?", "эрүүл мэндийн тест харуулаач" гэх мэт
+    if (isCategoryQuery && (exactCategory || category)) {
+      const filtered = filterByCategory(liveAssessments, exactCategory, category)
+      const tests = filtered.map(a => formatAssessmentForWidget(a, lang))
+
+      // Харуулах category нэр: exactCategory эсвэл keyword-ийн нэр
+      const displayName = exactCategory || category || ''
+
+      // Хэрэв тухайн category-д тест олдоогүй бол бүх тестийг буцаана
+      if (tests.length === 0) {
+        const allTests = liveAssessments.map(a => formatAssessmentForWidget(a, lang))
+        const allCategories = [...new Set(liveAssessments.map(a => a.category?.name).filter(Boolean))] as string[]
+        return Response.json({
+          reply: lang === 'mn'
+            ? `"${displayName}" бүлэгт тест олдсонгүй. Бүх тестүүдийг харуулж байна:`
+            : `No tests found for "${displayName}". Showing all tests:`,
+          tests: allTests,
+          categories: allCategories,
+          source: 'category_fallback',
+          intent,
+          tokens_used: 0,
+        })
+      }
+
+      const categories = [...new Set(filtered.map(a => a.category?.name).filter(Boolean))] as string[]
+
+      return Response.json({
+        reply: lang === 'mn'
+          ? `**"${displayName}"** чиглэлийн **${tests.length} тест** байна:`
+          : `Found **${tests.length} assessment${tests.length !== 1 ? 's' : ''}** in "${displayName}":`,
+        tests,
+        categories,
+        source: 'category_filter',
+        intent,
+        tokens_used: 0,
+      })
+    }
+
+    // ── ROUTE 3: FAQ — instant, no AI cost ────────────────────────────────
     if (!useLLM || intent === 'faq') {
       const faqAnswer = findFAQ(lastMessage, lang)
       if (faqAnswer) {
@@ -116,7 +172,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // ── ROUTE 3: Analyze — exam code-оор үр дүн татах ────────────────────
+    // ── ROUTE 4: Analyze — exam code-оор үр дүн татах ────────────────────
     let examContext = ''
     if (intent === 'analyze') {
       const code = extractExamCode(lastMessage)
@@ -133,9 +189,8 @@ export async function POST(req: Request) {
       }
     }
 
-    // ── ROUTE 4: LLM — тест санал болгох үндсэн зорилготой ─────────────
-    const { category: detectedCategory } = classify(lastMessage)
-    const systemPrompt = buildSystemPrompt(intent, lang, liveAssessments, detectedCategory) + examContext
+    // ── ROUTE 5: LLM — тест санал болгох үндсэн зорилготой ─────────────
+    const systemPrompt = buildSystemPrompt(intent, lang, liveAssessments, category) + examContext
     const compressed = compressHistory(messages)
     const formattedMessages = compressed
       .filter((m: { role: string }) => ['user', 'assistant', 'bot'].includes(m.role))
