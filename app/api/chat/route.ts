@@ -231,21 +231,35 @@ export async function POST(req: Request) {
     const rawText = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text : ''
     const tokensUsed = (aiResponse.usage?.input_tokens ?? 0) + (aiResponse.usage?.output_tokens ?? 0)
 
-    // [TEST:id] marker-уудыг parse хийж widget card болгоно
+    // Parse [TEST:id] markers from response + extract tests
     const { cleanText, testIds } = parseTestMarkers(rawText)
-    let tests = testIds.map(shapeTest).filter((t) => t !== null)
-
-    // Хэрэв LLM тест санал болгоогүй ЭСВЭЛ цөөн санал болгосон бол
-    // илрүүлсэн категорийн БҮГД тестийг автоматаар нэмнэ
-    if (detectedCategory && tests.length < 2) {
-      const categoryTests = relevantAssessments.map(a => formatAssessmentForWidget(a, lang))
-      // Давхардахгүйгээр нэмнэ
-      const existingIds = new Set(tests.map(t => t?.id))
-      for (const ct of categoryTests) {
-        if (!existingIds.has(ct.id)) {
-          tests.push(ct)
-        }
+    
+    // Extract tests from static TEST_DATABASE (1-12)
+    let tests: any[] = []
+    for (const id of testIds) {
+      const testInfo = TEST_DATABASE[id]
+      if (testInfo) {
+        const isFree = testInfo.price === 'Uneggui'
+        tests.push({
+          id: testInfo.id,
+          name: lang === 'en' ? testInfo.nameEn : testInfo.name,
+          desc: lang === 'en' ? testInfo.descEn : testInfo.desc,
+          url: testInfo.url,
+          price: isFree ? 'Үнэгүй' : `${testInfo.price}₮`,
+          duration: testInfo.time,
+          emoji: testInfo.emoji,
+          color: testInfo.color,
+          free: isFree,
+          image: testInfo.image,
+          category: testInfo.category,
+          icon: '', count: 0, author: '',
+        })
       }
+    }
+
+    // If no tests found in markers, look through live assessments for matches
+    if (tests.length === 0 && relevantAssessments?.length > 0) {
+      tests = relevantAssessments.slice(0, 3).map(a => formatAssessmentForWidget(a, lang))
     }
 
     // Category tabs — санал болгосон тестүүдийн категориудаар tab харуулна

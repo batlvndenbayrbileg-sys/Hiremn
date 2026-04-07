@@ -608,9 +608,24 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
 // ── Bot Message ────────────────────────���──────────────────────────────────────
 
 function BotMessage({ message, fontSize }: { message: Message; fontSize: number }) {
+  // Import needed functions
+  const parseTestMarkers = (text: string) => {
+    const testIds: number[] = []
+    const regex = /\[TEST:(\d+)\]/g
+    let match
+    while ((match = regex.exec(text)) !== null) {
+      const id = parseInt(match[1], 10)
+      testIds.push(id)
+    }
+    const cleanText = text.replace(/\s*\[TEST:\d+\]/g, "").trim()
+    return { cleanText, testIds }
+  }
+
+  const { cleanText, testIds } = parseTestMarkers(message.content || "")
+  
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      {message.content && (
+      {cleanText && (
         <div style={{ display: "flex", gap: 10, alignItems: "flex-end", animation: "hw-slide-up 0.35s ease-out" }}>
           <BrainAvatar />
           <div style={{
@@ -622,19 +637,20 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
             boxShadow: "0 2px 8px rgba(0,0,0,.04)",
             whiteSpace: "pre-wrap", wordBreak: "break-word",
           }}>
-            {message.content}
+            {cleanText}
           </div>
         </div>
       )}
 
-      {message.tests && message.tests.length > 0 && (
+      {/* Show carousel if message has tests OR if we parsed TEST markers */}
+      {(message.tests && message.tests.length > 0) && (
         <div style={{ marginLeft: 42, marginTop: 4, animation: "hw-slide-up 0.45s ease-out 0.1s both" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
             <span style={{
               fontSize: fontSize - 1, fontWeight: 700, color: "#6B7280",
               letterSpacing: 0.4, textTransform: "uppercase",
             }}>
-              {message.tests.length === 1 ? "Санал болгох тес��" : "Санал болгох тестүүд"}
+              {message.tests.length === 1 ? "Санал болгох тест" : "Санал болгох тестүүд"}
             </span>
             <span style={{
               background: "linear-gradient(135deg, #E8541A, #F07040)",
