@@ -2,26 +2,34 @@
 import { Intent } from './classifier'
 import type { Assessment } from './hire-api'
 
-function formatTestList(assessments: Assessment[], lang: 'mn' | 'en'): string {
-  if (assessments.length === 0) {
-    return [
-      '[TEST:114] AUDIT (Архины хэрэглээ) — Үнэгүй — 10 мин — Өөрийн үнэлгээ',
-      '[TEST:113] Никотин хамаарал — Үнэгүй — 10 мин — Өөрийн үнэлгээ',
-      '[TEST:112] СЭМҮТ урьдчилан сэргийлэх — Үнэгүй — 25 мин — Өөрийн үнэлгээ',
-      '[TEST:102] Өсөлтийн сэтгэлгээ (Mindset) — 10,000₮ — 10 мин — Өөрийн үнэлгээ',
-      '[TEST:99] Ажил-амьдрал тэнцвэр — 20,000₮ — 10 мин — Өөрийн үнэлгээ',
-      '[TEST:95] Харилцааны хэв шинж — 30,000₮ — 10 мин — Зан төлөвийн тест',
-    ].join('\n')
+function formatTestList(assessments: Assessment[], lang: 'mn' | 'en', filterCategory?: string): string {
+  const FALLBACK = [
+    '[TEST:114] AUDIT — Үнэгүй — 10 мин — Эрүүл мэнд',
+    '[TEST:113] Никотин хамаарал — Үнэгүй — 10 мин — Эрүүл мэнд',
+    '[TEST:112] СЭМҮТ — Үнэгүй — 25 мин — Сэтгэл зүй',
+    '[TEST:102] Mindset — 10,000₮ — 10 мин — Хөгжил',
+    '[TEST:99] Ажил-амьдрал тэнцвэр — 20,000₮ — 10 мин — Тэнцвэр',
+    '[TEST:95] Харилцааны хэв шинж — 30,000₮ — 10 мин — Зан төлөв',
+  ].join('\n')
+
+  if (assessments.length === 0) return FALLBACK
+
+  let list = assessments.filter(a => a.isActive !== false)
+
+  if (filterCategory) {
+    const filtered = list.filter(a =>
+      (a.category?.name || '').toLowerCase().includes(filterCategory.toLowerCase())
+    )
+    if (filtered.length > 0) list = filtered
   }
 
-  return assessments
-    .filter(a => a.isActive !== false)
+  return list
     .map(a => {
       const name = lang === 'en' && a.nameEn ? a.nameEn : a.name
       const price = a.price === 0 ? 'Үнэгүй' : `${a.price.toLocaleString()}₮`
       const duration = a.duration ? `${a.duration} мин` : '10 мин'
-      const category = a.category?.name || ''
-      return `[TEST:${a.id}] ${name} — ${price} — ${duration} — ${category}`
+      const cat = a.category?.name || ''
+      return `[TEST:${a.id}] ${name} — ${price} — ${duration} — ${cat}`
     })
     .join('\n')
 }
@@ -29,54 +37,44 @@ function formatTestList(assessments: Assessment[], lang: 'mn' | 'en'): string {
 export function buildSystemPrompt(
   intent: Intent,
   lang: 'mn' | 'en',
-  assessments: Assessment[] = []
+  assessments: Assessment[] = [],
+  filterCategory?: string
 ): string {
   const langInstruction = lang === 'mn'
-    ? 'Монгол хэлээр (кирилл) хариул. Товч, тодорхой, мэргэжлийн байх.'
-    : 'Respond in English. Be concise and professional.'
+    ? 'Монгол хэлээр (кирилл) хариул.'
+    : 'Respond in English.'
 
-  const testList = formatTestList(assessments, lang)
+  const testList = formatTestList(assessments, lang, filterCategory)
 
-  // Intent-д тохирсон зааврууд
   const intentInstructions: Record<Intent, string> = {
-    faq: `
-1-2 өгүүлбэрээр хариул. Шууд, тодорхой байх.
-[TEST:id] marker ашиглах шаардлагагүй.`,
+    faq: `1-2 өгүүлбэрээр хариул. Асуултад шууд хариулсны ЭЦЭСТнэгийн санал болгох тест [TEST:id] нэм.`,
 
-    recommend: `
-Хэрэглэгчийн нөхцөл байдалд тулгуурлан ТОХИРОХ тестүүдийг санал болго.
-- Нэг тест санал болгох бол: нэг [TEST:id]
-- Хэд хэдэн санал болгох бол: хэд хэдэн [TEST:id] (хамгийн их 5)
-- Нэг категориос хэд хэдэн санал болгох бол: тэр бүлгийн тестүүдийн [TEST:id]-г жагсаа
-Эхэлж нэг богино өгүүлбэр (12-аас дахиагүй үг), дараа нь [TEST:id] маркерууд.
-ЧУХАЛ: карт дээр нэр, үнэ бүгд харагдана — текстэд давтаж бичихгүй.`,
+    recommend: `Хэрэглэгчийн нөхцөл байдалд тулгуурлан хамгийн тохирох 2-4 тест санал болго.
+1 богино өгүүлбэр (10-аас дахиагүй үг) + [TEST:id] маркерууд.
+Карт дээр нэр/үнэ харагдах тул текстэд давтаж бичихгүй.`,
 
-    analyze: `
-Хэрэглэгчийн үр дүнг шинжил. Хамгийн их 3 bullet point.
-Хэрэв дараагийн тест санал болгох нь зүйтэй бол [TEST:id] нэм.`,
+    analyze: `Хэрэглэгчийн үр дүнг 2-3 bullet point-оор тайлбарла. Дараа нь тохирох [TEST:id] санал болго.`,
 
-    upsell: `
-Нэг урамшуулах өгүүлбэр + [TEST:id]. Нийт 15-аас дахиагүй үг.`,
+    upsell: `1 урамшуулах өгүүлбэр + 1-2 [TEST:id]. 15 үгнээс хэтрэхгүй.`,
 
-    general: `
-Хамгийн их 2-3 өгүүлбэр. Хэрэглэгчийн асуултад хамааралтай бол [TEST:id] нэм.
-Хэрэв ямар тест тохирохыг мэдэхгүй бол НЭГ товч тодруулах асуулт асуу.`,
+    general: `2 өгүүлбэрээс хэтрэхгүй хариул. ЗААВАЛ 1-3 тохирох [TEST:id] оруул.
+Хэрэглэгч ямар чиглэлд сонирхож байгааг таамаглаж тест санал болго.`,
   }
 
-  return `Та hire.mn-ийн AI туслагч юм. hire.mn бол Монголын мэргэжлийн үнэлгээний платформ ("Зөв хүн, зөв газарт").
-
+  return `Та hire.mn AI борлуулагч туслагч. hire.mn = Монголын мэргэжлийн үнэлгээний платформ.
+ҮНДСЭН ЗОРИЛГО: Хэрэглэгчид тохирох тестийг санал болгож, тэдгээрийг худалдан авахад урамшуулах.
 ${langInstruction}
 
-ТЕСТҮҮДИЙН ЖАГСААЛТ (зөвхөн эдгээрийг ашиглах, санал болгохдоо [TEST:id] marker оруулах):
+ТЕСТҮҮД:
 ${testList}
 
-ДААЛГАВАР:${intentInstructions[intent]}
+ДААЛГАВАР: ${intentInstructions[intent]}
 
 ХАТУУ ДҮРМҮҮД:
-- Текстэд тестийн нэр, үнийг давтаж бичихгүй — карт дээр харагдана
-- "analyze" intent-ээс бусад тохиолдолд bullet point ашиглахгүй
+- ЗААВАЛ дор хаяж нэг [TEST:id] оруул (зөвхөн analyze-д заавал биш)
+- Тестийн нэр, үнийг текстэд давтаж бичихгүй
 - 3-аас их өгүүлбэр бичихгүй
-- Хэрэглэгч category нэрлэвэл тэр category-ийн тестүүдийн [TEST:id]-г оруул`
+- Категори нэрлэсэн бол тэр категорийн бүх тестийг санал болго`
 }
 
 export function compressHistory(

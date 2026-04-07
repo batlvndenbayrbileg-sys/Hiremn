@@ -133,10 +133,9 @@ export async function POST(req: Request) {
       }
     }
 
-    // ── ROUTE 4: LLM — ямар ч асуултыг ойлгож, тест санал болгоно ────────
-    // Claude нь хэрэглэгчийн асуултыг ойлгоод тохирох [TEST:id] marker буцаана.
-    // Widget тэдгээр marker-уудыг carousel card болгон харуулна.
-    const systemPrompt = buildSystemPrompt(intent, lang, liveAssessments) + examContext
+    // ── ROUTE 4: LLM — тест санал болгох үндсэн зорилготой ─────────────
+    const { category: detectedCategory } = classify(lastMessage)
+    const systemPrompt = buildSystemPrompt(intent, lang, liveAssessments, detectedCategory) + examContext
     const compressed = compressHistory(messages)
     const formattedMessages = compressed
       .filter((m: { role: string }) => ['user', 'assistant', 'bot'].includes(m.role))
@@ -145,9 +144,14 @@ export async function POST(req: Request) {
         content: String(m.content),
       }))
 
+    // analyze-д sonnet, бусад бүхэнд haiku (хурдан, хямд)
+    const model = intent === 'analyze'
+      ? 'claude-sonnet-4-20250514'
+      : 'claude-haiku-4-20250514'
+
     const aiResponse = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 500,
+      model,
+      max_tokens: 300,
       system: systemPrompt,
       messages: formattedMessages,
     })
@@ -159,8 +163,8 @@ export async function POST(req: Request) {
     const { cleanText, testIds } = parseTestMarkers(rawText)
     const tests = testIds.map(shapeTest).filter(Boolean)
 
-    // LLM олон тест санал болгосон бол category tab ч харуулж болно
-    const categories = tests.length > 2
+    // Category tabs — тестүүд байвал үргэлж category-г буцаана
+    const categories = tests.length > 0
       ? [...new Set(tests.map(t => t?.category).filter(Boolean))] as string[]
       : []
 

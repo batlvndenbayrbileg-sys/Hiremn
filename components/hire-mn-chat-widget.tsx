@@ -106,6 +106,8 @@ function getCoverImage(test: Test): string {
 
 // ── Test Card ─────────────────────────────────────────────────────────────────
 
+const CARD_W = 200
+
 function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; fontSize: number }) {
   const [imgLoaded, setImgLoaded] = useState(false)
   const cover = getCoverImage(test)
@@ -117,10 +119,11 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
       rel="noopener noreferrer"
       className="hw-card"
       style={{
-        display: "block", background: "#fff",
+        display: "flex", flexDirection: "column",
+        background: "#fff",
         border: "1px solid #EEEAE8", borderRadius: 16,
         overflow: "hidden", textDecoration: "none",
-        minWidth: 192, maxWidth: 212, flexShrink: 0,
+        width: CARD_W, minWidth: CARD_W, maxWidth: CARD_W, flexShrink: 0,
         animation: `hw-card-in 0.42s cubic-bezier(.34,1.56,.64,1) ${index * 0.09}s both`,
       }}
     >
@@ -177,7 +180,7 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
       </div>
 
       {/* Body */}
-      <div style={{ padding: "10px 12px 12px" }}>
+      <div style={{ padding: "10px 12px 12px", display: "flex", flexDirection: "column", flex: 1 }}>
         <div style={{
           fontSize: fontSize - 1, fontWeight: 700, color: "#111827",
           lineHeight: 1.3, marginBottom: 4,
@@ -191,7 +194,8 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
         }}>{test.desc}</div>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <div style={{ marginTop: "auto", paddingTop: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 9 }}>
           <span style={{
             background: test.free ? "#ECFDF5" : "#FEF3EE",
             color: test.free ? "#059669" : "#E8541A",
@@ -221,12 +225,13 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
             <path d="M3 8h10M9 4l4 4-4 4" />
           </svg>
         </div>
+        </div>
       </div>
     </a>
   )
 }
 
-// ── Category Tabs ──────────────────────────────────────────────────���──────────
+// ── Category Tabs ─────────────────────────────────────────────────────────────
 
 function CategoryTabs({
   categories,
@@ -242,117 +247,149 @@ function CategoryTabs({
   const all = ["Бүгд", ...categories]
   return (
     <div style={{
-      display: "flex", gap: 6,
+      display: "flex", gap: 5,
       overflowX: "auto", scrollbarWidth: "none",
-      paddingBottom: 2, marginBottom: 8,
+      paddingBottom: 4, marginBottom: 6,
     }}>
-      {all.map(cat => (
-        <button
-          key={cat}
-          onClick={() => onSelect(cat)}
-          style={{
-            flexShrink: 0,
-            padding: "4px 11px", borderRadius: 20,
-            border: active === cat ? "none" : "1px solid #F0EAE6",
-            background: active === cat ? "#E8541A" : "#fff",
-            color: active === cat ? "#fff" : "#6B7280",
-            fontSize: fontSize - 2,
-            fontWeight: active === cat ? 600 : 400,
-            cursor: "pointer", whiteSpace: "nowrap",
-            transition: "all 0.15s",
-          }}
-        >
-          {cat}
-        </button>
-      ))}
+      {all.map(cat => {
+        const isActive = active === cat
+        return (
+          <button
+            key={cat}
+            className="hw-tab"
+            onClick={() => onSelect(cat)}
+            style={{
+              flexShrink: 0,
+              padding: "5px 12px", borderRadius: 20,
+              border: isActive ? "none" : "1.5px solid #F0EAE6",
+              background: isActive ? "linear-gradient(135deg,#E8541A,#F07040)" : "#fff",
+              color: isActive ? "#fff" : "#6B7280",
+              fontSize: fontSize - 3, fontWeight: isActive ? 700 : 500,
+              cursor: "pointer", whiteSpace: "nowrap",
+              boxShadow: isActive ? "0 3px 10px rgba(232,84,26,.25)" : "none",
+            }}
+          >
+            {cat}
+          </button>
+        )
+      })}
     </div>
   )
 }
 
 // ── Test Carousel ─────────────────────────────────────────────────────────────
 
-function TestCarousel({ tests, fontSize }: { tests: Test[]; fontSize: number }) {
+function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categories: string[]; fontSize: number }) {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const [canLeft, setCanLeft] = useState(false)
-  const [canRight, setCanRight] = useState(false)
+  const [activeCategory, setActiveCategory] = useState("Бүгд")
+  const [activeDot, setActiveDot] = useState(0)
+
+  // Filter tests by active category
+  const filtered = activeCategory === "Бүгд"
+    ? tests
+    : tests.filter(t => (t.category || "") === activeCategory)
 
   const check = () => {
     if (!scrollRef.current) return
-    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
-    setCanLeft(scrollLeft > 5)
-    setCanRight(scrollLeft < scrollWidth - clientWidth - 5)
+    const { scrollLeft } = scrollRef.current
+    setActiveDot(Math.round(scrollLeft / (CARD_W + 10)))
   }
 
-  useEffect(() => { check() }, [tests])
+  useEffect(() => {
+    setActiveCategory("Бүгд")
+    setActiveDot(0)
+    scrollRef.current?.scrollTo({ left: 0 })
+  }, [tests])
 
   const scroll = (dir: "left" | "right") => {
-    scrollRef.current?.scrollBy({ left: dir === "left" ? -220 : 220, behavior: "smooth" })
+    scrollRef.current?.scrollBy({ left: dir === "left" ? -(CARD_W + 10) : (CARD_W + 10), behavior: "smooth" })
     setTimeout(check, 350)
+  }
+
+  const handleCategorySelect = (cat: string) => {
+    setActiveCategory(cat)
+    setActiveDot(0)
+    setTimeout(() => scrollRef.current?.scrollTo({ left: 0 }), 10)
   }
 
   if (tests.length === 0) return null
 
+  const showArrows = filtered.length > 1
+
   return (
-    <div style={{ position: "relative" }}>
-      {canLeft && (
-        <button onClick={() => scroll("left")} style={{
-          position: "absolute", left: -10, top: "45%", transform: "translateY(-50%)",
-          width: 26, height: 26, borderRadius: "50%",
-          background: "#fff", border: "1px solid #F0EAE6",
-          boxShadow: "0 2px 8px rgba(0,0,0,.1)",
-          cursor: "pointer", zIndex: 10,
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
-            <path d="M10 4l-4 4 4 4" />
-          </svg>
-        </button>
-      )}
-      {canRight && (
-        <button onClick={() => scroll("right")} style={{
-          position: "absolute", right: -10, top: "45%", transform: "translateY(-50%)",
-          width: 26, height: 26, borderRadius: "50%",
-          background: "#fff", border: "1px solid #F0EAE6",
-          boxShadow: "0 2px 8px rgba(0,0,0,.1)",
-          cursor: "pointer", zIndex: 10,
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
-            <path d="M6 4l4 4-4 4" />
-          </svg>
-        </button>
+    <div>
+      {/* Category filter tabs — only show if >1 category */}
+      {categories.length > 1 && (
+        <CategoryTabs
+          categories={categories}
+          active={activeCategory}
+          onSelect={handleCategorySelect}
+          fontSize={fontSize}
+        />
       )}
 
-      <div
-        ref={scrollRef}
-        onScroll={check}
-        style={{
-          display: "flex", gap: 10,
-          overflowX: "auto", overflowY: "hidden",
-          scrollSnapType: "x mandatory",
-          paddingBottom: 4, paddingTop: 2,
-          paddingLeft: 2, paddingRight: 2,
-          scrollbarWidth: "none",
-        }}
-      >
-        {tests.map((test, i) => (
-          <div key={test.id} style={{ scrollSnapAlign: "start" }}>
-            <TestCard test={test} index={i} fontSize={fontSize} />
-          </div>
-        ))}
+      <div style={{ position: "relative" }}>
+        {showArrows && (
+          <button onClick={() => scroll("left")} style={{
+            position: "absolute", left: -10, top: "45%", transform: "translateY(-50%)",
+            width: 26, height: 26, borderRadius: "50%",
+            background: "#fff", border: "1px solid #F0EAE6",
+            boxShadow: "0 2px 8px rgba(0,0,0,.12)",
+            cursor: "pointer", zIndex: 10,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M10 4l-4 4 4 4" />
+            </svg>
+          </button>
+        )}
+        {showArrows && (
+          <button onClick={() => scroll("right")} style={{
+            position: "absolute", right: -10, top: "45%", transform: "translateY(-50%)",
+            width: 26, height: 26, borderRadius: "50%",
+            background: "#fff", border: "1px solid #F0EAE6",
+            boxShadow: "0 2px 8px rgba(0,0,0,.12)",
+            cursor: "pointer", zIndex: 10,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M6 4l4 4-4 4" />
+            </svg>
+          </button>
+        )}
+
+        <div
+          ref={scrollRef}
+          onScroll={check}
+          style={{
+            display: "flex", gap: 10,
+            overflowX: "auto", overflowY: "hidden",
+            scrollSnapType: "x mandatory",
+            paddingBottom: 4, paddingTop: 2,
+            paddingLeft: 2, paddingRight: 2,
+            scrollbarWidth: "none",
+          }}
+        >
+          {filtered.map((test, i) => (
+            <div key={test.id} style={{ scrollSnapAlign: "start", flexShrink: 0 }}>
+              <TestCard test={test} index={i} fontSize={fontSize} />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Dot indicators */}
-      {tests.length > 1 && (
+      {filtered.length > 1 && (
         <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 8 }}>
-          {tests.slice(0, Math.min(tests.length, 8)).map((_, i) => (
+          {filtered.slice(0, Math.min(filtered.length, 8)).map((_, i) => (
             <div key={i} style={{
-              width: i === 0 ? 14 : 5, height: 5, borderRadius: 3,
-              background: i === 0 ? "#E8541A" : "#F0D8CE",
+              width: i === activeDot ? 16 : 5, height: 5, borderRadius: 3,
+              background: i === activeDot ? "#E8541A" : "#F0D8CE",
+              transition: "all 0.25s cubic-bezier(.34,1.56,.64,1)",
             }} />
           ))}
-          {tests.length > 8 && (
-            <span style={{ fontSize: 10, color: "#9CA3AF", marginLeft: 2 }}>+{tests.length - 8}</span>
+          {filtered.length > 8 && (
+            <span style={{ fontSize: 10, color: "#9CA3AF", marginLeft: 2 }}>+{filtered.length - 8}</span>
           )}
         </div>
       )}
@@ -360,16 +397,9 @@ function TestCarousel({ tests, fontSize }: { tests: Test[]; fontSize: number }) 
   )
 }
 
-// ── Bot Message (tests + category tabs) ──────────────────────────────────────
+// ── Bot Message ───────────────────────────────────────────────────────────────
 
 function BotMessage({ message, fontSize }: { message: Message; fontSize: number }) {
-  const [activeTab, setActiveTab] = useState("Бүгд")
-
-  const filteredTests = !message.tests ? [] :
-    activeTab === "Бүгд"
-      ? message.tests
-      : message.tests.filter(t => t.category === activeTab)
-
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {/* Text bubble */}
@@ -390,40 +420,31 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
         </div>
       )}
 
-      {/* Test carousel + category tabs */}
+      {/* Test carousel — categories managed inside TestCarousel */}
       {message.tests && message.tests.length > 0 && (
         <div style={{ marginLeft: 38, marginTop: 2, animation: "hw-slide-up 0.45s ease-out 0.1s both" }}>
-
-          {/* Header row */}
-          <div style={{
-            display: "flex", alignItems: "center", gap: 8, marginBottom: 8,
-          }}>
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
             <span style={{
-              fontSize: fontSize - 2, fontWeight: 600, color: "#9CA3AF",
-              letterSpacing: 0.2, textTransform: "uppercase",
+              fontSize: fontSize - 2, fontWeight: 700, color: "#6B7280",
+              letterSpacing: 0.3, textTransform: "uppercase",
             }}>
               {message.tests.length === 1 ? "Санал болгох тест" : "Санал болгох тестүүд"}
             </span>
             <span style={{
-              background: "#FEF3EE", color: "#E8541A",
-              fontSize: fontSize - 3, fontWeight: 700,
-              padding: "1px 7px", borderRadius: 10,
+              background: "linear-gradient(135deg,#E8541A,#F07040)",
+              color: "#fff", fontSize: fontSize - 3, fontWeight: 700,
+              padding: "1px 8px", borderRadius: 20,
             }}>
-              {filteredTests.length}
+              {message.tests.length}
             </span>
           </div>
 
-          {/* Category tabs — зөвхөн 2+ category байвал харуулна */}
-          {message.categories && message.categories.length > 1 && (
-            <CategoryTabs
-              categories={message.categories}
-              active={activeTab}
-              onSelect={tab => setActiveTab(tab)}
-              fontSize={fontSize}
-            />
-          )}
-
-          <TestCarousel tests={filteredTests} fontSize={fontSize} />
+          <TestCarousel
+            tests={message.tests}
+            categories={message.categories || []}
+            fontSize={fontSize}
+          />
         </div>
       )}
     </div>
