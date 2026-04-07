@@ -606,59 +606,75 @@ export default function HireMnChatWidget() {
 
         @keyframes hw-bounce {
           0%, 60%, 100% { transform: translateY(0) scale(1); }
-          30% { transform: translateY(-8px) scale(0.9); }
+          30% { transform: translateY(-10px) scale(0.92); }
         }
         @keyframes hw-float {
           0%, 100% { transform: translateY(0) rotate(0deg); }
-          33% { transform: translateY(-3px) rotate(-2deg); }
-          66% { transform: translateY(-4px) rotate(2deg); }
+          25% { transform: translateY(-4px) rotate(-3deg); }
+          50% { transform: translateY(-6px) rotate(0deg); }
+          75% { transform: translateY(-4px) rotate(3deg); }
         }
         @keyframes hw-pop {
-          from { transform: scale(0.85) translateY(10px); opacity: 0; }
-          60%  { transform: scale(1.03) translateY(-2px); opacity: 1; }
+          from { transform: scale(0.8) translateY(12px); opacity: 0; }
+          50%  { transform: scale(1.05) translateY(-3px); opacity: 1; }
           to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         @keyframes hw-card-in {
-          from { transform: scale(0.85) translateY(16px) rotate(-2deg); opacity: 0; }
-          70%  { transform: scale(1.02) translateY(-3px) rotate(0deg); opacity: 1; }
-          to   { transform: scale(1) translateY(0); opacity: 1; }
+          from { transform: scale(0.8) translateY(20px) rotate(-3deg); opacity: 0; }
+          60%  { transform: scale(1.03) translateY(-4px) rotate(1deg); opacity: 1; }
+          to   { transform: scale(1) translateY(0) rotate(0deg); opacity: 1; }
         }
         @keyframes hw-slide-up {
-          from { transform: translateY(20px); opacity: 0; }
+          from { transform: translateY(24px); opacity: 0; }
           to   { transform: translateY(0); opacity: 1; }
         }
         @keyframes hw-chat-open {
-          from { opacity: 0; transform: scale(0.85) translateY(24px); transform-origin: bottom right; }
-          60%  { transform: scale(1.02) translateY(-4px); transform-origin: bottom right; }
+          from { opacity: 0; transform: scale(0.8) translateY(30px); transform-origin: bottom right; }
+          50%  { transform: scale(1.03) translateY(-6px); transform-origin: bottom right; }
           to   { opacity: 1; transform: scale(1) translateY(0); transform-origin: bottom right; }
         }
         @keyframes hw-pulse {
-          0%, 100% { box-shadow: 0 8px 24px rgba(232,84,26,.35), 0 0 0 0 rgba(232,84,26,.35); }
-          50%       { box-shadow: 0 8px 24px rgba(232,84,26,.35), 0 0 0 14px rgba(232,84,26,0); }
+          0%, 100% { box-shadow: 0 10px 30px rgba(232,84,26,.4), 0 0 0 0 rgba(232,84,26,.4); }
+          50%       { box-shadow: 0 10px 30px rgba(232,84,26,.4), 0 0 0 18px rgba(232,84,26,0); }
         }
         @keyframes hw-chip-in {
-          from { transform: scale(0.75) translateY(8px); opacity: 0; }
+          from { transform: scale(0.7) translateY(10px); opacity: 0; }
+          70%  { transform: scale(1.05) translateY(-2px); opacity: 1; }
           to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         @keyframes hw-ring {
-          0%   { transform: scale(1); opacity: 0.6; }
-          100% { transform: scale(2); opacity: 0; }
+          0%   { transform: scale(1); opacity: 0.7; }
+          100% { transform: scale(2.2); opacity: 0; }
+        }
+        @keyframes hw-ring2 {
+          0%   { transform: scale(1); opacity: 0.5; }
+          100% { transform: scale(2.8); opacity: 0; }
         }
         @keyframes hw-tooltip-in {
-          from { opacity: 0; transform: translateX(8px); }
-          to   { opacity: 1; transform: translateX(0); }
+          from { opacity: 0; transform: translateX(10px) scale(0.95); }
+          to   { opacity: 1; transform: translateX(0) scale(1); }
         }
         @keyframes wave-hand {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(25deg); }
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(20deg); }
+          50% { transform: rotate(-5deg); }
+          75% { transform: rotate(20deg); }
         }
         @keyframes wave-arm {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(-10deg); }
+          0%, 100% { transform: rotate(0deg); }
+          50% { transform: rotate(-15deg); }
         }
         @keyframes glow-pulse {
-          0%, 100% { filter: drop-shadow(0 0 8px rgba(232,84,26,0.4)); }
-          50% { filter: drop-shadow(0 0 16px rgba(232,84,26,0.6)); }
+          0%, 100% { filter: drop-shadow(0 0 6px rgba(232,84,26,0.3)); }
+          50% { filter: drop-shadow(0 0 20px rgba(232,84,26,0.7)); }
+        }
+        @keyframes typing-bounce {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-6px); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
         }
 
         .hw-msg { animation: hw-pop 0.4s cubic-bezier(.34,1.56,.64,1) both; }
@@ -756,25 +772,25 @@ export default function HireMnChatWidget() {
 
         {/* Chat panel */}
         {isOpen && (
-          <div style={{ animation: "hw-chat-open 0.32s cubic-bezier(.34,1.56,.64,1)" }}>
+          <div style={{ animation: "hw-chat-open 0.4s cubic-bezier(.34,1.56,.64,1)" }}>
             <div className="hw-panel" style={{
-              width: 380,
-              height: "min(580px, calc(100vh - 110px))",
-              borderRadius: 24,
-              background: "#FAFAFA",
-              boxShadow: "0 28px 70px rgba(0,0,0,.18), 0 6px 20px rgba(0,0,0,.08)",
+              width: 420,
+              height: "min(680px, calc(100vh - 100px))",
+              borderRadius: 20,
+              background: "linear-gradient(180deg, #FFFFFF 0%, #FAFAF9 100%)",
+              boxShadow: "0 25px 60px rgba(0,0,0,.15), 0 10px 30px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04)",
               display: "flex", flexDirection: "column", overflow: "hidden",
-              border: "1px solid rgba(0,0,0,.06)",
+              border: "none",
             }}>
 
               {/* Header */}
               <div style={{
-                background: "linear-gradient(180deg, #fff 0%, #FDFCFB 100%)",
-                padding: "0 16px 0 18px",
-                height: 72,
-                display: "flex", alignItems: "center", gap: 12,
+                background: "linear-gradient(180deg, #FFFFFF 0%, #FDF9F7 100%)",
+                padding: "0 18px 0 20px",
+                height: 76,
+                display: "flex", alignItems: "center", gap: 14,
                 flexShrink: 0, position: "relative",
-                borderBottom: "1px solid #F0EBE7",
+                borderBottom: "1px solid rgba(232,84,26,0.08)",
               }}>
                 {/* Top gradient bar */}
                 <div style={{
@@ -1057,20 +1073,26 @@ export default function HireMnChatWidget() {
             </div>
           )}
 
-          {/* Pulsing rings */}
+          {/* Pulsing rings - 3 layers */}
           {!isOpen && (
             <>
               <div style={{
                 position: "absolute", bottom: 0, right: 0, pointerEvents: "none",
-                width: 60, height: 60, borderRadius: "50%",
-                background: "rgba(232,84,26,.2)",
-                animation: "hw-ring 2.5s ease-out infinite",
+                width: 64, height: 64, borderRadius: "50%",
+                background: "rgba(232,84,26,.25)",
+                animation: "hw-ring 2s ease-out infinite",
               }} />
               <div style={{
                 position: "absolute", bottom: 0, right: 0, pointerEvents: "none",
-                width: 60, height: 60, borderRadius: "50%",
-                background: "rgba(232,84,26,.15)",
-                animation: "hw-ring 2.5s ease-out 0.8s infinite",
+                width: 64, height: 64, borderRadius: "50%",
+                background: "rgba(232,84,26,.18)",
+                animation: "hw-ring 2s ease-out 0.5s infinite",
+              }} />
+              <div style={{
+                position: "absolute", bottom: 0, right: 0, pointerEvents: "none",
+                width: 64, height: 64, borderRadius: "50%",
+                background: "rgba(232,84,26,.12)",
+                animation: "hw-ring2 2s ease-out 1s infinite",
               }} />
             </>
           )}
@@ -1082,34 +1104,35 @@ export default function HireMnChatWidget() {
             onMouseLeave={() => setIsHovered(false)}
             aria-label="hire.mn чат нээх"
             style={{
-              width: 60, height: 60, borderRadius: "50%",
-              background: "linear-gradient(145deg, #F06030, #E8541A, #D44810)",
-              border: "3px solid rgba(255,255,255,.95)",
+              width: 64, height: 64, borderRadius: "50%",
+              background: "linear-gradient(145deg, #FF6535 0%, #E8541A 50%, #D44810 100%)",
+              border: "3.5px solid rgba(255,255,255,.98)",
               cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0, position: "relative",
-              boxShadow: "0 8px 24px rgba(232,84,26,.4)",
+              boxShadow: "0 10px 30px rgba(232,84,26,.45), inset 0 2px 0 rgba(255,255,255,.2)",
             }}
           >
             <div style={{
-              transition: "transform 0.35s cubic-bezier(.34,1.56,.64,1)",
-              transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
+              transition: "transform 0.4s cubic-bezier(.34,1.56,.64,1), opacity 0.2s",
+              transform: isOpen ? "rotate(180deg) scale(0.9)" : "rotate(0deg) scale(1)",
             }}>
               {isOpen ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
               ) : (
-                <MascotRobot size={32} white waving />
+                <MascotRobot size={34} white waving />
               )}
             </div>
             {!isOpen && (
               <span style={{
-                position: "absolute", bottom: 2, right: 2,
-                width: 14, height: 14, borderRadius: "50%",
+                position: "absolute", bottom: 3, right: 3,
+                width: 15, height: 15, borderRadius: "50%",
                 background: "linear-gradient(135deg, #22C55E, #4ADE80)",
-                border: "2.5px solid #fff",
-                boxShadow: "0 0 8px rgba(34,197,94,.5)",
+                border: "3px solid #fff",
+                boxShadow: "0 0 10px rgba(34,197,94,.6)",
+                animation: "typing-bounce 2s ease-in-out infinite",
               }} />
             )}
           </button>
