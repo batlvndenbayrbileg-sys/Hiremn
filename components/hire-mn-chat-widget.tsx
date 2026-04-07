@@ -38,74 +38,100 @@ const QUICK_REPLIES = [
 // ── Animated Mascot Robot ─────────────────────────────────────────────────────
 
 function MascotRobot({ size = 40, white = false, waving = false }: { size?: number; white?: boolean; waving?: boolean }) {
-  const stroke = white ? "#fff" : "#E8541A"
-  const fill1 = white ? "rgba(255,255,255,0.25)" : "rgba(232,84,26,0.15)"
-  const fill2 = white ? "rgba(255,255,255,0.5)" : "rgba(232,84,26,0.3)"
-  const fillSolid = white ? "#fff" : "#E8541A"
+  const primary = white ? "#fff" : "#E8541A"
+  const secondary = white ? "rgba(255,255,255,0.6)" : "rgba(232,84,26,0.35)"
+  const accent = white ? "rgba(255,255,255,0.8)" : "#E8541A"
   
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={{ overflow: "visible" }}>
-      {/* Body */}
-      <rect x="18" y="32" width="28" height="24" rx="6" fill={fill1} stroke={stroke} strokeWidth="2" />
-      
-      {/* Body screen */}
-      <rect x="24" y="38" width="16" height="10" rx="3" fill={fill2} stroke={stroke} strokeWidth="1.2" />
-      
-      {/* Screen dots - blinking */}
-      <circle cx="28" cy="43" r="1.5" fill={fillSolid}>
-        <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" />
-      </circle>
-      <circle cx="32" cy="43" r="1.5" fill={fillSolid}>
-        <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite" />
-      </circle>
-      <circle cx="36" cy="43" r="1.5" fill={fillSolid}>
-        <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" begin="0.5s" />
-      </circle>
-      
-      {/* Left arm */}
-      <g style={waving ? { animation: "wave-arm 0.6s ease-in-out infinite alternate", transformOrigin: "18px 38px" } : {}}>
-        <rect x="8" y="36" width="10" height="6" rx="3" fill={fill1} stroke={stroke} strokeWidth="2" />
-        <circle cx="8" cy="39" r="4" fill={fill2} stroke={stroke} strokeWidth="1.5" />
+    <svg width={size} height={size} viewBox="0 0 100 120" fill="none" style={{ overflow: "visible" }}>
+      {/* Head - sleek modern design */}
+      <g>
+        {/* Head glow background */}
+        <ellipse cx="50" cy="35" rx="22" ry="24" fill={secondary} opacity="0.4" />
+        {/* Head shape */}
+        <path d="M28 20 Q28 12 50 10 Q72 12 72 20 L72 48 Q72 56 50 58 Q28 56 28 48 Z" 
+          fill={secondary} stroke={primary} strokeWidth="2" />
+        
+        {/* AI Eyes - glowing orbs */}
+        <g>
+          <circle cx="38" cy="32" r="5" fill="none" stroke={primary} strokeWidth="1.5" opacity="0.6" />
+          <circle cx="38" cy="32" r="3.5" fill={primary} opacity="0.8" />
+          <circle cx="39" cy="31" r="1.2" fill={white ? primary : "#fff"} opacity="0.9" />
+          
+          <circle cx="62" cy="32" r="5" fill="none" stroke={primary} strokeWidth="1.5" opacity="0.6" />
+          <circle cx="62" cy="32" r="3.5" fill={primary} opacity="0.8" />
+          <circle cx="63" cy="31" r="1.2" fill={white ? primary : "#fff"} opacity="0.9" />
+          
+          {/* Eye glow animation */}
+          <circle cx="38" cy="32" r="5" fill="none" stroke={primary} strokeWidth="1" opacity="0.3">
+            <animate attributeName="r" values="5;7;5" dur="2s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="62" cy="32" r="5" fill="none" stroke={primary} strokeWidth="1" opacity="0.3">
+            <animate attributeName="r" values="5;7;5" dur="2s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite" />
+          </circle>
+        </g>
+        
+        {/* Smart smile */}
+        <path d="M40 44 Q50 48 60 44" stroke={primary} strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7" />
+        
+        {/* Thinking/Processing indicator dots */}
+        <g opacity="0.6">
+          <circle cx="32" cy="18" r="1.5" fill={primary}>
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="50" cy="12" r="1.5" fill={primary}>
+            <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" begin="0.3s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="68" cy="18" r="1.5" fill={primary}>
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" begin="0.6s" repeatCount="indefinite" />
+          </circle>
+        </g>
       </g>
       
-      {/* Right arm - waves when waving prop is true */}
-      <g style={waving ? { animation: "wave-hand 0.4s ease-in-out infinite alternate", transformOrigin: "46px 36px" } : {}}>
-        <rect x="46" y="36" width="10" height="6" rx="3" fill={fill1} stroke={stroke} strokeWidth="2" />
-        <circle cx="56" cy="39" r="4" fill={fill2} stroke={stroke} strokeWidth="1.5" />
+      {/* Neck connector */}
+      <rect x="46" y="56" width="8" height="6" fill={secondary} />
+      
+      {/* Body - modern geometric */}
+      <g>
+        {/* Main body */}
+        <path d="M30 62 L30 90 Q30 96 36 98 L64 98 Q70 96 70 90 L70 62 Z" 
+          fill={secondary} stroke={primary} strokeWidth="2" />
+        
+        {/* Central panel with gradient glow */}
+        <rect x="38" y="70" width="24" height="20" rx="4" fill={white ? "rgba(232,84,26,0.15)" : "rgba(255,255,255,0.1)"} stroke={primary} strokeWidth="1.5" opacity="0.7" />
+        
+        {/* Processing nodes */}
+        <g opacity="0.8">
+          <circle cx="44" cy="75" r="2" fill={primary} />
+          <circle cx="50" cy="75" r="2" fill={primary} />
+          <circle cx="56" cy="75" r="2" fill={primary} />
+          <circle cx="44" cy="82" r="2" fill={primary} />
+          <circle cx="56" cy="82" r="2" fill={primary} />
+          <circle cx="44" cy="89" r="2" fill={primary} />
+          <circle cx="50" cy="89" r="2" fill={primary} />
+          <circle cx="56" cy="89" r="2" fill={primary} />
+        </g>
       </g>
       
-      {/* Head - brain shaped */}
-      <ellipse cx="32" cy="18" rx="14" ry="12" fill={fill1} stroke={stroke} strokeWidth="2" />
+      {/* Arms - waving */}
+      <g style={waving ? { animation: "wave-arm 0.5s ease-in-out infinite alternate", transformOrigin: "30px 72px" } : {}}>
+        <rect x="14" y="70" width="16" height="6" rx="3" fill={secondary} stroke={primary} strokeWidth="1.5" />
+        <circle cx="14" cy="73" r="4" fill={secondary} stroke={primary} strokeWidth="1.5" />
+      </g>
       
-      {/* Brain folds */}
-      <path d="M22 16 Q26 12 28 18" stroke={stroke} strokeWidth="1.2" fill="none" opacity="0.6" />
-      <path d="M36 18 Q38 12 42 16" stroke={stroke} strokeWidth="1.2" fill="none" opacity="0.6" />
-      <path d="M28 22 Q32 26 36 22" stroke={stroke} strokeWidth="1.2" fill="none" opacity="0.6" />
+      <g style={waving ? { animation: "wave-hand 0.4s ease-in-out infinite alternate", transformOrigin: "70px 70px", delay: "0.1s" } : {}}>
+        <rect x="70" y="70" width="16" height="6" rx="3" fill={secondary} stroke={primary} strokeWidth="1.5" />
+        <circle cx="86" cy="73" r="4" fill={secondary} stroke={primary} strokeWidth="1.5" />
+      </g>
       
-      {/* Eyes */}
-      <ellipse cx="27" cy="18" rx="3" ry="3.5" fill={fill2} stroke={stroke} strokeWidth="1.2" />
-      <ellipse cx="37" cy="18" rx="3" ry="3.5" fill={fill2} stroke={stroke} strokeWidth="1.2" />
-      
-      {/* Pupils - looking around */}
-      <circle cx="27" cy="18" r="1.5" fill={fillSolid}>
-        <animate attributeName="cx" values="26;28;27;26" dur="3s" repeatCount="indefinite" />
-      </circle>
-      <circle cx="37" cy="18" r="1.5" fill={fillSolid}>
-        <animate attributeName="cx" values="36;38;37;36" dur="3s" repeatCount="indefinite" />
-      </circle>
-      
-      {/* Smile */}
-      <path d="M28 23 Q32 27 36 23" stroke={stroke} strokeWidth="1.5" fill="none" strokeLinecap="round" />
-      
-      {/* Antenna */}
-      <line x1="32" y1="6" x2="32" y2="2" stroke={stroke} strokeWidth="2" strokeLinecap="round" />
-      <circle cx="32" cy="1" r="2.5" fill={fillSolid}>
-        <animate attributeName="r" values="2.5;3.5;2.5" dur="1s" repeatCount="indefinite" />
-      </circle>
-      
-      {/* Legs */}
-      <rect x="22" y="56" width="8" height="6" rx="3" fill={fill1} stroke={stroke} strokeWidth="1.5" />
-      <rect x="34" y="56" width="8" height="6" rx="3" fill={fill1} stroke={stroke} strokeWidth="1.5" />
+      {/* Energy pulse bottom */}
+      <ellipse cx="50" cy="104" rx="20" ry="3" fill={primary} opacity="0.3" />
+      <ellipse cx="50" cy="104" rx="20" ry="3" fill="none" stroke={primary} strokeWidth="1" opacity="0.5">
+        <animate attributeName="rx" values="20;28;20" dur="2s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.5;0;0.5" dur="2s" repeatCount="indefinite" />
+      </ellipse>
     </svg>
   )
 }
