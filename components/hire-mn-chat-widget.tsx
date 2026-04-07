@@ -231,7 +231,7 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
   )
 }
 
-// ── Category Tabs ─────────────────────────────────────────────────────────────
+// ── Category Tabs ────────────────────────────────────────────────────────────
 
 function CategoryTabs({
   categories,
