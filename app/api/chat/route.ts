@@ -257,20 +257,8 @@ export async function POST(req: Request) {
       }
     }
 
-    // If no tests found in markers, look through live assessments for matches
-    if (tests.length === 0 && relevantAssessments?.length > 0) {
-      tests = relevantAssessments.slice(0, 3).map(a => formatAssessmentForWidget(a, lang))
-    }
-
-    // Apply price filter if user asked for "үнэгүй" or "төлбөртэй"
-    if (priceFilter && tests.length > 0) {
-      tests = tests.filter(t => 
-        priceFilter === 'free' ? t.free === true : t.free !== true
-      )
-    }
-
-    // If priceFilter specified but no tests from LLM, get all matching tests from database
-    if (priceFilter && tests.length === 0) {
+    // If priceFilter specified (user asked for "үнэгүй" or "төлбөртэй"), get ALL matching tests from database
+    if (priceFilter) {
       const allStaticTests = Object.values(TEST_DATABASE)
       const filteredStatic = allStaticTests.filter(t => {
         const isFree = t.price === 'Uneggui' || t.priceEn === 'Free'
@@ -293,6 +281,10 @@ export async function POST(req: Request) {
           icon: '', count: 0, author: '',
         }
       })
+    }
+    // If no priceFilter and no tests found in markers, look through live assessments
+    else if (tests.length === 0 && relevantAssessments?.length > 0) {
+      tests = relevantAssessments.map(a => formatAssessmentForWidget(a, lang))
     }
 
     // Category tabs — санал болгосон тестүүдийн категориудаар tab харуулна
