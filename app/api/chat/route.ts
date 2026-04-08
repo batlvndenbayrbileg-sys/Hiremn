@@ -234,35 +234,21 @@ export async function POST(req: Request) {
     // Parse [TEST:id] markers from response + extract tests
     const { cleanText, testIds } = parseTestMarkers(rawText)
     
-    // Extract tests from BOTH static TEST_DATABASE AND live assessments API
+    // ALWAYS use live assessments API as primary source
     let tests: any[] = []
     const addedIds = new Set<number>()
 
-    // 1. First add tests from static TEST_DATABASE based on LLM markers
-    for (const id of testIds) {
-      const testInfo = TEST_DATABASE[id]
-      if (testInfo && !addedIds.has(id)) {
-        const isFree = testInfo.price === 'Uneggui'
-        tests.push({
-          id: testInfo.id,
-          name: lang === 'en' ? testInfo.nameEn : testInfo.name,
-          desc: lang === 'en' ? testInfo.descEn : testInfo.desc,
-          url: testInfo.url,
-          price: isFree ? 'Үнэгүй' : `${testInfo.price}₮`,
-          duration: testInfo.time,
-          emoji: testInfo.emoji,
-          color: testInfo.color,
-          free: isFree,
-          image: testInfo.image,
-          category: testInfo.category,
-          icon: '', count: 0, author: '',
-        })
-        addedIds.add(id)
-      }
+    // If priceFilter specified (user asked for "үнэгүй" or "төлбөртэй"), get ALL matching tests from API
+    if (priceFilter && relevantAssessments?.length > 0) {
+      const filteredLive = relevantAssessments.filter(a => {
+        const isFree = a.price === 0
+        return priceFilter === 'free' ? isFree : !isFree
+      })
+      tests = filteredLive.map(a => formatAssessmentForWidget(a, lang))
     }
-
-    // 2. Also add tests from live assessments API based on LLM markers
-    if (relevantAssessments?.length > 0) {
+    // Otherwise, get tests based on LLM markers from API
+    else if (testIds.length > 0 && relevantAssessments?.length > 0) {
+      // First try to find tests by ID from live API
       for (const id of testIds) {
         const liveTest = relevantAssessments.find(a => a.id === id)
         if (liveTest && !addedIds.has(id)) {
@@ -270,55 +256,33 @@ export async function POST(req: Request) {
           addedIds.add(id)
         }
       }
-    }
-
-    // If priceFilter specified (user asked for "үнэгүй" or "төлбөртэй"), get ALL matching tests
-    if (priceFilter) {
-      tests = [] // Clear any existing tests
-
-      // 1. Get all matching tests from static TEST_DATABASE
-      const allStaticTests = Object.values(TEST_DATABASE)
-      const filteredStatic = allStaticTests.filter(t => {
-        const isFree = t.price === 'Uneggui' || t.priceEn === 'Free'
-        return priceFilter === 'free' ? isFree : !isFree
-      })
-      tests.push(...filteredStatic.map(t => {
-        const isFree = t.price === 'Uneggui' || t.priceEn === 'Free'
-        return {
-          id: t.id,
-          name: lang === 'mn' ? t.name : t.nameEn,
-          desc: lang === 'mn' ? t.desc : t.descEn,
-          url: t.url,
-          price: isFree ? 'Үнэгүй' : `${t.price}₮`,
-          duration: t.time,
-          emoji: t.emoji,
-          color: t.color,
-          free: isFree,
-          image: t.image,
-          category: t.category,
-          icon: '', count: 0, author: '',
+      
+      // Fallback to static database if API doesn't have the test
+      for (const id of testIds) {
+        if (addedIds.has(id)) continue
+        const testInfo = TEST_DATABASE[id]
+        if (testInfo) {
+          const isFree = testInfo.price === 'Uneggui'
+          tests.push({
+            id: testInfo.id,
+            name: lang === 'en' ? testInfo.nameEn : testInfo.name,
+            desc: lang === 'en' ? testInfo.descEn : testInfo.desc,
+            url: testInfo.url,
+            price: isFree ? 'Үнэгүй' : `${testInfo.price}₮`,
+            duration: testInfo.time,
+            emoji: testInfo.emoji,
+            color: testInfo.color,
+            free: isFree,
+            image: testInfo.image,
+            category: testInfo.category,
+            icon: '', count: 0, author: '',
+          })
+          addedIds.add(id)
         }
-      }))
-
-      // 2. Get all matching tests from live assessments API
-      if (relevantAssessments?.length > 0) {
-        const filteredLive = relevantAssessments.filter(a => {
-          const isFree = a.price === 0
-          return priceFilter === 'free' ? isFree : !isFree
-        })
-        tests.push(...filteredLive.map(a => formatAssessmentForWidget(a, lang)))
       }
-
-      // 3. Remove duplicates by id
-      const seenIds = new Set<number>()
-      tests = tests.filter(t => {
-        if (seenIds.has(t.id)) return false
-        seenIds.add(t.id)
-        return true
-      })
     }
-    // If no priceFilter and no tests found in markers, look through live assessments
-    else if (tests.length === 0 && relevantAssessments?.length > 0) {
+    // If no markers and no priceFilter, return all relevant assessments from API
+    else if (relevantAssessments?.length > 0) {
       tests = relevantAssessments.map(a => formatAssessmentForWidget(a, lang))
     }
 
