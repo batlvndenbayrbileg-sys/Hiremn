@@ -257,14 +257,17 @@ export async function POST(req: Request) {
       }
     }
 
-    // If priceFilter specified (user asked for "үнэгүй" or "төлбөртэй"), get ALL matching tests from database
+    // If priceFilter specified (user asked for "үнэгүй" or "төлбөртэй"), get ALL matching tests
     if (priceFilter) {
+      tests = [] // Clear any existing tests
+
+      // 1. Get all matching tests from static TEST_DATABASE
       const allStaticTests = Object.values(TEST_DATABASE)
       const filteredStatic = allStaticTests.filter(t => {
         const isFree = t.price === 'Uneggui' || t.priceEn === 'Free'
         return priceFilter === 'free' ? isFree : !isFree
       })
-      tests = filteredStatic.map(t => {
+      tests.push(...filteredStatic.map(t => {
         const isFree = t.price === 'Uneggui' || t.priceEn === 'Free'
         return {
           id: t.id,
@@ -280,6 +283,23 @@ export async function POST(req: Request) {
           category: t.category,
           icon: '', count: 0, author: '',
         }
+      }))
+
+      // 2. Get all matching tests from live assessments API
+      if (relevantAssessments?.length > 0) {
+        const filteredLive = relevantAssessments.filter(a => {
+          const isFree = a.price === 0
+          return priceFilter === 'free' ? isFree : !isFree
+        })
+        tests.push(...filteredLive.map(a => formatAssessmentForWidget(a, lang)))
+      }
+
+      // 3. Remove duplicates by id
+      const seenIds = new Set<number>()
+      tests = tests.filter(t => {
+        if (seenIds.has(t.id)) return false
+        seenIds.add(t.id)
+        return true
       })
     }
     // If no priceFilter and no tests found in markers, look through live assessments
