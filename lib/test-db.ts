@@ -17,7 +17,9 @@ export interface TestInfo {
   tag: string
   tagEn: string
   category: "personality" | "health" | "behavior"
-  image: string
+  image?: string
+  // LLM-д өгөх дэлгэрэнгүй тайлбар — ямар асуудалд тохирох
+  useCases: string
 }
 
 export const TEST_DATABASE: Record<number, TestInfo> = {
@@ -37,6 +39,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tagEn: "Popular",
     category: "personality",
     image: "/images/tests/test-1-growth-mindset.jpg",
+    useCases: "Суралцахдаа бэрхшээлтэй, өөрийгөө хөгжүүлэхийг хүсдэг, амжилтгүй болохоос айдаг, шинэ зүйл сурахад хэцүү санагддаг, бүтэлгүйтлээс сэргийлэх",
   },
   2: {
     id: 2,
@@ -54,6 +57,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tagEn: "New",
     category: "personality",
     image: "/images/tests/test-2-work-life-balance.jpg",
+    useCases: "Ажилдаа их цаг зарцуулдаг, гэр бүлдээ цаг гаргаж чаддаггүй, ядарч түвддэг, стресстэй, burnout мэдрэмж, амралт авч чаддаггүй, ажил амьдралын хоорондох тэнцвэрээ олох",
   },
   3: {
     id: 3,
@@ -71,6 +75,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tagEn: "For Leaders",
     category: "behavior",
     image: "/images/tests/test-3-communication-style.jpg",
+    useCases: "Хүмүүстэй харилцахад хэцүү, багаар ажиллахад асуудалтай, удирдах ажилтан, менежер, санаагаа илэрхийлж чаддаггүй, зөрчилдөөн шийдэж чаддаггүй, харилцааны ур чадвараа сайжруулах",
   },
   99: {
     id: 99,
@@ -88,6 +93,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tagEn: "Free",
     category: "health",
     image: "/images/tests/test-99-audit.jpg",
+    useCases: "Архи ууж байгаа, архины хэрэглээгээ хянах, согтууруулах ундаа хэт их хэрэглэж байгаа эсэх, архинд донтох эрсдэл, эрүүл мэндийн үзлэг",
   },
   5: {
     id: 5,
@@ -105,6 +111,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tagEn: "Free",
     category: "health",
     image: "/images/tests/test-5-nicotine.jpg",
+    useCases: "Тамхи татдаг, тамхинаас гарах гэж байгаа, тамхины хамаарлаа шалгах, никотин донтолт, эрүүл амьдралын хэв маягт шилжих",
   },
   6: {
     id: 6,
@@ -122,11 +129,12 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tagEn: "Important",
     category: "health",
     image: "/images/tests/test-6-semut.jpg",
+    useCases: "Сэтгэл санаа муу, депресс мэдрэмж, санаа зовнил, уйтгар гунигтай, стресс ихтэй, сэтгэцийн эрүүл мэндээ шалгах, урьдчилан сэргийлэх, гутрал",
   },
   // Үнэгүй сорилтүүд
   7: {
     id: 7,
-    name: "Öөтөө итгэх итгэл",
+    name: "Өөртөө итгэх итгэл",
     nameEn: "Self-Confidence",
     desc: "Өөрийн өөртөө итгэх чадварыг үнэл",
     descEn: "Assess your self-confidence level",
@@ -139,12 +147,13 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tag: "Uneggui",
     tagEn: "Free",
     category: "personality",
+    useCases: "Өөртөө итгэлгүй, ичимхий, олны өмнө ярихаас айдаг, шийдвэр гаргахад эргэлздэг, бусдын санаа бодлоос хэт ихээр хамаардаг, өөрийгөө үнэлдэггүй",
   },
   8: {
     id: 8,
-    name: "Нойргүйдлийн үнэлгээ",
+    name: "Түгшүүрийн үнэлгээ",
     nameEn: "Anxiety Assessment",
-    desc: "Нойргүйдлийн түвшнийг хэмжээрэй",
+    desc: "Түгшүүрийн түвшнийг хэмжээрэй",
     descEn: "Measure your anxiety level",
     url: "https://hire.mn/test/8",
     price: "Uneggui",
@@ -155,6 +164,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tag: "Uneggui",
     tagEn: "Free",
     category: "health",
+    useCases: "Санаа зовнилтой, түгшүүртэй, сандрах, зүрхний цохилт түргэсдэг, нойргүй, хэт их бодолтой, ирээдүйгээсээ айдаг, panic attack, anxiety",
   },
   4: {
     id: 4,
@@ -171,6 +181,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tag: "Uneggui",
     tagEn: "Free",
     category: "personality",
+    useCases: "Өөрийгөө үнэлж чаддаггүй, бусадтай харьцуулдаг, өөрийгөө дутуу санадаг, self-esteem бага, өөрийгөө хүндлэх, өөрийнхөө үнэ цэнийг мэдэхгүй",
   },
   // Төлбөртэй сорилтүүд
   10: {
@@ -188,6 +199,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tag: "Premium",
     tagEn: "Premium",
     category: "personality",
+    useCases: "Зорилгодоо хүрч чаддаггүй, амархан бууж өгдөг, тууштай байх, урт хугацааны зорилготой, хэцүү үед тэвчдэггүй, шаргуу хөдөлмөрлөх",
   },
   11: {
     id: 11,
@@ -204,6 +216,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tag: "Premium",
     tagEn: "Premium",
     category: "personality",
+    useCases: "Удирдах ажилтан, менежер, манлайлагч, ёс зүйн асуудал, шийдвэр гаргалт, баг удирдах, ажлын байрны ёс зүй, leadership",
   },
   12: {
     id: 12,
@@ -220,6 +233,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tag: "Premium",
     tagEn: "Premium",
     category: "personality",
+    useCases: "Өөрийгөө илүү сайн ойлгох, хувь хүний хэв шинж, MBTI, introvert extravert, карьер сонголт, хамтрагчаа ойлгох, харилцаагаа сайжруулах",
   },
 }
 
