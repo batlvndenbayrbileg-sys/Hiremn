@@ -11,6 +11,7 @@ export interface ClassifyResult {
   useLLM: boolean
   detectedLang: 'mn' | 'en'
   category?: string // хэрэглэгч тодорхой категори нэрлэсэн бол
+  priceFilter?: 'free' | 'paid' // "үнэгүй" эсвэл "төлбөртэй" тест хүссэн бол
 }
 
 // Категорийн keyword map — hire.mn /api/v1/assessmentCategory-д байгаа нэртэй таарна
@@ -78,32 +79,42 @@ function detectCategory(message: string): string | undefined {
   return undefined
 }
 
+function detectPriceFilter(message: string): 'free' | 'paid' | undefined {
+  const freePattern = /үнэгүй|free|тѳлбѳргүй|төлбөргүй|мөнгөгүй/i
+  const paidPattern = /төлбөртэй|төлбөр төлдөг|мөнгөтэй|paid|premium/i
+  
+  if (freePattern.test(message)) return 'free'
+  if (paidPattern.test(message)) return 'paid'
+  return undefined
+}
+
 export function classify(message: string): ClassifyResult {
   const lang = detectLang(message)
   const category = detectCategory(message)
+  const priceFilter = detectPriceFilter(message)
 
   // 1. Үр дүн шинжилгэх — хамгийн эхэлж
   if (ANALYZE_PATTERNS.some(p => p.test(message))) {
-    return { intent: 'analyze', confidence: 0.9, useLLM: true, detectedLang: lang, category }
+    return { intent: 'analyze', confidence: 0.9, useLLM: true, detectedLang: lang, category, priceFilter }
   }
 
   // 2. Дараагийн тест
   if (UPSELL_PATTERNS.some(p => p.test(message))) {
-    return { intent: 'upsell', confidence: 0.88, useLLM: true, detectedLang: lang, category }
+    return { intent: 'upsell', confidence: 0.88, useLLM: true, detectedLang: lang, category, priceFilter }
   }
 
   // 3. Компани/платформ талаарх мэдээлэл — FAQ
   if (FAQ_PATTERNS.some(p => p.test(message))) {
-    return { intent: 'faq', confidence: 0.95, useLLM: false, detectedLang: lang }
+    return { intent: 'faq', confidence: 0.95, useLLM: false, detectedLang: lang, priceFilter }
   }
 
-  // 4. Үнэ, хугацаа, тестийн жагсаалт — FAQ боловч тест санал болгохтой хавсарна
+  // 4. Үнэ, хугацаа, тестийн жагсаалт — тэр төрлийн тестүүдийг санал болгоно
   const isPriceDuration = /үнэ|төлбөр|хэд|мөнгө|үнэгүй|хэдэн минут|хугацаа|price|cost|free|how long/i.test(message)
   if (isPriceDuration) {
-    return { intent: 'faq', confidence: 0.85, useLLM: false, detectedLang: lang, category }
+    return { intent: 'recommend', confidence: 0.9, useLLM: true, detectedLang: lang, category, priceFilter }
   }
 
   // 5. DEFAULT: recommend — чатботын үндсэн зорилго бол тест санал болгох
   // Ямар ч асуулт ирсэн ч тесттэй холбон хариулна
-  return { intent: 'recommend', confidence: 0.8, useLLM: true, detectedLang: lang, category }
+  return { intent: 'recommend', confidence: 0.8, useLLM: true, detectedLang: lang, category, priceFilter }
 }

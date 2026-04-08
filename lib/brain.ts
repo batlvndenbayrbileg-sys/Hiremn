@@ -46,12 +46,25 @@ hire.mn = Монголын анхны сэтгэл зүй, зан төлөв, м
 
 ҮНДСЭН ЗОРИЛГО: Хэрэглэгчийн асуултад мэргэжлийн түвшинд хариулж, тохирох тестийг санал болгож, худалдан авахад урамшуулах.`
 
+  // Separate free and paid test lists for the prompt
+  const freeTests = assessments.filter(a => a.price === 0)
+  const paidTests = assessments.filter(a => a.price > 0)
+  
+  const freeTestMarkers = freeTests.map(a => `[TEST:${a.id}]`).join(' ')
+  const paidTestMarkers = paidTests.map(a => `[TEST:${a.id}]`).join(' ')
+
   const testContext = `
-ОДОО БАЙГАА ТЕСТҮҮД (${assessments.length} ширхэг, ${freeCount} үнэгүй, ${paidCount} төлбөртэй):
+ОДОО БАЙГАА ТЕСТҮҮД (${assessments.length} ширхэг):
 ${testList}
 
+ҮНЭГҮЙ ТЕСТҮҮД (${freeCount} ширхэг): ${freeTestMarkers}
+ТӨЛБӨРТЭЙ ТЕСТҮҮД (${paidCount} ширхэг): ${paidTestMarkers}
+
 КАТЕГОРИУД:
-${catSummary}`
+${catSummary}
+
+ЧУХАЛ: "Үнэгүй тест", "free test" гэж асуувал ЗӨВХӨН үнэгүй тестүүдийн marker-уудыг буцаа.
+"Төлбөртэй тест", "paid test" гэж асуувал ЗӨВХӨН төлбөртэй тестүүдийн marker-уудыг буцаа.`
 
   const responseRules = `
 ХАРИУЛАХ ДҮРЭМ:
@@ -68,13 +81,17 @@ ${catSummary}`
     faq: `Асуултад 1 өгүүлбэрээр хариул + [TEST:id] маркерууд.`,
 
     recommend: `1 өгүүлбэр тайлбар + категорийн БҮХ тестийн [TEST:id] маркерууд.
-ЖАГСААЛТ БИЧЭХГҮЙ — зөвхөн marker ашиглана.`,
+ЖАГСААЛТ БИЧЭХГҮЙ — зөвхөн marker ашиглана.
+"Үнэгүй" гэж асуувал: ${freeTestMarkers}
+"Төлбөртэй" гэж асуувал: ${paidTestMarkers}`,
 
     analyze: `Үр дүнг 2 өгүүлбэрээр тайлбарла + холбогдох [TEST:id] маркерууд.`,
 
     upsell: `1 өгүүлбэр + 2-3 тест [TEST:id].`,
 
     general: `1-2 өгүүлбэр хариулт + БҮХ холбогдох [TEST:id] маркерууд.
+"Үнэгүй тест" асуувал: "Манай үнэгүй тестүүд:" + ${freeTestMarkers}
+"Төлбөртэй тест" асуувал: "Манай төлбөртэй тестүүд:" + ${paidTestMarkers}
 Тестийн нэр, үнийг текстэд БИЧЭХГҮЙ.`
   }
 

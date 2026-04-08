@@ -103,7 +103,7 @@ export async function POST(req: Request) {
       return Response.json({ error: 'empty message' }, { status: 400 })
 
     // Intent + хэл тодорхойлох
-    const { intent, useLLM, detectedLang } = classify(lastMessage)
+    const { intent, useLLM, detectedLang, priceFilter } = classify(lastMessage)
     const lang: 'mn' | 'en' = forcedLang === 'mn' || forcedLang === 'en' ? forcedLang : detectedLang
 
     // API-аас тестүүд татах
@@ -260,6 +260,39 @@ export async function POST(req: Request) {
     // If no tests found in markers, look through live assessments for matches
     if (tests.length === 0 && relevantAssessments?.length > 0) {
       tests = relevantAssessments.slice(0, 3).map(a => formatAssessmentForWidget(a, lang))
+    }
+
+    // Apply price filter if user asked for "үнэгүй" or "төлбөртэй"
+    if (priceFilter && tests.length > 0) {
+      tests = tests.filter(t => 
+        priceFilter === 'free' ? t.free === true : t.free !== true
+      )
+    }
+
+    // If priceFilter specified but no tests from LLM, get all matching tests from database
+    if (priceFilter && tests.length === 0) {
+      const allStaticTests = Object.values(TEST_DATABASE)
+      const filteredStatic = allStaticTests.filter(t => {
+        const isFree = t.price === 'Uneggui' || t.priceEn === 'Free'
+        return priceFilter === 'free' ? isFree : !isFree
+      })
+      tests = filteredStatic.map(t => {
+        const isFree = t.price === 'Uneggui' || t.priceEn === 'Free'
+        return {
+          id: t.id,
+          name: lang === 'mn' ? t.name : t.nameEn,
+          desc: lang === 'mn' ? t.desc : t.descEn,
+          url: t.url,
+          price: isFree ? 'Үнэгүй' : `${t.price}₮`,
+          duration: t.time,
+          emoji: t.emoji,
+          color: t.color,
+          free: isFree,
+          image: t.image,
+          category: t.category,
+          icon: '', count: 0, author: '',
+        }
+      })
     }
 
     // Category tabs — санал болгосон тестүүдийн категориудаар tab харуулна
