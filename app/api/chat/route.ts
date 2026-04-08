@@ -234,11 +234,14 @@ export async function POST(req: Request) {
     // Parse [TEST:id] markers from response + extract tests
     const { cleanText, testIds } = parseTestMarkers(rawText)
     
-    // Extract tests from static TEST_DATABASE (1-12)
+    // Extract tests from BOTH static TEST_DATABASE AND live assessments API
     let tests: any[] = []
+    const addedIds = new Set<number>()
+
+    // 1. First add tests from static TEST_DATABASE based on LLM markers
     for (const id of testIds) {
       const testInfo = TEST_DATABASE[id]
-      if (testInfo) {
+      if (testInfo && !addedIds.has(id)) {
         const isFree = testInfo.price === 'Uneggui'
         tests.push({
           id: testInfo.id,
@@ -254,6 +257,18 @@ export async function POST(req: Request) {
           category: testInfo.category,
           icon: '', count: 0, author: '',
         })
+        addedIds.add(id)
+      }
+    }
+
+    // 2. Also add tests from live assessments API based on LLM markers
+    if (relevantAssessments?.length > 0) {
+      for (const id of testIds) {
+        const liveTest = relevantAssessments.find(a => a.id === id)
+        if (liveTest && !addedIds.has(id)) {
+          tests.push(formatAssessmentForWidget(liveTest, lang))
+          addedIds.add(id)
+        }
       }
     }
 
