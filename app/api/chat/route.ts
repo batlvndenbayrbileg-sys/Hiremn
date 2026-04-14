@@ -4,6 +4,8 @@ import { classify } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/brain'
 import { parseTestMarkers, TEST_DATABASE } from '@/lib/test-db'
+import { getOrCreateMemory, updateMemoryFromMessage, type UserMemory } from '@/lib/memory'
+import { analyzeAndRecommend, searchTestsByProblem } from '@/lib/agent-tools'
 import {
   getAllAssessments,
   getAssessmentCategories,
@@ -93,7 +95,10 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Content-Type must be application/json' }, { status: 415 })
 
     const body = await req.json()
-    const { messages, lang: forcedLang } = body
+    const { messages, lang: forcedLang, sessionId: providedSessionId } = body
+    
+    // Generate or use provided session ID for memory
+    const sessionId = providedSessionId || `session_${Date.now()}_${Math.random().toString(36).slice(2)}`
 
     if (!Array.isArray(messages) || messages.length === 0)
       return Response.json({ error: 'messages array required' }, { status: 400 })
@@ -103,8 +108,11 @@ export async function POST(req: Request) {
       return Response.json({ error: 'empty message' }, { status: 400 })
 
     // Intent + хэл тодорхойлох
-    const { intent, useLLM, detectedLang, priceFilter } = classify(lastMessage)
+    const { intent, useLLM, detectedLang, priceFilter, category: detectedCategoryFromClassifier } = classify(lastMessage)
     const lang: 'mn' | 'en' = forcedLang === 'mn' || forcedLang === 'en' ? forcedLang : detectedLang
+
+    // Get or create user memory for personalization
+    const memory = getOrCreateMemory(sessionId)
 
     // API-аас тестүүд татах
     const liveAssessments = await getAssessments()
@@ -210,7 +218,16 @@ export async function POST(req: Request) {
     // ── ROUTE 4: LLM — тест санал болгох үндсэн зорилготой ─────────────
     // Category илрүүлсэн бол тэр категорийн тестүүдийг LLM-д өгч, карт ч шүүж харуулна
     const relevantAssessments = filterByDetectedCategory(liveAssessments, detectedCategory, cachedCategories)
-    const systemPrompt = buildSystemPrompt(intent, lang, relevantAssessments, detectedCategory) + examContext
+    
+    // Build system prompt with RAG knowledge retrieval and memory context
+    const systemPrompt = buildSystemPrompt(
+      intent, 
+      lang, 
+      relevantAssessments, 
+      detectedCategory,
+      lastMessage,  // For RAG knowledge retrieval
+      memory        // For personalization
+    ) + examContext
     const compressed = compressHistory(messages)
     const formattedMessages = compressed
       .filter((m: { role: string }) => ['user', 'assistant', 'bot'].includes(m.role))
@@ -281,15 +298,56 @@ export async function POST(req: Request) {
         }
       }
     }
-    // If no markers and no priceFilter, return all relevant assessments from API
-    else if (relevantAssessments?.length > 0) {
-      tests = relevantAssessments.map(a => formatAssessmentForWidget(a, lang))
+    // If no LLM markers found, use agent tools to analyze and recommend
+    else if (testIds.length === 0 && relevantAssessments?.length > 0) {
+      // Use agent to analyze user problem and find matching tests
+      const analysisResult = analyzeAndRecommend(lastMessage, relevantAssessments)
+      
+      if (analysisResult.success && analysisResult.data.recommendations.length > 0) {
+        // Get test IDs from agent recommendations
+        for (const rec of analysisResult.data.recommendations) {
+          const liveTest = relevantAssessments.find(a => a.id === rec.id)
+          if (liveTest && !addedIds.has(rec.id)) {
+            tests.push(formatAssessmentForWidget(liveTest, lang))
+            addedIds.add(rec.id)
+          }
+        }
+      }
+      
+      // If agent didn't find enough tests, fall back to search by problem
+      if (tests.length < 3) {
+        const searchResult = searchTestsByProblem(lastMessage, relevantAssessments)
+        if (searchResult.success && searchResult.data.matches.length > 0) {
+          for (const match of searchResult.data.matches) {
+            if (addedIds.has(match.id)) continue
+            const liveTest = relevantAssessments.find(a => a.id === match.id)
+            if (liveTest) {
+              tests.push(formatAssessmentForWidget(liveTest, lang))
+              addedIds.add(match.id)
+            }
+          }
+        }
+      }
+      
+      // If still no tests, return top relevant assessments
+      if (tests.length === 0) {
+        tests = relevantAssessments.slice(0, 6).map(a => formatAssessmentForWidget(a, lang))
+      }
     }
 
     // Category tabs — санал болгосон тестүүдийн категориудаар tab харуулна
     const categories = tests.length > 0
       ? [...new Set(tests.map(t => t?.category).filter(Boolean))] as string[]
       : []
+
+    // Update memory with this conversation turn
+    const recommendedTestIds = tests.map(t => t.id).filter(Boolean)
+    updateMemoryFromMessage(sessionId, lastMessage, {
+      detectedCategory,
+      priceFilter,
+      intent,
+      recommendedTestIds,
+    })
 
     return Response.json({
       reply: cleanText,
@@ -298,6 +356,7 @@ export async function POST(req: Request) {
       source: 'llm',
       intent,
       tokens_used: tokensUsed,
+      sessionId, // Return session ID for client to persist
     })
 
   } catch (err) {
