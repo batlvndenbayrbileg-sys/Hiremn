@@ -164,6 +164,35 @@ export async function POST(req: Request) {
       })
     }
 
+    // ── ROUTE 1.5: Free/Paid Tests — static, no AI cost ──────────────────
+    if (lastMessage === '__FREE_TESTS__') {
+      const freeTests = liveAssessments
+        .filter(a => a.price === 0 && a.isActive !== false)
+        .map(a => formatAssessmentForWidget(a, lang))
+      return Response.json({
+        reply: '',
+        tests: freeTests,
+        categories: ['free'],
+        source: 'static_free',
+        intent: 'recommend',
+        tokens_used: 0,
+      })
+    }
+    
+    if (lastMessage === '__PAID_TESTS__') {
+      const paidTests = liveAssessments
+        .filter(a => a.price > 0 && a.isActive !== false)
+        .map(a => formatAssessmentForWidget(a, lang))
+      return Response.json({
+        reply: '',
+        tests: paidTests,
+        categories: ['paid'],
+        source: 'static_paid',
+        intent: 'recommend',
+        tokens_used: 0,
+      })
+    }
+
     // ── ROUTE 2: FAQ — instant, no AI cost ────────────────────────────────
     if (!useLLM || intent === 'faq') {
       const faqResult = findFAQ(lastMessage, lang, liveAssessments)

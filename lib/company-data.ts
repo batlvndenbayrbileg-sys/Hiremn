@@ -51,7 +51,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: "Үүсгэн байгуулагч",
     roleColor: "#E8541A",
     description: "СЭЗИС болон Австралийн Үндэсний Их сургуульд Бизнесийн удирдлагын магистр, Маркетингийн удирдлагын магистрын зэрэг хамгаалсан. Маркетинг, хүний нөөцийн салбарт багш, зөвлөх, судлаачаар 2003 оноос хойш ажиллаж байна.",
-    image: "https://hire.mn/images/team/nandin-erdene.jpg",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-Z6dZ9hCGVpslrNT4ShfdMcIv525YOE.png",
     category: "founder"
   },
   
@@ -62,7 +62,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: "Системийн шинжээч",
     roleColor: "#22C55E",
     description: "СЭЗИС болон МУИС-д Мэдээллийн системийн бакалавр, магистрын зэрэг хамгаалсан. Системийн шинжилгээ, Бизнес процесс менежмент, чадамжид суурилсан боловсрол чиглэлээр багш, зөвлөх, судлаачаар 2011 оноос хойш ажиллаж байна.",
-    image: "https://hire.mn/images/team/saranchimeg.jpg",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-4fY7Ui7iWk9EnSJMHDgZvE4i8VrmwR.png",
     category: "system"
   },
   {
@@ -71,7 +71,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: "Систем хөгжүүлэгч",
     roleColor: "#22C55E",
     description: "СЭЗИС-д Мэдээллийн системийн бакалавр, Бизнесийн удирдлагын магистрын зэрэг хамгаалсан. Програм хангамж хөгжүүлэлт, Системийн шинжилгээ, Өгөгдлийн сангийн чиглэлээр хөгжүүлэгч, багш, судлаачаар 2012 оноос хойш ажиллаж байна.",
-    image: "https://hire.mn/images/team/erdenetsetseg.jpg",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-vl9ZubXezo0mZSFGVtsKsZV9ffBJhu.png",
     category: "system"
   },
   {
@@ -80,7 +80,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: "Back-end хөгжүүлэгч",
     roleColor: "#22C55E",
     description: "СЭЗИС-д Мэдээллийн системийн бакалаврын хөтөлбөр. Програм хангамжын back-end хөгжүүлэлт, Өгөгдлийн сангийн программчлалын чиглэлээр ажиллаж байна.",
-    image: "https://hire.mn/images/team/dorjnyambuu.jpg",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-rl1utT3lyjoDboq5m3PbYn0DGUP5ib.png",
     category: "system"
   },
   {
@@ -89,20 +89,20 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: "Front-end хөгжүүлэгч",
     roleColor: "#22C55E",
     description: "СЭЗИС-д Мэдээллийн системийн бакалаврын хөтөлбөр төгссөн. Програм хангамжын front-end, UX, UI хөгжүүлэлт, өгөгдлийн шинжилгээ чиглэлээр ажиллаж байна.",
-    image: "https://hire.mn/images/team/osohbayar.jpg",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-K6trzOpzdyDwJjA8doMazTsdH6QiZW.png",
     category: "system"
   },
+  
+  // Test Development Team
   {
-    id: "system-5",
+    id: "test-0",
     name: "Г.Чин-Эрдэнэ",
     role: "Тест хөгжүүлэгч",
     roleColor: "#3B82F6",
     description: "Америкийн Нэгдсэн Улсын Вашингтоны их сургуульд компьютерийн шинжлэх ухаанаар суралцаж байгаа, front-end, mobile development, backend чиглэлээр салбарын (industry) туршлагатай.",
     image: "https://hire.mn/images/team/chin-erdene.jpg",
-    category: "system"
+    category: "test"
   },
-  
-  // Test Development Team
   {
     id: "test-1",
     name: "Б.Үүрцайх",

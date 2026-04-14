@@ -828,16 +828,30 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
                     }}
                   >
                     <div style={{ textAlign: "center" }}>
-                      <div style={{
-                        width: 72, height: 72, borderRadius: "50%",
-                        background: `linear-gradient(135deg, ${member.roleColor}20, ${member.roleColor}10)`,
-                        border: `2px solid ${member.roleColor}40`,
-                        margin: "0 auto 12px",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 28, color: member.roleColor,
-                      }}>
-                        {member.name.charAt(0)}
-                      </div>
+                      {member.image && member.image.startsWith('http') ? (
+                        <img 
+                          src={member.image} 
+                          alt={member.name}
+                          style={{
+                            width: 80, height: 80, borderRadius: "50%",
+                            objectFit: "cover",
+                            border: `3px solid ${member.roleColor}40`,
+                            margin: "0 auto 12px",
+                            boxShadow: "0 4px 12px rgba(0,0,0,.1)",
+                          }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: 80, height: 80, borderRadius: "50%",
+                          background: `linear-gradient(135deg, ${member.roleColor}20, ${member.roleColor}10)`,
+                          border: `3px solid ${member.roleColor}40`,
+                          margin: "0 auto 12px",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 28, color: member.roleColor,
+                        }}>
+                          {member.name.charAt(0)}
+                        </div>
+                      )}
                       <div style={{
                         fontSize: fontSize + 1, fontWeight: 700, color: "#1F2937",
                         marginBottom: 8,
@@ -933,19 +947,79 @@ export default function HireMnChatWidget() {
     // Static responses - no LLM needed, save tokens
     const isAboutHire = /hire\.?mn|платформ|компани|бидний тухай|тухай$/i.test(text)
     const isAboutTeam = /баг|ажилчид|хөгжүүлэгч|үүсгэн байгуулагч|хэн бүтээсэн|хэн хийсэн/i.test(text)
+    const isFreeTest = /үнэгүй\s*тест/i.test(text)
+    const isPaidTest = /төлбөртэй\s*тест/i.test(text)
+    const isFounderQuery = /үүсгэн\s*байгуулагч|founder|нандин.?эрдэнэ/i.test(text)
     
-    if (isAboutHire || isAboutTeam) {
+    if (isAboutHire || isAboutTeam || isFreeTest || isPaidTest || isFounderQuery) {
       // Import static data
-      const { COMPANY_INFO, getAllTeamCategories } = await import("@/lib/company-data")
+      const { COMPANY_INFO, getAllTeamCategories, TEAM_MEMBERS } = await import("@/lib/company-data")
       
-      setTimeout(() => {
+      setTimeout(async () => {
+        // Free tests query
+        if (isFreeTest) {
+          const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ messages: [{ role: "user", content: "__FREE_TESTS__" }], lang: lang === "МН" ? "mn" : "en" }),
+          })
+          const data = await res.json()
+          setMessages(prev => [...prev, {
+            role: "assistant",
+            content: "**Үнэгүй тестүүд**\n\nТа эдгээр тестүүдийг ямар ч төлбөргүйгээр өгч, өөрийн талаар илүү ихийг мэдэж авах боломжтой:",
+            tests: data.tests || [],
+            categories: ["free"],
+          }])
+          setIsTyping(false)
+          return
+        }
+        
+        // Paid tests query  
+        if (isPaidTest) {
+          const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ messages: [{ role: "user", content: "__PAID_TESTS__" }], lang: lang === "МН" ? "mn" : "en" }),
+          })
+          const data = await res.json()
+          setMessages(prev => [...prev, {
+            role: "assistant",
+            content: "**Төлбөртэй тестүүд**\n\nЭдгээр нь илүү гүнзгий шинжилгээ, дэлгэрэнгүй тайлантай мэргэжлийн тестүүд. Төлбөр төлөх боломжууд: Qpay, карт, дансаар.",
+            tests: data.tests || [],
+            categories: ["paid"],
+          }])
+          setIsTyping(false)
+          return
+        }
+        
+        // Founder query - show single person card
+        if (isFounderQuery) {
+          const founder = TEAM_MEMBERS.find(m => m.category === 'founder')
+          if (founder) {
+            setMessages(prev => [...prev, {
+              role: "assistant",
+              content: `### Үүсгэн байгуулагч`,
+              teamCategories: [{
+                label: founder.name,
+                icon: "🚀",
+                color: "#E8541A",
+                members: [founder]
+              }],
+            }])
+          }
+          setIsTyping(false)
+          return
+        }
+        
+        // Team query
         if (isAboutTeam) {
           setMessages(prev => [...prev, {
             role: "assistant",
-            content: `**hire.mn** платформыг мэргэжлийн багийнхан хөгжүүлж байна:\n\n- **Үүсгэн байгуулагч:** Бизнесийн удирдлага, маркетингийн чиглэлээр 20+ жил туршлагатай\n- **Систем хөгжүүлэлтийн баг:** Front-end, back-end, систем хөгжүүлэгчид\n- **Тест хөгжүүлэлтийн баг:** Их дээд сургуулийн багш, судлаач, эмч нар`,
+            content: `**hire.mn** платформыг мэргэжлийн багийнхан хөгжүүлж байна:`,
             teamCategories: getAllTeamCategories(),
           }])
         } else {
+          // About hire.mn
           setMessages(prev => [...prev, {
             role: "assistant",
             content: `### ${COMPANY_INFO.name}\n\n**"${COMPANY_INFO.slogan}"**\n\n${COMPANY_INFO.description}\n\n**Онцлог:**\n- ${COMPANY_INFO.testCount}+ төрлийн тест\n- Мэргэжлийн судлаачдын боловсруулсан\n- Шинжлэх ухааны үндэслэлтэй\n- Монгол хэл дээр\n- Үнэгүй болон төлбөртэй тестүүд`,
