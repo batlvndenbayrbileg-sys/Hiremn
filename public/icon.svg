@@ -1,26 +1,43 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    @media (prefers-color-scheme: light) {
-      .background { fill: black; }
-      .foreground { fill: white; }
-    }
-    @media (prefers-color-scheme: dark) {
-      .background { fill: white; }
-      .foreground { fill: black; }
-    }
-  </style>
-  <g clip-path="url(#clip0_7960_43945)">
-    <rect class="background" width="180" height="180" rx="37" />
-    <g style="transform: scale(95%); transform-origin: center">
-      <path class="foreground"
-        d="M101.141 53H136.632C151.023 53 162.689 64.6662 162.689 79.0573V112.904H148.112V79.0573C148.112 78.7105 148.098 78.3662 148.072 78.0251L112.581 112.898C112.701 112.902 112.821 112.904 112.941 112.904H148.112V126.672H112.941C98.5504 126.672 86.5638 114.891 86.5638 100.5V66.7434H101.141V100.5C101.141 101.15 101.191 101.792 101.289 102.422L137.56 66.7816C137.255 66.7563 136.945 66.7434 136.632 66.7434H101.141V53Z" />
-      <path class="foreground"
-        d="M65.2926 124.136L14 66.7372H34.6355L64.7495 100.436V66.7372H80.1365V118.47C80.1365 126.278 70.4953 129.958 65.2926 124.136Z" />
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#FFF5F0"/>
+  
+  <!-- Brain outline -->
+  <g id="brain">
+    <!-- Left hemisphere -->
+    <path d="M 180 200 Q 160 180 160 150 Q 160 110 190 90 Q 200 85 210 85 Q 230 85 245 100 L 220 140 Q 200 160 200 200 Z" fill="#E8541A" opacity="0.9"/>
+    
+    <!-- Right hemisphere -->
+    <path d="M 332 200 Q 352 180 352 150 Q 352 110 322 90 Q 312 85 302 85 Q 282 85 267 100 L 292 140 Q 312 160 312 200 Z" fill="#E8541A" opacity="0.9"/>
+    
+    <!-- Top brain lobes -->
+    <ellipse cx="220" cy="120" rx="35" ry="45" fill="#E8541A" opacity="0.85"/>
+    <ellipse cx="292" cy="120" rx="35" ry="45" fill="#E8541A" opacity="0.85"/>
+    
+    <!-- Middle section -->
+    <rect x="200" y="150" width="112" height="90" rx="20" fill="#E8541A" opacity="0.9"/>
+    
+    <!-- Bottom curves -->
+    <path d="M 200 240 Q 180 260 190 290 Q 200 310 220 315 L 220 240 Z" fill="#E8541A" opacity="0.85"/>
+    <path d="M 312 240 Q 332 260 322 290 Q 312 310 292 315 L 292 240 Z" fill="#E8541A" opacity="0.85"/>
+    
+    <!-- Bottom center -->
+    <ellipse cx="256" cy="300" rx="40" ry="50" fill="#E8541A" opacity="0.9"/>
   </g>
-  <defs>
-    <clipPath id="clip0_7960_43945">
-      <rect width="180" height="180" fill="white" />
-    </clipPath>
-  </defs>
+  
+  <!-- Eyes -->
+  <circle cx="230" cy="180" r="12" fill="#fff"/>
+  <circle cx="282" cy="180" r="12" fill="#fff"/>
+  <circle cx="232" cy="180" r="7" fill="#2563EB"/>
+  <circle cx="284" cy="180" r="7" fill="#2563EB"/>
+  
+  <!-- Smile -->
+  <path d="M 240 210 Q 256 225 272 210" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>
+  
+  <!-- Shine/highlight -->
+  <circle cx="220" cy="110" r="20" fill="#fff" opacity="0.4"/>
+  
+  <!-- Accent dots -->
+  <circle cx="280" cy="290" r="6" fill="#2563EB" opacity="0.6"/>
+  <circle cx="240" cy="310" r="5" fill="#2563EB" opacity="0.6"/>
 </svg>
