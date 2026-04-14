@@ -4,11 +4,30 @@ import { useState, useRef, useEffect } from "react"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
+interface TeamMember {
+  id: string
+  name: string
+  role: string
+  roleColor: string
+  description: string
+  image: string
+  category: 'founder' | 'system' | 'test'
+}
+
+interface TeamCategory {
+  label: string
+  icon: string
+  color: string
+  members: TeamMember[]
+}
+
 interface Message {
   role: "user" | "assistant"
   content: string
   tests?: Test[]
   categories?: string[]
+  teamCategories?: TeamCategory[]
+  companyInfo?: boolean
 }
 
 interface Test {
@@ -767,6 +786,94 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
           />
         </div>
       )}
+
+      {/* Team categories carousel */}
+      {message.teamCategories && message.teamCategories.length > 0 && (
+        <div style={{ marginLeft: 42, marginTop: 8, animation: "hw-slide-up 0.45s ease-out 0.1s both" }}>
+          {message.teamCategories.map((cat, catIdx) => (
+            <div key={cat.label} style={{ marginBottom: catIdx < message.teamCategories!.length - 1 ? 20 : 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <span style={{ fontSize: 16 }}>{cat.icon}</span>
+                <span style={{
+                  fontSize: fontSize, fontWeight: 700, color: cat.color,
+                  letterSpacing: 0.3,
+                }}>
+                  {cat.label}
+                </span>
+                <span style={{
+                  background: cat.color,
+                  color: "#fff", fontSize: fontSize - 2, fontWeight: 700,
+                  padding: "2px 8px", borderRadius: 12,
+                }}>
+                  {cat.members.length}
+                </span>
+              </div>
+              
+              <div style={{
+                display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8,
+                scrollSnapType: "x mandatory",
+              }}>
+                {cat.members.map((member, idx) => (
+                  <div
+                    key={member.id}
+                    style={{
+                      minWidth: 200, maxWidth: 200,
+                      background: "#fff",
+                      border: "1.5px solid #F0EAE6",
+                      borderRadius: 16,
+                      padding: 16,
+                      scrollSnapAlign: "start",
+                      animation: `hw-slide-up 0.35s ease-out ${idx * 0.08}s both`,
+                      boxShadow: "0 2px 8px rgba(0,0,0,.04)",
+                    }}
+                  >
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{
+                        width: 72, height: 72, borderRadius: "50%",
+                        background: `linear-gradient(135deg, ${member.roleColor}20, ${member.roleColor}10)`,
+                        border: `2px solid ${member.roleColor}40`,
+                        margin: "0 auto 12px",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 28, color: member.roleColor,
+                      }}>
+                        {member.name.charAt(0)}
+                      </div>
+                      <div style={{
+                        fontSize: fontSize + 1, fontWeight: 700, color: "#1F2937",
+                        marginBottom: 8,
+                      }}>
+                        {member.name}
+                      </div>
+                      <div style={{
+                        display: "inline-block",
+                        fontSize: fontSize - 2, fontWeight: 600,
+                        color: member.roleColor,
+                        background: `${member.roleColor}15`,
+                        border: `1px solid ${member.roleColor}30`,
+                        padding: "4px 12px", borderRadius: 20,
+                        marginBottom: 10,
+                      }}>
+                        {member.role}
+                      </div>
+                      <div style={{
+                        fontSize: fontSize - 1, color: "#6B7280",
+                        lineHeight: 1.5,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 4,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}>
+                        {member.description}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -822,6 +929,32 @@ export default function HireMnChatWidget() {
     setMessages(prev => [...prev, userMsg])
     setInput("")
     setIsTyping(true)
+
+    // Static responses - no LLM needed, save tokens
+    const isAboutHire = /hire\.?mn|платформ|компани|бидний тухай|тухай$/i.test(text)
+    const isAboutTeam = /баг|ажилчид|хөгжүүлэгч|үүсгэн байгуулагч|хэн бүтээсэн|хэн хийсэн/i.test(text)
+    
+    if (isAboutHire || isAboutTeam) {
+      // Import static data
+      const { COMPANY_INFO, getAllTeamCategories } = await import("@/lib/company-data")
+      
+      setTimeout(() => {
+        if (isAboutTeam) {
+          setMessages(prev => [...prev, {
+            role: "assistant",
+            content: `**hire.mn** платформыг мэргэжлийн багийнхан хөгжүүлж байна:\n\n- **Үүсгэн байгуулагч:** Бизнесийн удирдлага, маркетингийн чиглэлээр 20+ жил туршлагатай\n- **Систем хөгжүүлэлтийн баг:** Front-end, back-end, систем хөгжүүлэгчид\n- **Тест хөгжүүлэлтийн баг:** Их дээд сургуулийн багш, судлаач, эмч нар`,
+            teamCategories: getAllTeamCategories(),
+          }])
+        } else {
+          setMessages(prev => [...prev, {
+            role: "assistant",
+            content: `### ${COMPANY_INFO.name}\n\n**"${COMPANY_INFO.slogan}"**\n\n${COMPANY_INFO.description}\n\n**Онцлог:**\n- ${COMPANY_INFO.testCount}+ төрлийн тест\n- Мэргэжлийн судлаачдын боловсруулсан\n- Шинжлэх ухааны үндэслэлтэй\n- Монгол хэл дээр\n- Үнэгүй болон төлбөртэй тестүүд`,
+          }])
+        }
+        setIsTyping(false)
+      }, 500)
+      return
+    }
 
     try {
       const history = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }))
