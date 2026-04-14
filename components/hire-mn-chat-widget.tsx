@@ -947,13 +947,29 @@ export default function HireMnChatWidget() {
     // Static responses - no LLM needed, save tokens
     const isAboutHire = /hire\.?mn|платформ|компани|бидний тухай|тухай$/i.test(text)
     // Only match team queries that are specifically about hire.mn team, not test names containing "баг"
-    const isTestRelated = /тест|шалгалт|үнэлгээ|яадын|юу вэ|ямар|хэрхэн/i.test(text)
+    const isTestRelated = /багийн\s*дүр|тест|шалгалт|үнэлгээ|яадын|юу вэ|ямар|хэрхэн/i.test(text)
     const isAboutTeam = !isTestRelated && /хөгжүүлэлтийн\s*баг|систем.*баг|тест.*хөгжүүлэгч|ажилчид|хөгжүүлэгч|хэн бүтээсэн|хэн хийсэн|hire.*баг/i.test(text)
     const isFreeTest = /үнэгүй\s*тест/i.test(text)
     const isPaidTest = /төлбөртэй\s*тест/i.test(text)
     const isFounderQuery = !isTestRelated && /үүсгэн\s*байгуулагч|founder|нандин.?эрдэнэ/i.test(text)
     
-    if (isAboutHire || isAboutTeam || isFreeTest || isPaidTest || isFounderQuery) {
+    // Individual team member queries - check for specific names
+    const teamMemberNames = [
+      { pattern: /саранчимэг/i, id: "system-1" },
+      { pattern: /эрдэнэцэцэг/i, id: "system-2" },
+      { pattern: /доржнямбуу/i, id: "system-3" },
+      { pattern: /өсөхбаяр/i, id: "system-4" },
+      { pattern: /чин.?эрдэнэ/i, id: "test-0" },
+      { pattern: /үүрцайх/i, id: "test-1" },
+      { pattern: /оюунбилэг/i, id: "test-2" },
+      { pattern: /баярмаа/i, id: "test-3" },
+      { pattern: /мөнхжаргал/i, id: "test-4" },
+      { pattern: /одонтуяа/i, id: "test-5" },
+      { pattern: /эрдэнэбаяр/i, id: "test-6" },
+    ]
+    const matchedMember = teamMemberNames.find(m => m.pattern.test(text))
+    
+    if (isAboutHire || isAboutTeam || isFreeTest || isPaidTest || isFounderQuery || matchedMember) {
       // Import static data
       const { COMPANY_INFO, getAllTeamCategories, TEAM_MEMBERS } = await import("@/lib/company-data")
       
@@ -1000,12 +1016,31 @@ export default function HireMnChatWidget() {
           if (founder) {
             setMessages(prev => [...prev, {
               role: "assistant",
-              content: `### Үүсгэн байгуулагч`,
+              content: `**${founder.name}** - ${founder.role}`,
               teamCategories: [{
-                label: founder.name,
+                label: founder.role,
                 icon: "🚀",
-                color: "#E8541A",
+                color: founder.roleColor,
                 members: [founder]
+              }],
+            }])
+          }
+          setIsTyping(false)
+          return
+        }
+        
+        // Individual team member query - show single person card
+        if (matchedMember) {
+          const member = TEAM_MEMBERS.find(m => m.id === matchedMember.id)
+          if (member) {
+            setMessages(prev => [...prev, {
+              role: "assistant",
+              content: `**${member.name}** - ${member.role}`,
+              teamCategories: [{
+                label: member.role,
+                icon: member.category === 'system' ? "💻" : member.category === 'test' ? "📊" : "🚀",
+                color: member.roleColor,
+                members: [member]
               }],
             }])
           }
