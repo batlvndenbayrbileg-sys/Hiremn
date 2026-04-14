@@ -946,10 +946,12 @@ export default function HireMnChatWidget() {
 
     // Static responses - no LLM needed, save tokens
     const isAboutHire = /hire\.?mn|платформ|компани|бидний тухай|тухай$/i.test(text)
-    const isAboutTeam = /баг|ажилчид|хөгжүүлэгч|үүсгэн байгуулагч|хэн бүтээсэн|хэн хийсэн/i.test(text)
+    // Only match team queries that are specifically about hire.mn team, not test names containing "баг"
+    const isTestRelated = /тест|шалгалт|үнэлгээ|яадын|юу вэ|ямар|хэрхэн/i.test(text)
+    const isAboutTeam = !isTestRelated && /хөгжүүлэлтийн\s*баг|систем.*баг|тест.*хөгжүүлэгч|ажилчид|хөгжүүлэгч|хэн бүтээсэн|хэн хийсэн|hire.*баг/i.test(text)
     const isFreeTest = /үнэгүй\s*тест/i.test(text)
     const isPaidTest = /төлбөртэй\s*тест/i.test(text)
-    const isFounderQuery = /үүсгэн\s*байгуулагч|founder|нандин.?эрдэнэ/i.test(text)
+    const isFounderQuery = !isTestRelated && /үүсгэн\s*байгуулагч|founder|нандин.?эрдэнэ/i.test(text)
     
     if (isAboutHire || isAboutTeam || isFreeTest || isPaidTest || isFounderQuery) {
       // Import static data
