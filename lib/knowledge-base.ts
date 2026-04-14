@@ -288,10 +288,7 @@ export const PLATFORM_KNOWLEDGE: PlatformKnowledge[] = [
 - Харилцааны хэв шинж: 30,000₮
 
 ТӨЛБӨРИЙН АРГА:
-- QPay
-- SocialPay
-- Банкны карт
-- Дансаар шилжүүлэг`,
+- Зөвхөн QPay-ээр төлбөр төлөх боломжтой`,
     keywords: ["үнэ", "төлбөр", "үнэгүй", "free", "paid", "төлбөртэй", "qpay"]
   },
   {
