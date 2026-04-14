@@ -51,7 +51,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: "Үүсгэн байгуулагч",
     roleColor: "#E8541A",
     description: "СЭЗИС болон Австралийн Үндэсний Их сургуульд Бизнесийн удирдлагын магистр, Маркетингийн удирдлагын магистрын зэрэг хамгаалсан. Маркетинг, хүний нөөцийн салбарт багш, зөвлөх, судлаачаар 2003 оноос хойш ажиллаж байна.",
-    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-Z6dZ9hCGVpslrNT4ShfdMcIv525YOE.png",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-rl1utT3lyjoDboq5m3PbYn0DGUP5ib.png",
     category: "founder"
   },
   
@@ -80,7 +80,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: "Back-end хөгжүүлэгч",
     roleColor: "#22C55E",
     description: "СЭЗИС-д Мэдээллийн системийн бакалаврын хөтөлбөр. Програм хангамжын back-end хөгжүүлэлт, Өгөгдлийн сангийн программчлалын чиглэлээр ажиллаж байна.",
-    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-rl1utT3lyjoDboq5m3PbYn0DGUP5ib.png",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-K6trzOpzdyDwJjA8doMazTsdH6QiZW.png",
     category: "system"
   },
   {
@@ -89,7 +89,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: "Front-end хөгжүүлэгч",
     roleColor: "#22C55E",
     description: "СЭЗИС-д Мэдээллийн системийн бакалаврын хөтөлбөр төгссөн. Програм хангамжын front-end, UX, UI хөгжүүлэлт, өгөгдлийн шинжилгээ чиглэлээр ажиллаж байна.",
-    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-K6trzOpzdyDwJjA8doMazTsdH6QiZW.png",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-Z6dZ9hCGVpslrNT4ShfdMcIv525YOE.png",
     category: "system"
   },
   
@@ -213,7 +213,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
   },
   {
     id: "test-13",
-    name: "О.Зэсэмдорж",
+    name: "О.Зэс��мдорж",
     role: "Тест хөгжүүлэгч",
     roleColor: "#3B82F6",
     description: "АШУУИС-д Анагаах Ухааны Магистр, Японы Жичи Анагаах Ухааны Их Сургуулийн анагаах ухааны доктор зэрэгтэй.",
