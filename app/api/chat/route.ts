@@ -5,7 +5,7 @@ import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/brain'
 import { parseTestMarkers, TEST_DATABASE } from '@/lib/test-db'
 import { getOrCreateMemory, updateMemoryFromMessage, type UserMemory } from '@/lib/memory'
-import { analyzeAndRecommend, searchTestsByProblem } from '@/lib/agent-tools'
+import { searchTestsByProblem } from '@/lib/agent-tools'
 import {
   getAllAssessments,
   getAssessmentCategories,
@@ -238,12 +238,22 @@ export async function POST(req: Request) {
 
     const model = 'claude-sonnet-4-20250514'
 
-    const aiResponse = await anthropic.messages.create({
-      model,
-      max_tokens: 300,
-      system: systemPrompt,
-      messages: formattedMessages,
-    })
+    // Parallel processing: LLM call + Agent tools call simultaneously
+    const [aiResponse, agentResult] = await Promise.all([
+      // LLM call
+      anthropic.messages.create({
+        model,
+        max_tokens: 200,
+        system: systemPrompt,
+        messages: formattedMessages,
+      }),
+      // Agent tools call (pre-compute matching tests while LLM is thinking)
+      Promise.resolve(
+        priceFilter 
+          ? { success: true, data: { matches: [] } }
+          : (testIds.length === 0 ? searchTestsByProblem(lastMessage, relevantAssessments) : { success: true, data: { matches: [] } })
+      ),
+    ])
 
     const rawText = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text : ''
     const tokensUsed = (aiResponse.usage?.input_tokens ?? 0) + (aiResponse.usage?.output_tokens ?? 0)
@@ -265,7 +275,6 @@ export async function POST(req: Request) {
     }
     // Otherwise, get tests based on LLM markers from API
     else if (testIds.length > 0 && relevantAssessments?.length > 0) {
-      // First try to find tests by ID from live API
       for (const id of testIds) {
         const liveTest = relevantAssessments.find(a => a.id === id)
         if (liveTest && !addedIds.has(id)) {
@@ -273,7 +282,6 @@ export async function POST(req: Request) {
           addedIds.add(id)
         }
       }
-      
       // Fallback to static database if API doesn't have the test
       for (const id of testIds) {
         if (addedIds.has(id)) continue
@@ -298,37 +306,17 @@ export async function POST(req: Request) {
         }
       }
     }
-    // If no LLM markers found, use agent tools to analyze and recommend
+    // If no LLM markers found, use pre-computed agent results
     else if (testIds.length === 0 && relevantAssessments?.length > 0) {
-      // Use agent to analyze user problem and find matching tests
-      const analysisResult = analyzeAndRecommend(lastMessage, relevantAssessments)
-      
-      if (analysisResult.success && analysisResult.data.recommendations.length > 0) {
-        // Get test IDs from agent recommendations
-        for (const rec of analysisResult.data.recommendations) {
-          const liveTest = relevantAssessments.find(a => a.id === rec.id)
-          if (liveTest && !addedIds.has(rec.id)) {
+      if (agentResult.success && agentResult.data.matches?.length > 0) {
+        for (const match of agentResult.data.matches) {
+          const liveTest = relevantAssessments.find(a => a.id === match.id)
+          if (liveTest && !addedIds.has(match.id)) {
             tests.push(formatAssessmentForWidget(liveTest, lang))
-            addedIds.add(rec.id)
+            addedIds.add(match.id)
           }
         }
       }
-      
-      // If agent didn't find enough tests, fall back to search by problem
-      if (tests.length < 3) {
-        const searchResult = searchTestsByProblem(lastMessage, relevantAssessments)
-        if (searchResult.success && searchResult.data.matches.length > 0) {
-          for (const match of searchResult.data.matches) {
-            if (addedIds.has(match.id)) continue
-            const liveTest = relevantAssessments.find(a => a.id === match.id)
-            if (liveTest) {
-              tests.push(formatAssessmentForWidget(liveTest, lang))
-              addedIds.add(match.id)
-            }
-          }
-        }
-      }
-      
       // If still no tests, return top relevant assessments
       if (tests.length === 0) {
         tests = relevantAssessments.slice(0, 6).map(a => formatAssessmentForWidget(a, lang))

@@ -292,108 +292,6 @@ export function getRelatedTests(testId: number): ToolResult {
 // Tool: Analyze User Problem and Recommend
 // ══════════════════════════════════════════════════════════════════════════════
 
-export function analyzeAndRecommend(
-  userProblem: string, 
-  assessments: Assessment[]
-): ToolResult {
-  const problemLower = userProblem.toLowerCase()
-  
-  // Problem → Test mapping with reasoning
-  const recommendations: { 
-    id: number
-    name: string
-    reason: string
-    priority: 'high' | 'medium' | 'low'
-  }[] = []
-  
-  // Pattern matching for common problems
-  const problemPatterns = [
-    {
-      pattern: /стресс|ядар|burnout|түвд|ачаалал/i,
-      tests: [2, 6, 8],
-      reason: 'Стресс, burnout-ын үнэлгээ',
-      priority: 'high' as const,
-    },
-    {
-      pattern: /өөртөө итгэ|confidence|ичим|айдас/i,
-      tests: [7, 4],
-      reason: 'Өөртөө итгэлийн үнэлгээ',
-      priority: 'high' as const,
-    },
-    {
-      pattern: /харилц|communicat|баг|хамт ажилла/i,
-      tests: [3, 12],
-      reason: 'Харилцааны хэв шинжийн үнэлгээ',
-      priority: 'medium' as const,
-    },
-    {
-      pattern: /удирд|манлай|менежер|boss/i,
-      tests: [11, 3],
-      reason: 'Манлайллын үнэлгээ',
-      priority: 'medium' as const,
-    },
-    {
-      pattern: /депресс|гуниг|уйтгар|сэтгэл санаа муу/i,
-      tests: [6, 8],
-      reason: 'Сэтгэцийн эрүүл мэндийн үнэлгээ',
-      priority: 'high' as const,
-    },
-    {
-      pattern: /тамхи|никотин/i,
-      tests: [5],
-      reason: 'Тамхины хамаарлын үнэлгээ',
-      priority: 'medium' as const,
-    },
-    {
-      pattern: /архи|согтууруу/i,
-      tests: [99],
-      reason: 'Архины хэрэглээний үнэлгээ',
-      priority: 'medium' as const,
-    },
-    {
-      pattern: /карьер|ажил хай|мэргэжил/i,
-      tests: [12, 1, 10],
-      reason: 'Карьер төлөвлөлтийн үнэлгээ',
-      priority: 'medium' as const,
-    },
-    {
-      pattern: /өсөлт|сура|хөгж/i,
-      tests: [1, 10],
-      reason: 'Хувь хүний хөгжлийн үнэлгээ',
-      priority: 'low' as const,
-    },
-  ]
-  
-  for (const { pattern, tests, reason, priority } of problemPatterns) {
-    if (pattern.test(problemLower)) {
-      for (const testId of tests) {
-        const knowledge = TEST_KNOWLEDGE[testId]
-        if (knowledge && !recommendations.some(r => r.id === testId)) {
-          recommendations.push({
-            id: testId,
-            name: knowledge.name,
-            reason,
-            priority,
-          })
-        }
-      }
-    }
-  }
-  
-  // Sort by priority
-  const priorityOrder = { high: 0, medium: 1, low: 2 }
-  recommendations.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
-  
-  return {
-    success: true,
-    data: {
-      analyzedProblem: userProblem,
-      recommendations: recommendations.slice(0, 6),
-      totalRecommendations: recommendations.length,
-    }
-  }
-}
-
 // ══════════════════════════════════════════════════════════════════════════════
 // Master tool executor
 // ══════════════════════════════════════════════════════════════════════════════
@@ -407,7 +305,6 @@ export type ToolName =
   | 'getPaidTests'
   | 'getTestAuthorInfo'
   | 'getRelatedTests'
-  | 'analyzeAndRecommend'
 
 export function executeTool(
   toolName: ToolName, 
@@ -431,8 +328,6 @@ export function executeTool(
       return getTestAuthorInfo(params.testId)
     case 'getRelatedTests':
       return getRelatedTests(params.testId)
-    case 'analyzeAndRecommend':
-      return analyzeAndRecommend(params.problem, assessments)
     default:
       return {
         success: false,
