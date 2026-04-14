@@ -238,7 +238,8 @@ export async function POST(req: Request) {
 
     const model = 'claude-sonnet-4-20250514'
 
-    // Parallel processing: LLM call + Agent tools call simultaneously
+    // Parallel processing: LLM call + Agent search simultaneously
+    // Agent search runs for user's problem regardless of LLM markers
     const [aiResponse, agentResult] = await Promise.all([
       // LLM call
       anthropic.messages.create({
@@ -247,18 +248,16 @@ export async function POST(req: Request) {
         system: systemPrompt,
         messages: formattedMessages,
       }),
-      // Agent tools call (pre-compute matching tests while LLM is thinking)
-      Promise.resolve(
-        priceFilter 
-          ? { success: true, data: { matches: [] } }
-          : (testIds.length === 0 ? searchTestsByProblem(lastMessage, relevantAssessments) : { success: true, data: { matches: [] } })
-      ),
+      // Pre-compute problem-based test search while LLM is thinking
+      priceFilter 
+        ? Promise.resolve({ success: true, data: { matches: [] } })
+        : Promise.resolve(searchTestsByProblem(lastMessage, relevantAssessments)),
     ])
 
     const rawText = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text : ''
     const tokensUsed = (aiResponse.usage?.input_tokens ?? 0) + (aiResponse.usage?.output_tokens ?? 0)
 
-    // Parse [TEST:id] markers from response + extract tests
+    // Parse [TEST:id] markers from response
     const { cleanText, testIds } = parseTestMarkers(rawText)
     
     // ALWAYS use live assessments API as primary source
