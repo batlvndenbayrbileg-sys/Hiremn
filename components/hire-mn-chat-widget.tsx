@@ -621,17 +621,36 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
     return { cleanText, testIds }
   }
 
-  // Render formatted text with bold, lists, etc.
+  // Render formatted text with bold, lists, headings, etc.
   const renderFormattedText = (text: string) => {
-    // Split by lines first
     const lines = text.split('\n')
     
     return lines.map((line, lineIdx) => {
+      // Check for markdown heading: ### Heading
+      const headingMatch = line.match(/^(#{1,3})\s+(.+)$/)
+      if (headingMatch) {
+        const level = headingMatch[1].length
+        const headingText = headingMatch[2]
+        const sizes = { 1: 20, 2: 18, 3: 16 }
+        return (
+          <div key={lineIdx} style={{ 
+            marginTop: lineIdx > 0 ? 12 : 0,
+            marginBottom: 8,
+            fontSize: sizes[level as 1 | 2 | 3],
+            fontWeight: 700,
+            color: '#E8541A',
+            lineHeight: 1.4,
+          }}>
+            {headingText}
+          </div>
+        )
+      }
+      
       // Check if it's a list item
       const isBullet = /^[\-\•\*]\s/.test(line.trim())
       const isNumbered = /^\d+[\.\)]\s/.test(line.trim())
       
-      // Parse bold text **text** or line starting with **Label:**
+      // Parse bold text **text**
       const parts: React.ReactNode[] = []
       let remaining = isBullet ? line.replace(/^[\-\•\*]\s/, '') : isNumbered ? line.replace(/^\d+[\.\)]\s/, '') : line
       let keyIdx = 0
@@ -642,15 +661,13 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
       let match
       
       while ((match = boldRegex.exec(remaining)) !== null) {
-        // Add text before the match
         if (match.index > lastIndex) {
           parts.push(<span key={`t-${lineIdx}-${keyIdx++}`}>{remaining.slice(lastIndex, match.index)}</span>)
         }
-        // Add bold text
         parts.push(
           <strong key={`b-${lineIdx}-${keyIdx++}`} style={{ 
             color: '#E8541A', 
-            fontWeight: 600,
+            fontWeight: 700,
           }}>
             {match[1]}
           </strong>
@@ -658,12 +675,10 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
         lastIndex = match.index + match[0].length
       }
       
-      // Add remaining text
       if (lastIndex < remaining.length) {
         parts.push(<span key={`e-${lineIdx}-${keyIdx++}`}>{remaining.slice(lastIndex)}</span>)
       }
       
-      // If no parts, just use the line
       if (parts.length === 0) {
         parts.push(<span key={`l-${lineIdx}`}>{remaining}</span>)
       }
@@ -674,13 +689,15 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
           <div key={lineIdx} style={{ 
             display: 'flex', 
             gap: 8, 
-            marginTop: lineIdx > 0 ? 6 : 0,
+            marginTop: lineIdx > 0 ? 8 : 0,
             paddingLeft: 4,
+            alignItems: 'flex-start',
           }}>
             <span style={{ 
               color: '#E8541A', 
-              fontWeight: 600,
+              fontWeight: 700,
               flexShrink: 0,
+              marginTop: 2,
             }}>
               {isNumbered ? line.match(/^\d+/)?.[0] + '.' : '•'}
             </span>
@@ -691,11 +708,11 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
       
       // Empty line = paragraph break
       if (line.trim() === '') {
-        return <div key={lineIdx} style={{ height: 8 }} />
+        return <div key={lineIdx} style={{ height: 10 }} />
       }
       
       return (
-        <div key={lineIdx} style={{ marginTop: lineIdx > 0 ? 4 : 0 }}>
+        <div key={lineIdx} style={{ marginTop: lineIdx > 0 ? 6 : 0 }}>
           {parts}
         </div>
       )
@@ -774,7 +791,7 @@ function UserMessage({ content, fontSize }: { content: string; fontSize: number 
   )
 }
 
-// ── Main Widget ───────────────────────────────────────────────────────────────
+// ── Main Widget ───────────────────────��───────────────────────────────────────
 
 export default function HireMnChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
