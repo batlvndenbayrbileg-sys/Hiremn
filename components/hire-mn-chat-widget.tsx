@@ -30,10 +30,10 @@ interface Test {
 // ── Quick replies with icons ──────────────────────────────────────────────────
 
 const QUICK_REPLIES = [
-  { text: "Ямар тест байдаг вэ?", icon: "📋" },
+  { text: "Бүх тест харах", icon: "📋" },
   { text: "Надад тохирох тест хэл", icon: "🎯" },
-  { text: "Үнэгүй тест байна уу?", icon: "🆓" },
-  { text: "Стресстэй байна, юу хийх вэ?", icon: "🧘" },
+  { text: "Үнэгүй тестүүд", icon: "🆓" },
+  { text: "Hire.mn тухай", icon: "ℹ️" },
 ]
 
 // ── Animated Mascot Robot ─────────────────────────────────────────────────────
@@ -801,7 +801,7 @@ export default function HireMnChatWidget() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Сайн байна уу!\n\nБи бол hire.mn-ын хиймэл оюунт ухаалаг туслагч. Та надаас ямар тест өгөх, тестийн хариугаа шинжлүүлэх, зөвлөгөө мэдээлэл авах боломжтой.",
+      content: "Сайн байна уу!\n\nБи hire.mn AI туслагч. Та надаас:\n\n- **Тест санал болгох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар туслана",
     },
   ])
   const [input, setInput] = useState("")
@@ -1216,14 +1216,14 @@ export default function HireMnChatWidget() {
                         className="hw-chip"
                         onClick={() => sendMessage(qr.text)}
                         style={{
-                          background: "#fff",
-                          border: "1.5px solid #F0C4AD",
-                          color: "#E8541A",
+                          background: "linear-gradient(135deg, #E8541A, #F07040)",
+                          border: "none",
+                          color: "#fff",
                           borderRadius: 22, padding: "8px 14px",
                           fontSize: fontSize - 1, fontWeight: 600,
                           cursor: "pointer", whiteSpace: "nowrap",
                           animation: `hw-chip-in 0.35s cubic-bezier(.34,1.56,.64,1) ${i * 0.08}s both`,
-                          boxShadow: "0 2px 8px rgba(232,84,26,.08)",
+                          boxShadow: "0 4px 12px rgba(232,84,26,.25)",
                           display: "flex", alignItems: "center", gap: 6,
                         }}
                       >
