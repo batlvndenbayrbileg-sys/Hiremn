@@ -608,7 +608,7 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
 // ── Bot Message ────────────────────────���──────────────────────────────────────
 
 function BotMessage({ message, fontSize }: { message: Message; fontSize: number }) {
-  // Import needed functions
+  // Parse [TEST:id] markers
   const parseTestMarkers = (text: string) => {
     const testIds: number[] = []
     const regex = /\[TEST:(\d+)\]/g
@@ -621,7 +621,88 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
     return { cleanText, testIds }
   }
 
-  const { cleanText, testIds } = parseTestMarkers(message.content || "")
+  // Render formatted text with bold, lists, etc.
+  const renderFormattedText = (text: string) => {
+    // Split by lines first
+    const lines = text.split('\n')
+    
+    return lines.map((line, lineIdx) => {
+      // Check if it's a list item
+      const isBullet = /^[\-\•\*]\s/.test(line.trim())
+      const isNumbered = /^\d+[\.\)]\s/.test(line.trim())
+      
+      // Parse bold text **text** or line starting with **Label:**
+      const parts: React.ReactNode[] = []
+      let remaining = isBullet ? line.replace(/^[\-\•\*]\s/, '') : isNumbered ? line.replace(/^\d+[\.\)]\s/, '') : line
+      let keyIdx = 0
+      
+      // Match **bold** patterns
+      const boldRegex = /\*\*([^*]+)\*\*/g
+      let lastIndex = 0
+      let match
+      
+      while ((match = boldRegex.exec(remaining)) !== null) {
+        // Add text before the match
+        if (match.index > lastIndex) {
+          parts.push(<span key={`t-${lineIdx}-${keyIdx++}`}>{remaining.slice(lastIndex, match.index)}</span>)
+        }
+        // Add bold text
+        parts.push(
+          <strong key={`b-${lineIdx}-${keyIdx++}`} style={{ 
+            color: '#E8541A', 
+            fontWeight: 600,
+          }}>
+            {match[1]}
+          </strong>
+        )
+        lastIndex = match.index + match[0].length
+      }
+      
+      // Add remaining text
+      if (lastIndex < remaining.length) {
+        parts.push(<span key={`e-${lineIdx}-${keyIdx++}`}>{remaining.slice(lastIndex)}</span>)
+      }
+      
+      // If no parts, just use the line
+      if (parts.length === 0) {
+        parts.push(<span key={`l-${lineIdx}`}>{remaining}</span>)
+      }
+      
+      // Render as list item or paragraph
+      if (isBullet || isNumbered) {
+        return (
+          <div key={lineIdx} style={{ 
+            display: 'flex', 
+            gap: 8, 
+            marginTop: lineIdx > 0 ? 6 : 0,
+            paddingLeft: 4,
+          }}>
+            <span style={{ 
+              color: '#E8541A', 
+              fontWeight: 600,
+              flexShrink: 0,
+            }}>
+              {isNumbered ? line.match(/^\d+/)?.[0] + '.' : '•'}
+            </span>
+            <span>{parts}</span>
+          </div>
+        )
+      }
+      
+      // Empty line = paragraph break
+      if (line.trim() === '') {
+        return <div key={lineIdx} style={{ height: 8 }} />
+      }
+      
+      return (
+        <div key={lineIdx} style={{ marginTop: lineIdx > 0 ? 4 : 0 }}>
+          {parts}
+        </div>
+      )
+    })
+  }
+
+  const { cleanText } = parseTestMarkers(message.content || "")
   
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -633,11 +714,11 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
             border: "1.5px solid #F0EAE6",
             borderRadius: 16, borderBottomLeftRadius: 4,
             padding: "12px 16px",
-            fontSize: fontSize, lineHeight: 1.7, color: "#1F2937",
+            fontSize: fontSize, lineHeight: 1.6, color: "#1F2937",
             boxShadow: "0 2px 8px rgba(0,0,0,.04)",
-            whiteSpace: "pre-wrap", wordBreak: "break-word",
+            wordBreak: "break-word",
           }}>
-            {cleanText}
+            {renderFormattedText(cleanText)}
           </div>
         </div>
       )}
