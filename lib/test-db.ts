@@ -716,18 +716,21 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
 }
 
 // Parse [TEST:id] markers from AI response and extract test IDs
+// Бүх ID-г авах - API-аас ирсэн тест TEST_DATABASE-д байхгүй байж болно
 export function parseTestMarkers(text: string): { cleanText: string; testIds: number[] } {
   const testIds: number[] = []
   const regex = /\[TEST:(\d+)\]/g
   let match
-
+  
   while ((match = regex.exec(text)) !== null) {
     const id = parseInt(match[1], 10)
-    if (TEST_DATABASE[id]) {
+    // Бүх ID-г авах - TEST_DATABASE шалгахгүй
+    // API route-д live assessments-аас олно
+    if (id > 0 && !testIds.includes(id)) {
       testIds.push(id)
     }
   }
-
+  
   const cleanText = text.replace(/\s*\[TEST:\d+\]/g, "").trim()
   return { cleanText, testIds }
 }
