@@ -969,6 +969,10 @@ export default function HireMnChatWidget() {
     ]
     const matchedMember = teamMemberNames.find(m => m.pattern.test(text))
     
+    console.log('[v0] text:', text)
+    console.log('[v0] matchedMember:', matchedMember)
+    console.log('[v0] isAboutHire:', isAboutHire, 'isFounderQuery:', isFounderQuery)
+    
     if (isAboutHire || isAboutTeam || isFreeTest || isPaidTest || isFounderQuery || matchedMember) {
       // Import static data
       const { COMPANY_INFO, getAllTeamCategories, TEAM_MEMBERS } = await import("@/lib/company-data")
