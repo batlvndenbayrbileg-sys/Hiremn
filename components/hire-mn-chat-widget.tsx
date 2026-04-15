@@ -953,25 +953,21 @@ export default function HireMnChatWidget() {
     const isPaidTest = /төлбөртэй\s*тест/i.test(text)
     const isFounderQuery = !isTestRelated && /үүсгэн\s*байгуулагч|founder|нандин.?эрдэнэ/i.test(text)
     
-    // Individual team member queries - check for specific names
-    const teamMemberNames = [
-      { pattern: /саранчимэг/i, id: "system-1" },
-      { pattern: /эрдэнэцэцэг/i, id: "system-2" },
-      { pattern: /доржнямбуу/i, id: "system-3" },
-      { pattern: /өсөхбаяр/i, id: "system-4" },
-      { pattern: /чин.?эрдэнэ/i, id: "test-0" },
-      { pattern: /үүрцайх/i, id: "test-1" },
-      { pattern: /оюунбилэг/i, id: "test-2" },
-      { pattern: /баярмаа/i, id: "test-3" },
-      { pattern: /мөнхжаргал/i, id: "test-4" },
-      { pattern: /одонтуяа/i, id: "test-5" },
-      { pattern: /эрдэнэбаяр/i, id: "test-6" },
-    ]
+  // Individual team member queries - check for specific names (Latin & Cyrillic)
+  const teamMemberNames = [
+    { pattern: /саранчимэг|saranchimeg/i, id: "system-1" },
+    { pattern: /эрдэнэцэцэг|erdenetseteg|erdentseteg/i, id: "system-2" },
+    { pattern: /доржнямбуу|dorjnyambuu/i, id: "system-3" },
+    { pattern: /өсөхбаяр|osohbayar/i, id: "system-4" },
+    { pattern: /чин.?эрдэнэ|chin.?erdene/i, id: "test-0" },
+    { pattern: /үүрцайх|uurtsaikh/i, id: "test-1" },
+    { pattern: /оюунбилэг|oyunbileg/i, id: "test-2" },
+    { pattern: /баярмаа|bayarmaa/i, id: "test-3" },
+    { pattern: /мөнхжаргал|monhjargal/i, id: "test-4" },
+    { pattern: /одонтуяа|odontuyaa/i, id: "test-5" },
+    { pattern: /эрдэнэбаяр|erdenebyar/i, id: "test-6" },
+  ]
     const matchedMember = teamMemberNames.find(m => m.pattern.test(text))
-    
-    console.log('[v0] text:', text)
-    console.log('[v0] matchedMember:', matchedMember)
-    console.log('[v0] isAboutHire:', isAboutHire, 'isFounderQuery:', isFounderQuery)
     
     if (isAboutHire || isAboutTeam || isFreeTest || isPaidTest || isFounderQuery || matchedMember) {
       // Import static data
