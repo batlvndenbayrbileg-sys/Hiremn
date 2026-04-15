@@ -974,6 +974,44 @@ export default function HireMnChatWidget() {
       const { COMPANY_INFO, getAllTeamCategories, TEAM_MEMBERS } = await import("@/lib/company-data")
       
       setTimeout(async () => {
+        // Individual team member query - FIRST PRIORITY
+        if (matchedMember) {
+          const member = TEAM_MEMBERS.find(m => m.id === matchedMember.id)
+          if (member) {
+            setMessages(prev => [...prev, {
+              role: "assistant",
+              content: `**${member.name}**\n\n${member.role}\n\n${member.description}`,
+              teamCategories: [{
+                label: member.role,
+                icon: member.category === 'system' ? "💻" : member.category === 'test' ? "📊" : "🚀",
+                color: member.roleColor,
+                members: [member]
+              }],
+            }])
+          }
+          setIsTyping(false)
+          return
+        }
+        
+        // Founder query
+        if (isFounderQuery) {
+          const founder = TEAM_MEMBERS.find(m => m.category === 'founder')
+          if (founder) {
+            setMessages(prev => [...prev, {
+              role: "assistant",
+              content: `**${founder.name}**\n\n${founder.role}\n\n${founder.description}`,
+              teamCategories: [{
+                label: founder.role,
+                icon: "🚀",
+                color: founder.roleColor,
+                members: [founder]
+              }],
+            }])
+          }
+          setIsTyping(false)
+          return
+        }
+        
         // Free tests query
         if (isFreeTest) {
           const res = await fetch("/api/chat", {
@@ -1006,44 +1044,6 @@ export default function HireMnChatWidget() {
             tests: data.tests || [],
             categories: ["paid"],
           }])
-          setIsTyping(false)
-          return
-        }
-        
-        // Founder query - show single person card
-        if (isFounderQuery) {
-          const founder = TEAM_MEMBERS.find(m => m.category === 'founder')
-          if (founder) {
-            setMessages(prev => [...prev, {
-              role: "assistant",
-              content: `**${founder.name}** - ${founder.role}`,
-              teamCategories: [{
-                label: founder.role,
-                icon: "🚀",
-                color: founder.roleColor,
-                members: [founder]
-              }],
-            }])
-          }
-          setIsTyping(false)
-          return
-        }
-        
-        // Individual team member query - show single person card
-        if (matchedMember) {
-          const member = TEAM_MEMBERS.find(m => m.id === matchedMember.id)
-          if (member) {
-            setMessages(prev => [...prev, {
-              role: "assistant",
-              content: `**${member.name}** - ${member.role}`,
-              teamCategories: [{
-                label: member.role,
-                icon: member.category === 'system' ? "💻" : member.category === 'test' ? "📊" : "🚀",
-                color: member.roleColor,
-                members: [member]
-              }],
-            }])
-          }
           setIsTyping(false)
           return
         }
