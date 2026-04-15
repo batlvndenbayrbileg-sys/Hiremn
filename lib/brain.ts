@@ -42,13 +42,15 @@ function formatTestList(assessments: Assessment[], lang: 'mn' | 'en'): string {
 
   return assessments
     .filter(a => a.isActive !== false)
-    .slice(0, 20) // Limit for context window
     .map(a => {
       const name = lang === 'en' && a.nameEn ? a.nameEn : a.name
       const price = a.price === 0 ? 'Үнэгүй' : `${a.price.toLocaleString()}₮`
       const duration = a.duration ? `${a.duration} мин` : ''
       const cat = a.category?.name || ''
-      return `[TEST:${a.id}] ${name} | ${price} | ${duration} | ${cat}`
+      // test-db-ээс useCases авах, эсвэл API-ийн description/usage/measure
+      const testDbInfo = TEST_DATABASE[a.id]
+      const useCases = testDbInfo?.useCases || [a.description, a.usage, a.measure].filter(Boolean).join('. ') || ''
+      return `[TEST:${a.id}] ${name} | ${price} | ${duration} | ${cat}\n   → Тохирох: ${useCases}`
     })
     .join('\n')
 }
@@ -113,7 +115,7 @@ HIRE.MN ТУХАЙ:
    - Хэрэглэгч тодорхой асуудалтай (стресс, түгшүүр, харилцааны бэрхшээл) → ЗӨВЛӨГӨӨ + тест хослуул
 
 3. МОНГОЛ ХЭЛНИЙ ЧАНАР:
-   - Утга найруулга зүйн алдаагүй, зөв дүрмээр бич
+   - Утга найруулга зүйн алдаагүй, зөв дүрмээр б��ч
    - Товч, тодорхой, ойлгомжтой өгүүлбэр ашигла
    - Хэт албан ёсны эсвэл хэт энгийн биш, байгалийн дотно өнгө аястай
    - Нэг бодлыг давтахгүй, шаардлагагүй үг хэрэглэхгүй
@@ -234,7 +236,7 @@ ${formatCategorySummary(assessments)}`
 - Зөвлөгөө өгөхдөө итгэл төрүүлэм, бодитой бай`
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────���───────────────
   // Category hint
   // ─────────────────────────────────────────────────────────────────────────────
   const categoryHint = filterCategory
