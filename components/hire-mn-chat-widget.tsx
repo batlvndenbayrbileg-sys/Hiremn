@@ -945,27 +945,27 @@ export default function HireMnChatWidget() {
     setIsTyping(true)
 
     // Static responses - no LLM needed, save tokens
-    const isAboutHire = /hire\.?mn|платформ|компани|бидний тухай|тухай$/i.test(text)
-    // Only match team queries that are specifically about hire.mn team, not test names containing "баг"
-    const isTestRelated = /багийн\s*дүр|тест|шалгалт|үнэлгээ|яадын|юу вэ|ямар|хэрхэн/i.test(text)
-    const isAboutTeam = !isTestRelated && /хөгжүүлэлтийн\s*баг|систем.*баг|тест.*хөгжүүлэгч|ажилчид|хөгжүүлэгч|хэн бүтээсэн|хэн хийсэн|hire.*баг/i.test(text)
-    const isFreeTest = /үнэгүй\s*тест/i.test(text)
-    const isPaidTest = /төлбөртэй\s*тест/i.test(text)
-    const isFounderQuery = !isTestRelated && /үүсгэн\s*байгуулагч|founder|нандин.?эрдэнэ/i.test(text)
+    // Support: Cyrillic Mongolian, Latin Mongolian, English
+    const isAboutHire = /hire\.?mn|платформ|platform|компани|company|бидний\s*тухай|about\s*us|тухай$/i.test(text)
+    const isTestRelated = /багийн\s*дүр|team\s*role|тест|test|шалгалт|exam|үнэлгээ|assess|яадын|why|юу\s*вэ|what|ямар|what|хэрхэн|how/i.test(text)
+    const isAboutTeam = !isTestRelated && /хөгжүүлэлтийн\s*баг|development\s*team|систем.*баг|system.*team|тест.*хөгжүүлэгч|test.*developer|ажилчид|employees|хөгжүүлэгч|developer|хэн\s*бүтээсэн|who.*created|хэн\s*хийсэн|who.*made|hire.*баг|hire.*team/i.test(text)
+    const isFreeTest = /үнэгүй\s*тест|free\s*test|free\s*assessment|төлбөргүй/i.test(text)
+    const isPaidTest = /төлбөртэй\s*тест|paid\s*test|premium\s*test/i.test(text)
+    const isFounderQuery = !isTestRelated && /үүсгэн\s*байгуулагч|founder|нандин.?эрдэнэ|nandin|erdene/i.test(text)
     
-  // Individual team member queries - check for specific names (Latin & Cyrillic)
+  // Individual team member queries - support Cyrillic, Latin Mongolian, English
   const teamMemberNames = [
-    { pattern: /саранчимэг|saranchimeg/i, id: "system-1" },
-    { pattern: /эрдэнэцэцэг|erdenetseteg|erdentseteg/i, id: "system-2" },
-    { pattern: /доржнямбуу|dorjnyambuu/i, id: "system-3" },
-    { pattern: /өсөхбаяр|osohbayar/i, id: "system-4" },
-    { pattern: /чин.?эрдэнэ|chin.?erdene/i, id: "test-0" },
-    { pattern: /үүрцайх|uurtsaikh/i, id: "test-1" },
-    { pattern: /оюунбилэг|oyunbileg/i, id: "test-2" },
-    { pattern: /баярмаа|bayarmaa/i, id: "test-3" },
-    { pattern: /мөнхжаргал|monhjargal/i, id: "test-4" },
-    { pattern: /одонтуяа|odontuyaa/i, id: "test-5" },
-    { pattern: /эрдэнэбаяр|erdenebyar/i, id: "test-6" },
+    { pattern: /саранчимэг|saranchimeg|sarantsimeg/i, id: "system-1" },
+    { pattern: /эрдэнэцэцэг|erdenetseteg|erdentseteg|erdenetseteg/i, id: "system-2" },
+    { pattern: /доржнямбуу|dorjnyambuu|dorjnyambu/i, id: "system-3" },
+    { pattern: /өсөхбаяр|osohbayar|osoh\s*bayar/i, id: "system-4" },
+    { pattern: /чин.?эрдэнэ|chin.?erdene|chin\s*erdene|chinerdene/i, id: "test-0" },
+    { pattern: /үүрцайх|uurtsaikh|uurtsaih|uurtsayh/i, id: "test-1" },
+    { pattern: /оюунбилэг|oyunbileg|oyun\s*bileg/i, id: "test-2" },
+    { pattern: /баярмаа|bayarmaa|bayar\s*maa/i, id: "test-3" },
+    { pattern: /мөнхжаргал|monhjargal|monh\s*jargal|monhjargal/i, id: "test-4" },
+    { pattern: /одонтуяа|odontuyaa|odon\s*tuyaa/i, id: "test-5" },
+    { pattern: /эрдэнэбаяр|erdenebyar|erdene\s*byar|erdene\s*bayar/i, id: "test-6" },
   ]
     const matchedMember = teamMemberNames.find(m => m.pattern.test(text))
     

@@ -39,7 +39,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tagEn: "Popular",
     category: "personality",
     image: "/images/tests/test-1-growth-mindset.jpg",
-    useCases: "Суралцахдаа бэрхшээлтэй, өөрийгөө хөгжүүлэхийг хүсдэг, амжилтгүй болохоос айдаг, шинэ зүйл сурахад хэцүү санагддаг, бүтэлгүйтлээс сэргийлэх",
+    useCases: "Суралцахдаа бэрхшээлтэй, өөрийгөө хөгжүүлэхийг хүсдэг, амжилтгүй болохоос айдаг, шинэ зүйл сурахад хэцүү санагддаг, бүтэлгүйтлээс сэргийлэх | learning difficulties, growth mindset, want to improve, afraid of failure, new skills, resilience, development",
   },
   2: {
     id: 2,
@@ -57,7 +57,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tagEn: "New",
     category: "personality",
     image: "/images/tests/test-2-work-life-balance.jpg",
-    useCases: "Ажилдаа их цаг зарцуулдаг, гэр бүлдээ цаг гаргаж чаддаггүй, ядарч түвддэг, стресстэй, burnout мэдрэмж, амралт авч чаддаггүй, ажил амьдралын хоорондох тэнцвэрээ олох",
+    useCases: "Ажилдаа их цаг зарцуулдаг, гэр бүлдээ цаг гаргаж чаддаггүй, ядарч түвддэг, стресстэй, burnout мэдрэмж, амралт авч чаддаггүй, ажил амьдралын хоорондох тэнцвэрээ олох | work-life balance, stressed, burnout, family time, exhausted, work overload, harmony",
   },
   3: {
     id: 3,
@@ -388,7 +388,7 @@ export const TEST_DATABASE: Record<number, TestInfo> = {
     tag: "Uneggui",
     tagEn: "Free",
     category: "health",
-    useCases: "Архи, архины хэрэглээ, AUDIT, согтууруулах ундаа, архидалт, архинд донтох, архи уух, архи хэтрүүлэх, бодис хэрэглээ, донтолт, хар тамхи, мансууруулах бодис, хэрэглээгээ хянах, ДЭМБ, эрсдэлтэй хэрэглээ",
+    useCases: "Архи, архины хэрэглээ, AUDIT, согтууруулах ундаа, архидалт, архинд донтох, архи уух, архи хэтрүүлэх, бодис хэрэглээ, донтолт, хар тамхи, мансууруулах бодис, хэрэглээгээ хянах, ДЭМБ, эрсдэлтэй хэрэглээ | alcohol, substance use, AUDIT, drinking, DAST, intoxication, substance abuse, addiction, drug use",
   },
   22: {
     id: 22,

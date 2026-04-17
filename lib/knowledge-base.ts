@@ -40,7 +40,7 @@ export const TEST_KNOWLEDGE: Record<number, TestKnowledge> = {
     scientificBasis: "Implicit Theories of Intelligence судалгаа, 1988-оноос хойшхи олон улсын судалгаанууд",
     useCases: ["Суралцахдаа бэрхшээлтэй", "Өөрийгөө хөгжүүлэх", "Амжилтгүй болохоос айх", "Шинэ зүйл сурах"],
     relatedTests: [4, 7, 10],
-    keywords: ["өсөлт", "сэтгэлгээ", "mindset", "суралцах", "хөгжил", "двек", "амжилт"]
+    keywords: ["өсөлт", "growth", "сэтгэлгээ", "mindset", "suraltsah", "suralcach", "хөгжил", "development", "амжилт", "success", "двек", "dweck"]
   },
   2: {
     id: 2,

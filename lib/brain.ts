@@ -38,35 +38,35 @@ export function retrieveRelevantKnowledge(query: string): string {
 // ══════════════════════════════════════════════════════════════════════════════
 
 function formatTestList(assessments: Assessment[], lang: 'mn' | 'en'): string {
-  if (assessments.length === 0) return '(Тестийн мэдээлэл байхгүй байна)'
+  if (assessments.length === 0) return '(Тестийн мэдээлэл байхгүй байна | No test information available)'
 
   return assessments
     .filter(a => a.isActive !== false)
     .map(a => {
       const name = lang === 'en' && a.nameEn ? a.nameEn : a.name
-      const price = a.price === 0 ? 'Үнэгүй' : `${a.price.toLocaleString()}₮`
-      const duration = a.duration ? `${a.duration} мин` : ''
+      const price = a.price === 0 ? 'Үнэгүй / Free' : `${a.price.toLocaleString()}₮`
+      const duration = a.duration ? `${a.duration} мин / min` : ''
       const cat = a.category?.name || ''
-      const author = a.author ? `Зохиогч: ${a.author}` : ''
+      const author = a.author ? `Author: ${a.author}` : ''
       
       // API-аас авсан бүрэн мэдээлэл
       const description = a.description || ''
       const usage = a.usage || ''  // "Хэн ашиглах вэ"
       const measure = a.measure || ''  // "Юу хэмжих вэ"
       
-      // test-db-ээс нэмэлт useCases (түлхүүр үгс)
+      // test-db-ээс нэмэлт useCases (түлхүүр үгс - multi-language)
       const testDbInfo = TEST_DATABASE[a.id]
       const keywords = testDbInfo?.useCases || ''
       
-      // Бүрэн мэдээллийг нэгтгэх
+      // Бүрэн мэдээллийг нэгтгэх (multi-language)
       const parts = [
         `[TEST:${a.id}] **${name}**`,
-        `   Үнэ: ${price} | Хугацаа: ${duration} | Ангилал: ${cat}`,
-        description ? `   Тайлбар: ${description}` : '',
-        usage ? `   Хэн авах вэ: ${usage}` : '',
-        measure ? `   Юу хэмжих вэ: ${measure}` : '',
+        `   Price: ${price} | Duration: ${duration} | Category: ${cat}`,
+        description ? `   Description: ${description}` : '',
+        usage ? `   For: ${usage}` : '',
+        measure ? `   Measures: ${measure}` : '',
         author ? `   ${author}` : '',
-        keywords ? `   Түлхүүр үгс: ${keywords}` : '',
+        keywords ? `   Keywords (all languages): ${keywords}` : '',
       ].filter(Boolean)
       
       return parts.join('\n')
@@ -130,7 +130,7 @@ HIRE.MN ТУХАЙ:
 
 2. ТЕСТ САНАЛ БОЛГОХ ЭСЭХЭЭ ШИЙД:
    - Хэрэглэгч зүгээр л ярилцах, зөвлөгөө авахыг хүсвэл → ТЕСТ САНАЛ БОЛГОХГҮЙ
-   - Хэрэглэгч өөрийгөө үнэлэх, илүү сайн таних хүсэлтэй бол → ТОХИРОХ 1-3 тест санал болго
+   - Хэрэглэгч өөрийгөө үнэлэх, илүү сайн таних хүсэлтэй бол → ТОХИ��ОХ 1-3 тест санал болго
    - Хэрэглэгч тодорхой асуудалтай (стресс, түгшүүр, харилцааны бэрхшээл) → ЗӨВЛӨГӨӨ + тест хослуул
 
 3. МОНГОЛ ХЭЛНИЙ ЧАНАР:
@@ -144,7 +144,11 @@ HIRE.MN ТУХАЙ:
    - Ноцтой асуудал байвал мэргэжилтэнд хандахыг зөвлө
    - Итгэл төрүүлэх, гэхдээ хэт амлалт өгөхгүй
 
-5. ХАРИУЛАХ ХҮРЭЭ - ЧАНД БАРИМТЛАХ:
+ХЭРЭГЛЭГЧИЙН ХЭЛНИЙГ ОЙЛГОХ:
+   - Монгол (Кириллээр): "Архины хэрэглээ", "тест", "сэтгэл зүй"
+   - Монгол (Латинаар): "arhinii heregleeg", "test", "setgel zuuh"
+   - Английээр: "alcohol test", "assessment", "psychology"
+   - Бүх хэлээр адилхан хариул - хэл солих хэргүй
    - Зөвхөн hire.mn платформ, сэтгэл зүй, өөрийгөө таних, хувийн хөгжил, ажлын байрны сэтгэл зүй, харилцаа, зан төлөв, стресс, түгшүүр зэрэг холбогдох сэдвүүдэд хариулна
    - ХАМААРАЛГҮЙ сэдэв (кино, хоол, спорт, улс төр, цаг агаар гэх мэт) асуувал:
      "Би hire.mn платформын AI зөвлөх бөгөөд зөвхөн сэтгэл зүй, өөрийгөө таних, хувийн хөгжлийн асуудлуудад туслах боломжтой. Танд ямар нэгэн сэтгэл зүйн асуудалд туслах уу?"
@@ -226,7 +230,7 @@ ${formatCategorySummary(assessments)}`
    
    B) ТЕСТ СОНГОХ АРГА:
       - Хэрэглэгчийн асуултыг ТЕСТҮҮДИЙН ЖАГСААЛТ дахь "Тайлбар", "Хэн авах вэ", "Юу хэмжих вэ", "Түлхүүр үгс"-тэй ХАРЬЦУУЛАХ
-      - Хамгийн ТОХИРОХ тестийг олох (нэр биш, агуулгаар!)
+      - Хамгийн ТОХИРОХ ��естийг олох (нэр биш, агуулгаар!)
       - Ижил төстэй тестүүдийг бас санал болгож болно
    
    C) ЖИШЭЭ:
