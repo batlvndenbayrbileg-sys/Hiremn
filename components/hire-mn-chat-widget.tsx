@@ -30,6 +30,20 @@ interface Message {
   companyInfo?: boolean
 }
 
+interface InitialContext {
+  type: 'exam-result'
+  data: {
+    assessmentName: string
+    score: number
+    interpretation: string
+    advice: string
+  }
+}
+
+interface HireMnChatWidgetProps {
+  initialContext?: InitialContext
+}
+
 interface Test {
   id: number
   name: string
@@ -914,17 +928,30 @@ function UserMessage({ content, fontSize }: { content: string; fontSize: number 
 
 // ── Main Widget ───────────────────────��───────────────────────────────────────
 
-export default function HireMnChatWidget() {
+export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetProps = {}) {
   const [isOpen, setIsOpen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [fontSize, setFontSize] = useState(13)
   const [showFontSlider, setShowFontSlider] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "Сайн байна уу!\n\nБи hire.mn AI туслагч. Та надаас:\n\n- **Тест санал болгох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар туслана",
-    },
-  ])
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const initialMessages: Message[] = [
+      {
+        role: "assistant",
+        content: "Сайн байна уу!\n\nБи hire.mn AI туслагч. Та надаас:\n\n- **Тест санал болгох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар туслана",
+      },
+    ]
+    
+    // Exam result байвал initial message оруулна
+    if (initialContext?.type === 'exam-result') {
+      const { data } = initialContext
+      initialMessages.push({
+        role: "assistant",
+        content: `**${data.assessmentName}** үнэлгээний үр дүнд үндэслээд зөвлөгөө өгье.\n\n📊 **Таны оноо:** ${data.score}\n🎯 **Түвшин:** ${data.interpretation}\n\n${data.advice}`,
+      })
+    }
+    
+    return initialMessages
+  })
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [showQuickReplies, setShowQuickReplies] = useState(true)
