@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { HireMnChatWidget } from '@/components/hire-mn-chat-widget'
+import HireMnChatWidget from '@/components/hire-mn-chat-widget'
 
 export default function ChatPage() {
   const [examAdvice, setExamAdvice] = useState<any>(null)
