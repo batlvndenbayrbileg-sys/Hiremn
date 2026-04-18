@@ -10,7 +10,18 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Allow the /widget page to be iframed from any origin (hire.mn etc.)
+        // Security headers for all routes
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "X-XSS-Protection", value: "1; mode=block" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+        ],
+      },
+      {
+        // Allow the /widget page to be iframed from hire.mn
         source: "/widget",
         headers: [
           { key: "X-Frame-Options", value: "ALLOWALL" },
@@ -18,20 +29,32 @@ const nextConfig = {
         ],
       },
       {
-        // Allow hire.mn to call the chat API
-        source: "/api/:path*",
+        // Secure API routes with proper CORS
+        source: "/api/ai/:path*",
         headers: [
-          { key: "Access-Control-Allow-Origin", value: "*" },
-          { key: "Access-Control-Allow-Methods", value: "GET,POST,OPTIONS" },
-          { key: "Access-Control-Allow-Headers", value: "Content-Type" },
+          { key: "Access-Control-Allow-Origin", value: process.env.ALLOWED_ORIGINS || "*" },
+          { key: "Access-Control-Allow-Methods", value: "POST,OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Content-Type,x-api-key,Authorization" },
+          { key: "Access-Control-Max-Age", value: "86400" },
+          { key: "Content-Security-Policy", value: "default-src 'self'" },
         ],
       },
       {
-        // Allow embed.js to be loaded from any site
+        // Chat API security
+        source: "/api/chat",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "POST,GET,OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Content-Type" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+        ],
+      },
+      {
+        // Embed script caching
         source: "/embed.js",
         headers: [
           { key: "Access-Control-Allow-Origin", value: "*" },
-          { key: "Cache-Control", value: "public, max-age=3600" },
+          { key: "Cache-Control", value: "public, max-age=3600, must-revalidate" },
         ],
       },
     ]
