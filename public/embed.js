@@ -19,9 +19,17 @@
   var wrapper = document.createElement("div");
   wrapper.id = "hiremn-widget-root";
   wrapper.style.cssText =
-    "position:fixed;bottom:0;right:0;z-index:2147483647;" +
-    "pointer-events:none;overflow:hidden;" +
-    "width:420px;height:680px;max-width:100vw;max-height:100%;";
+    "position:fixed !important;" +
+    "bottom:0 !important;" +
+    "right:0 !important;" +
+    "z-index:2147483647 !important;" +
+    "pointer-events:none !important;" +
+    "overflow:visible !important;" +
+    "width:420px;" +
+    "height:680px;" +
+    "max-width:100vw;" +
+    "max-height:100vh;" +
+    "background:transparent !important;";
 
   // ── iframe ────────────────────────────────────────────────────────────────
   var iframe = document.createElement("iframe");
@@ -32,15 +40,30 @@
   iframe.setAttribute("frameborder", "0");
   iframe.setAttribute("scrolling", "no");
   iframe.style.cssText =
-    "width:100%;height:100%;border:none;background:transparent;" +
-    "pointer-events:all;display:block;color-scheme:light;";
+    "width:100% !important;" +
+    "height:100% !important;" +
+    "border:none !important;" +
+    "background:transparent !important;" +
+    "pointer-events:all !important;" +
+    "display:block !important;" +
+    "color-scheme:light !important;";
 
   // ── Responsive sizing ─────────────────────────────────────────────────────
   function resize() {
     var mobile = window.innerWidth <= 480;
-    wrapper.style.width  = mobile ? "100vw" : "420px";
-    wrapper.style.height = mobile ? "100dvh" : "680px";
-    wrapper.style.maxHeight = mobile ? "100%" : "100%";
+    if (mobile) {
+      wrapper.style.width = "100vw";
+      wrapper.style.height = "100dvh";
+      wrapper.style.maxHeight = "100dvh";
+      wrapper.style.bottom = "0";
+      wrapper.style.right = "0";
+      wrapper.style.left = "0";
+    } else {
+      wrapper.style.width = "420px";
+      wrapper.style.height = "680px";
+      wrapper.style.maxHeight = "100vh";
+      wrapper.style.left = "auto";
+    }
   }
   resize();
   window.addEventListener("resize", resize);
