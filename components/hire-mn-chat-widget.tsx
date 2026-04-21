@@ -11,7 +11,8 @@ import {
   canSendMessage,
   getRemainingMessages,
   saveConversation,
-  generateConversationTitle
+  generateConversationTitle,
+  incrementDailyCount
 } from '@/lib/conversation-storage'
 
 // Lazy load 3D mascot to avoid SSR issues
@@ -1053,6 +1054,10 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     }
     
     if (!text.trim() || isTyping) return
+    
+    // Increment daily count
+    incrementDailyCount()
+    
     setShowQuickReplies(false)
     const userMsg: Message = { role: "user", content: text }
     setMessages(prev => [...prev, userMsg])
@@ -1423,9 +1428,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   }
                 `}</style>
 
-                {/* Logo/Mascot - click to toggle sidebar */}
-                <button
-                  onClick={() => setShowSidebar(s => !s)}
+                {/* Logo/Mascot - hover to show sidebar */}
+                <div
+                  onMouseEnter={() => setShowSidebar(true)}
                   title="Яриа түүх харах"
                   style={{
                     width: 48, height: 48, borderRadius: 12,
@@ -1446,7 +1451,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   <Suspense fallback={<MascotRobot size={26} waving />}>
                     <ChatMascot3D isTyping={isTyping} size="sm" />
                   </Suspense>
-                </button>
+                </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1476,30 +1481,6 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   </div>
                   
                   {/* Message counter - compact pill */}
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 4,
-                    marginTop: 6,
-                  }}>
-                    <div style={{
-                      fontSize: 10, 
-                      fontWeight: 600,
-                      padding: "3px 8px", 
-                      borderRadius: 20,
-                      backgroundColor: getRemainingMessages() < 5 ? "#FEE2E2" : "#F0FDF4",
-                      color: getRemainingMessages() < 5 ? "#DC2626" : "#16A34A",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                    }}>
-                      <span style={{
-                        width: 5, height: 5, borderRadius: "50%",
-                        backgroundColor: getRemainingMessages() < 5 ? "#DC2626" : "#16A34A",
-                      }} />
-                      {getRemainingMessages()} үлдсэн
-                    </div>
-                  </div>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
@@ -1643,11 +1624,38 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input */}
-              <div style={{
-                padding: "12px 14px 14px", borderTop: "1px solid #EDE8E5",
-                background: "#fff", flexShrink: 0,
-              }}>
+  {/* Input */}
+  <div style={{
+  padding: "12px 14px 14px", borderTop: "1px solid #EDE8E5",
+  background: "#fff", flexShrink: 0,
+  }}>
+  
+  {/* Daily limit warning */}
+  {getRemainingMessages() <= 20 && (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      marginBottom: 10,
+      padding: "6px 12px",
+      borderRadius: 8,
+      backgroundColor: getRemainingMessages() < 5 ? "#FEF2F2" : "#FFFBEB",
+      border: `1px solid ${getRemainingMessages() < 5 ? "#FECACA" : "#FDE68A"}`,
+    }}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={getRemainingMessages() < 5 ? "#DC2626" : "#D97706"} strokeWidth="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v4M12 16h.01"/>
+      </svg>
+      <span style={{
+        fontSize: 11,
+        fontWeight: 500,
+        color: getRemainingMessages() < 5 ? "#DC2626" : "#92400E",
+      }}>
+        Өнөөдөр {getRemainingMessages()} асуулт үлдлээ
+      </span>
+    </div>
+  )}
                 <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
                   <textarea
                     ref={inputRef}
@@ -1703,14 +1711,15 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 </div>
               </div>
 
-              {/* Sidebar Overlay */}
-              {showSidebar && (
-                <ConversationSidebar 
-                  activeId={conversation?.id}
-                  onSelectConversation={handleSelectConversation}
-                  onNewConversation={handleNewConversation}
-                  onClose={() => setShowSidebar(false)}
-                />
+  {/* Sidebar Overlay */}
+  {showSidebar && (
+  <ConversationSidebar
+  activeId={conversation?.id}
+  onSelectConversation={handleSelectConversation}
+  onNewConversation={handleNewConversation}
+  onClose={() => setShowSidebar(false)}
+  isVisible={showSidebar}
+  />
               )}
 
             </div>

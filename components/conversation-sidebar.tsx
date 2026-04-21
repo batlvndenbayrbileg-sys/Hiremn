@@ -8,20 +8,29 @@ interface ConversationSidebarProps {
   onSelectConversation: (conv: Conversation) => void
   onNewConversation: () => void
   onClose: () => void
+  isVisible: boolean
 }
 
 export function ConversationSidebar({ 
   activeId, 
   onSelectConversation, 
   onNewConversation,
-  onClose
+  onClose,
+  isVisible
 }: ConversationSidebarProps) {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setConversations(getConversations())
-  }, [])
+    if (isVisible) {
+      const timer = setTimeout(() => setMounted(true), 10)
+      return () => clearTimeout(timer)
+    } else {
+      setMounted(false)
+    }
+  }, [isVisible])
 
   const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -56,7 +65,9 @@ export function ConversationSidebar({
           inset: 0,
           backgroundColor: 'rgba(0,0,0,0.3)',
           zIndex: 10,
-          animation: 'fadeIn 0.2s ease',
+          opacity: mounted ? 1 : 0,
+          transition: 'opacity 0.2s ease',
+          borderRadius: 24,
         }}
       />
       
@@ -73,7 +84,9 @@ export function ConversationSidebar({
         flexDirection: 'column',
         zIndex: 20,
         boxShadow: '4px 0 24px rgba(0,0,0,0.1)',
-        animation: 'slideInLeft 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        transform: mounted ? 'translateX(0)' : 'translateX(-100%)',
+        opacity: mounted ? 1 : 0,
+        transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease',
       }}>
         <style>{`
           @keyframes fadeIn {

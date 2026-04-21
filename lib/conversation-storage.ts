@@ -8,25 +8,65 @@ export interface Conversation {
   messageCount: number
 }
 
-// Session storage - нийт асуултын тоо
+interface DailyUsage {
+  date: string // YYYY-MM-DD
+  count: number
+}
+
 const MESSAGE_LIMIT = 20
 const STORAGE_KEY = 'hiremn_conversations'
 const ACTIVE_CONVERSATION_KEY = 'hiremn_active_conversation'
+const DAILY_USAGE_KEY = 'hiremn_daily_usage'
 
-export function getCurrentMessageCount(): number {
-  if (typeof window === 'undefined') return 0
-  const active = sessionStorage.getItem(ACTIVE_CONVERSATION_KEY)
-  if (!active) return 0
-  const data = JSON.parse(active)
-  return data.messageCount || 0
+// Get today's date as YYYY-MM-DD
+function getTodayDate(): string {
+  return new Date().toISOString().split('T')[0]
 }
 
-export function canSendMessage(): boolean {
-  return getCurrentMessageCount() < MESSAGE_LIMIT
+// Get daily usage
+function getDailyUsage(): DailyUsage {
+  if (typeof window === 'undefined') return { date: getTodayDate(), count: 0 }
+  try {
+    const data = localStorage.getItem(DAILY_USAGE_KEY)
+    if (!data) return { date: getTodayDate(), count: 0 }
+    const usage = JSON.parse(data) as DailyUsage
+    // Reset if it's a new day
+    if (usage.date !== getTodayDate()) {
+      return { date: getTodayDate(), count: 0 }
+    }
+    return usage
+  } catch {
+    return { date: getTodayDate(), count: 0 }
+  }
 }
 
+// Save daily usage
+function saveDailyUsage(usage: DailyUsage): void {
+  if (typeof window === 'undefined') return
+  localStorage.setItem(DAILY_USAGE_KEY, JSON.stringify(usage))
+}
+
+// Increment daily message count
+export function incrementDailyCount(): void {
+  const usage = getDailyUsage()
+  usage.count += 1
+  saveDailyUsage(usage)
+}
+
+// Get remaining messages for today (across ALL conversations)
 export function getRemainingMessages(): number {
-  return Math.max(0, MESSAGE_LIMIT - getCurrentMessageCount())
+  const usage = getDailyUsage()
+  return Math.max(0, MESSAGE_LIMIT - usage.count)
+}
+
+// Check if can send message today
+export function canSendMessage(): boolean {
+  return getRemainingMessages() > 0
+}
+
+// Get total used today
+export function getTodayUsedCount(): number {
+  return getDailyUsage().count
 }
 
 export function getConversations(): Conversation[] {
@@ -51,11 +91,11 @@ export function saveConversation(conversation: Conversation): void {
       conversations.unshift(conversation)
     }
     
-    // Хамгийн сүүлийн 10 conversation л хадгалах
+    // Keep only last 10 conversations
     const recent = conversations.slice(0, 10)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(recent))
   } catch (e) {
-    console.error('[v0] Failed to save conversation:', e)
+    console.error('Failed to save conversation:', e)
   }
 }
 
@@ -69,7 +109,7 @@ export function deleteConversation(id: string): void {
     const conversations = getConversations().filter(c => c.id !== id)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations))
   } catch (e) {
-    console.error('[v0] Failed to delete conversation:', e)
+    console.error('Failed to delete conversation:', e)
   }
 }
 
@@ -100,16 +140,6 @@ export function getActiveConversation(): Conversation | null {
   }
 }
 
-export function updateMessageCount(count: number): void {
-  if (typeof window === 'undefined') return
-  const active = getActiveConversation()
-  if (active) {
-    active.messageCount = count
-    setActiveConversation(active)
-  }
-}
-
 export function generateConversationTitle(firstMessage: string): string {
-  // Эхний асуултын эхний 30 үсэгээс title үүсгэх
   return firstMessage.substring(0, 30) + (firstMessage.length > 30 ? '...' : '')
 }
