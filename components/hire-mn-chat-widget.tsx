@@ -2,6 +2,17 @@
 
 import { useState, useRef, useEffect, lazy, Suspense } from "react"
 import { MessageFeedback } from './message-feedback'
+import { ConversationSidebar } from './conversation-sidebar'
+import { 
+  Conversation, 
+  createNewConversation, 
+  getActiveConversation, 
+  setActiveConversation,
+  canSendMessage,
+  getRemainingMessages,
+  saveConversation,
+  generateConversationTitle
+} from '@/lib/conversation-storage'
 
 // Lazy load 3D mascot to avoid SSR issues
 const ChatMascot3D = lazy(() => import('./chat-mascot-3d'))
@@ -946,6 +957,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const [isHovered, setIsHovered] = useState(false)
   const [fontSize, setFontSize] = useState(13)
   const [showFontSlider, setShowFontSlider] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(false)
+  const [conversation, setConversation] = useState<Conversation | null>(null)
+  const messageCountRef = useRef(0)
   const [messages, setMessages] = useState<Message[]>(() => {
     const initialMessages: Message[] = [
       {
@@ -969,6 +983,61 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const [isTyping, setIsTyping] = useState(false)
   const [showQuickReplies, setShowQuickReplies] = useState(true)
   const [lang, setLang] = useState<"МН" | "EN">("МН")
+  // Initialize conversation on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    let active = getActiveConversation()
+    if (!active) {
+      active = createNewConversation()
+      setActiveConversation(active)
+    }
+    setConversation(active)
+  }, [])
+
+  const handleNewConversation = () => {
+    const newConv = createNewConversation()
+    setActiveConversation(newConv)
+    setConversation(newConv)
+    setMessages([{
+      role: "assistant",
+      content: "Сайн байна уу!\n\nБи hire.mn AI туслагч. Та надаас:\n\n- **Тест санал болгох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар туслана",
+    }])
+    setInput("")
+  }
+
+  const handleSelectConversation = (conv: Conversation) => {
+    setConversation(conv)
+    setActiveConversation(conv)
+    setMessages(conv.messages.length > 0 ? conv.messages : [{
+      role: "assistant",
+      content: "Сайн байна уу!\n\nБи hire.mn AI туслагч. Та надаас:\n\n- **Тест санал болгох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар туслана",
+    }])
+    messageCountRef.current = conv.messageCount || 0
+    setShowSidebar(false)
+  }
+
+  // Auto-save conversation
+  useEffect(() => {
+    if (!conversation || messages.length === 0) return
+    const timer = setTimeout(() => {
+      const userMessages = messages.filter(m => m.role === 'user').length
+      const title = messages.find(m => m.role === 'user')?.content 
+        ? generateConversationTitle(messages.find(m => m.role === 'user')!.content)
+        : 'Шинэ яриа'
+      
+      const updated = {
+        ...conversation,
+        messages,
+        title,
+        messageCount: userMessages,
+        updatedAt: Date.now(),
+      }
+      saveConversation(updated)
+      setConversation(updated)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [messages, conversation])
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -977,6 +1046,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   }, [messages, isTyping])
 
   const sendMessage = async (text: string) => {
+    // Check message limit
+    if (!canSendMessage()) {
+      alert(`⚠️ 20 асуултаж хүрсэн байна. Шинэ яриа эхлүүлнэ үү.`)
+      return
+    }
+    
     if (!text.trim() || isTyping) return
     setShowQuickReplies(false)
     const userMsg: Message = { role: "user", content: text }
@@ -1308,13 +1383,22 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 16,
       }}>
 
-        {/* Chat panel */}
-        {isOpen && (
-          <div style={{ animation: "hw-chat-open 0.4s cubic-bezier(.34,1.56,.64,1)" }}>
-            <div className="hw-panel" style={{
-              width: 380,
-              maxWidth: "calc(100vw - 48px)",
-              height: "min(620px, calc(100vh - 120px))",
+  {/* Chat panel with sidebar */}
+  {isOpen && (
+    <div style={{ animation: "hw-chat-open 0.4s cubic-bezier(.34,1.56,.64,1)", display: "flex" }}>
+      {/* Sidebar */}
+      {showSidebar && (
+        <ConversationSidebar 
+          activeId={conversation?.id}
+          onSelectConversation={handleSelectConversation}
+          onNewConversation={handleNewConversation}
+        />
+      )}
+      
+      <div className="hw-panel" style={{
+        width: showSidebar ? 380 : 380,
+        maxWidth: "calc(100vw - 48px)",
+        height: "min(620px, calc(100vh - 120px))",
               borderRadius: 20,
               background: "linear-gradient(180deg, #FFFFFF 0%, #FAFAF9 100%)",
               boxShadow: "0 25px 60px rgba(0,0,0,.15), 0 10px 30px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04)",
@@ -1387,9 +1471,35 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     }} />
                     Онлайн | Туслахад бэлэн
                   </div>
+                  
+                  {/* Message counter */}
+                  <div style={{
+                    fontSize: 11, color: "#9CA3AF", fontWeight: 500,
+                    padding: "4px 8px", borderRadius: 6,
+                    backgroundColor: getRemainingMessages() < 5 ? "#FEE2E2" : "#F3F4F6",
+                    color: getRemainingMessages() < 5 ? "#DC2626" : "#6B7280",
+                  }}>
+                    📊 {getRemainingMessages()}/20
+                  </div>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                  {/* Sidebar toggle */}
+                  <button
+                    onClick={() => setShowSidebar(s => !s)}
+                    title="Яриа түүх"
+                    style={{
+                      width: 32, height: 32, borderRadius: 10,
+                      background: showSidebar ? "linear-gradient(135deg, #FEF3EE, #FFE8DC)" : "transparent",
+                      border: `1.5px solid ${showSidebar ? "#FDDCCC" : "transparent"}`,
+                      color: showSidebar ? "#E8541A" : "#9CA3AF",
+                      cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "all .18s",
+                    }}>
+                    📋
+                  </button>
+                  
                   <button
                     onClick={() => setShowFontSlider(s => !s)}
                     title="Үсгийн хэмжээ"
