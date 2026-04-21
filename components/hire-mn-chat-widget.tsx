@@ -578,7 +578,7 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
                 : priceFilter === "paid" ? "rgba(255,255,255,.6)"
                 : "#9CA3AF",
             }} />
-            {priceFilter === "free" ? "Үнэгүй" : priceFilter === "paid" ? "Төлбөртэй" : "Бүгд"}
+            {priceFilter === "free" ? "Үнэгүй" : priceFilter === "paid" ? "��өлбөртэй" : "Бүгд"}
             {/* Chevron */}
             <svg
               width="10" height="10" viewBox="0 0 16 16" fill="none"
@@ -644,7 +644,7 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
 
 // ── Bot Message ────────────────────────���──────────────────────────────────────
 
-function BotMessage({ message, fontSize }: { message: Message; fontSize: number }) {
+function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message; fontSize: number; userQuestion?: string }) {
   // Parse [TEST:id] markers
   const parseTestMarkers = (text: string) => {
     const testIds: number[] = []
@@ -907,11 +907,11 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
         </div>
       )}
 
-      {/* Feedback buttons */}
-      <div style={{ marginLeft: 42, marginTop: 8 }}>
+      {/* Feedback - response дор шууд */}
+      <div style={{ marginLeft: 42, marginTop: 2 }}>
         <MessageFeedback 
           messageId={`msg-${Date.now()}`}
-          userMessage="Chat message"
+          userMessage={userQuestion}
           assistantMessage={message.content}
         />
       </div>
@@ -1479,14 +1479,21 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 display: "flex", flexDirection: "column", gap: 12,
                 background: "linear-gradient(180deg, #FAFAFA 0%, #F8F6F5 100%)",
               }}>
-                {messages.map((msg, i) => (
-                  <div key={i} className="hw-msg">
-                    {msg.role === "assistant"
-                      ? <BotMessage message={msg} fontSize={fontSize} />
-                      : <UserMessage content={msg.content} fontSize={fontSize} />
-                    }
-                  </div>
-                ))}
+                {messages.map((msg, i) => {
+                  // Өмнөх хэрэглэгчийн асуултыг олох (feedback-д ашиглах)
+                  const prevUserMsg = msg.role === "assistant" && i > 0
+                    ? messages.slice(0, i).reverse().find(m => m.role === "user")?.content || ""
+                    : ""
+                  
+                  return (
+                    <div key={i} className="hw-msg">
+                      {msg.role === "assistant"
+                        ? <BotMessage message={msg} fontSize={fontSize} userQuestion={prevUserMsg} />
+                        : <UserMessage content={msg.content} fontSize={fontSize} />
+                      }
+                    </div>
+                  )
+                })}
 
                 {isTyping && (
                   <div className="hw-msg">
