@@ -273,7 +273,7 @@ export async function POST(req: Request) {
       // LLM call
       anthropic.messages.create({
         model,
-        max_tokens: 400,
+        max_tokens: 1200,
         system: systemPrompt,
         messages: formattedMessages,
       }),
