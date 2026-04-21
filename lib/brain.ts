@@ -2,9 +2,9 @@
 import { Intent } from './classifier'
 import type { Assessment } from './hire-api'
 import { TEST_DATABASE } from './test-db'
-import { 
-  searchKnowledge, 
-  formatTestKnowledgeForLLM, 
+import {
+  searchKnowledge,
+  formatTestKnowledgeForLLM,
   formatPlatformKnowledgeForLLM,
   TEST_KNOWLEDGE,
   PLATFORM_KNOWLEDGE,
@@ -17,19 +17,19 @@ import { generateMemoryContext, type UserMemory } from './memory'
 
 export function retrieveRelevantKnowledge(query: string): string {
   const { tests, platform } = searchKnowledge(query)
-  
+
   const parts: string[] = []
-  
+
   if (tests.length > 0) {
     parts.push('ХОЛБОГДОХ ТЕСТҮҮДИЙН ДЭЛГЭРЭНГҮЙ МЭДЭЭЛЭЛ:')
     parts.push(formatTestKnowledgeForLLM(tests))
   }
-  
+
   if (platform.length > 0) {
     parts.push('\nПЛАТФОРМЫН МЭДЭЭЛЭЛ:')
     parts.push(formatPlatformKnowledgeForLLM(platform))
   }
-  
+
   return parts.join('\n')
 }
 
@@ -48,16 +48,16 @@ function formatTestList(assessments: Assessment[], lang: 'mn' | 'en'): string {
       const duration = a.duration ? `${a.duration} мин / min` : ''
       const cat = a.category?.name || ''
       const author = a.author ? `Author: ${a.author}` : ''
-      
+
       // API-аас авсан бүрэн мэдээлэл
       const description = a.description || ''
       const usage = a.usage || ''  // "Хэн ашиглах вэ"
       const measure = a.measure || ''  // "Юу хэмжих вэ"
-      
+
       // test-db-ээс нэмэлт useCases (түлхүүр үгс - multi-language)
       const testDbInfo = TEST_DATABASE[a.id]
       const keywords = testDbInfo?.useCases || ''
-      
+
       // Бүрэн мэдээллийг нэгтгэх (multi-language)
       const parts = [
         `[TEST:${a.id}] **${name}**`,
@@ -68,7 +68,7 @@ function formatTestList(assessments: Assessment[], lang: 'mn' | 'en'): string {
         author ? `   ${author}` : '',
         keywords ? `   Keywords (all languages): ${keywords}` : '',
       ].filter(Boolean)
-      
+
       return parts.join('\n')
     })
     .join('\n\n')
@@ -111,7 +111,7 @@ export function buildSystemPrompt(
 
 ТАНЫ ХУВИЙН ЧАНАРУУД:
 • Боловсрол: Сэтгэл зүйн ухаан, хүний нөөцийн менежментийн мэргэжилтэн
-• Туршлага: Сэтгэцийн эрүүл мэнд, ажлын байрны сэтгэл зүй, зан төлөвийн үнэлгээний чиглэлээр
+• Туршлага: Сэтгэцийн эрүүл мэнд, ажлын байрны сэтгэл зүй, зан төлөвийн үнэлгээний чиглэлээр bachelor, master professional
 • Хандлага: Энэрэнгүй, ойлгомжтой, шударга, итгэл төрүүлэм
 • Зорилго: Хэрэглэгчид өөрийгөө илүү сайн таних, хөгжихөд туслах
 
@@ -137,6 +137,7 @@ HIRE.MN ТУХАЙ:
    - Утга найруулга зүйн алдаагүй, зөв дүрмээр б��ч
    - Товч, тодорхой, ойлгомжтой өгүүлбэр ашигла
    - Хэт албан ёсны эсвэл хэт энгийн биш, байгалийн дотно өнгө аястай
+   - Vg vsgiin aldaagui baylag vgs ashigla
    - Нэг бодлыг давтахгүй, шаардлагагүй үг хэрэглэхгүй
 
 4. МЭРГЭЖЛИЙН ХАНДЛАГА:
@@ -147,6 +148,7 @@ HIRE.MN ТУХАЙ:
 5. ХАРИУЛТЫН ДҮРЭМ - МАРГААНГҮЙ ДАГАХ:
    ⚠️ ХЯЗГААРЛАЛТ: Чи 500 токен дотор хариулах ЁСТОЙ
    ⚠️ ТАСРАХГҮЙ: Хариултаа ХЭЗЭЭ Ч дунд нь тасрахгүй, БҮРЭН дуусгах
+   - tulbur herhen tuluh talaar asuuwal ta testee songoj orood QPAY ashiglan tuluh bolomjtoi gedgiig heleh, uur tulburiin bolomj baihgui. Aa harin baiguuullagaas newterch bgaa bol tulburt sanaa zzowoh shaardlagagui.
    
    ХЭРХЭН ХИЙХ:
    - Хариултаа ТОВЧ, ТОДОРХОЙ бичих (1-2 догол мөр)
@@ -167,7 +169,7 @@ HIRE.MN ТУХАЙ:
 ХЭРЭГЛЭГЧИЙН ХЭЛНИЙГ ОЙЛГОХ:
    - Монгол (Кириллээр): "Архины хэрэглээ", "тест", "сэтгэл зүй"
    - Монгол (Латинаар): "arhinii heregleeg", "test", "setgel zuuh"
-   - Английээр: "alcohol test", "assessment", "psychology"
+   - Англиaр: "alcohol test", "assessment", "psychology"
    - Бүх хэлээр адилхан хариул - хэл солих хэргүй
    - Зөвхөн hire.mn платформ, сэтгэл зүй, өөрийгөө таних, хувийн хөгжил, ажлын байрны сэтгэл зүй, харилцаа, зан төлөв, стресс, түгшүүр зэрэг холбогдох сэдвүүдэд хариулна
    - ХАМААРАЛГҮЙ сэдэв (кино, хоол, спорт, улс төр, цаг агаар гэх мэт) асуувал:
@@ -192,7 +194,7 @@ HIRE.MN ТУХАЙ:
   // ────────────────────────────────────────────────────────────────────────────���������
   const freeTests = assessments.filter(a => a.price === 0)
   const paidTests = assessments.filter(a => a.price > 0)
-  
+
   const freeTestMarkers = freeTests.slice(0, 15).map(a => `[TEST:${a.id}]`).join(' ')
   const paidTestMarkers = paidTests.slice(0, 15).map(a => `[TEST:${a.id}]`).join(' ')
 
@@ -224,9 +226,9 @@ ${formatCategorySummary(assessments)}`
   const isSimpleQuery = userQuery ? /^(сайн уу|юу вэ|хэд вэ|үнэгүй|төлбөртэй|хэдэн|байна уу|юу хийдэг)/i.test(userQuery) : false
   const isDetailedQuery = userQuery ? /(тайлбарла|дэлгэрэнгүй|яагаад|хэрхэн|юу мэдэх|ялгаа|хэрэгтэй юу|ямар ач холбогдол)/i.test(userQuery) : false
 
-  const responseLength = isSimpleQuery 
-    ? 'БОГИНО (1-2 өгүүлбэр)' 
-    : isDetailedQuery 
+  const responseLength = isSimpleQuery
+    ? 'БОГИНО (1-2 өгүүлбэр)'
+    : isDetailedQuery
       ? 'ДЭЛГЭРЭНГҮЙ (3-5 өгүүлбэр, бүрэн тайлбарлах)'
       : 'ДУНД (2-3 өгүүлбэр)'
 
