@@ -1,6 +1,9 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, lazy, Suspense } from "react"
+
+// Lazy load 3D mascot to avoid SSR issues
+const ChatMascot3D = lazy(() => import('./chat-mascot-3d'))
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -1333,17 +1336,19 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   }
                 `}</style>
 
-                {/* Mascot avatar */}
+                {/* 3D Mascot avatar */}
                 <div style={{
-                  width: 44, height: 44, borderRadius: 14,
+                  width: 52, height: 52, borderRadius: 14,
                   background: "linear-gradient(145deg, #FEF3EE, #FFE8DC)",
                   border: "2px solid #FDDCCC",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   flexShrink: 0,
                   boxShadow: "0 4px 12px rgba(232,84,26,.15)",
-                  animation: "hw-float 3s ease-in-out infinite, glow-pulse 2s ease-in-out infinite",
+                  overflow: "hidden",
                 }}>
-                  <MascotRobot size={28} waving />
+                  <Suspense fallback={<MascotRobot size={28} waving />}>
+                    <ChatMascot3D isTyping={isTyping} size="sm" />
+                  </Suspense>
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
