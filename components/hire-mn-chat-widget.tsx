@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, lazy, Suspense } from "react"
+import { MessageFeedback } from './message-feedback'
 
 // Lazy load 3D mascot to avoid SSR issues
 const ChatMascot3D = lazy(() => import('./chat-mascot-3d'))
@@ -905,6 +906,15 @@ function BotMessage({ message, fontSize }: { message: Message; fontSize: number 
           ))}
         </div>
       )}
+
+      {/* Feedback buttons */}
+      <div style={{ marginLeft: 42, marginTop: 8 }}>
+        <MessageFeedback 
+          messageId={`msg-${Date.now()}`}
+          userMessage="Chat message"
+          assistantMessage={message.content}
+        />
+      </div>
     </div>
   )
 }
