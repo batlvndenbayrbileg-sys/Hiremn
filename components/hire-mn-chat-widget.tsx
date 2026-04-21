@@ -1383,20 +1383,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 16,
       }}>
 
-  {/* Chat panel with sidebar */}
+  {/* Chat panel */}
   {isOpen && (
-    <div style={{ animation: "hw-chat-open 0.4s cubic-bezier(.34,1.56,.64,1)", display: "flex" }}>
-      {/* Sidebar */}
-      {showSidebar && (
-        <ConversationSidebar 
-          activeId={conversation?.id}
-          onSelectConversation={handleSelectConversation}
-          onNewConversation={handleNewConversation}
-        />
-      )}
-      
+    <div style={{ animation: "hw-chat-open 0.4s cubic-bezier(.34,1.56,.64,1)" }}>
       <div className="hw-panel" style={{
-        width: showSidebar ? 380 : 380,
+        width: 380,
+        position: "relative",
+        overflow: "hidden",
         maxWidth: "calc(100vw - 48px)",
         height: "min(620px, calc(100vh - 120px))",
               borderRadius: 20,
@@ -1430,20 +1423,30 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   }
                 `}</style>
 
-                {/* 3D Mascot avatar */}
-                <div style={{
-                  width: 52, height: 52, borderRadius: 14,
-                  background: "linear-gradient(145deg, #FEF3EE, #FFE8DC)",
-                  border: "2px solid #FDDCCC",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0,
-                  boxShadow: "0 4px 12px rgba(232,84,26,.15)",
-                  overflow: "hidden",
-                }}>
-                  <Suspense fallback={<MascotRobot size={28} waving />}>
+                {/* Logo/Mascot - click to toggle sidebar */}
+                <button
+                  onClick={() => setShowSidebar(s => !s)}
+                  title="Яриа түүх харах"
+                  style={{
+                    width: 48, height: 48, borderRadius: 12,
+                    background: showSidebar 
+                      ? "linear-gradient(145deg, #FFF7ED, #FFEDD5)" 
+                      : "linear-gradient(145deg, #FEF3EE, #FFE8DC)",
+                    border: showSidebar ? "2px solid #FB923C" : "2px solid #FDDCCC",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
+                    boxShadow: showSidebar 
+                      ? "0 4px 16px rgba(251,146,60,.3)" 
+                      : "0 4px 12px rgba(232,84,26,.15)",
+                    overflow: "hidden",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    padding: 0,
+                  }}>
+                  <Suspense fallback={<MascotRobot size={26} waving />}>
                     <ChatMascot3D isTyping={isTyping} size="sm" />
                   </Suspense>
-                </div>
+                </button>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1469,37 +1472,37 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       display: "inline-block", flexShrink: 0,
                       boxShadow: "0 0 8px rgba(34,197,94,.5)",
                     }} />
-                    Онлайн | Туслахад бэлэн
+                    Онлайн
                   </div>
                   
-                  {/* Message counter */}
+                  {/* Message counter - compact pill */}
                   <div style={{
-                    fontSize: 11, color: "#9CA3AF", fontWeight: 500,
-                    padding: "4px 8px", borderRadius: 6,
-                    backgroundColor: getRemainingMessages() < 5 ? "#FEE2E2" : "#F3F4F6",
-                    color: getRemainingMessages() < 5 ? "#DC2626" : "#6B7280",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    marginTop: 6,
                   }}>
-                    📊 {getRemainingMessages()}/20
+                    <div style={{
+                      fontSize: 10, 
+                      fontWeight: 600,
+                      padding: "3px 8px", 
+                      borderRadius: 20,
+                      backgroundColor: getRemainingMessages() < 5 ? "#FEE2E2" : "#F0FDF4",
+                      color: getRemainingMessages() < 5 ? "#DC2626" : "#16A34A",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}>
+                      <span style={{
+                        width: 5, height: 5, borderRadius: "50%",
+                        backgroundColor: getRemainingMessages() < 5 ? "#DC2626" : "#16A34A",
+                      }} />
+                      {getRemainingMessages()} үлдсэн
+                    </div>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
-                  {/* Sidebar toggle */}
-                  <button
-                    onClick={() => setShowSidebar(s => !s)}
-                    title="Яриа түүх"
-                    style={{
-                      width: 32, height: 32, borderRadius: 10,
-                      background: showSidebar ? "linear-gradient(135deg, #FEF3EE, #FFE8DC)" : "transparent",
-                      border: `1.5px solid ${showSidebar ? "#FDDCCC" : "transparent"}`,
-                      color: showSidebar ? "#E8541A" : "#9CA3AF",
-                      cursor: "pointer",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      transition: "all .18s",
-                    }}>
-                    📋
-                  </button>
-                  
+                <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
                   <button
                     onClick={() => setShowFontSlider(s => !s)}
                     title="Үсгийн хэмжээ"
@@ -1699,6 +1702,16 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   hire.mn AI
                 </div>
               </div>
+
+              {/* Sidebar Overlay */}
+              {showSidebar && (
+                <ConversationSidebar 
+                  activeId={conversation?.id}
+                  onSelectConversation={handleSelectConversation}
+                  onNewConversation={handleNewConversation}
+                  onClose={() => setShowSidebar(false)}
+                />
+              )}
 
             </div>
           </div>
