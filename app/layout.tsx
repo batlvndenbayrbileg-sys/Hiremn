@@ -7,23 +7,26 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'hire.mn — Зөв хүн, зөв газарт',
-  description: 'Монголын анхны мэргэжлийн үнэлгээ болон авьяас чадварын платформ. 42+ тест, AI-д суурилсан зөвлөгөө.',
-  generator: 'hire.mn',
-  // Google болон бусад хайлтын системд индекслүүлэхгүй
+  // Internal embed widget - NOT for public search
+  title: 'Widget',
+  description: 'Internal component',
   robots: {
     index: false,
     follow: false,
+    nocache: true,
     googleBot: {
       index: false,
       follow: false,
       noimageindex: true,
+      noarchive: true,
+      nosnippet: true,
     },
   },
   icons: {
     icon: '/favicon.ico',
-    apple: '/apple-icon.png',
   },
+  openGraph: undefined,
+  twitter: undefined,
 }
 
 export default function RootLayout({
