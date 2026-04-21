@@ -10,6 +10,16 @@ export const metadata: Metadata = {
   title: 'hire.mn — Зөв хүн, зөв газарт',
   description: 'Монголын анхны мэргэжлийн үнэлгээ болон авьяас чадварын платформ. 42+ тест, AI-д суурилсан зөвлөгөө.',
   generator: 'hire.mn',
+  // Google болон бусад хайлтын системд индекслүүлэхгүй
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-icon.png',

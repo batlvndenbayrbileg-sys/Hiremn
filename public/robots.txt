@@ -1,0 +1,21 @@
+# Бүх хайлтын системээс нуух
+User-agent: *
+Disallow: /
+
+# Google
+User-agent: Googlebot
+Disallow: /
+
+# Bing
+User-agent: Bingbot
+Disallow: /
+
+# Yandex
+User-agent: Yandex
+Disallow: /
+
+# Baidu
+User-agent: Baiduspider
+Disallow: /
+
+# Sitemap байхгүй - индекслэхгүй
