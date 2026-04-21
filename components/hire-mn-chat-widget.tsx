@@ -12,8 +12,10 @@ import {
   getRemainingMessages,
   saveConversation,
   generateConversationTitle,
-  incrementDailyCount
+  incrementDailyCount,
+  isLockedOut
 } from '@/lib/conversation-storage'
+import { LockoutPopup } from './lockout-popup'
 
 // Lazy load 3D mascot to avoid SSR issues
 const ChatMascot3D = lazy(() => import('./chat-mascot-3d'))
@@ -1142,7 +1144,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           const data = await res.json()
           setMessages(prev => [...prev, {
             role: "assistant",
-            content: "**Үнэгүй тестүүд**\n\nТа эдгээр тестүүдийг ямар ч төлбөргүйгээр өгч, өөрийн талаар илүү ихийг мэдэж авах боломжтой:",
+            content: "**Үнэ��үй тестүүд**\n\nТа эдгээр тестүүдийг ямар ч төлбөргүйгээр өгч, өөрийн талаар илүү ихийг мэдэж авах боломжтой:",
             tests: data.tests || [],
             categories: ["free"],
           }])
