@@ -31,8 +31,8 @@ if (indices.length >= 2) {
   const trimmed = before.trimEnd()
   const fixed = trimmed + '\n'
   writeFileSync(path, fixed, 'utf8')
-  console.log('[v0] Fixed! Removed second compressHistory starting at char', indices[1])
-  console.log('[v0] New line count:', fixed.split('\n').length)
+  console.log(' Fixed! Removed second compressHistory starting at char', indices[1])
+  console.log(' New line count:', fixed.split('\n').length)
 } else {
-  console.log('[v0] Only one occurrence found - file may already be clean')
+  console.log(' Only one occurrence found - file may already be clean')
 }
