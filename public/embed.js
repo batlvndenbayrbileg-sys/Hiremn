@@ -53,24 +53,26 @@
   // ── Responsive sizing ─────────────────────────────────────────────────────
   function resize() {
     var mobile = window.innerWidth <= 480;
-    var docHeight = document.documentElement.clientHeight;
     var viewportHeight = window.innerHeight;
-    var dvh = viewportHeight; // Use innerHeight which respects mobile viewport
     
     if (mobile) {
+      // Mobile: fill entire screen
       wrapper.style.width = "100vw";
-      wrapper.style.height = dvh + "px"; // Use exact px instead of dvh
-      wrapper.style.maxHeight = "100vh";
+      wrapper.style.height = viewportHeight + "px";
       wrapper.style.bottom = "0";
       wrapper.style.right = "0";
       wrapper.style.left = "0";
-      wrapper.style.top = "0"; // Ensure it fills from top
+      wrapper.style.top = "0";
+      wrapper.style.pointerEvents = "auto"; // Accept all touches on mobile
     } else {
+      // Desktop: fixed size in corner
       wrapper.style.width = "420px";
       wrapper.style.height = "680px";
-      wrapper.style.maxHeight = "100vh";
+      wrapper.style.bottom = "0";
+      wrapper.style.right = "0";
       wrapper.style.left = "auto";
       wrapper.style.top = "auto";
+      wrapper.style.pointerEvents = "auto"; // Accept clicks, but passthrough outside iframe
     }
   }
   resize();
@@ -88,9 +90,26 @@
   // Enable pointer events once iframe has loaded
   iframe.addEventListener("load", function () {
     console.log("[hire.mn Widget] iframe loaded successfully");
-    wrapper.style.pointerEvents = "none"; // wrapper stays pass-through
+    wrapper.style.pointerEvents = "auto"; // Allow wrapper to receive clicks
     iframe.style.pointerEvents  = "all";  // iframe itself is interactive
   });
+
+  // ── Click handling: pass through clicks outside iframe bounds ────────────
+  wrapper.addEventListener("click", function (e) {
+    var rect = iframe.getBoundingClientRect();
+    var x = e.clientX;
+    var y = e.clientY;
+    
+    // If click is outside iframe bounds, let it pass through to page
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      wrapper.style.pointerEvents = "none";
+      var clickTarget = document.elementFromPoint(x, y);
+      if (clickTarget && clickTarget !== wrapper) {
+        clickTarget.click();
+      }
+      wrapper.style.pointerEvents = "auto";
+    }
+  }, false);
 
   // ── PostMessage bridge: open test links in parent tab ─────────────────────
   window.addEventListener("message", function (e) {
