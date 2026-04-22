@@ -56,7 +56,7 @@
 
   // ── PostMessage for size changes from widget ─────────────────────────────
   window.addEventListener("message", function (e) {
-    if (e.origin !== ORIGIN) return;
+    if (!e.data || !e.data.type) return;
 
     if (e.data && e.data.type === "HIREMN_RESIZE") {
       var isOpen = e.data.isOpen;
