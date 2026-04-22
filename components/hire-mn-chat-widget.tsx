@@ -1271,14 +1271,6 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           70%  { transform: scale(1.05) translateY(-2px); opacity: 1; }
           to   { transform: scale(1) translateY(0); opacity: 1; }
         }
-        @keyframes hw-ring {
-            0%   { transform: scale(1); opacity: 0.7; }
-  100% { transform: scale(2.2); opacity: 0; }
-        }
-        @keyframes hw-ring2 {
-          0%   { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(2.8); opacity: 0; } 
-        }
         @keyframes hw-tooltip-in {
           from { opacity: 0; transform: translateX(10px) scale(0.95); }
           to   { opacity: 1; transform: translateX(0) scale(1); }
@@ -1347,7 +1339,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
         .hw-mascot {
           transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease;
-          animation: hw-pulse 2.5s ease-in-out infinite;
+          animation: none;
           will-change: transform;
         }
         .hw-mascot:hover {
@@ -1773,21 +1765,22 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             </div>
           )}
           {!isOpen && (
-            <>
-              <div style={{
-                position: "absolute", bottom: 10, right: 10, pointerEvents: "none",
-                width: 85, height: 85, borderRadius: "50%",
-                background: "rgba(232,84,26,.2)",
-                animation: "hw-ring 2s ease-out infinite",
-              }} />
-              <div style={{
-                position: "absolute", bottom: 10, right: 10, pointerEvents: "none",
-                width: 85, height: 85, borderRadius: "50%",
-                background: "rgba(232,84,26,.12)",
-                animation: "hw-ring 2s ease-out 0.6s infinite",
-              }} />
-            </>
-          )}
+  <>
+    <div style={{
+      position: "absolute", bottom: 10, right: 10, pointerEvents: "none",
+      width: 85, height: 85, borderRadius: "50%",
+      background: "rgba(232,84,26,.2)",
+     
+    }} />
+    <div style={{
+      position: "absolute", bottom: 10, right: 10, pointerEvents: "none",
+      width: 85, height: 85, borderRadius: "50%",
+      background: "rgba(232,84,26,.12)",
+     
+
+    }} />
+  </>
+)}
 
 
 
