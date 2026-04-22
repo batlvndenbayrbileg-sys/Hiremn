@@ -1,4 +1,4 @@
-;(function () {
+; (function () {
   "use strict";
 
   // Prevent double-init
@@ -35,7 +35,7 @@
   // ── iframe ────────────────────────────────────────────────────────────────
   var iframe = document.createElement("iframe");
   iframe.src = ORIGIN + "/embed";
-  iframe.id  = "hiremn-widget-iframe";
+  iframe.id = "hiremn-widget-iframe";
   iframe.title = "hire.mn AI Assistant";
   iframe.allow = "clipboard-write";
   iframe.setAttribute("frameborder", "0");
@@ -57,11 +57,11 @@
   // ── PostMessage for size changes from widget ─────────────────────────────
   window.addEventListener("message", function (e) {
     if (e.origin !== ORIGIN) return;
-    
+
     if (e.data && e.data.type === "HIREMN_RESIZE") {
       var isOpen = e.data.isOpen;
       var mobile = window.innerWidth <= 480;
-      
+
       if (isOpen) {
         if (mobile) {
           wrapper.style.width = "100vw";
@@ -74,13 +74,13 @@
           iframe.style.height = "100%";
         } else {
           wrapper.style.width = "420px";
-          wrapper.style.height = "700px";
+          wrapper.style.height = "800px";
           wrapper.style.bottom = "12px";
           wrapper.style.right = "12px";
           wrapper.style.left = "auto";
           wrapper.style.top = "auto";
           iframe.style.width = "420px";
-          iframe.style.height = "700px";
+          iframe.style.height = "800px";
         }
       } else {
         // Closed - button size with padding
@@ -94,7 +94,7 @@
         iframe.style.height = BUTTON_SIZE;
       }
     }
-    
+
     if (e.data && e.data.type === "HIREMN_OPEN_URL" && e.data.url) {
       window.open(e.data.url, "_blank", "noopener,noreferrer");
     }
