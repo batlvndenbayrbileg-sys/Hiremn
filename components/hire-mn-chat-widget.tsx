@@ -320,7 +320,7 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
             backdropFilter: "blur(4px)",
             color: "#fff", fontSize: 9, fontWeight: 600,
             padding: "3px 8px", borderRadius: 20,
-          }}>{test.count.toLocaleString()}+ авсан</div>
+          }}>{test.count.toLocaleString()}+ а��сан</div>
         )}
       </div>
 
@@ -1826,10 +1826,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   src="/mascot.jpg" 
                   alt="AI Assistant"
                   style={{
-                    width: 50,
-                    height: 50,
+                    width: 54,
+                    height: 54,
                     borderRadius: "50%",
                     objectFit: "cover",
+                    objectPosition: "center",
+                    filter: "drop-shadow(0 0 8px rgba(232,84,26,.3))",
                   }}
                 />
               )}
