@@ -1399,7 +1399,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               borderRadius: 20,
               background: "linear-gradient(180deg, #FFFFFF 0%, #FAFAF9 100%)",
               boxShadow: "0 25px 60px rgba(0,0,0,.15), 0 10px 30px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04)",
-              display: "flex", flexDirection: "column", overflow: "hidden",
+              display: "flex", flexDirection: "column",
               border: "none",
             }}>
 
@@ -1483,7 +1483,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       display: "inline-block", flexShrink: 0,
                       boxShadow: "0 0 8px rgba(34,197,94,.5)",
                     }} />
-                   Online
+                    Online
                   </div>
 
                   {/* Message counter - compact pill */}
