@@ -1829,8 +1829,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   src="/mascot.jpg"
                   alt="AI Assistant"
                   style={{
-                    width: 81,
-                    height: 81,
+                    width: 51,
+                    height: 51,
                     borderRadius: "50%",
                     objectFit: "cover",
                     objectPosition: "center",
