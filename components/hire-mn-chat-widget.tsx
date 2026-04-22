@@ -954,7 +954,10 @@ function UserMessage({ content, fontSize }: { content: string; fontSize: number 
 
 // ── Main Widget ───────────────────────��───────────────────────────────────────
 
-export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetProps = {}) {
+export default function HireMnChatWidget({ initialContext }: Hir
+  
+  
+  ChatWidgetProps = {}) {
   const [isOpen, setIsOpen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [fontSize, setFontSize] = useState(13)
@@ -1773,29 +1776,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             </div>
           )}
 
-          {/* Pulsing rings - 3 layers */}
-          {!isOpen && (
-            <>
-              <div style={{
-                position: "absolute", bottom: 0, right: 0, pointerEvents: "none",
-                width: 88, height: 88, borderRadius: "50%",
-                background: "rgba(232,84,26,.25)",
-                animation: "hw-ring 2s ease-out infinite",
-              }} />
-              <div style={{
-                position: "absolute", bottom: 0, right: 0, pointerEvents: "none",
-                width: 88, height: 88, borderRadius: "50%",
-                background: "rgba(232,84,26,.18)",
-                animation: "hw-ring 2s ease-out 0.5s infinite",
-              }} />
-              <div style={{
-                position: "absolute", bottom: 0, right: 0, pointerEvents: "none",
-                width: 88, height: 88, borderRadius: "50%",
-                background: "rgba(232,84,26,.12)",
-                animation: "hw-ring2 2s ease-out 1s infinite",
-              }} />
-            </>
-          )}
+
 
           <button
             className="hw-mascot"
