@@ -954,10 +954,7 @@ function UserMessage({ content, fontSize }: { content: string; fontSize: number 
 
 // ── Main Widget ───────────────────────��───────────────────────────────────────
 
-export default function HireMnChatWidget({ initialContext }: Hir
-  
-  
-  ChatWidgetProps = {}) {
+export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetProps = {}) {
   const [isOpen, setIsOpen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [fontSize, setFontSize] = useState(13)
