@@ -1343,9 +1343,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           will-change: transform;
         }
         .hw-mascot:hover {
-          transform: scale(1.12) translateY(-4px);
-          animation: none;
-          box-shadow: 0 14px 36px rgba(232,84,26,.5) !important;
+         box-shadow: 0 10px 30px rgba(232,84,26,.4) !important;
+          
         }
         .hw-mascot:active { transform: scale(0.94); }
 
@@ -1765,22 +1764,22 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             </div>
           )}
           {!isOpen && (
-  <>
-    <div style={{
-      position: "absolute", bottom: 10, right: 10, pointerEvents: "none",
-      width: 85, height: 85, borderRadius: "50%",
-      background: "rgba(232,84,26,.2)",
-     
-    }} />
-    <div style={{
-      position: "absolute", bottom: 10, right: 10, pointerEvents: "none",
-      width: 85, height: 85, borderRadius: "50%",
-      background: "rgba(232,84,26,.12)",
-     
+            <>
+              <div style={{
+                position: "absolute", bottom: 10, right: 10, pointerEvents: "none",
+                width: 85, height: 85, borderRadius: "50%",
+                background: "rgba(232,84,26,.2)",
 
-    }} />
-  </>
-)}
+              }} />
+              <div style={{
+                position: "absolute", bottom: 10, right: 10, pointerEvents: "none",
+                width: 85, height: 85, borderRadius: "50%",
+                background: "rgba(232,84,26,.12)",
+
+
+              }} />
+            </>
+          )}
 
 
 
