@@ -11,11 +11,9 @@ export interface Conversation {
 interface DailyUsage {
   date: string // YYYY-MM-DD
   count: number
-  lockedUntil?: number // timestamp when lockout ends
 }
 
 const MESSAGE_LIMIT = 20
-const LOCKOUT_HOURS = 8
 const STORAGE_KEY = 'hiremn_conversations'
 const ACTIVE_CONVERSATION_KEY = 'hiremn_active_conversation'
 const DAILY_USAGE_KEY = 'hiremn_daily_usage'
@@ -32,13 +30,10 @@ function getDailyUsage(): DailyUsage {
     const data = localStorage.getItem(DAILY_USAGE_KEY)
     if (!data) return { date: getTodayDate(), count: 0 }
     const usage = JSON.parse(data) as DailyUsage
-    
-    // Check if lockout has expired
-    if (usage.lockedUntil && Date.now() >= usage.lockedUntil) {
-      // Lockout expired, reset
+    // Reset if it's a new day
+    if (usage.date !== getTodayDate()) {
       return { date: getTodayDate(), count: 0 }
     }
-    
     return usage
   } catch {
     return { date: getTodayDate(), count: 0 }
@@ -55,45 +50,18 @@ function saveDailyUsage(usage: DailyUsage): void {
 export function incrementDailyCount(): void {
   const usage = getDailyUsage()
   usage.count += 1
-  
-  // If reached limit, set lockout
-  if (usage.count >= MESSAGE_LIMIT) {
-    usage.lockedUntil = Date.now() + (LOCKOUT_HOURS * 60 * 60 * 1000)
-  }
-  
   saveDailyUsage(usage)
 }
 
 // Get remaining messages for today (across ALL conversations)
 export function getRemainingMessages(): number {
   const usage = getDailyUsage()
-  
-  // If locked out, return 0
-  if (usage.lockedUntil && Date.now() < usage.lockedUntil) {
-    return 0
-  }
-  
   return Math.max(0, MESSAGE_LIMIT - usage.count)
 }
 
 // Check if can send message today
 export function canSendMessage(): boolean {
   return getRemainingMessages() > 0
-}
-
-// Check if user is locked out
-export function isLockedOut(): boolean {
-  const usage = getDailyUsage()
-  return !!(usage.lockedUntil && Date.now() < usage.lockedUntil)
-}
-
-// Get lockout end time
-export function getLockoutEndTime(): Date | null {
-  const usage = getDailyUsage()
-  if (usage.lockedUntil && Date.now() < usage.lockedUntil) {
-    return new Date(usage.lockedUntil)
-  }
-  return null
 }
 
 // Get total used today
