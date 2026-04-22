@@ -12,8 +12,10 @@ import {
   getRemainingMessages,
   saveConversation,
   generateConversationTitle,
-  incrementDailyCount
+  incrementDailyCount,
+  isUserLocked
 } from '@/lib/conversation-storage'
+import { UsageLimitPopup } from './usage-limit-popup'
 
 // Lazy load 3D mascot to avoid SSR issues
 const ChatMascot3D = lazy(() => import('./chat-mascot-3d'))
@@ -1047,9 +1049,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   }, [messages, isTyping])
 
   const sendMessage = async (text: string) => {
-    // Check message limit
+    // Check if user is locked - popup will show automatically
     if (!canSendMessage()) {
-      alert(`⚠️ 20 асуултаж хүрсэн байна. Шинэ яриа эхлүүлнэ үү.`)
       return
     }
     
@@ -1142,7 +1143,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           const data = await res.json()
           setMessages(prev => [...prev, {
             role: "assistant",
-            content: "**Үнэгүй тестүүд**\n\nТа эдгээр тестүүдийг ямар ч төлбөргүйгээр өгч, өөрийн талаар илүү ихийг мэдэж авах боломжтой:",
+            content: "**Үнэ��үй тестүүд**\n\nТа эдгээр тестүүдийг ямар ч төлбөргүйгээр өгч, өөрийн талаар илүү ихийг мэдэж авах боломжтой:",
             tests: data.tests || [],
             categories: ["free"],
           }])
@@ -1630,32 +1631,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   background: "#fff", flexShrink: 0,
   }}>
   
-  {/* Daily limit warning */}
-  {getRemainingMessages() <= 20 && (
-    <div style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 6,
-      marginBottom: 10,
-      padding: "6px 12px",
-      borderRadius: 8,
-      backgroundColor: getRemainingMessages() < 5 ? "#FEF2F2" : "#FFFBEB",
-      border: `1px solid ${getRemainingMessages() < 5 ? "#FECACA" : "#FDE68A"}`,
-    }}>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={getRemainingMessages() < 5 ? "#DC2626" : "#D97706"} strokeWidth="2">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 8v4M12 16h.01"/>
-      </svg>
-      <span style={{
-        fontSize: 11,
-        fontWeight: 500,
-        color: getRemainingMessages() < 5 ? "#DC2626" : "#92400E",
-      }}>
-        Өнөөдөр {getRemainingMessages()} асуулт үлдлээ
-      </span>
-    </div>
-  )}
+
                 <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
                   <textarea
                     ref={inputRef}
@@ -1706,10 +1682,41 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     </svg>
                   </button>
                 </div>
+                
+                {/* Warning - shows when 10 or less remaining */}
+                {getRemainingMessages() <= 10 && getRemainingMessages() > 0 && (
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                    marginTop: 10,
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    backgroundColor: getRemainingMessages() <= 3 ? "#FEF2F2" : "#FFFBEB",
+                    border: `1px solid ${getRemainingMessages() <= 3 ? "#FECACA" : "#FDE68A"}`,
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={getRemainingMessages() <= 3 ? "#DC2626" : "#D97706"} strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 8v4M12 16h.01"/>
+                    </svg>
+                    <span style={{
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: getRemainingMessages() <= 3 ? "#DC2626" : "#92400E",
+                    }}>
+                      Танд {getRemainingMessages()} асуулт асуух эрх үлдсэн байна
+                    </span>
+                  </div>
+                )}
+                
                 <div style={{ textAlign: "center", marginTop: 10, fontSize: 10, color: "#D1C4BE", fontWeight: 500 }}>
                   hire.mn AI
                 </div>
               </div>
+
+              {/* Usage Limit Popup */}
+              {isUserLocked() && <UsageLimitPopup />}
 
   {/* Sidebar Overlay */}
   {showSidebar && (
