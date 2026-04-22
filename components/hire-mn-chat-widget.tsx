@@ -1272,12 +1272,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         @keyframes hw-ring {
-          0%   { transform: scale(1); opacity: 0.7; }
-          100% { transform: scale(2.2); opacity: 0; }
+            0%   { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(2.2); opacity: 0; }
         }
         @keyframes hw-ring2 {
           0%   { transform: scale(1); opacity: 0.5; }
-          100% { transform: scale(2.8); opacity: 0; }
+  100% { transform: scale(2.8); opacity: 0; } 
         }
         @keyframes hw-tooltip-in {
           from { opacity: 0; transform: translateX(10px) scale(0.95); }
