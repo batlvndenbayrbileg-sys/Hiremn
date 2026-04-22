@@ -1483,7 +1483,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       display: "inline-block", flexShrink: 0,
                       boxShadow: "0 0 8px rgba(34,197,94,.5)",
                     }} />
-                    ��н����айн
+                   Online
                   </div>
 
                   {/* Message counter - compact pill */}
