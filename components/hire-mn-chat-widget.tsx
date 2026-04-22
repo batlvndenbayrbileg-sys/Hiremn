@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect, lazy, Suspense } from "react"
+import { useState, useRef, useEffect } from "react"
 import { MessageFeedback } from './message-feedback'
 import { ConversationSidebar } from './conversation-sidebar'
 import { 
@@ -17,8 +17,7 @@ import {
 } from '@/lib/conversation-storage'
 import { UsageLimitPopup } from './usage-limit-popup'
 
-// Lazy load 3D mascot to avoid SSR issues
-const ChatMascot3D = lazy(() => import('./chat-mascot-3d'))
+
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -197,7 +196,7 @@ function BrainAvatar() {
       flexShrink: 0,
       boxShadow: "0 2px 8px rgba(232,84,26,0.12)",
     }}>
-      <MascotRobot size={22} />
+        <img src="/mascot.jpg" alt="AI" style={{ width: 22, height: 22, borderRadius: 6, objectFit: "cover" }} />
     </div>
   )
 }
@@ -961,6 +960,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const [fontSize, setFontSize] = useState(13)
   const [showFontSlider, setShowFontSlider] = useState(false)
   const [showSidebar, setShowSidebar] = useState(false)
+  
+  // Notify parent window of open/close state for iframe resizing
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.parent !== window) {
+      window.parent.postMessage({ type: 'HIREMN_RESIZE', isOpen }, '*')
+    }
+  }, [isOpen])
   const [conversation, setConversation] = useState<Conversation | null>(null)
   const messageCountRef = useRef(0)
   const [messages, setMessages] = useState<Message[]>(() => {
@@ -1143,7 +1149,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           const data = await res.json()
           setMessages(prev => [...prev, {
             role: "assistant",
-            content: "**Үнэ��үй тестүүд**\n\nТа эдгээр тестүүдийг ямар ч төлбөргүйгээр өгч, өөрийн талаар илүү ихийг мэдэж авах боломжтой:",
+            content: "**Үнэ���үй тестүүд**\n\nТа эдгээр тестүүдийг ямар ч төлбөргүйгээр өгч, өөрийн талаар илүү ихийг мэдэж авах боломжтой:",
             tests: data.tests || [],
             categories: ["free"],
           }])
@@ -1449,9 +1455,16 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     transition: "all 0.2s ease",
                     padding: 0,
                   }}>
-                  <Suspense fallback={<MascotRobot size={26} waving />}>
-                    <ChatMascot3D isTyping={isTyping} size="sm" />
-                  </Suspense>
+                  <img 
+                    src="/mascot.jpg" 
+                    alt="AI Assistant"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      objectFit: "cover",
+                    }}
+                  />
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -1478,7 +1491,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       display: "inline-block", flexShrink: 0,
                       boxShadow: "0 0 8px rgba(34,197,94,.5)",
                     }} />
-                    Онлайн
+                    ��нлайн
                   </div>
                   
                   {/* Message counter - compact pill */}
@@ -1809,7 +1822,16 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
               ) : (
-                <MascotRobot size={34} white waving />
+                <img 
+                  src="/mascot.jpg" 
+                  alt="AI Assistant"
+                  style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
               )}
             </div>
             {!isOpen && (

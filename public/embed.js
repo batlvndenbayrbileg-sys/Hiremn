@@ -15,22 +15,18 @@
     return;
   }
 
-  console.log("[hire.mn Widget] Initializing from:", ORIGIN);
-
-  // ── Wrapper div (fixed, bottom-right) ────────────────────────────────────
+  // ── Wrapper div (fixed, bottom-right, SMALL size for button only) ────────
   var wrapper = document.createElement("div");
   wrapper.id = "hiremn-widget-root";
   wrapper.style.cssText =
     "position:fixed !important;" +
-    "bottom:0 !important;" +
-    "right:0 !important;" +
+    "bottom:16px !important;" +
+    "right:16px !important;" +
     "z-index:2147483647 !important;" +
     "pointer-events:none !important;" +
     "overflow:visible !important;" +
-    "width:420px;" +
-    "height:680px;" +
-    "max-width:100vw;" +
-    "max-height:100vh;" +
+    "width:70px !important;" +
+    "height:70px !important;" +
     "background:transparent !important;";
 
   // ── iframe ────────────────────────────────────────────────────────────────
@@ -42,43 +38,62 @@
   iframe.setAttribute("frameborder", "0");
   iframe.setAttribute("scrolling", "no");
   iframe.style.cssText =
-    "width:100% !important;" +
-    "height:100% !important;" +
+    "position:absolute !important;" +
+    "bottom:0 !important;" +
+    "right:0 !important;" +
+    "width:70px !important;" +
+    "height:70px !important;" +
     "border:none !important;" +
     "background:transparent !important;" +
-    "pointer-events:all !important;" +
+    "pointer-events:auto !important;" +
     "display:block !important;" +
-    "color-scheme:light !important;";
+    "color-scheme:light !important;" +
+    "transition:width 0.3s ease, height 0.3s ease !important;";
 
-  // ── Responsive sizing ─────────────────────────────────────────────────────
-  function resize() {
-    var mobile = window.innerWidth <= 480;
-    var viewportHeight = window.innerHeight;
+  // ── PostMessage for size changes from widget ─────────────────────────────
+  window.addEventListener("message", function (e) {
+    if (e.origin !== ORIGIN) return;
     
-    if (mobile) {
-      // Mobile: fill entire screen
-      wrapper.style.width = "100vw";
-      wrapper.style.height = viewportHeight + "px";
-      wrapper.style.bottom = "0";
-      wrapper.style.right = "0";
-      wrapper.style.left = "0";
-      wrapper.style.top = "0";
-      wrapper.style.pointerEvents = "auto"; // Accept all touches on mobile
-    } else {
-      // Desktop: fixed size in corner
-      wrapper.style.width = "420px";
-      wrapper.style.height = "680px";
-      wrapper.style.bottom = "0";
-      wrapper.style.right = "0";
-      wrapper.style.left = "auto";
-      wrapper.style.top = "auto";
-      wrapper.style.pointerEvents = "auto"; // Accept clicks, but passthrough outside iframe
+    if (e.data && e.data.type === "HIREMN_RESIZE") {
+      var isOpen = e.data.isOpen;
+      var mobile = window.innerWidth <= 480;
+      
+      if (isOpen) {
+        if (mobile) {
+          wrapper.style.width = "100vw";
+          wrapper.style.height = "100vh";
+          wrapper.style.bottom = "0";
+          wrapper.style.right = "0";
+          wrapper.style.left = "0";
+          wrapper.style.top = "0";
+          iframe.style.width = "100%";
+          iframe.style.height = "100%";
+        } else {
+          wrapper.style.width = "420px";
+          wrapper.style.height = "680px";
+          wrapper.style.bottom = "16px";
+          wrapper.style.right = "16px";
+          wrapper.style.left = "auto";
+          wrapper.style.top = "auto";
+          iframe.style.width = "420px";
+          iframe.style.height = "680px";
+        }
+      } else {
+        // Closed - just button size
+        wrapper.style.width = "70px";
+        wrapper.style.height = "70px";
+        wrapper.style.bottom = "16px";
+        wrapper.style.right = "16px";
+        wrapper.style.left = "auto";
+        wrapper.style.top = "auto";
+        iframe.style.width = "70px";
+        iframe.style.height = "70px";
+      }
     }
-  }
-  resize();
-  window.addEventListener("resize", resize);
-  window.addEventListener("orientationchange", function() {
-    setTimeout(resize, 100);
+    
+    if (e.data && e.data.type === "HIREMN_OPEN_URL" && e.data.url) {
+      window.open(e.data.url, "_blank", "noopener,noreferrer");
+    }
   });
 
   // Error handling
@@ -87,39 +102,6 @@
     wrapper.style.display = "none";
   });
 
-  // Enable pointer events once iframe has loaded
-  iframe.addEventListener("load", function () {
-    console.log("[hire.mn Widget] iframe loaded successfully");
-    wrapper.style.pointerEvents = "auto"; // Allow wrapper to receive clicks
-    iframe.style.pointerEvents  = "all";  // iframe itself is interactive
-  });
-
-  // ── Click handling: pass through clicks outside iframe bounds ────────────
-  wrapper.addEventListener("click", function (e) {
-    var rect = iframe.getBoundingClientRect();
-    var x = e.clientX;
-    var y = e.clientY;
-    
-    // If click is outside iframe bounds, let it pass through to page
-    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-      wrapper.style.pointerEvents = "none";
-      var clickTarget = document.elementFromPoint(x, y);
-      if (clickTarget && clickTarget !== wrapper) {
-        clickTarget.click();
-      }
-      wrapper.style.pointerEvents = "auto";
-    }
-  }, false);
-
-  // ── PostMessage bridge: open test links in parent tab ─────────────────────
-  window.addEventListener("message", function (e) {
-    if (e.origin !== ORIGIN) return;
-    if (e.data && e.data.type === "HIREMN_OPEN_URL" && e.data.url) {
-      window.open(e.data.url, "_blank", "noopener,noreferrer");
-    }
-  });
-
   wrapper.appendChild(iframe);
   document.body.appendChild(wrapper);
-  console.log("[hire.mn Widget] Widget appended to DOM");
 })();
