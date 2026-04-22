@@ -1772,6 +1772,22 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               }} />
             </div>
           )}
+          {!isOpen && (
+            <>
+              <div style={{
+                position: "absolute", bottom: 10, right: 10, pointerEvents: "none",
+                width: 85, height: 85, borderRadius: "50%",
+                background: "rgba(232,84,26,.2)",
+                animation: "hw-ring 2s ease-out infinite",
+              }} />
+              <div style={{
+                position: "absolute", bottom: 10, right: 10, pointerEvents: "none",
+                width: 85, height: 85, borderRadius: "50%",
+                background: "rgba(232,84,26,.12)",
+                animation: "hw-ring 2s ease-out 0.6s infinite",
+              }} />
+            </>
+          )}
 
 
 
