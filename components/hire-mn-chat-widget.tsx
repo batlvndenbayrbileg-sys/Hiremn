@@ -1816,6 +1816,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             <div style={{
               transition: "transform 0.4s cubic-bezier(.34,1.56,.64,1), opacity 0.2s",
               transform: isOpen ? "rotate(180deg) scale(0.9)" : "rotate(0deg) scale(1)",
+              width: 60, height: 60, borderRadius: "50%",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              overflow: "hidden",
             }}>
               {isOpen ? (
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
@@ -1826,12 +1829,11 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   src="/mascot.jpg" 
                   alt="AI Assistant"
                   style={{
-                    width: 54,
-                    height: 54,
+                    width: 60,
+                    height: 60,
                     borderRadius: "50%",
                     objectFit: "cover",
                     objectPosition: "center",
-                    filter: "drop-shadow(0 0 8px rgba(232,84,26,.3))",
                   }}
                 />
               )}
