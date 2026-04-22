@@ -1778,19 +1778,19 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             <>
               <div style={{
                 position: "absolute", bottom: 0, right: 0, pointerEvents: "none",
-                width: 64, height: 64, borderRadius: "50%",
+                width: 72, height: 72, borderRadius: "50%",
                 background: "rgba(232,84,26,.25)",
                 animation: "hw-ring 2s ease-out infinite",
               }} />
               <div style={{
                 position: "absolute", bottom: 0, right: 0, pointerEvents: "none",
-                width: 64, height: 64, borderRadius: "50%",
+                width: 72, height: 72, borderRadius: "50%",
                 background: "rgba(232,84,26,.18)",
                 animation: "hw-ring 2s ease-out 0.5s infinite",
               }} />
               <div style={{
                 position: "absolute", bottom: 0, right: 0, pointerEvents: "none",
-                width: 64, height: 64, borderRadius: "50%",
+                width: 72, height: 72, borderRadius: "50%",
                 background: "rgba(232,84,26,.12)",
                 animation: "hw-ring2 2s ease-out 1s infinite",
               }} />
@@ -1804,7 +1804,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             onMouseLeave={() => setIsHovered(false)}
             aria-label="hire.mn чат нээх"
             style={{
-              width: 64, height: 64, borderRadius: "50%",
+              width: 70, height: 70, borderRadius: "50%",
               background: "linear-gradient(145deg, #FF6535 0%, #E8541A 50%, #D44810 100%)",
               border: "3.5px solid rgba(255,255,255,.98)",
               cursor: "pointer",
@@ -1816,7 +1816,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             <div style={{
               transition: "transform 0.4s cubic-bezier(.34,1.56,.64,1), opacity 0.2s",
               transform: isOpen ? "rotate(180deg) scale(0.9)" : "rotate(0deg) scale(1)",
-              width: 60, height: 60, borderRadius: "50%",
+              width: 66, height: 66, borderRadius: "50%",
               display: "flex", alignItems: "center", justifyContent: "center",
               overflow: "hidden",
             }}>
@@ -1829,8 +1829,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   src="/mascot.jpg" 
                   alt="AI Assistant"
                   style={{
-                    width: 60,
-                    height: 60,
+                    width: 66,
+                    height: 66,
                     borderRadius: "50%",
                     objectFit: "cover",
                     objectPosition: "center",
