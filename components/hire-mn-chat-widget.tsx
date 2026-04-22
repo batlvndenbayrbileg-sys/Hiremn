@@ -1339,7 +1339,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
         .hw-mascot {
           transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease;
-          animation: none;
+          
           will-change: transform;
         }
         .hw-mascot:hover {
@@ -1390,11 +1390,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         {isOpen && (
           <div style={{ animation: "hw-chat-open 0.4s cubic-bezier(.34,1.56,.64,1)" }}>
             <div className="hw-panel" style={{
-              width: 380,
+              width: 340,
+              height: "min(540px, calc(100vh - 120px))",
               position: "relative",
               overflow: "hidden",
               maxWidth: "calc(100vw - 48px)",
-              height: "min(620px, calc(100vh - 120px))",
+
               borderRadius: 20,
               background: "linear-gradient(180deg, #FFFFFF 0%, #FAFAF9 100%)",
               boxShadow: "0 25px 60px rgba(0,0,0,.15), 0 10px 30px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04)",
