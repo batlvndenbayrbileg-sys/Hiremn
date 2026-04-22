@@ -1491,7 +1491,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       display: "inline-block", flexShrink: 0,
                       boxShadow: "0 0 8px rgba(34,197,94,.5)",
                     }} />
-                    ��нлайн
+                    ��н��айн
                   </div>
 
                   {/* Message counter - compact pill */}
@@ -1747,7 +1747,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         )}
 
         {/* Mascot button */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", gap: 12, padding: 10 }}>
           {isHovered && !isOpen && (
             <div style={{
               animation: "hw-tooltip-in 0.2s ease-out",

@@ -11,25 +11,19 @@ export default function EmbedPage() {
           padding: 0;
           box-sizing: border-box;
         }
-        html {
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-        }
-        body {
+        html, body {
           width: 100%;
           height: 100%;
           margin: 0;
           padding: 0;
-          background: transparent;
-          overflow: hidden;
+          background: transparent !important;
+          overflow: visible !important;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         #__next {
           width: 100%;
           height: 100%;
-          display: flex;
-          flex-direction: column;
+          background: transparent !important;
         }
       `}</style>
       <HireMnChatWidget />

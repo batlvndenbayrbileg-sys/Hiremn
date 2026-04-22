@@ -15,18 +15,21 @@
     return;
   }
 
-  // ── Wrapper div (fixed, bottom-right, SMALL size for button only) ────────
+  // Button size with padding for shadow/pulse effects
+  var BUTTON_SIZE = "100px";
+
+  // ── Wrapper div (fixed, bottom-right) ────────────────────────────────────
   var wrapper = document.createElement("div");
   wrapper.id = "hiremn-widget-root";
   wrapper.style.cssText =
     "position:fixed !important;" +
-    "bottom:16px !important;" +
-    "right:16px !important;" +
+    "bottom:12px !important;" +
+    "right:12px !important;" +
     "z-index:2147483647 !important;" +
     "pointer-events:none !important;" +
     "overflow:visible !important;" +
-    "width:70px !important;" +
-    "height:70px !important;" +
+    "width:" + BUTTON_SIZE + " !important;" +
+    "height:" + BUTTON_SIZE + " !important;" +
     "background:transparent !important;";
 
   // ── iframe ────────────────────────────────────────────────────────────────
@@ -41,12 +44,13 @@
     "position:absolute !important;" +
     "bottom:0 !important;" +
     "right:0 !important;" +
-    "width:70px !important;" +
-    "height:70px !important;" +
+    "width:" + BUTTON_SIZE + " !important;" +
+    "height:" + BUTTON_SIZE + " !important;" +
     "border:none !important;" +
     "background:transparent !important;" +
     "pointer-events:auto !important;" +
     "display:block !important;" +
+    "overflow:visible !important;" +
     "color-scheme:light !important;" +
     "transition:width 0.3s ease, height 0.3s ease !important;";
 
@@ -70,24 +74,24 @@
           iframe.style.height = "100%";
         } else {
           wrapper.style.width = "420px";
-          wrapper.style.height = "680px";
-          wrapper.style.bottom = "16px";
-          wrapper.style.right = "16px";
+          wrapper.style.height = "700px";
+          wrapper.style.bottom = "12px";
+          wrapper.style.right = "12px";
           wrapper.style.left = "auto";
           wrapper.style.top = "auto";
           iframe.style.width = "420px";
-          iframe.style.height = "680px";
+          iframe.style.height = "700px";
         }
       } else {
-        // Closed - just button size
-        wrapper.style.width = "70px";
-        wrapper.style.height = "70px";
-        wrapper.style.bottom = "16px";
-        wrapper.style.right = "16px";
+        // Closed - button size with padding
+        wrapper.style.width = BUTTON_SIZE;
+        wrapper.style.height = BUTTON_SIZE;
+        wrapper.style.bottom = "12px";
+        wrapper.style.right = "12px";
         wrapper.style.left = "auto";
         wrapper.style.top = "auto";
-        iframe.style.width = "70px";
-        iframe.style.height = "70px";
+        iframe.style.width = BUTTON_SIZE;
+        iframe.style.height = BUTTON_SIZE;
       }
     }
     
