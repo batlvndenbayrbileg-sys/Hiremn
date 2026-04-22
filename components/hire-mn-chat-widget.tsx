@@ -1831,7 +1831,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   style={{
                     width: 51,
                     height: 51,
-                    borderRadius: "50%",
+                    borderRadius: "30%",
                     objectFit: "cover",
                     objectPosition: "center",
                   }}
