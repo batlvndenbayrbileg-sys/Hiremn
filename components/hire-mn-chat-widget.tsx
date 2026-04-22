@@ -3,10 +3,10 @@
 import { useState, useRef, useEffect } from "react"
 import { MessageFeedback } from './message-feedback'
 import { ConversationSidebar } from './conversation-sidebar'
-import { 
-  Conversation, 
-  createNewConversation, 
-  getActiveConversation, 
+import {
+  Conversation,
+  createNewConversation,
+  getActiveConversation,
   setActiveConversation,
   canSendMessage,
   getRemainingMessages,
@@ -88,9 +88,9 @@ const QUICK_REPLIES = [
 
 // ── Animated Mascot Robot ─────────────────────────────────────────────────────
 
-function MascotRobot({ size = 48, white = false, waving = false }: { size?: number; white?: boolean; waving?: boolean }) {
+function MascotRobot({ size = 58, white = false, waving = false }: { size?: number; white?: boolean; waving?: boolean }) {
   const [eyePos, setEyePos] = useState({ x: 0, y: 0 })
-  
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const centerX = window.innerWidth - 60
@@ -105,15 +105,15 @@ function MascotRobot({ size = 48, white = false, waving = false }: { size?: numb
     window.addEventListener("mousemove", handleMouseMove)
     return () => window.removeEventListener("mousemove", handleMouseMove)
   }, [])
-  
+
   const primary = white ? "#fff" : "#E8541A"
   const fill = white ? "rgba(255,255,255,0.3)" : "rgba(247,200,180,0.6)"
   const stroke = white ? "#fff" : "#E8541A"
-  
+
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" style={{ overflow: "visible" }}>
       {/* Main brain shape - smooth organic form like hire.mn */}
-      <path 
+      <path
         d="M50 8 
            C25 8 12 25 12 45 
            C12 52 14 58 18 63
@@ -129,49 +129,49 @@ function MascotRobot({ size = 48, white = false, waving = false }: { size?: numb
         stroke={stroke}
         strokeWidth="2.5"
       />
-      
+
       {/* Left hemisphere curves - smooth elegant folds */}
       <path d="M28 25 Q22 32 26 40" stroke={stroke} strokeWidth="2" fill="none" opacity="0.5" strokeLinecap="round" />
       <path d="M24 38 Q18 48 24 58" stroke={stroke} strokeWidth="2" fill="none" opacity="0.45" strokeLinecap="round" />
       <path d="M30 50 Q24 58 30 68" stroke={stroke} strokeWidth="1.8" fill="none" opacity="0.4" strokeLinecap="round" />
-      
+
       {/* Right hemisphere curves - smooth elegant folds */}
       <path d="M72 25 Q78 32 74 40" stroke={stroke} strokeWidth="2" fill="none" opacity="0.5" strokeLinecap="round" />
       <path d="M76 38 Q82 48 76 58" stroke={stroke} strokeWidth="2" fill="none" opacity="0.45" strokeLinecap="round" />
       <path d="M70 50 Q76 58 70 68" stroke={stroke} strokeWidth="1.8" fill="none" opacity="0.4" strokeLinecap="round" />
-      
+
       {/* Center division - gentle curve */}
-      <path d="M50 18 Q48 35 50 50 Q52 65 50 80" 
+      <path d="M50 18 Q48 35 50 50 Q52 65 50 80"
         stroke={stroke} strokeWidth="1.5" fill="none" opacity="0.35" strokeLinecap="round" />
-      
+
       {/* Left Eye - cursor tracking */}
       <g>
         <ellipse cx="36" cy="42" rx="8" ry="9" fill="rgba(255,255,255,0.95)" stroke={stroke} strokeWidth="1.5" />
-        <circle 
-          cx={36 + eyePos.x} 
-          cy={42 + eyePos.y} 
-          r="4.5" 
+        <circle
+          cx={36 + eyePos.x}
+          cy={42 + eyePos.y}
+          r="4.5"
           fill={primary}
           style={{ transition: "cx 0.08s ease-out, cy 0.08s ease-out" }}
         />
         <circle cx={37 + eyePos.x * 0.3} cy={40 + eyePos.y * 0.3} r="1.5" fill={white ? primary : "#fff"} />
       </g>
-      
+
       {/* Right Eye - cursor tracking */}
       <g>
         <ellipse cx="64" cy="42" rx="8" ry="9" fill="rgba(255,255,255,0.95)" stroke={stroke} strokeWidth="1.5" />
-        <circle 
-          cx={64 + eyePos.x} 
-          cy={42 + eyePos.y} 
-          r="4.5" 
+        <circle
+          cx={64 + eyePos.x}
+          cy={42 + eyePos.y}
+          r="4.5"
           fill={primary}
           style={{ transition: "cx 0.08s ease-out, cy 0.08s ease-out" }}
         />
         <circle cx={65 + eyePos.x * 0.3} cy={40 + eyePos.y * 0.3} r="1.5" fill={white ? primary : "#fff"} />
       </g>
-      
+
       {/* Subtle glow pulse */}
-      <path 
+      <path
         d="M50 8 C25 8 12 25 12 45 C12 52 14 58 18 63 C14 68 12 74 15 80 C18 86 28 90 38 88 C42 92 46 94 50 94 C54 94 58 92 62 88 C72 90 82 86 85 80 C88 74 86 68 82 63 C86 58 88 52 88 45 C88 25 75 8 50 8Z"
         fill="none"
         stroke={stroke}
@@ -196,7 +196,7 @@ function BrainAvatar() {
       flexShrink: 0,
       boxShadow: "0 2px 8px rgba(232,84,26,0.12)",
     }}>
-        <img src="/mascot.jpg" alt="AI" style={{ width: 22, height: 22, borderRadius: 6, objectFit: "cover" }} />
+      <img src="/mascot.jpg" alt="AI" style={{ width: 22, height: 22, borderRadius: 6, objectFit: "cover" }} />
     </div>
   )
 }
@@ -216,7 +216,7 @@ function TypingIndicator() {
       }}>
         {[0, 1, 2].map(i => (
           <div key={i} style={{
-            width: 8, height: 8, 
+            width: 8, height: 8,
             background: "linear-gradient(135deg, #E8541A, #F5A07A)",
             borderRadius: "50%",
             animation: `hw-bounce 1.4s ease-in-out ${i * 0.15}s infinite`,
@@ -232,7 +232,7 @@ function TypingIndicator() {
 function getCoverImage(test: Test): string {
   // Use test-specific AI-generated image if available
   if (test.image) return test.image
-  
+
   // Fallback to category-based images
   const name = (test.name || "").toLowerCase()
   const cat = (test.category || "").toLowerCase()
@@ -290,7 +290,7 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
           position: "absolute", inset: 0,
           background: "linear-gradient(160deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.35) 100%)",
         }} />
-        
+
         {/* Emoji badge */}
         <div style={{
           position: "absolute", top: 8, right: 8,
@@ -312,7 +312,7 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
             boxShadow: "0 2px 8px rgba(0,0,0,.1)",
           }}>ҮНЭГҮЙ</div>
         )}
-        
+
         {test.count && test.count > 0 && (
           <div style={{
             position: "absolute", bottom: 8, right: 8,
@@ -390,7 +390,7 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
   const categoryFiltered = activeCategory === "Бүгд"
     ? tests
     : tests.filter(t => (t.category || "") === activeCategory)
-  
+
   // Then filter by price
   const filtered = priceFilter === "all"
     ? categoryFiltered
@@ -560,95 +560,95 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
 
         {/* Price filter dropdown */}
         {hasBothPriceTypes && (
-        <div ref={dropdownRef} style={{ 
-          position: "relative", flexShrink: 0,
-        }}>
-          {/* Trigger button */}
-          <button
-            onClick={() => setPriceDropdownOpen(o => !o)}
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 12px", borderRadius: 10, border: "none",
-              background: priceFilter === "free"
-                ? "linear-gradient(135deg, #059669, #10B981)"
-                : priceFilter === "paid"
-                  ? "linear-gradient(135deg, #E8541A, #F07040)"
-                  : "#F5F3F1",
-              color: priceFilter === "all" ? "#374151" : "#fff",
-              fontSize: 11, fontWeight: 700, cursor: "pointer",
-              boxShadow: priceFilter !== "all"
-                ? priceFilter === "free"
-                  ? "0 2px 8px rgba(5,150,105,.25)"
-                  : "0 2px 8px rgba(232,84,26,.25)"
-                : "none",
-              transition: "all 0.2s ease",
-            }}
-          >
-            {/* Color dot */}
-            <span style={{
-              width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
-              background: priceFilter === "free" ? "rgba(255,255,255,.6)"
-                : priceFilter === "paid" ? "rgba(255,255,255,.6)"
-                : "#9CA3AF",
-            }} />
-            {priceFilter === "free" ? "Үнэгүй" : priceFilter === "paid" ? "��өлбөртэй" : "Бүгд"}
-            {/* Chevron */}
-            <svg
-              width="10" height="10" viewBox="0 0 16 16" fill="none"
-              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
-              style={{ transform: priceDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }}
+          <div ref={dropdownRef} style={{
+            position: "relative", flexShrink: 0,
+          }}>
+            {/* Trigger button */}
+            <button
+              onClick={() => setPriceDropdownOpen(o => !o)}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "6px 12px", borderRadius: 10, border: "none",
+                background: priceFilter === "free"
+                  ? "linear-gradient(135deg, #059669, #10B981)"
+                  : priceFilter === "paid"
+                    ? "linear-gradient(135deg, #E8541A, #F07040)"
+                    : "#F5F3F1",
+                color: priceFilter === "all" ? "#374151" : "#fff",
+                fontSize: 11, fontWeight: 700, cursor: "pointer",
+                boxShadow: priceFilter !== "all"
+                  ? priceFilter === "free"
+                    ? "0 2px 8px rgba(5,150,105,.25)"
+                    : "0 2px 8px rgba(232,84,26,.25)"
+                  : "none",
+                transition: "all 0.2s ease",
+              }}
             >
-              <path d="M4 6l4 4 4-4" />
-            </svg>
-          </button>
+              {/* Color dot */}
+              <span style={{
+                width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
+                background: priceFilter === "free" ? "rgba(255,255,255,.6)"
+                  : priceFilter === "paid" ? "rgba(255,255,255,.6)"
+                    : "#9CA3AF",
+              }} />
+              {priceFilter === "free" ? "Үнэгүй" : priceFilter === "paid" ? "��өлбөртэй" : "Бүгд"}
+              {/* Chevron */}
+              <svg
+                width="10" height="10" viewBox="0 0 16 16" fill="none"
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+                style={{ transform: priceDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }}
+              >
+                <path d="M4 6l4 4 4-4" />
+              </svg>
+            </button>
 
-          {/* Dropdown panel */}
-          {priceDropdownOpen && (
-            <div style={{
-              position: "absolute", bottom: "calc(100% + 6px)", right: 0,
-              background: "#fff",
-              borderRadius: 12,
-              border: "1.5px solid #F0EAE6",
-              boxShadow: "0 8px 24px rgba(0,0,0,.12)",
-              overflow: "hidden",
-              zIndex: 50,
-              minWidth: 130,
-              animation: "hw-slide-up 0.15s ease-out",
-            }}>
-              {[
-                { key: "all" as const, label: "Бүгд", count: freeCount + paidCount, dot: "#9CA3AF" },
-                { key: "free" as const, label: "Үнэгүй", count: freeCount, dot: "#059669" },
-                { key: "paid" as const, label: "Төлбөртэй", count: paidCount, dot: "#E8541A" },
-              ].map((f, idx, arr) => (
-                <button
-                  key={f.key}
-                  onClick={() => { handlePriceFilter(f.key); setPriceDropdownOpen(false) }}
-                  style={{
-                    width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-                    gap: 8, padding: "9px 14px", border: "none",
-                    background: priceFilter === f.key ? "#FEF3EE" : "#fff",
-                    borderBottom: idx < arr.length - 1 ? "1px solid #F9F5F3" : "none",
-                    cursor: "pointer", transition: "background 0.15s ease",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: f.dot, flexShrink: 0 }} />
+            {/* Dropdown panel */}
+            {priceDropdownOpen && (
+              <div style={{
+                position: "absolute", bottom: "calc(100% + 6px)", right: 0,
+                background: "#fff",
+                borderRadius: 12,
+                border: "1.5px solid #F0EAE6",
+                boxShadow: "0 8px 24px rgba(0,0,0,.12)",
+                overflow: "hidden",
+                zIndex: 50,
+                minWidth: 130,
+                animation: "hw-slide-up 0.15s ease-out",
+              }}>
+                {[
+                  { key: "all" as const, label: "Бүгд", count: freeCount + paidCount, dot: "#9CA3AF" },
+                  { key: "free" as const, label: "Үнэгүй", count: freeCount, dot: "#059669" },
+                  { key: "paid" as const, label: "Төлбөртэй", count: paidCount, dot: "#E8541A" },
+                ].map((f, idx, arr) => (
+                  <button
+                    key={f.key}
+                    onClick={() => { handlePriceFilter(f.key); setPriceDropdownOpen(false) }}
+                    style={{
+                      width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                      gap: 8, padding: "9px 14px", border: "none",
+                      background: priceFilter === f.key ? "#FEF3EE" : "#fff",
+                      borderBottom: idx < arr.length - 1 ? "1px solid #F9F5F3" : "none",
+                      cursor: "pointer", transition: "background 0.15s ease",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: f.dot, flexShrink: 0 }} />
+                      <span style={{
+                        fontSize: 12, fontWeight: priceFilter === f.key ? 700 : 500,
+                        color: priceFilter === f.key ? "#E8541A" : "#374151",
+                      }}>{f.label}</span>
+                    </div>
                     <span style={{
-                      fontSize: 12, fontWeight: priceFilter === f.key ? 700 : 500,
-                      color: priceFilter === f.key ? "#E8541A" : "#374151",
-                    }}>{f.label}</span>
-                  </div>
-                  <span style={{
-                    fontSize: 10, fontWeight: 600,
-                    color: "#9CA3AF",
-                    background: "#F5F3F1",
-                    padding: "1px 7px", borderRadius: 8,
-                  }}>{f.count}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+                      fontSize: 10, fontWeight: 600,
+                      color: "#9CA3AF",
+                      background: "#F5F3F1",
+                      padding: "1px 7px", borderRadius: 8,
+                    }}>{f.count}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>
@@ -674,7 +674,7 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
   // Render formatted text with bold, lists, headings, etc.
   const renderFormattedText = (text: string) => {
     const lines = text.split('\n')
-    
+
     return lines.map((line, lineIdx) => {
       // Check for markdown heading: ### Heading
       const headingMatch = line.match(/^(#{1,3})\s+(.+)$/)
@@ -683,7 +683,7 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
         const headingText = headingMatch[2]
         const sizes = { 1: 20, 2: 18, 3: 16 }
         return (
-          <div key={lineIdx} style={{ 
+          <div key={lineIdx} style={{
             marginTop: lineIdx > 0 ? 12 : 0,
             marginBottom: 8,
             fontSize: sizes[level as 1 | 2 | 3],
@@ -695,28 +695,28 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
           </div>
         )
       }
-      
+
       // Check if it's a list item
       const isBullet = /^[\-\•\*]\s/.test(line.trim())
       const isNumbered = /^\d+[\.\)]\s/.test(line.trim())
-      
+
       // Parse bold text **text**
       const parts: React.ReactNode[] = []
       let remaining = isBullet ? line.replace(/^[\-\•\*]\s/, '') : isNumbered ? line.replace(/^\d+[\.\)]\s/, '') : line
       let keyIdx = 0
-      
+
       // Match **bold** patterns
       const boldRegex = /\*\*([^*]+)\*\*/g
       let lastIndex = 0
       let match
-      
+
       while ((match = boldRegex.exec(remaining)) !== null) {
         if (match.index > lastIndex) {
           parts.push(<span key={`t-${lineIdx}-${keyIdx++}`}>{remaining.slice(lastIndex, match.index)}</span>)
         }
         parts.push(
-          <strong key={`b-${lineIdx}-${keyIdx++}`} style={{ 
-            color: '#E8541A', 
+          <strong key={`b-${lineIdx}-${keyIdx++}`} style={{
+            color: '#E8541A',
             fontWeight: 700,
           }}>
             {match[1]}
@@ -724,27 +724,27 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
         )
         lastIndex = match.index + match[0].length
       }
-      
+
       if (lastIndex < remaining.length) {
         parts.push(<span key={`e-${lineIdx}-${keyIdx++}`}>{remaining.slice(lastIndex)}</span>)
       }
-      
+
       if (parts.length === 0) {
         parts.push(<span key={`l-${lineIdx}`}>{remaining}</span>)
       }
-      
+
       // Render as list item or paragraph
       if (isBullet || isNumbered) {
         return (
-          <div key={lineIdx} style={{ 
-            display: 'flex', 
-            gap: 8, 
+          <div key={lineIdx} style={{
+            display: 'flex',
+            gap: 8,
             marginTop: lineIdx > 0 ? 8 : 0,
             paddingLeft: 4,
             alignItems: 'flex-start',
           }}>
-            <span style={{ 
-              color: '#E8541A', 
+            <span style={{
+              color: '#E8541A',
               fontWeight: 700,
               flexShrink: 0,
               marginTop: 2,
@@ -755,12 +755,12 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
           </div>
         )
       }
-      
+
       // Empty line = paragraph break
       if (line.trim() === '') {
         return <div key={lineIdx} style={{ height: 10 }} />
       }
-      
+
       return (
         <div key={lineIdx} style={{ marginTop: lineIdx > 0 ? 6 : 0 }}>
           {parts}
@@ -770,7 +770,7 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
   }
 
   const { cleanText } = parseTestMarkers(message.content || "")
-  
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {cleanText && (
@@ -839,7 +839,7 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
                   {cat.members.length}
                 </span>
               </div>
-              
+
               <div style={{
                 display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8,
                 scrollSnapType: "x mandatory",
@@ -860,8 +860,8 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
                   >
                     <div style={{ textAlign: "center" }}>
                       {member.image && member.image.startsWith('http') ? (
-                        <img 
-                          src={member.image} 
+                        <img
+                          src={member.image}
                           alt={member.name}
                           style={{
                             width: 80, height: 80, borderRadius: "50%",
@@ -922,7 +922,7 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
 
       {/* Feedback - response дор шууд */}
       <div style={{ marginLeft: 42, marginTop: 2 }}>
-        <MessageFeedback 
+        <MessageFeedback
           messageId={`msg-${Date.now()}`}
           userMessage={userQuestion}
           assistantMessage={message.content}
@@ -960,7 +960,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const [fontSize, setFontSize] = useState(13)
   const [showFontSlider, setShowFontSlider] = useState(false)
   const [showSidebar, setShowSidebar] = useState(false)
-  
+
   // Notify parent window of open/close state for iframe resizing
   useEffect(() => {
     if (typeof window !== 'undefined' && window.parent !== window) {
@@ -976,7 +976,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         content: "Сайн байна уу!\n\nБи hire.mn AI туслагч. Та надаас:\n\n- **Тест санал болгох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар туслана",
       },
     ]
-    
+
     // Exam result байвал initial message оруулна
     if (initialContext?.type === 'exam-result') {
       const { data } = initialContext
@@ -985,7 +985,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         content: `**${data.assessmentName}** үнэлгээний үр дүнд үндэслээд зөвлөгөө өгье.\n\n📊 **Таны оноо:** ${data.score}\n🎯 **Түвшин:** ${data.interpretation}\n\n${data.advice}`,
       })
     }
-    
+
     return initialMessages
   })
   const [input, setInput] = useState("")
@@ -1030,10 +1030,10 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     if (!conversation || messages.length === 0) return
     const timer = setTimeout(() => {
       const userMessages = messages.filter(m => m.role === 'user').length
-      const title = messages.find(m => m.role === 'user')?.content 
+      const title = messages.find(m => m.role === 'user')?.content
         ? generateConversationTitle(messages.find(m => m.role === 'user')!.content)
         : 'Шинэ яриа'
-      
+
       const updated = {
         ...conversation,
         messages,
@@ -1059,12 +1059,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     if (!canSendMessage()) {
       return
     }
-    
+
     if (!text.trim() || isTyping) return
-    
+
     // Increment daily count
     incrementDailyCount()
-    
+
     setShowQuickReplies(false)
     const userMsg: Message = { role: "user", content: text }
     setMessages(prev => [...prev, userMsg])
@@ -1079,27 +1079,27 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     const isFreeTest = /үнэгүй\s*тест|free\s*test|free\s*assessment|төлбөргүй/i.test(text)
     const isPaidTest = /төлбөртэй\s*тест|paid\s*test|premium\s*test/i.test(text)
     const isFounderQuery = !isTestRelated && /үүсгэн\s*байгуулагч|founder|нандин.?эрдэнэ|nandin|erdene/i.test(text)
-    
-  // Individual team member queries - support Cyrillic, Latin Mongolian, English
-  const teamMemberNames = [
-    { pattern: /саранчимэг|saranchimeg|sarantsimeg/i, id: "system-1" },
-    { pattern: /эрдэнэцэцэг|erdenetseteg|erdentseteg|erdenetseteg/i, id: "system-2" },
-    { pattern: /доржнямбуу|dorjnyambuu|dorjnyambu/i, id: "system-3" },
-    { pattern: /өсөхбаяр|osohbayar|osoh\s*bayar/i, id: "system-4" },
-    { pattern: /чин.?эрдэнэ|chin.?erdene|chin\s*erdene|chinerdene/i, id: "test-0" },
-    { pattern: /үүрцайх|uurtsaikh|uurtsaih|uurtsayh/i, id: "test-1" },
-    { pattern: /оюунбилэг|oyunbileg|oyun\s*bileg/i, id: "test-2" },
-    { pattern: /баярмаа|bayarmaa|bayar\s*maa/i, id: "test-3" },
-    { pattern: /мөнхжаргал|monhjargal|monh\s*jargal|monhjargal/i, id: "test-4" },
-    { pattern: /одонтуяа|odontuyaa|odon\s*tuyaa/i, id: "test-5" },
-    { pattern: /эрдэнэбаяр|erdenebyar|erdene\s*byar|erdene\s*bayar/i, id: "test-6" },
-  ]
+
+    // Individual team member queries - support Cyrillic, Latin Mongolian, English
+    const teamMemberNames = [
+      { pattern: /саранчимэг|saranchimeg|sarantsimeg/i, id: "system-1" },
+      { pattern: /эрдэнэцэцэг|erdenetseteg|erdentseteg|erdenetseteg/i, id: "system-2" },
+      { pattern: /доржнямбуу|dorjnyambuu|dorjnyambu/i, id: "system-3" },
+      { pattern: /өсөхбаяр|osohbayar|osoh\s*bayar/i, id: "system-4" },
+      { pattern: /чин.?эрдэнэ|chin.?erdene|chin\s*erdene|chinerdene/i, id: "test-0" },
+      { pattern: /үүрцайх|uurtsaikh|uurtsaih|uurtsayh/i, id: "test-1" },
+      { pattern: /оюунбилэг|oyunbileg|oyun\s*bileg/i, id: "test-2" },
+      { pattern: /баярмаа|bayarmaa|bayar\s*maa/i, id: "test-3" },
+      { pattern: /мөнхжаргал|monhjargal|monh\s*jargal|monhjargal/i, id: "test-4" },
+      { pattern: /одонтуяа|odontuyaa|odon\s*tuyaa/i, id: "test-5" },
+      { pattern: /эрдэнэбаяр|erdenebyar|erdene\s*byar|erdene\s*bayar/i, id: "test-6" },
+    ]
     const matchedMember = teamMemberNames.find(m => m.pattern.test(text))
-    
+
     if (isAboutHire || isAboutTeam || isFreeTest || isPaidTest || isFounderQuery || matchedMember) {
       // Import static data
       const { COMPANY_INFO, getAllTeamCategories, TEAM_MEMBERS } = await import("@/lib/company-data")
-      
+
       setTimeout(async () => {
         // Individual team member query - FIRST PRIORITY
         if (matchedMember) {
@@ -1119,7 +1119,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           setIsTyping(false)
           return
         }
-        
+
         // Founder query
         if (isFounderQuery) {
           const founder = TEAM_MEMBERS.find(m => m.category === 'founder')
@@ -1138,7 +1138,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           setIsTyping(false)
           return
         }
-        
+
         // Free tests query
         if (isFreeTest) {
           const res = await fetch("/api/chat", {
@@ -1156,7 +1156,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           setIsTyping(false)
           return
         }
-        
+
         // Paid tests query  
         if (isPaidTest) {
           const res = await fetch("/api/chat", {
@@ -1174,7 +1174,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           setIsTyping(false)
           return
         }
-        
+
         // Team query
         if (isAboutTeam) {
           setMessages(prev => [...prev, {
@@ -1395,15 +1395,15 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 16,
       }}>
 
-  {/* Chat panel */}
-  {isOpen && (
-    <div style={{ animation: "hw-chat-open 0.4s cubic-bezier(.34,1.56,.64,1)" }}>
-      <div className="hw-panel" style={{
-        width: 380,
-        position: "relative",
-        overflow: "hidden",
-        maxWidth: "calc(100vw - 48px)",
-        height: "min(620px, calc(100vh - 120px))",
+        {/* Chat panel */}
+        {isOpen && (
+          <div style={{ animation: "hw-chat-open 0.4s cubic-bezier(.34,1.56,.64,1)" }}>
+            <div className="hw-panel" style={{
+              width: 380,
+              position: "relative",
+              overflow: "hidden",
+              maxWidth: "calc(100vw - 48px)",
+              height: "min(620px, calc(100vh - 120px))",
               borderRadius: 20,
               background: "linear-gradient(180deg, #FFFFFF 0%, #FAFAF9 100%)",
               boxShadow: "0 25px 60px rgba(0,0,0,.15), 0 10px 30px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04)",
@@ -1441,22 +1441,22 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   title="Яриа түүх харах"
                   style={{
                     width: 48, height: 48, borderRadius: 12,
-                    background: showSidebar 
-                      ? "linear-gradient(145deg, #FFF7ED, #FFEDD5)" 
+                    background: showSidebar
+                      ? "linear-gradient(145deg, #FFF7ED, #FFEDD5)"
                       : "linear-gradient(145deg, #FEF3EE, #FFE8DC)",
                     border: showSidebar ? "2px solid #FB923C" : "2px solid #FDDCCC",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     flexShrink: 0,
-                    boxShadow: showSidebar 
-                      ? "0 4px 16px rgba(251,146,60,.3)" 
+                    boxShadow: showSidebar
+                      ? "0 4px 16px rgba(251,146,60,.3)"
                       : "0 4px 12px rgba(232,84,26,.15)",
                     overflow: "hidden",
                     cursor: "pointer",
                     transition: "all 0.2s ease",
                     padding: 0,
                   }}>
-                  <img 
-                    src="/mascot.jpg" 
+                  <img
+                    src="/mascot.jpg"
                     alt="AI Assistant"
                     style={{
                       width: 40,
@@ -1493,7 +1493,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     }} />
                     ��нлайн
                   </div>
-                  
+
                   {/* Message counter - compact pill */}
                 </div>
 
@@ -1592,7 +1592,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   const prevUserMsg = msg.role === "assistant" && i > 0
                     ? messages.slice(0, i).reverse().find(m => m.role === "user")?.content || ""
                     : ""
-                  
+
                   return (
                     <div key={i} className="hw-msg">
                       {msg.role === "assistant"
@@ -1638,12 +1638,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 <div ref={messagesEndRef} />
               </div>
 
-  {/* Input */}
-  <div style={{
-  padding: "12px 14px 14px", borderTop: "1px solid #EDE8E5",
-  background: "#fff", flexShrink: 0,
-  }}>
-  
+              {/* Input */}
+              <div style={{
+                padding: "12px 14px 14px", borderTop: "1px solid #EDE8E5",
+                background: "#fff", flexShrink: 0,
+              }}>
+
 
                 <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
                   <textarea
@@ -1695,7 +1695,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     </svg>
                   </button>
                 </div>
-                
+
                 {/* Warning - shows when 10 or less remaining */}
                 {getRemainingMessages() <= 10 && getRemainingMessages() > 0 && (
                   <div style={{
@@ -1710,8 +1710,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     border: `1px solid ${getRemainingMessages() <= 3 ? "#FECACA" : "#FDE68A"}`,
                   }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={getRemainingMessages() <= 3 ? "#DC2626" : "#D97706"} strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M12 8v4M12 16h.01"/>
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 8v4M12 16h.01" />
                     </svg>
                     <span style={{
                       fontSize: 12,
@@ -1722,7 +1722,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     </span>
                   </div>
                 )}
-                
+
                 <div style={{ textAlign: "center", marginTop: 10, fontSize: 10, color: "#D1C4BE", fontWeight: 500 }}>
                   hire.mn AI
                 </div>
@@ -1731,15 +1731,15 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               {/* Usage Limit Popup */}
               {isUserLocked() && <UsageLimitPopup />}
 
-  {/* Sidebar Overlay */}
-  {showSidebar && (
-  <ConversationSidebar
-  activeId={conversation?.id}
-  onSelectConversation={handleSelectConversation}
-  onNewConversation={handleNewConversation}
-  onClose={() => setShowSidebar(false)}
-  isVisible={showSidebar}
-  />
+              {/* Sidebar Overlay */}
+              {showSidebar && (
+                <ConversationSidebar
+                  activeId={conversation?.id}
+                  onSelectConversation={handleSelectConversation}
+                  onNewConversation={handleNewConversation}
+                  onClose={() => setShowSidebar(false)}
+                  isVisible={showSidebar}
+                />
               )}
 
             </div>
@@ -1825,8 +1825,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
               ) : (
-                <img 
-                  src="/mascot.jpg" 
+                <img
+                  src="/mascot.jpg"
                   alt="AI Assistant"
                   style={{
                     width: 66,
