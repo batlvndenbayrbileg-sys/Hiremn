@@ -73,14 +73,14 @@
           iframe.style.width = "100%";
           iframe.style.height = "100%";
         } else {
-          wrapper.style.width = "420px";
-          wrapper.style.height = "800px";
+          wrapper.style.width = "380px";
+          wrapper.style.height = "720px";
           wrapper.style.bottom = "12px";
           wrapper.style.right = "12px";
           wrapper.style.left = "auto";
           wrapper.style.top = "auto";
-          iframe.style.width = "420px";
-          iframe.style.height = "800px";
+          iframe.style.width = "380px";
+          iframe.style.height = "720px";
         }
       } else {
         // Closed - button size with padding
