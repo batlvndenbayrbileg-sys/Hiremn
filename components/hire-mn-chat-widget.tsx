@@ -1830,7 +1830,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0, position: "relative",
-              boxShadow: "0 12px 40px rgba(232,84,26,.5), inset 0 2px 0 rgba(255,255,255,.2)",
+              boxShadow: "none",
             }}
           >
             <div style={{
