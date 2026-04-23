@@ -196,12 +196,12 @@ function BrainAvatar() {
       flexShrink: 0,
       boxShadow: "0 2px 8px rgba(232,84,26,0.12)",
     }}>
-      <img src="/mascot.png" alt="AI" className="hw-mascot-float" style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover" }} />
+      <img src="/mascot.png" alt="AI" className="hw-mascot-float" style={{ width: 26, height: 26, borderRadius: 6, objectFit: "cover" }} />
     </div>
   )
 }
 
-// ── Typing indicator ──────────────────────────────���───────────────────────────
+// ── Typing indicator ─────────────────────────────────────────────────────────
 
 function TypingIndicator() {
   return (
@@ -219,7 +219,7 @@ function TypingIndicator() {
             width: 8, height: 8,
             background: "linear-gradient(135deg, #E8541A, #F5A07A)",
             borderRadius: "50%",
-            animation: `hw-dot-blink 1.2s ease-in-out ${i * 0.16}s infinite`,
+            animation: `hw-bounce 1.4s ease-in-out ${i * 0.15}s infinite`,
           }} />
         ))}
       </div>
@@ -263,10 +263,11 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
       style={{
         display: "flex", flexDirection: "column",
         background: "#fff",
-        border: "1.5px solid #F0EBE8", borderRadius: 18,
+        border: "1.5px solid #EAE0D9", borderRadius: 18,
         overflow: "hidden", textDecoration: "none",
         width: CARD_W, minWidth: CARD_W, maxWidth: CARD_W, flexShrink: 0,
-        animation: `hw-card-in 0.45s cubic-bezier(.34,1.56,.64,1) ${index * 0.08}s both`,
+        height: 310,
+        animation: `hw-card-in 0.4s cubic-bezier(.34,1.56,.64,1) ${index * 0.07}s both`,
       }}
     >
       {/* Cover image header */}
@@ -320,7 +321,7 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
             backdropFilter: "blur(4px)",
             color: "#fff", fontSize: 9, fontWeight: 600,
             padding: "3px 8px", borderRadius: 20,
-          }}>{test.count.toLocaleString()}+ а��сан</div>
+          }}>{test.count.toLocaleString()}+ авсан</div>
         )}
       </div>
 
@@ -591,7 +592,7 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
                   : priceFilter === "paid" ? "rgba(255,255,255,.6)"
                     : "#9CA3AF",
               }} />
-              {priceFilter === "free" ? "Үнэгүй" : priceFilter === "paid" ? "��өлбөртэй" : "Бүгд"}
+              {priceFilter === "free" ? "Үнэгүй" : priceFilter === "paid" ? "өлбөртэй" : "Бүгд"}
               {/* Chevron */}
               <svg
                 width="10" height="10" viewBox="0 0 16 16" fill="none"
@@ -655,7 +656,7 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
   )
 }
 
-// ── Bot Message ────────────────────────���──────────────────────────────────────
+// ── Bot Message ──────────────────────────────────────────────────────────────
 
 function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message; fontSize: number; userQuestion?: string }) {
   // Parse [TEST:id] markers
@@ -944,7 +945,7 @@ function UserMessage({ content, fontSize }: { content: string; fontSize: number 
         borderRadius: 16, borderBottomRightRadius: 4,
         padding: "12px 16px",
         fontSize: fontSize, lineHeight: 1.65, wordBreak: "break-word",
-        boxShadow: "0 3px 10px rgba(232,84,26,.18)",
+        boxShadow: "0 4px 12px rgba(232,84,26,.2)",
       }}>
         {content}
       </div>
@@ -952,7 +953,7 @@ function UserMessage({ content, fontSize }: { content: string; fontSize: number 
   )
 }
 
-// ── Main Widget ───────────────────────��───────────────────────────────────────
+// ── Main Widget ──────────────────────────────────────────────────────────────
 
 export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetProps = {}) {
   const [isOpen, setIsOpen] = useState(false)
@@ -1156,7 +1157,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           const data = await res.json()
           setMessages(prev => [...prev, {
             role: "assistant",
-            content: "**Үнэ���үй тестүүд**\n\nТа эдгээр тестүүдийг ямар ч төлбөргүйгээр өгч, өөрийн талаар илүү ихийг мэдэж авах боломжтой:",
+            content: "**Үнэүй тестүүд**\n\nТа эдгээр тестүүдийг ямар ч төлбөргүйгээр өгч, өөрийн талаар илүү ихийг мэдэж авах боломжтой:",
             tests: data.tests || [],
             categories: ["free"],
           }])
@@ -1237,311 +1238,363 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700&display=swap');
+        .hw-root, .hw-root * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important; box-sizing: border-box; }
 
-        /* ── Font: GIP (hire.mn custom) with DM Sans fallback ── */
-        .hw-root, .hw-root * {
-          font-family: 'GIP', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
-          box-sizing: border-box;
-          -webkit-font-smoothing: antialiased;
-        }
-
-        /* ── Design tokens ── */
-        .hw-root {
-          --brand:        #E8541A;
-          --brand-dark:   #C04010;
-          --brand-light:  #F07040;
-          --brand-bg:     #FEF0EA;
-          --brand-border: #FDDCCC;
-          --chat-bg:      #F5F1EE;
-          --surface:      #FFFFFF;
-          --border:       #EAE0D9;
-          --text:         #1C1008;
-          --text-mid:     #6B5E54;
-          --text-muted:   #A89890;
-        }
-
-        /* ── Keyframes ── */
         @keyframes hw-bounce {
-          0%, 60%, 100% { transform: translateY(0); }
-          30%            { transform: translateY(-7px); }
+          0%, 60%, 100% { transform: translateY(0) scale(1); }
+          30% { transform: translateY(-10px) scale(0.92); }
+        }
+        @keyframes hw-float {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          25% { transform: translateY(-4px) rotate(-3deg); }
+          50% { transform: translateY(-6px) rotate(0deg); }
+          75% { transform: translateY(-4px) rotate(3deg); }
         }
         @keyframes hw-pop {
-          from { transform: scale(0.88) translateY(10px); opacity: 0; }
-          60%  { transform: scale(1.03) translateY(-2px); opacity: 1; }
+          from { transform: scale(0.8) translateY(12px); opacity: 0; }
+          50%  { transform: scale(1.05) translateY(-3px); opacity: 1; }
           to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         @keyframes hw-card-in {
-          from { transform: scale(0.88) translateY(16px); opacity: 0; }
-          60%  { transform: scale(1.02) translateY(-3px); opacity: 1; }
-          to   { transform: scale(1) translateY(0); opacity: 1; }
+          from { transform: scale(0.8) translateY(20px) rotate(-3deg); opacity: 0; }
+          60%  { transform: scale(1.03) translateY(-4px) rotate(1deg); opacity: 1; }
+          to   { transform: scale(1) translateY(0) rotate(0deg); opacity: 1; }
         }
         @keyframes hw-slide-up {
-          from { transform: translateY(18px); opacity: 0; }
+          from { transform: translateY(24px); opacity: 0; }
           to   { transform: translateY(0); opacity: 1; }
         }
         @keyframes hw-chat-open {
-          from { opacity: 0; transform: scale(0.88) translateY(24px); transform-origin: bottom right; }
-          60%  { transform: scale(1.02) translateY(-4px); transform-origin: bottom right; }
+          from { opacity: 0; transform: scale(0.8) translateY(30px); transform-origin: bottom right; }
+          50%  { transform: scale(1.03) translateY(-6px); transform-origin: bottom right; }
           to   { opacity: 1; transform: scale(1) translateY(0); transform-origin: bottom right; }
         }
+        @keyframes hw-pulse {
+         0%, 100% { box-shadow: 0 10px 30px rgba(232,84,26,.4); }
+  50%       { box-shadow: 0 10px 30px rgba(232,84,26,.4); }
+        }
         @keyframes hw-chip-in {
-          from { transform: scale(0.82) translateY(8px); opacity: 0; }
-          65%  { transform: scale(1.04) translateY(-2px); opacity: 1; }
+          from { transform: scale(0.7) translateY(10px); opacity: 0; }
+          70%  { transform: scale(1.05) translateY(-2px); opacity: 1; }
           to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         @keyframes hw-tooltip-in {
-          from { opacity: 0; transform: translateX(8px) scale(0.96); }
+          from { opacity: 0; transform: translateX(10px) scale(0.95); }
           to   { opacity: 1; transform: translateX(0) scale(1); }
+        }
+        
+        /* Mascot animations */
+        @keyframes hw-mascot-bounce {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-6px) scale(1.02); }
         }
         @keyframes hw-mascot-float {
           0%, 100% { transform: translateY(0) rotate(0deg); }
-          30%  { transform: translateY(-4px) rotate(-1.5deg); }
-          60%  { transform: translateY(-5px) rotate(1deg); }
+          25% { transform: translateY(-3px) rotate(-2deg); }
+          50% { transform: translateY(-5px) rotate(0deg); }
+          75% { transform: translateY(-3px) rotate(2deg); }
         }
-        @keyframes hw-mascot-bounce {
-          0%, 100% { transform: translateY(0); }
-          50%       { transform: translateY(-5px); }
+        @keyframes hw-mascot-wave {
+          0%, 100% { transform: rotate(0deg); }
+          20% { transform: rotate(15deg); }
+          40% { transform: rotate(-10deg); }
+          60% { transform: rotate(15deg); }
+          80% { transform: rotate(-5deg); }
         }
-        @keyframes hw-dot-blink {
-          0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
-          30%            { transform: translateY(-5px); opacity: 1; }
+        .hw-mascot-bounce {
+          animation: hw-mascot-bounce 2s ease-in-out infinite;
         }
-        @keyframes hw-status-pulse {
-          0%, 100% { opacity: 1; }
-          50%       { opacity: 0.4; }
+        .hw-mascot-float {
+          animation: hw-mascot-float 3s ease-in-out infinite;
         }
-        @keyframes gs {
-          0%, 100% { background-position: 0% 50%; }
-          50%       { background-position: 100% 50%; }
+        .hw-mascot-wave {
+          animation: hw-mascot-wave 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes wave-hand {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(20deg); }
+          50% { transform: rotate(-5deg); }
+          75% { transform: rotate(20deg); }
+        }
+        @keyframes wave-arm {
+          0%, 100% { transform: rotate(0deg); }
+          50% { transform: rotate(-15deg); }
+        }
+        @keyframes glow-pulse {
+          0%, 100% { filter: drop-shadow(0 0 6px rgba(232,84,26,0.3)); }
+          50% { filter: drop-shadow(0 0 20px rgba(232,84,26,0.7)); }
+        }
+        @keyframes typing-bounce {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-6px); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
         }
 
-        /* ── Component classes ── */
-        .hw-msg  { animation: hw-pop 0.36s cubic-bezier(.34,1.56,.64,1) both; }
+        .hw-msg { animation: hw-pop 0.4s cubic-bezier(.34,1.56,.64,1) both; }
 
         .hw-card {
-          transition: transform 0.24s cubic-bezier(.34,1.56,.64,1), box-shadow 0.24s ease, border-color 0.2s;
+          transition: transform 0.28s cubic-bezier(.34,1.56,.64,1), box-shadow 0.28s ease, border-color 0.2s ease;
           will-change: transform;
         }
         .hw-card:hover {
-          transform: translateY(-5px) scale(1.015);
-          box-shadow: 0 16px 36px rgba(232,84,26,.14), 0 4px 12px rgba(0,0,0,.06) !important;
-          border-color: #F5C0A8 !important;
+          transform: translateY(-6px) scale(1.02);
+          box-shadow: 0 20px 40px rgba(232,84,26,.18), 0 6px 16px rgba(0,0,0,.08);
+          border-color: #F5C8B8 !important;
         }
         .hw-card:hover .hw-cta {
-          background: #C04010 !important;
-          transform: translateY(-1px);
+          background: linear-gradient(135deg, #D44810 0%, #E8541A 100%) !important;
+          box-shadow: 0 6px 20px rgba(232,84,26,.4) !important;
+          transform: translateY(-2px);
         }
-        .hw-cta { transition: all 0.2s ease; }
+
+        .hw-cta { transition: all 0.22s cubic-bezier(.34,1.56,.64,1); }
 
         .hw-chip {
-          transition: all 0.18s cubic-bezier(.34,1.56,.64,1);
+          transition: all 0.22s cubic-bezier(.34,1.56,.64,1);
         }
         .hw-chip:hover {
-          background: #E8541A !important;
+          background: linear-gradient(135deg, #E8541A, #F07040) !important;
           color: #fff !important;
           border-color: #E8541A !important;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 14px rgba(232,84,26,.28) !important;
+          transform: translateY(-3px) scale(1.05);
+          box-shadow: 0 6px 16px rgba(232,84,26,.3);
         }
         .hw-chip:active { transform: scale(0.96); }
 
-        .hw-send { transition: all 0.18s ease; }
+        .hw-send { transition: all 0.2s cubic-bezier(.34,1.56,.64,1); }
         .hw-send:hover:not(:disabled) {
-          background: #C04010 !important;
-          transform: scale(1.06);
+          background: linear-gradient(135deg, #D44810 0%, #E8541A 100%) !important;
+          transform: scale(1.08);
+          box-shadow: 0 6px 20px rgba(232,84,26,.4) !important;
         }
-        .hw-send:active:not(:disabled) { transform: scale(0.93); }
+        .hw-send:active:not(:disabled) { transform: scale(0.92); }
 
-        .hw-mascot { transition: box-shadow 0.2s ease; }
-        .hw-mascot:hover { box-shadow: none !important; background: #fff !important; }
-        .hw-mascot:active { transform: scale(0.95); }
-        .hw-mascot-float  { animation: hw-mascot-float  3.2s ease-in-out infinite; }
-        .hw-mascot-bounce { animation: hw-mascot-bounce 2.2s ease-in-out infinite; }
+        .hw-mascot {
+          transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease;
+          
+          will-change: transform;
+        }
+       .hw-mascot:hover {
+  box-shadow: none !important;
+  background: #FFFFFF !important;
+}
+        .hw-mascot:active { transform: scale(0.94); }
 
-        .hw-arrow { transition: all 0.18s ease; }
+        .hw-arrow {
+          transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
+        }
         .hw-arrow:hover {
-          transform: translateY(-50%) scale(1.12);
-          border-color: #F5C0A8 !important;
+          transform: translateY(-50%) scale(1.15);
+          box-shadow: 0 4px 16px rgba(232,84,26,.25);
+          border-color: #F5C8B8;
         }
 
-        .hw-tab { transition: all 0.18s ease; }
-        .hw-tab:hover { transform: translateY(-1px); }
-
-        .hw-icon-btn {
-          width: 32px; height: 32px; border-radius: 10px;
-          border: none; background: transparent; cursor: pointer;
-          display: flex; align-items: center; justify-content: center;
-          transition: background 0.15s, color 0.15s;
-          color: #A89890;
-        }
-        .hw-icon-btn:hover { background: #F5EDE8; color: #6B5E54; }
-
-        .hw-scroll::-webkit-scrollbar       { width: 3px; }
+        .hw-scroll::-webkit-scrollbar { width: 4px; }
         .hw-scroll::-webkit-scrollbar-track { background: transparent; }
-        .hw-scroll::-webkit-scrollbar-thumb { background: rgba(232,84,26,.18); border-radius: 3px; }
-        .hw-scroll::-webkit-scrollbar-thumb:hover { background: rgba(232,84,26,.36); }
+        .hw-scroll::-webkit-scrollbar-thumb { background: rgba(232,84,26,.15); border-radius: 4px; }
+        .hw-scroll::-webkit-scrollbar-thumb:hover { background: rgba(232,84,26,.3); }
 
-        .hw-font-slider {
-          -webkit-appearance: none; width: 100%; height: 3px;
-          border-radius: 2px; outline: none; cursor: pointer;
-          background: linear-gradient(to right, #E8541A calc((var(--val) - 11) / 6 * 100%), #EAE0D9 calc((var(--val) - 11) / 6 * 100%));
+        .hw-font-slider { -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px; outline: none; cursor: pointer;
+          background: linear-gradient(to right, #E8541A calc((var(--val) - 11) / 6 * 100%), #F0E4DF calc((var(--val) - 11) / 6 * 100%));
         }
-        .hw-font-slider::-webkit-slider-thumb {
-          -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
-          background: #E8541A; border: 2px solid #fff;
-          box-shadow: 0 1px 6px rgba(232,84,26,.4); cursor: pointer; transition: transform 0.14s;
-        }
-        .hw-font-slider::-webkit-slider-thumb:hover { transform: scale(1.18); }
-        .hw-font-slider::-moz-range-thumb {
-          width: 14px; height: 14px; border-radius: 50%;
-          background: #E8541A; border: 2px solid #fff; cursor: pointer;
-        }
+        .hw-font-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, #E8541A, #F07040); border: 2.5px solid #fff; box-shadow: 0 2px 8px rgba(232,84,26,.4); cursor: pointer; transition: transform 0.15s; }
+        .hw-font-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        .hw-font-slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, #E8541A, #F07040); border: 2.5px solid #fff; cursor: pointer; }
+
+        .hw-tab { transition: all 0.2s cubic-bezier(.34,1.56,.64,1); }
+        .hw-tab:hover { transform: translateY(-2px); }
 
         @media (max-width: 380px) {
-          .hw-panel { width: 320px !important; height: 500px !important; border-radius: 16px !important; }
+          .hw-panel {
+            width: 340px !important;
+            height: 520px !important;
+            border-radius: 16px !important;
+          }
         }
       `}</style>
 
       <div className="hw-root" style={{
-        position: "fixed", bottom: 20, right: 20, zIndex: 99999,
-        display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 12,
+        position: "fixed", bottom: 24, right: 24, zIndex: 99999,
+        display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 16,
       }}>
 
-        {/* ── Chat panel ── */}
+        {/* Chat panel */}
         {isOpen && (
-          <div style={{ animation: "hw-chat-open 0.38s cubic-bezier(.34,1.56,.64,1)" }}>
+          <div style={{ animation: "hw-chat-open 0.4s cubic-bezier(.34,1.56,.64,1)" }}>
             <div className="hw-panel" style={{
-              width: 348,
-              height: "min(580px, calc(100vh - 110px))",
-              borderRadius: 22,
-              background: "#F5F1EE",
-              boxShadow: "0 20px 56px rgba(0,0,0,.13), 0 6px 20px rgba(0,0,0,.07), 0 0 0 1px rgba(0,0,0,.05)",
-              display: "flex", flexDirection: "column",
-              overflow: "hidden",
+              width: 340,
+              height: "min(540px, calc(100vh - 120px))",
               position: "relative",
+              overflow: "hidden",
+              maxWidth: "calc(100vw - 48px)",
+
+              borderRadius: 20,
+              background: "linear-gradient(180deg, #FFFFFF 0%, #FAFAF9 100%)",
+              boxShadow: "0 25px 60px rgba(0,0,0,.15), 0 10px 30px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04)",
+              display: "flex", flexDirection: "column",
+              border: "none",
             }}>
 
-              {/* ── Header ── */}
+              {/* Header */}
               <div style={{
-                background: "#fff",
-                padding: "0 14px 0 16px",
-                height: 68,
-                display: "flex", alignItems: "center", gap: 12,
-                flexShrink: 0,
-                position: "relative",
-                borderBottom: "1px solid #EAE0D9",
+                background: "linear-gradient(180deg, #FFFFFF 0%, #FDF9F7 100%)",
+                padding: "0 18px 0 20px",
+                height: 76,
+                display: "flex", alignItems: "center", gap: 14,
+                flexShrink: 0, position: "relative",
+                borderBottom: "1px solid rgba(232,84,26,0.08)",
               }}>
-                {/* Accent bar */}
+                {/* Top gradient bar */}
                 <div style={{
-                  position: "absolute", top: 0, left: 0, right: 0, height: 3,
+                  position: "absolute", top: 0, left: 0, right: 0, height: 4,
                   background: "linear-gradient(90deg, #E8541A 0%, #F5A07A 50%, #E8541A 100%)",
                   backgroundSize: "200% 100%",
-                  animation: "gs 3.5s ease infinite",
-                  borderRadius: "22px 22px 0 0",
+                  animation: "gradient-shift 3s ease infinite",
+                  borderRadius: "24px 24px 0 0",
                 }} />
+                <style>{`
+                  @keyframes gradient-shift {
+                    0%, 100% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                  }
+                `}</style>
 
-                {/* Avatar */}
+                {/* Logo/Mascot - hover to show sidebar */}
                 <div
                   onMouseEnter={() => setShowSidebar(true)}
-                  title="Яриа түүх"
+                  title="Яриа түүх харах"
                   style={{
-                    width: 48, height: 48, borderRadius: 13,
-                    background: "#FEF0EA",
-                    border: "1.5px solid #FDDCCC",
+                    width: 56, height: 56, borderRadius: 14,
+                    background: "linear-gradient(145deg, #FFF7ED, #FFEDD5)",
+                    border: "2.5px solid #FB923C",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0, overflow: "hidden", cursor: "pointer",
-                    transition: "border-color 0.2s, box-shadow 0.2s",
-                  }}
-                  onMouseOver={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
-                      ; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 3px rgba(232,84,26,.1)"
-                  }}
-                  onMouseOut={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "#FDDCCC"
-                      ; (e.currentTarget as HTMLElement).style.boxShadow = "none"
-                  }}
-                >
-                  <img src="/mascot.png" alt="AI" className="hw-mascot-float"
-                    style={{ width: 44, height: 44, borderRadius: 11, objectFit: "cover" }} />
+                    flexShrink: 0,
+                    boxShadow: "0 4px 16px rgba(251,146,60,.25)",
+                    overflow: "hidden",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    padding: 0,
+                  }}>
+                  <img
+                    src="/mascot.png"
+                    alt="AI Assistant"
+                    className="hw-mascot-float"
+                    style={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: 12,
+                      objectFit: "cover",
+                    }}
+                  />
                 </div>
 
-                {/* Title */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                    <span style={{ fontSize: 14.5, fontWeight: 700, color: "#1C1008", letterSpacing: "-0.2px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ color: "#111", fontWeight: 700, fontSize: 15, letterSpacing: "-0.3px" }}>
                       hire.mn
                     </span>
                     <span style={{
-                      fontSize: 9, fontWeight: 700, letterSpacing: "0.6px",
-                      color: "#fff", background: "#E8541A",
-                      padding: "2px 7px", borderRadius: 20,
+                      fontSize: 10, fontWeight: 700, letterSpacing: "0.5px",
+                      color: "#fff",
+                      background: "linear-gradient(135deg, #E8541A, #F07040)",
+                      padding: "3px 8px", borderRadius: 20,
+                      textTransform: "uppercase",
+                      boxShadow: "0 2px 6px rgba(232,84,26,.25)",
                     }}>AI</span>
                   </div>
                   <div style={{
-                    fontSize: 11, color: "#A89890", marginTop: 3,
-                    display: "flex", alignItems: "center", gap: 5,
+                    color: "#9CA3AF", fontSize: 11.5, marginTop: 4,
+                    display: "flex", alignItems: "center", gap: 6,
                   }}>
                     <span style={{
-                      width: 6, height: 6, borderRadius: "50%",
-                      background: "#22C55E", display: "inline-block",
-                      animation: "hw-status-pulse 2.5s ease-in-out infinite",
+                      width: 7, height: 7, borderRadius: "50%",
+                      background: "linear-gradient(135deg, #22C55E, #4ADE80)",
+                      display: "inline-block", flexShrink: 0,
+                      boxShadow: "0 0 8px rgba(34,197,94,.5)",
                     }} />
-                    Онлайн
+                    Online
                   </div>
+
+                  {/* Message counter - compact pill */}
                 </div>
 
-                {/* Actions */}
-                <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
                   <button
-                    className="hw-icon-btn"
                     onClick={() => setShowFontSlider(s => !s)}
                     title="Үсгийн хэмжээ"
                     style={{
-                      background: showFontSlider ? "#FEF0EA" : "transparent",
-                      color: showFontSlider ? "#E8541A" : "#A89890",
+                      width: 32, height: 32, borderRadius: 10,
+                      background: showFontSlider ? "linear-gradient(135deg, #FEF3EE, #FFE8DC)" : "transparent",
+                      border: `1.5px solid ${showFontSlider ? "#FDDCCC" : "transparent"}`,
+                      color: showFontSlider ? "#E8541A" : "#9CA3AF",
+                      cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "all .18s",
                     }}
                   >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                       <path d="M4 20h4M6 20V7M14 20h4M16 20V4" />
                     </svg>
                   </button>
 
                   <button
-                    className="hw-icon-btn"
                     onClick={() => setLang(l => l === "МН" ? "EN" : "МН")}
-                    style={{ width: "auto", padding: "0 8px", fontSize: 10.5, fontWeight: 600 }}
+                    style={{
+                      height: 32, paddingLeft: 10, paddingRight: 10, borderRadius: 10,
+                      background: "transparent", border: "1.5px solid transparent",
+                      color: "#9CA3AF", fontSize: 11, fontWeight: 600, cursor: "pointer",
+                      transition: "all .18s",
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.background = "#F5F5F5"
+                        ; (e.currentTarget as HTMLElement).style.color = "#333"
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.background = "transparent"
+                        ; (e.currentTarget as HTMLElement).style.color = "#9CA3AF"
+                    }}
                   >
                     {lang === "МН" ? "EN" : "МН"}
                   </button>
 
                   <button
-                    className="hw-icon-btn"
                     onClick={() => setIsOpen(false)}
-                    onMouseOver={e => {
+                    style={{
+                      width: 32, height: 32, borderRadius: 10,
+                      background: "transparent", border: "1.5px solid transparent",
+                      color: "#9CA3AF", cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "all .18s",
+                    }}
+                    onMouseEnter={e => {
                       (e.currentTarget as HTMLElement).style.background = "#FEF2F2"
                         ; (e.currentTarget as HTMLElement).style.color = "#EF4444"
                     }}
-                    onMouseOut={e => {
+                    onMouseLeave={e => {
                       (e.currentTarget as HTMLElement).style.background = "transparent"
-                        ; (e.currentTarget as HTMLElement).style.color = "#A89890"
+                        ; (e.currentTarget as HTMLElement).style.color = "#9CA3AF"
                     }}
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
                       <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
               </div>
 
-              {/* ── Font slider ── */}
+              {/* Font slider */}
               {showFontSlider && (
                 <div style={{
-                  background: "#fff", borderBottom: "1px solid #EAE0D9",
-                  padding: "10px 16px", flexShrink: 0,
-                  display: "flex", alignItems: "center", gap: 10,
+                  background: "linear-gradient(180deg, #FAFAFA, #F8F6F5)", borderBottom: "1px solid #F0EBE7",
+                  padding: "12px 18px", flexShrink: 0,
+                  display: "flex", alignItems: "center", gap: 12,
                 }}>
-                  <span style={{ fontSize: 9.5, color: "#A89890", fontWeight: 600, minWidth: 16 }}>A</span>
+                  <span style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 600, minWidth: 18 }}>A</span>
                   <input
                     type="range" min={11} max={17} step={1}
                     value={fontSize}
@@ -1549,29 +1602,23 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     className="hw-font-slider"
                     style={{ "--val": fontSize } as React.CSSProperties}
                   />
-                  <span style={{ fontSize: 15, color: "#A89890", fontWeight: 600, minWidth: 14 }}>A</span>
-                  <span style={{ fontSize: 10, color: "#C0B4AC", minWidth: 28, textAlign: "right" }}>{fontSize}px</span>
+                  <span style={{ fontSize: 16, color: "#9CA3AF", fontWeight: 600, minWidth: 14 }}>A</span>
+                  <span style={{ fontSize: 10, color: "#C0B0A8", minWidth: 30, textAlign: "right" }}>{fontSize}px</span>
                 </div>
               )}
 
-              {/* ── Messages ── */}
+              {/* Messages */}
               <div className="hw-scroll" style={{
-                flex: 1, overflowY: "auto",
-                padding: "14px 12px 8px",
-                display: "flex", flexDirection: "column", gap: 10,
-                background: "#F5F1EE",
+                flex: 1, overflowY: "auto", padding: "16px 14px 10px",
+                display: "flex", flexDirection: "column", gap: 12,
+                background: "linear-gradient(180deg, #FAFAFA 0%, #F8F6F5 100%)",
               }}>
-                {/* Date divider */}
-                <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "2px 0 4px" }}>
-                  <div style={{ flex: 1, height: "1px", background: "#E0D6CF" }} />
-                  <span style={{ fontSize: 10, color: "#C0B4AC", fontWeight: 500, whiteSpace: "nowrap" }}>Өнөөдөр</span>
-                  <div style={{ flex: 1, height: "1px", background: "#E0D6CF" }} />
-                </div>
-
                 {messages.map((msg, i) => {
+                  // Өмнөх хэрэглэгчийн асуултыг олох (feedback-д ашиглах)
                   const prevUserMsg = msg.role === "assistant" && i > 0
                     ? messages.slice(0, i).reverse().find(m => m.role === "user")?.content || ""
                     : ""
+
                   return (
                     <div key={i} className="hw-msg">
                       {msg.role === "assistant"
@@ -1588,27 +1635,26 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   </div>
                 )}
 
-                {/* Quick replies */}
                 {showQuickReplies && !isTyping && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 4, paddingLeft: 40 }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
                     {QUICK_REPLIES.map((qr, i) => (
                       <button
                         key={qr.text}
                         className="hw-chip"
                         onClick={() => sendMessage(qr.text)}
                         style={{
-                          background: "#fff",
-                          border: "1.5px solid #FDDCCC",
-                          color: "#E8541A",
-                          borderRadius: 20, padding: "6px 13px",
-                          fontSize: fontSize - 1.5, fontWeight: 600,
+                          background: "linear-gradient(135deg, #E8541A, #F07040)",
+                          border: "none",
+                          color: "#fff",
+                          borderRadius: 22, padding: "8px 14px",
+                          fontSize: fontSize - 1, fontWeight: 600,
                           cursor: "pointer", whiteSpace: "nowrap",
-                          animation: `hw-chip-in 0.32s cubic-bezier(.34,1.56,.64,1) ${i * 0.07}s both`,
-                          display: "flex", alignItems: "center", gap: 5,
-                          boxShadow: "0 1px 4px rgba(0,0,0,.05)",
+                          animation: `hw-chip-in 0.35s cubic-bezier(.34,1.56,.64,1) ${i * 0.08}s both`,
+                          boxShadow: "0 4px 12px rgba(232,84,26,.25)",
+                          display: "flex", alignItems: "center", gap: 6,
                         }}
                       >
-                        <span style={{ fontSize: fontSize }}>{qr.icon}</span>
+                        <span style={{ fontSize: fontSize + 1 }}>{qr.icon}</span>
                         {qr.text}
                       </button>
                     ))}
@@ -1618,19 +1664,17 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* ── Input area ── */}
+              {/* Input */}
               <div style={{
-                background: "#fff",
-                borderTop: "1px solid #EAE0D9",
-                padding: "10px 12px 12px",
-                flexShrink: 0,
+                padding: "10px 12px 12px", borderTop: "1px solid #EAE0D9",
+                background: "#fff", flexShrink: 0,
               }}>
+
                 <div style={{
-                  display: "flex", gap: 8, alignItems: "flex-end",
-                  background: "#F5F1EE",
-                  border: "1.5px solid #EAE0D9",
-                  borderRadius: 16, padding: "8px 8px 8px 12px",
-                  transition: "border-color 0.18s, box-shadow 0.18s",
+                  display: "flex", gap: 8, alignItems: "center",
+                  background: "#F5F1EE", border: "1.5px solid #EAE0D9",
+                  borderRadius: 14, padding: "0 6px 0 14px", height: 46,
+                  transition: "border-color .18s, box-shadow .18s",
                 }}
                   onFocusCapture={e => {
                     (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
@@ -1641,21 +1685,15 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       ; (e.currentTarget as HTMLElement).style.boxShadow = "none"
                   }}
                 >
-                  <textarea
-                    ref={inputRef}
+                  <input
+                    ref={inputRef as any}
                     value={input}
-                    onChange={e => {
-                      setInput(e.target.value)
-                      e.target.style.height = "auto"
-                      e.target.style.height = Math.min(e.target.scrollHeight, 86) + "px"
-                    }}
+                    onChange={e => setInput(e.target.value)}
                     onKeyDown={handleKey}
                     placeholder="Асуулт бичнэ үү..."
-                    rows={1}
                     style={{
                       flex: 1, border: "none", background: "transparent",
-                      padding: "2px 0", fontSize: fontSize, outline: "none",
-                      resize: "none", maxHeight: 86, lineHeight: 1.55,
+                      fontSize: fontSize, outline: "none",
                       color: "#1C1008",
                     }}
                   />
@@ -1664,53 +1702,57 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     onClick={() => sendMessage(input)}
                     disabled={!input.trim() || isTyping}
                     style={{
-                      width: 38, height: 38, borderRadius: 12, flexShrink: 0,
+                      width: 36, height: 36, borderRadius: 10,
                       background: input.trim() && !isTyping ? "#E8541A" : "#E0D4CC",
                       border: "none",
                       cursor: input.trim() && !isTyping ? "pointer" : "not-allowed",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      transition: "all .18s",
+                      flexShrink: 0, transition: "all .18s",
                     }}
                   >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="22" y1="2" x2="11" y2="13" />
                       <polygon points="22 2 15 22 11 13 2 9 22 2" fill="white" stroke="none" />
                     </svg>
                   </button>
                 </div>
 
-                {/* Remaining messages warning */}
+                {/* Warning - shows when 10 or less remaining */}
                 {getRemainingMessages() <= 10 && getRemainingMessages() > 0 && (
                   <div style={{
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    gap: 5, marginTop: 8, padding: "6px 10px", borderRadius: 8,
-                    background: getRemainingMessages() <= 3 ? "#FEF2F2" : "#FFFBEB",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                    marginTop: 10,
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    backgroundColor: getRemainingMessages() <= 3 ? "#FEF2F2" : "#FFFBEB",
                     border: `1px solid ${getRemainingMessages() <= 3 ? "#FECACA" : "#FDE68A"}`,
                   }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                      stroke={getRemainingMessages() <= 3 ? "#DC2626" : "#D97706"} strokeWidth="2">
-                      <circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" />
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={getRemainingMessages() <= 3 ? "#DC2626" : "#D97706"} strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 8v4M12 16h.01" />
                     </svg>
                     <span style={{
-                      fontSize: 11.5, fontWeight: 500,
+                      fontSize: 12,
+                      fontWeight: 500,
                       color: getRemainingMessages() <= 3 ? "#DC2626" : "#92400E",
                     }}>
-                      {getRemainingMessages()} асуулт үлдсэн
+                      Танд {getRemainingMessages()} асуулт асуух эрх үлдсэн байна
                     </span>
                   </div>
                 )}
 
-                <div style={{
-                  textAlign: "center", marginTop: 8,
-                  fontSize: 9.5, color: "#C0B4AC", fontWeight: 500,
-                  letterSpacing: "0.3px",
-                }}>
+                <div style={{ textAlign: "center", marginTop: 10, fontSize: 10, color: "#D1C4BE", fontWeight: 500 }}>
                   hire.mn AI
                 </div>
               </div>
 
-              {/* Popups */}
+              {/* Usage Limit Popup */}
               {isUserLocked() && <UsageLimitPopup />}
+
+              {/* Sidebar Overlay */}
               {showSidebar && (
                 <ConversationSidebar
                   activeId={conversation?.id}
@@ -1720,41 +1762,57 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   isVisible={showSidebar}
                 />
               )}
+
             </div>
           </div>
         )}
 
-        {/* ── Mascot / trigger button ── */}
-        <div style={{
-          display: "flex", alignItems: "flex-end",
-          justifyContent: "flex-end", gap: 10, padding: 8,
-        }}>
-          {/* Tooltip */}
+        {/* Mascot button */}
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", gap: 12, padding: 10 }}>
           {isHovered && !isOpen && (
             <div style={{
-              animation: "hw-tooltip-in 0.18s ease-out",
-              background: "#1C1008",
-              borderRadius: 12, padding: "10px 14px",
-              boxShadow: "0 8px 24px rgba(0,0,0,.22)",
-              maxWidth: 190, pointerEvents: "none", position: "relative",
+              animation: "hw-tooltip-in 0.2s ease-out",
+              background: "linear-gradient(135deg, #1A1A1A, #2D2D2D)",
+              borderRadius: 14,
+              padding: "12px 16px",
+              boxShadow: "0 10px 30px rgba(0,0,0,.2)",
+              maxWidth: 200, pointerEvents: "none", position: "relative",
             }}>
-              <div style={{ fontSize: 12.5, fontWeight: 700, color: "#fff", marginBottom: 3 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 4 }}>
                 hire.mn Туслагч
               </div>
-              <div style={{ fontSize: 11.5, color: "rgba(255,255,255,.55)", lineHeight: 1.5 }}>
-                Тест сонгох, мэргэжлийн зөвлөгөө
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,.6)", lineHeight: 1.5 }}>
+                Тест сонгох, мэргэжлийн зөвлөгөө авах
               </div>
               <div style={{
-                position: "absolute", right: -6, top: "50%", transform: "translateY(-50%)",
+                position: "absolute", right: -7, top: "50%", transform: "translateY(-50%)",
                 width: 0, height: 0,
-                borderTop: "6px solid transparent",
-                borderBottom: "6px solid transparent",
-                borderLeft: "6px solid #1C1008",
+                borderTop: "7px solid transparent",
+                borderBottom: "7px solid transparent",
+                borderLeft: "7px solid #1A1A1A",
               }} />
             </div>
           )}
+          {!isOpen && (
+            <>
+              <div style={{
+                position: "absolute", bottom: 10, right: 10, pointerEvents: "none",
+                width: 85, height: 85, borderRadius: "50%",
+                background: "rgba(232,84,26,.2)",
 
-          {/* Button */}
+              }} />
+              <div style={{
+                position: "absolute", bottom: 10, right: 10, pointerEvents: "none",
+                width: 85, height: 85, borderRadius: "50%",
+                background: "rgba(232,84,26,.12)",
+
+
+              }} />
+            </>
+          )}
+
+
+
           <button
             className="hw-mascot"
             onClick={() => setIsOpen(o => !o)}
@@ -1762,9 +1820,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             onMouseLeave={() => setIsHovered(false)}
             aria-label="hire.mn чат нээх"
             style={{
-              width: 64, height: 64, borderRadius: "50%",
-              background: "#fff",
-              border: "2.5px solid #E8541A",
+              width: 100, height: 100, borderRadius: "50%",
+              background: "#FFFFFF",
+              border: "4px solid #E8541A",
               cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0, position: "relative",
@@ -1772,34 +1830,39 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             }}
           >
             <div style={{
-              transition: "transform 0.36s cubic-bezier(.34,1.56,.64,1), opacity 0.18s",
-              transform: isOpen ? "rotate(180deg) scale(0.88)" : "rotate(0deg) scale(1)",
-              width: 60, height: 60, borderRadius: "50%",
+              transition: "transform 0.4s cubic-bezier(.34,1.56,.64,1), opacity 0.2s",
+              transform: isOpen ? "rotate(180deg) scale(0.9)" : "rotate(0deg) scale(1)",
+              width: 120, height: 120, borderRadius: "50%",
               display: "flex", alignItems: "center", justifyContent: "center",
               overflow: "hidden",
             }}>
               {isOpen ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
               ) : (
                 <img
                   src="/mascot.png"
-                  alt="hire.mn AI"
+                  alt="AI Assistant"
                   className="hw-mascot-bounce"
-                  style={{ width: 46, height: 46, borderRadius: "50%", objectFit: "cover" }}
+                  style={{
+                    width: 110,
+                    height: 110,
+                    borderRadius: "30%",
+                    objectFit: "cover",
+                    objectPosition: "center top",
+                  }}
                 />
               )}
             </div>
-
-            {/* Online dot */}
             {!isOpen && (
               <span style={{
-                position: "absolute", bottom: 1, right: 1,
-                width: 13, height: 13, borderRadius: "50%",
-                background: "#22C55E",
-                border: "2.5px solid #fff",
-                boxShadow: "0 0 8px rgba(34,197,94,.5)",
+                position: "absolute", bottom: 3, right: 3,
+                width: 15, height: 15, borderRadius: "50%",
+                background: "linear-gradient(135deg, #22C55E, #4ADE80)",
+                border: "3px solid #fff",
+                boxShadow: "0 0 10px rgba(34,197,94,.6)",
+                animation: "typing-bounce 2s ease-in-out infinite",
               }} />
             )}
           </button>
