@@ -17,6 +17,21 @@
 
   // Button size with padding for shadow/pulse effects
   var BUTTON_SIZE = "140px";
+  // Tooltip
+  var tooltip = document.createElement("div");
+  tooltip.innerHTML = '<strong style="display:block;margin-bottom:4px">hire.mn Туслагч</strong>Тест сонгох, мэргэжлийн зөвлөгөө авах<div style="position:absolute;right:-7px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:7px solid #1A1A1A"></div>';
+  Object.assign(tooltip.style, {
+    position: "fixed", bottom: "148px", right: "20px",
+    background: "linear-gradient(135deg,#1A1A1A,#2D2D2D)",
+    color: "#fff", padding: "12px 16px", borderRadius: "14px",
+    fontSize: "13px", lineHeight: "1.6", maxWidth: "200px",
+    pointerEvents: "none", opacity: "0",
+    transition: "opacity 0.2s ease, transform 0.2s ease",
+    transform: "translateX(8px)", zIndex: "2147483646",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+    fontFamily: "-apple-system,BlinkMacSystemFont,sans-serif",
+  });
+  document.body.appendChild(tooltip);
 
   // ── Wrapper div (fixed, bottom-right) ────────────────────────────────────
   var wrapper = document.createElement("div");
