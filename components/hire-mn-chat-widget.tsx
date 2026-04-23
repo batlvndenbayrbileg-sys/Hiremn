@@ -962,16 +962,18 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const [showSidebar, setShowSidebar] = useState(false)
 
   // Notify parent window of open/close state for iframe resizing
+  // ✅ ЗӨВ — 2 тусдаа useEffect
   useEffect(() => {
     if (typeof window !== 'undefined' && window.parent !== window) {
       window.parent.postMessage({ type: 'HIREMN_RESIZE', isOpen }, '*')
-      useEffect(() => {
-        if (typeof window !== 'undefined' && window.parent !== window) {
-          window.parent.postMessage({ type: 'HIREMN_HOVER', isHovered, isOpen }, '*')
-        }
-      }, [isHovered, isOpen])
     }
   }, [isOpen])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.parent !== window) {
+      window.parent.postMessage({ type: 'HIREMN_HOVER', isHovered, isOpen }, '*')
+    }
+  }, [isHovered, isOpen])
   const [conversation, setConversation] = useState<Conversation | null>(null)
   const messageCountRef = useRef(0)
   const [messages, setMessages] = useState<Message[]>(() => {
