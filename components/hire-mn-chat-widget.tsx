@@ -1175,7 +1175,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           const data = await res.json()
           setMessages(prev => [...prev, {
             role: "assistant",
-            content: "**Төлбөртэй тестүүд**\n\nМэргэжлийн судлаачдын боловсруулсан гүнзгий шинжилгээ, дэлгэрэнгүй тайлантай тестүүд. Төлбөрийг **QPay**-ээр төлөх боломжтой.",
+            content: "**Төлбөртэй тестүүд**\n\nМэргэжлийн судлаачдын боловсруулсан мэргэжлийн шинжилгээ, дэлгэрэнгүй тайлантай тестүүд. Төлбөрийг **QPay**-ээр төлөх боломжтой.",
             tests: data.tests || [],
             categories: ["paid"],
           }])
