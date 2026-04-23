@@ -16,7 +16,7 @@
   }
 
   // Button size with padding for shadow/pulse effects
-  var BUTTON_SIZE = "160px";
+  var BUTTON_SIZE = "140px";
 
   // ── Wrapper div (fixed, bottom-right) ────────────────────────────────────
   var wrapper = document.createElement("div");

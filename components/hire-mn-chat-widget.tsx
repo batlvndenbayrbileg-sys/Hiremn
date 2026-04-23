@@ -973,7 +973,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     const initialMessages: Message[] = [
       {
         role: "assistant",
-        content: "Сайн байна уу!\n\nБи hire.mn AI туслагч. Та надаас:\n\n- **Тест санал болгох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар туслана",
+        content: "Сайн байна уу!\n\nБи hire.mn AI туслагч. Та надаас:\n\n- **Тест санал болгох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэрг��жлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар туслана",
       },
     ]
 
@@ -1461,16 +1461,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   onMouseEnter={() => setShowSidebar(true)}
                   title="Яриа түүх харах"
                   style={{
-                    width: 48, height: 48, borderRadius: 12,
-                    background: showSidebar
-                      ? "linear-gradient(145deg, #FFF7ED, #FFEDD5)"
-                      : "linear-gradient(145deg, #FEF3EE, #FFE8DC)",
-                    border: showSidebar ? "2px solid #FB923C" : "2px solid #FDDCCC",
+                    width: 56, height: 56, borderRadius: 14,
+                    background: "linear-gradient(145deg, #FFF7ED, #FFEDD5)",
+                    border: "2.5px solid #FB923C",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     flexShrink: 0,
-                    boxShadow: showSidebar
-                      ? "0 4px 16px rgba(251,146,60,.3)"
-                      : "0 4px 12px rgba(232,84,26,.15)",
+                    boxShadow: "0 4px 16px rgba(251,146,60,.25)",
                     overflow: "hidden",
                     cursor: "pointer",
                     transition: "all 0.2s ease",
@@ -1481,9 +1477,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     alt="AI Assistant"
                     className="hw-mascot-float"
                     style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 10,
+                      width: 52,
+                      height: 52,
+                      borderRadius: 12,
                       objectFit: "cover",
                     }}
                   />
@@ -1821,24 +1817,24 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             onMouseLeave={() => setIsHovered(false)}
             aria-label="hire.mn чат нээх"
             style={{
-              width: 85, height: 85, borderRadius: "50%",
+              width: 100, height: 100, borderRadius: "50%",
               background: "linear-gradient(145deg, #FF6535 0%, #E8541A 50%, #D44810 100%)",
-              border: "3.5px solid rgba(255,255,255,.98)",
+              border: "4px solid rgba(255,255,255,.98)",
               cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0, position: "relative",
-              boxShadow: "0 10px 30px rgba(232,84,26,.45), inset 0 2px 0 rgba(255,255,255,.2)",
+              boxShadow: "0 12px 40px rgba(232,84,26,.5), inset 0 2px 0 rgba(255,255,255,.2)",
             }}
           >
             <div style={{
               transition: "transform 0.4s cubic-bezier(.34,1.56,.64,1), opacity 0.2s",
               transform: isOpen ? "rotate(180deg) scale(0.9)" : "rotate(0deg) scale(1)",
-              width: 81, height: 81, borderRadius: "50%",
+              width: 96, height: 96, borderRadius: "50%",
               display: "flex", alignItems: "center", justifyContent: "center",
               overflow: "hidden",
             }}>
               {isOpen ? (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
               ) : (
@@ -1847,8 +1843,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   alt="AI Assistant"
                   className="hw-mascot-bounce"
                   style={{
-                    width: 60,
-                    height: 60,
+                    width: 72,
+                    height: 72,
                     borderRadius: "30%",
                     objectFit: "cover",
                     objectPosition: "center top",
