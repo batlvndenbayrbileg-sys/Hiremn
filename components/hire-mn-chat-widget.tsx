@@ -1379,7 +1379,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           will-change: transform;
         }
         .hw-mascot:hover {
-         box-shadow: 0 10px 30px rgba(232,84,26,.4) !important;
+         box-shadow: none !important;
           
         }
         .hw-mascot:active { transform: scale(0.94); }
@@ -1850,8 +1850,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   alt="AI Assistant"
                   className="hw-mascot-bounce"
                   style={{
-                    width: 72,
-                    height: 72,
+                    width: 96,
+                    height: 96,
                     borderRadius: "30%",
                     objectFit: "cover",
                     objectPosition: "center top",
