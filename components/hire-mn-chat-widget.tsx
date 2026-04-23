@@ -1824,7 +1824,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             onMouseLeave={() => setIsHovered(false)}
             aria-label="hire.mn чат нээх"
             style={{
-              width: 100, height: 100, borderRadius: "50%",
+              width: 150, height: 150, borderRadius: "50%",
               background: "#FFFFFF",
               border: "4px solid #E8541A",
               cursor: "pointer",
