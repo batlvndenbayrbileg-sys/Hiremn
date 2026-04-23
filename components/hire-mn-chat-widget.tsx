@@ -1825,8 +1825,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             aria-label="hire.mn чат нээх"
             style={{
               width: 100, height: 100, borderRadius: "50%",
-              background: "linear-gradient(145deg, #FF6535 0%, #E8541A 50%, #D44810 100%)",
-              border: "4px solid rgba(255,255,255,.98)",
+              background: "#FFFFFF",
+              border: "4px solid #E8541A",
               cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0, position: "relative",
