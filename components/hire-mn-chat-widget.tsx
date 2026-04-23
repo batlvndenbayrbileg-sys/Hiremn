@@ -1850,8 +1850,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   alt="AI Assistant"
                   className="hw-mascot-bounce"
                   style={{
-                    width: 120,
-                    height: 120,
+                    width: 110,
+                    height: 110,
                     borderRadius: "30%",
                     objectFit: "cover",
                     objectPosition: "center top",
