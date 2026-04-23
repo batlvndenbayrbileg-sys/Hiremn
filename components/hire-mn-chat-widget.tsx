@@ -196,7 +196,7 @@ function BrainAvatar() {
       flexShrink: 0,
       boxShadow: "0 2px 8px rgba(232,84,26,0.12)",
     }}>
-      <img src="/mascot.jpg" alt="AI" style={{ width: 22, height: 22, borderRadius: 6, objectFit: "cover" }} />
+      <img src="/mascot.png" alt="AI" className="hw-mascot-float" style={{ width: 26, height: 26, borderRadius: 6, objectFit: "cover" }} />
     </div>
   )
 }
@@ -1275,6 +1275,35 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           from { opacity: 0; transform: translateX(10px) scale(0.95); }
           to   { opacity: 1; transform: translateX(0) scale(1); }
         }
+        
+        /* Mascot animations */
+        @keyframes hw-mascot-bounce {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-6px) scale(1.02); }
+        }
+        @keyframes hw-mascot-float {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          25% { transform: translateY(-3px) rotate(-2deg); }
+          50% { transform: translateY(-5px) rotate(0deg); }
+          75% { transform: translateY(-3px) rotate(2deg); }
+        }
+        @keyframes hw-mascot-wave {
+          0%, 100% { transform: rotate(0deg); }
+          20% { transform: rotate(15deg); }
+          40% { transform: rotate(-10deg); }
+          60% { transform: rotate(15deg); }
+          80% { transform: rotate(-5deg); }
+        }
+        .hw-mascot-bounce {
+          animation: hw-mascot-bounce 2s ease-in-out infinite;
+        }
+        .hw-mascot-float {
+          animation: hw-mascot-float 3s ease-in-out infinite;
+        }
+        .hw-mascot-wave {
+          animation: hw-mascot-wave 1.5s ease-in-out infinite;
+        }
+        
         @keyframes wave-hand {
           0%, 100% { transform: rotate(0deg); }
           25% { transform: rotate(20deg); }
@@ -1448,11 +1477,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     padding: 0,
                   }}>
                   <img
-                    src="/mascot.jpg"
+                    src="/mascot.png"
                     alt="AI Assistant"
+                    className="hw-mascot-float"
                     style={{
-                      width: 40,
-                      height: 40,
+                      width: 44,
+                      height: 44,
                       borderRadius: 10,
                       objectFit: "cover",
                     }}
@@ -1813,14 +1843,15 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 </svg>
               ) : (
                 <img
-                  src="/mascot.jpg"
+                  src="/mascot.png"
                   alt="AI Assistant"
+                  className="hw-mascot-bounce"
                   style={{
-                    width: 51,
-                    height: 51,
+                    width: 60,
+                    height: 60,
                     borderRadius: "30%",
                     objectFit: "cover",
-                    objectPosition: "center",
+                    objectPosition: "center top",
                   }}
                 />
               )}
