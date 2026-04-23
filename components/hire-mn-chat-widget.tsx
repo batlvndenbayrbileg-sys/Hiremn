@@ -1836,7 +1836,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             <div style={{
               transition: "transform 0.4s cubic-bezier(.34,1.56,.64,1), opacity 0.2s",
               transform: isOpen ? "rotate(180deg) scale(0.9)" : "rotate(0deg) scale(1)",
-              width: 96, height: 96, borderRadius: "50%",
+              width: 120, height: 120, borderRadius: "50%",
               display: "flex", alignItems: "center", justifyContent: "center",
               overflow: "hidden",
             }}>
