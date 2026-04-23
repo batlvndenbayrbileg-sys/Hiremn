@@ -1378,10 +1378,10 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           
           will-change: transform;
         }
-        .hw-mascot:hover {
-         box-shadow: none !important;
-          
-        }
+       .hw-mascot:hover {
+  box-shadow: none !important;
+  background: #FFFFFF !important;
+}
         .hw-mascot:active { transform: scale(0.94); }
 
         .hw-arrow {
