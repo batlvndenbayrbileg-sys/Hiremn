@@ -1157,7 +1157,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           const data = await res.json()
           setMessages(prev => [...prev, {
             role: "assistant",
-            content: "**Үнэүй тестүүд**\n\nТа эдгээр тестүүдийг ямар ч төлбөргүйгээр өгч, өөрийн талаар илүү ихийг мэдэж авах боломжтой:",
+            content: "**Үнэүй тестүүд**\n\nТа эдгээр тестүүдийг ямар ч төлбөргүйгээр өгч, өөрийнхөө талаар илүү ихийг мэдэж авах боломжтой:",
             tests: data.tests || [],
             categories: ["free"],
           }])
