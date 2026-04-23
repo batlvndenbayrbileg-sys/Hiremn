@@ -965,6 +965,11 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   useEffect(() => {
     if (typeof window !== 'undefined' && window.parent !== window) {
       window.parent.postMessage({ type: 'HIREMN_RESIZE', isOpen }, '*')
+      useEffect(() => {
+        if (typeof window !== 'undefined' && window.parent !== window) {
+          window.parent.postMessage({ type: 'HIREMN_HOVER', isHovered, isOpen }, '*')
+        }
+      }, [isHovered, isOpen])
     }
   }, [isOpen])
   const [conversation, setConversation] = useState<Conversation | null>(null)
