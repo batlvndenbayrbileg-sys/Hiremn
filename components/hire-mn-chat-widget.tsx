@@ -962,6 +962,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const [showFontSlider, setShowFontSlider] = useState(false)
   const [showSidebar, setShowSidebar] = useState(false)
   const [activeTab, setActiveTab] = useState(0) // 0: Chat, 1: FAQs, 2: Contact
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null) // FAQ accordion state
 
   // Notify parent window of open/close state for iframe resizing
   // ✅ ЗӨВ — 2 тусдаа useEffect
@@ -982,7 +983,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     const initialMessages: Message[] = [
       {
         role: "assistant",
-        content: "Сайн байна уу!\n\nБи бол hire.mn-ы AI туслагч. Та надаас:\n\n- **Тест санал бол��ох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар зөвлөгөө авах боломжтой.",
+        content: "Сайн байна уу!\n\nБи бол hire.mn-ы AI туслагч. Та надаас:\n\n- **Тест санал бол����ох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар зөвлөгөө авах боломжтой.",
       },
     ]
 
@@ -1336,26 +1337,53 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           100% { background-position: 200% 0; }
         }
         
-        /* New creative animations */
+        /* Liquid Glass Futuristic Animations */
         @keyframes hw-float {
           0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-8px) scale(1.02); }
+          50% { transform: translateY(-10px) scale(1.03); }
         }
         @keyframes hw-ring {
-          0% { transform: scale(1); opacity: 0.6; }
-          100% { transform: scale(1.5); opacity: 0; }
+          0% { transform: scale(1); opacity: 0.7; }
+          100% { transform: scale(1.8); opacity: 0; }
         }
         @keyframes hw-online-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
-          50% { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+          50% { box-shadow: 0 0 0 10px rgba(34,197,94,0); }
         }
         @keyframes hw-msg-in {
-          from { transform: translateY(15px) scale(0.95); opacity: 0; }
-          to { transform: translateY(0) scale(1); opacity: 1; }
+          from { transform: translateY(20px) scale(0.92); opacity: 0; filter: blur(4px); }
+          to { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
         }
         @keyframes hw-glow {
-          0%, 100% { box-shadow: 0 0 20px rgba(232,84,26,0.3); }
-          50% { box-shadow: 0 0 40px rgba(232,84,26,0.5); }
+          0%, 100% { box-shadow: 0 0 30px rgba(232,84,26,0.3); }
+          50% { box-shadow: 0 0 60px rgba(232,84,26,0.5); }
+        }
+        @keyframes hw-aurora {
+          0%, 100% { transform: rotate(0deg) scale(1); }
+          25% { transform: rotate(5deg) scale(1.05); }
+          50% { transform: rotate(0deg) scale(1.1); }
+          75% { transform: rotate(-5deg) scale(1.05); }
+        }
+        @keyframes hw-orb {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+          33% { transform: translate(10px, -15px) scale(1.1); opacity: 0.7; }
+          66% { transform: translate(-5px, 10px) scale(0.95); opacity: 0.4; }
+        }
+        @keyframes hw-grid-move {
+          0% { transform: translate(0, 0); }
+          100% { transform: translate(20px, 20px); }
+        }
+        @keyframes hw-pulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.2); opacity: 0.8; }
+        }
+        @keyframes hw-mascot-glow {
+          0%, 100% { box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 0 40px rgba(255,200,150,0.2); }
+          50% { box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 0 60px rgba(255,200,150,0.4); }
+        }
+        @keyframes hw-shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
         }
 
         .hw-msg { animation: hw-pop 0.4s cubic-bezier(.34,1.56,.64,1) both; }
@@ -1448,102 +1476,175 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
         {/* Chat panel */}
         {isOpen && (
-          <div style={{ animation: "hw-chat-open 0.4s cubic-bezier(.34,1.56,.64,1)" }}>
+          <div style={{ animation: "hw-chat-open 0.5s cubic-bezier(.22,1,.36,1)" }}>
+            {/* Liquid Glass Morphism Panel */}
             <div className="hw-panel" style={{
-              width: 380,
-              height: "min(620px, calc(100vh - 100px))",
+              width: 420,
+              height: "min(720px, calc(100vh - 80px))",
               position: "relative",
               overflow: "hidden",
-              maxWidth: "calc(100vw - 48px)",
-
-              borderRadius: 28,
-              background: "linear-gradient(180deg, #FFF9F5 0%, #FFFFFF 100%)",
-              boxShadow: "0 25px 80px rgba(232,84,26,.15), 0 10px 40px rgba(0,0,0,.08), 0 0 0 1px rgba(232,84,26,.08)",
+              maxWidth: "calc(100vw - 32px)",
+              borderRadius: 32,
+              /* Liquid Glass Effect */
+              background: "linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,250,245,0.9) 50%, rgba(255,245,238,0.85) 100%)",
+              backdropFilter: "blur(40px) saturate(180%)",
+              WebkitBackdropFilter: "blur(40px) saturate(180%)",
+              boxShadow: `
+                0 0 0 1px rgba(255,255,255,0.8),
+                0 0 0 2px rgba(232,84,26,0.08),
+                0 30px 100px -20px rgba(232,84,26,0.25),
+                0 50px 150px -30px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.9),
+                inset 0 -1px 0 rgba(232,84,26,0.05)
+              `,
               display: "flex", flexDirection: "column",
               border: "none",
             }}>
-
-              {/* Header - Warm gradient with glassmorphism */}
+              {/* Animated Aurora Background */}
               <div style={{
-                background: "linear-gradient(135deg, #FF8C42 0%, #E8541A 50%, #D64000 100%)",
-                padding: "20px 20px 16px 20px",
-                flexShrink: 0, position: "relative",
-                borderRadius: "28px 28px 0 0",
-                overflow: "hidden",
+                position: "absolute", inset: 0, overflow: "hidden", borderRadius: 32,
+                pointerEvents: "none", zIndex: 0,
               }}>
-                {/* Animated background circles */}
                 <div style={{
-                  position: "absolute", top: -30, right: -30, width: 100, height: 100,
-                  borderRadius: "50%", background: "rgba(255,255,255,0.1)",
-                  animation: "hw-float 6s ease-in-out infinite",
+                  position: "absolute", top: "-50%", left: "-50%", width: "200%", height: "200%",
+                  background: `
+                    radial-gradient(ellipse at 20% 20%, rgba(255,140,66,0.15) 0%, transparent 50%),
+                    radial-gradient(ellipse at 80% 80%, rgba(232,84,26,0.1) 0%, transparent 50%),
+                    radial-gradient(ellipse at 50% 50%, rgba(255,200,150,0.08) 0%, transparent 60%)
+                  `,
+                  animation: "hw-aurora 15s ease-in-out infinite",
                 }} />
+              </div>
+
+              {/* Futuristic Header */}
+              <div style={{
+                background: "linear-gradient(135deg, rgba(232,84,26,0.95) 0%, rgba(255,107,61,0.9) 50%, rgba(255,140,66,0.85) 100%)",
+                backdropFilter: "blur(20px)",
+                padding: "24px 24px 20px 24px",
+                flexShrink: 0, position: "relative",
+                borderRadius: "32px 32px 0 0",
+                overflow: "hidden",
+                borderBottom: "1px solid rgba(255,255,255,0.2)",
+              }}>
+                {/* Holographic grid overlay */}
                 <div style={{
-                  position: "absolute", bottom: -20, left: 40, width: 60, height: 60,
-                  borderRadius: "50%", background: "rgba(255,255,255,0.08)",
-                  animation: "hw-float 8s ease-in-out infinite reverse",
+                  position: "absolute", inset: 0, opacity: 0.1,
+                  backgroundImage: `
+                    linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+                  `,
+                  backgroundSize: "20px 20px",
+                  animation: "hw-grid-move 20s linear infinite",
                 }} />
                 
-                {/* Top row - Mascot, title, close */}
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16, position: "relative", zIndex: 1 }}>
+                {/* Floating orbs */}
+                <div style={{
+                  position: "absolute", top: -40, right: -20, width: 120, height: 120,
+                  borderRadius: "50%", 
+                  background: "radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)",
+                  animation: "hw-orb 8s ease-in-out infinite",
+                  filter: "blur(2px)",
+                }} />
+                <div style={{
+                  position: "absolute", bottom: -30, left: 20, width: 80, height: 80,
+                  borderRadius: "50%",
+                  background: "radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%)",
+                  animation: "hw-orb 10s ease-in-out infinite reverse",
+                  filter: "blur(1px)",
+                }} />
+                
+                {/* Header content */}
+                <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20, position: "relative", zIndex: 1 }}>
+                  {/* Glowing mascot container */}
                   <div style={{
-                    width: 52, height: 52, borderRadius: 16,
-                    background: "rgba(255,255,255,0.95)",
+                    width: 58, height: 58, borderRadius: 18,
+                    background: "rgba(255,255,255,0.98)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    boxShadow: "0 4px 20px rgba(0,0,0,.15)",
+                    boxShadow: `
+                      0 8px 32px rgba(0,0,0,0.15),
+                      0 0 40px rgba(255,200,150,0.3),
+                      inset 0 1px 0 rgba(255,255,255,1)
+                    `,
                     overflow: "hidden",
-                    animation: "hw-mascot-float 3s ease-in-out infinite",
+                    animation: "hw-mascot-glow 3s ease-in-out infinite",
+                    border: "2px solid rgba(255,255,255,0.5)",
                   }}>
-                    <img src="/mascot.png" alt="AI" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 12 }} />
+                    <img src="/mascot.png" alt="AI" style={{ 
+                      width: 50, height: 50, objectFit: "cover", borderRadius: 14,
+                      animation: "hw-mascot-float 4s ease-in-out infinite",
+                    }} />
                   </div>
                   
                   <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ color: "#fff", fontWeight: 700, fontSize: 17, textShadow: "0 2px 8px rgba(0,0,0,.15)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ 
+                        color: "#fff", fontWeight: 800, fontSize: 19, 
+                        textShadow: "0 2px 12px rgba(0,0,0,0.2)",
+                        letterSpacing: "-0.5px",
+                      }}>
                         hire.mn AI
                       </span>
                       <span style={{
-                        fontSize: 9, fontWeight: 700, letterSpacing: "0.5px",
-                        color: "#E8541A", background: "#fff",
-                        padding: "3px 8px", borderRadius: 12,
+                        fontSize: 9, fontWeight: 700, letterSpacing: "1px",
+                        color: "#E8541A", 
+                        background: "linear-gradient(135deg, #fff 0%, #FFF5EE 100%)",
+                        padding: "4px 10px", borderRadius: 20,
                         textTransform: "uppercase",
-                      }}>Online</span>
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                        display: "flex", alignItems: "center", gap: 4,
+                      }}>
+                        <span style={{
+                          width: 6, height: 6, borderRadius: "50%",
+                          background: "#22C55E",
+                          boxShadow: "0 0 8px #22C55E",
+                          animation: "hw-pulse 2s ease-in-out infinite",
+                        }} />
+                        Online
+                      </span>
                     </div>
-                    <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 12, marginTop: 4 }}>
-                      Танд туслахад бэлэн
+                    <div style={{ 
+                      color: "rgba(255,255,255,0.9)", fontSize: 13, marginTop: 6,
+                      fontWeight: 500,
+                    }}>
+                      24/7 танд туслахад бэлэн
                     </div>
                   </div>
                   
                   <button
                     onClick={() => setIsOpen(false)}
                     style={{
-                      width: 36, height: 36, borderRadius: 12,
-                      background: "rgba(255,255,255,0.2)", border: "none",
+                      width: 40, height: 40, borderRadius: 14,
+                      background: "rgba(255,255,255,0.15)", 
+                      border: "1px solid rgba(255,255,255,0.3)",
                       backdropFilter: "blur(10px)",
                       color: "#fff", cursor: "pointer",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
+                      transition: "all 0.4s cubic-bezier(.22,1,.36,1)",
                     }}
                     onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.35)"
-                      ; (e.currentTarget as HTMLElement).style.transform = "scale(1.1) rotate(90deg)"
+                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.3)"
+                      ; (e.currentTarget as HTMLElement).style.transform = "scale(1.1) rotate(180deg)"
+                      ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(0,0,0,0.15)"
                     }}
                     onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.2)"
+                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.15)"
                       ; (e.currentTarget as HTMLElement).style.transform = "scale(1) rotate(0deg)"
+                      ; (e.currentTarget as HTMLElement).style.boxShadow = "none"
                     }}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                       <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
 
-                {/* Tab navigation - pill style */}
+                {/* Futuristic Tab navigation */}
                 <div style={{
-                  display: "flex", gap: 6,
-                  background: "rgba(0,0,0,0.15)", borderRadius: 14, padding: 4,
+                  display: "flex", gap: 8,
+                  background: "rgba(0,0,0,0.12)", borderRadius: 16, padding: 5,
                   backdropFilter: "blur(10px)",
                   position: "relative", zIndex: 1,
+                  border: "1px solid rgba(255,255,255,0.1)",
                 }}>
                   {[
                     { label: "Чат", icon: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" },
@@ -1554,18 +1655,23 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       key={tab.label}
                       onClick={() => setActiveTab(i)}
                       style={{
-                        flex: 1, padding: "10px 12px", borderRadius: 10,
-                        background: activeTab === i ? "rgba(255,255,255,0.95)" : "transparent",
-                        border: "none", cursor: "pointer",
-                        color: activeTab === i ? "#E8541A" : "rgba(255,255,255,0.8)",
-                        fontSize: 12, fontWeight: 600,
-                        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                        transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
-                        boxShadow: activeTab === i ? "0 4px 15px rgba(0,0,0,.1)" : "none",
-                        transform: activeTab === i ? "scale(1.02)" : "scale(1)",
+                        flex: 1, padding: "12px 14px", borderRadius: 12,
+                        background: activeTab === i 
+                          ? "linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,250,245,0.95) 100%)" 
+                          : "transparent",
+                        border: activeTab === i ? "1px solid rgba(255,255,255,0.5)" : "1px solid transparent",
+                        cursor: "pointer",
+                        color: activeTab === i ? "#E8541A" : "rgba(255,255,255,0.85)",
+                        fontSize: 13, fontWeight: 600,
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                        transition: "all 0.4s cubic-bezier(.22,1,.36,1)",
+                        boxShadow: activeTab === i 
+                          ? "0 8px 24px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,1)" 
+                          : "none",
+                        transform: activeTab === i ? "translateY(-2px)" : "translateY(0)",
                       }}
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d={tab.icon} />
                       </svg>
                       {tab.label}
@@ -1667,81 +1773,151 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               )}
 
               {activeTab === 1 && (
-                /* FAQs Tab - Warm themed */
+                /* FAQs Tab - Liquid Glass Accordion */
                 <div className="hw-scroll" style={{
-                  flex: 1, overflowY: "auto", padding: "20px 16px",
-                  background: "linear-gradient(180deg, #FFFBF8 0%, #FFFFFF 100%)",
+                  flex: 1, overflowY: "auto", padding: "24px 20px",
+                  background: "transparent",
+                  position: "relative", zIndex: 1,
                 }}>
+                  {/* FAQ Header */}
                   <div style={{ 
-                    display: "flex", alignItems: "center", gap: 10, marginBottom: 20,
-                    padding: "14px 16px", background: "linear-gradient(135deg, #FFF5EE 0%, #FFE8DC 100%)",
-                    borderRadius: 16, border: "1px solid rgba(232,84,26,0.1)",
+                    display: "flex", alignItems: "center", gap: 14, marginBottom: 24,
+                    padding: "18px 20px", 
+                    background: "linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,250,245,0.8) 100%)",
+                    backdropFilter: "blur(20px)",
+                    borderRadius: 20, 
+                    border: "1px solid rgba(255,255,255,0.6)",
+                    boxShadow: "0 8px 32px rgba(232,84,26,0.1), inset 0 1px 0 rgba(255,255,255,0.8)",
                   }}>
                     <div style={{
-                      width: 40, height: 40, borderRadius: 12,
+                      width: 48, height: 48, borderRadius: 14,
                       background: "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)",
                       display: "flex", alignItems: "center", justifyContent: "center",
+                      boxShadow: "0 4px 16px rgba(232,84,26,0.3)",
                     }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
                         <circle cx="12" cy="12" r="10" />
                         <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
                       </svg>
                     </div>
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: "#333" }}>Түгээмэл асуултууд</div>
-                      <div style={{ fontSize: 12, color: "#888" }}>Дарж асуултаа илгээнэ үү</div>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: "#333", letterSpacing: "-0.3px" }}>Түгээмэл асуултууд</div>
+                      <div style={{ fontSize: 13, color: "#888", marginTop: 2 }}>Асуултаа сонгоод хариултыг нь үзнэ үү</div>
                     </div>
                   </div>
                   
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {/* FAQ Accordion */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     {[
-                      { q: "Hire.mn гэж юу вэ?", icon: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" },
-                      { q: "Тест өгөхөд төлбөртэй юу?", icon: "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2" },
-                      { q: "Үр дүнгээ хэрхэн харах вэ?", icon: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" },
-                      { q: "Компани хэрхэн бүртгүүлэх вэ?", icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" },
-                      { q: "Тестийн төрлүүд юу юу байдаг вэ?", icon: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" },
+                      { 
+                        q: "Hire.mn гэж юу вэ?", 
+                        a: "Hire.mn бол Монголын анхны AI-д суурилсан ажил горилогч болон ажил олгогчдыг холбосон платформ юм. Бид мэргэжлийн тест, ур чадварын үнэлгээ зэргээр таныг тохирох ажлын байртай холбоно.",
+                        icon: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" 
+                      },
+                      { 
+                        q: "Тест өгөхөд төлбөртэй юу?", 
+                        a: "Үгүй, ихэнх тестүүд бүрэн үнэгүй. Зарим нэмэлт функц, дэлгэрэнгүй тайлан авахад төлбөртэй сонголтууд байдаг боловч үндсэн тестүүд бүгд үнэгүй.",
+                        icon: "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2" 
+                      },
+                      { 
+                        q: "Үр дүнгээ хэрхэн харах вэ?", 
+                        a: "Тест дуусмагц таны үр дүн шууд гарна. Профайл хэсэгт орж бүх үр дүнгээ харах, татаж авах, хуваалцах боломжтой. Мөн и-мэйлээр илгээх боломжтой.",
+                        icon: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" 
+                      },
+                      { 
+                        q: "Компани хэрхэн бүртгүүлэх вэ?", 
+                        a: "hire.mn вэбсайтад орж \"Компани бүртгүүлэх\" товч дарна уу. Компанийн мэдээллээ оруулаад баталгаажуулах процессыг дуусгана. 24 цагийн дотор хянагдаж баталгаажна.",
+                        icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" 
+                      },
+                      { 
+                        q: "Тестийн төрлүүд юу юу байдаг вэ?", 
+                        a: "IQ тест, EQ тест, зан чанарын тест, мэргэжлийн ур чадварын тест, хэлний түвшин тодорхойлох тест гэх мэт 50+ төрлийн тест байдаг. Та өөрт тохирох тестүүдийг сонгон өгч болно.",
+                        icon: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" 
+                      },
+                      { 
+                        q: "Үнэлгээний систем хэрхэн ажилладаг вэ?", 
+                        a: "AI алгоритм таны хариултуудыг дүн шинжилгээ хийж, олон улсын стандарт болон Монголын статистик дата-тай харьцуулан үнэлдэг. Үр дүн нь 95%+ нарийвчлалтай.",
+                        icon: "M12 20V10M18 20V4M6 20v-4" 
+                      },
                     ].map((faq, i) => (
-                      <button
+                      <div
                         key={i}
-                        onClick={() => { setActiveTab(0); sendMessage(faq.q); }}
                         style={{
-                          width: "100%", textAlign: "left",
-                          background: "#fff", 
-                          border: "1.5px solid rgba(232,84,26,0.12)",
-                          borderRadius: 16, padding: "14px 16px",
-                          color: "#333", fontSize: 14, fontWeight: 500,
-                          cursor: "pointer",
-                          display: "flex", alignItems: "center", gap: 12,
-                          transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
-                          boxShadow: "0 2px 8px rgba(232,84,26,0.05)",
-                          animation: `hw-msg-in 0.4s cubic-bezier(.34,1.56,.64,1) ${i * 0.08}s both`,
-                        }}
-                        onMouseEnter={e => {
-                          (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
-                          ; (e.currentTarget as HTMLElement).style.transform = "translateX(4px)"
-                          ; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(232,84,26,0.12)"
-                        }}
-                        onMouseLeave={e => {
-                          (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.12)"
-                          ; (e.currentTarget as HTMLElement).style.transform = "translateX(0)"
-                          ; (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 8px rgba(232,84,26,0.05)"
+                          background: expandedFaq === i 
+                            ? "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,250,245,0.9) 100%)"
+                            : "linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,250,245,0.7) 100%)",
+                          backdropFilter: "blur(20px)",
+                          border: expandedFaq === i 
+                            ? "1.5px solid rgba(232,84,26,0.3)" 
+                            : "1.5px solid rgba(255,255,255,0.6)",
+                          borderRadius: 18, 
+                          overflow: "hidden",
+                          transition: "all 0.4s cubic-bezier(.22,1,.36,1)",
+                          boxShadow: expandedFaq === i 
+                            ? "0 12px 40px rgba(232,84,26,0.15), inset 0 1px 0 rgba(255,255,255,0.9)"
+                            : "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+                          animation: `hw-msg-in 0.5s cubic-bezier(.22,1,.36,1) ${i * 0.08}s both`,
                         }}
                       >
+                        <button
+                          onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
+                          style={{
+                            width: "100%", textAlign: "left",
+                            background: "transparent", border: "none",
+                            padding: "16px 18px",
+                            color: "#333", fontSize: 14, fontWeight: 600,
+                            cursor: "pointer",
+                            display: "flex", alignItems: "center", gap: 14,
+                            transition: "all 0.3s",
+                          }}
+                        >
+                          <div style={{
+                            width: 38, height: 38, borderRadius: 12,
+                            background: expandedFaq === i 
+                              ? "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)"
+                              : "linear-gradient(135deg, rgba(232,84,26,0.1) 0%, rgba(255,140,66,0.1) 100%)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            flexShrink: 0,
+                            transition: "all 0.4s cubic-bezier(.22,1,.36,1)",
+                            boxShadow: expandedFaq === i ? "0 4px 12px rgba(232,84,26,0.3)" : "none",
+                          }}>
+                            <svg 
+                              width="18" height="18" viewBox="0 0 24 24" fill="none" 
+                              stroke={expandedFaq === i ? "#fff" : "#E8541A"} 
+                              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                            >
+                              <path d={faq.icon} />
+                            </svg>
+                          </div>
+                          <span style={{ flex: 1, lineHeight: 1.4 }}>{faq.q}</span>
+                          <div style={{
+                            width: 28, height: 28, borderRadius: 8,
+                            background: expandedFaq === i ? "rgba(232,84,26,0.1)" : "transparent",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            transition: "all 0.4s cubic-bezier(.22,1,.36,1)",
+                            transform: expandedFaq === i ? "rotate(180deg)" : "rotate(0deg)",
+                          }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
+                              <path d="M6 9l6 6 6-6" />
+                            </svg>
+                          </div>
+                        </button>
+                        
+                        {/* Answer - Animated dropdown */}
                         <div style={{
-                          width: 32, height: 32, borderRadius: 10,
-                          background: "linear-gradient(135deg, #FFF5EE 0%, #FFE8DC 100%)",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          flexShrink: 0,
+                          maxHeight: expandedFaq === i ? "200px" : "0px",
+                          opacity: expandedFaq === i ? 1 : 0,
+                          overflow: "hidden",
+                          transition: "all 0.4s cubic-bezier(.22,1,.36,1)",
                         }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8541A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d={faq.icon} />
-                          </svg>
+                          <div style={{
+                            padding: "0 18px 18px 70px",
+                            fontSize: 13, lineHeight: 1.7, color: "#666",
+                          }}>
+                            {faq.a}
+                          </div>
                         </div>
-                        <span style={{ flex: 1 }}>{faq.q}</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8541A" strokeWidth="2" strokeLinecap="round">
-                          <path d="M9 18l6-6-6-6" />
-                        </svg>
-                      </button>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -1950,22 +2126,24 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           </div>
         )}
 
-        {/* Mascot button - Creative warm design */}
+        {/* Futuristic Liquid Glass Mascot Button */}
         {!isOpen && (
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", gap: 12, padding: 10 }}>
-          {/* Pulsing background rings */}
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", gap: 12, padding: 16 }}>
           <div style={{ position: "relative" }}>
+            {/* Outer glow rings */}
             <div style={{
-              position: "absolute", inset: -8,
-              borderRadius: 32, 
-              background: "rgba(232,84,26,0.15)",
-              animation: "hw-ring 2.5s ease-out infinite",
+              position: "absolute", inset: -12,
+              borderRadius: 36, 
+              background: "linear-gradient(135deg, rgba(232,84,26,0.2), rgba(255,140,66,0.15))",
+              animation: "hw-ring 3s ease-out infinite",
+              filter: "blur(4px)",
             }} />
             <div style={{
-              position: "absolute", inset: -4,
-              borderRadius: 30,
-              background: "rgba(232,84,26,0.1)",
-              animation: "hw-ring 2.5s ease-out 0.5s infinite",
+              position: "absolute", inset: -6,
+              borderRadius: 34,
+              background: "linear-gradient(135deg, rgba(232,84,26,0.15), rgba(255,107,61,0.1))",
+              animation: "hw-ring 3s ease-out 0.6s infinite",
+              filter: "blur(2px)",
             }} />
             
             <button
@@ -1975,38 +2153,67 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               onMouseLeave={() => setIsHovered(false)}
               aria-label="hire.mn чат нээх"
               style={{
-                height: 56, 
-                borderRadius: 28,
-                background: "linear-gradient(135deg, #E8541A 0%, #FF6B3D 50%, #FF8C42 100%)",
-                border: "3px solid rgba(255,255,255,0.9)",
+                height: 60, 
+                borderRadius: 30,
+                /* Liquid Glass Effect */
+                background: `linear-gradient(135deg, 
+                  rgba(232,84,26,0.95) 0%, 
+                  rgba(255,107,61,0.9) 50%, 
+                  rgba(255,140,66,0.85) 100%
+                )`,
+                backdropFilter: "blur(20px)",
+                border: "2px solid rgba(255,255,255,0.4)",
                 cursor: "pointer",
-                display: "flex", alignItems: "center", gap: 12,
-                paddingLeft: 6, paddingRight: 20,
+                display: "flex", alignItems: "center", gap: 14,
+                paddingLeft: 8, paddingRight: 24,
                 flexShrink: 0, position: "relative",
                 boxShadow: isHovered 
-                  ? "0 12px 40px rgba(232,84,26,0.5), 0 4px 15px rgba(0,0,0,0.1)"
-                  : "0 8px 30px rgba(232,84,26,0.35), 0 4px 10px rgba(0,0,0,0.08)",
-                transition: "all 0.4s cubic-bezier(.34,1.56,.64,1)",
-                transform: isHovered ? "scale(1.05) translateY(-3px)" : "scale(1) translateY(0)",
+                  ? `
+                    0 20px 60px rgba(232,84,26,0.5), 
+                    0 8px 25px rgba(0,0,0,0.12),
+                    inset 0 1px 0 rgba(255,255,255,0.4),
+                    0 0 40px rgba(255,140,66,0.3)
+                  `
+                  : `
+                    0 12px 40px rgba(232,84,26,0.35), 
+                    0 4px 15px rgba(0,0,0,0.1),
+                    inset 0 1px 0 rgba(255,255,255,0.3)
+                  `,
+                transition: "all 0.5s cubic-bezier(.22,1,.36,1)",
+                transform: isHovered ? "scale(1.08) translateY(-4px)" : "scale(1) translateY(0)",
+                overflow: "hidden",
               }}
             >
-              {/* Mascot avatar with glow */}
+              {/* Inner shimmer effect */}
               <div style={{
-                width: 44, height: 44, borderRadius: "50%",
-                background: "#fff",
+                position: "absolute", inset: 0,
+                background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)",
+                backgroundSize: "200% 100%",
+                animation: isHovered ? "hw-shimmer 1.5s ease-in-out infinite" : "none",
+              }} />
+              
+              {/* Mascot avatar with glass effect */}
+              <div style={{
+                width: 46, height: 46, borderRadius: 16,
+                background: "linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,250,245,0.95) 100%)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                boxShadow: `
+                  0 4px 16px rgba(0,0,0,0.12),
+                  inset 0 1px 0 rgba(255,255,255,1)
+                `,
                 overflow: "hidden",
-                transition: "transform 0.4s cubic-bezier(.34,1.56,.64,1)",
-                transform: isHovered ? "rotate(-10deg) scale(1.1)" : "rotate(0) scale(1)",
+                transition: "all 0.5s cubic-bezier(.22,1,.36,1)",
+                transform: isHovered ? "rotate(-8deg) scale(1.1)" : "rotate(0) scale(1)",
+                border: "1px solid rgba(255,255,255,0.5)",
+                position: "relative",
+                zIndex: 1,
               }}>
                 <img
                   src="/mascot.png"
                   alt="AI Assistant"
                   style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
+                    width: 40, height: 40,
+                    borderRadius: 12,
                     objectFit: "cover",
                   }}
                 />
@@ -2014,22 +2221,25 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               
               <span style={{
                 color: "#fff",
-                fontSize: 14,
-                fontWeight: 600,
-                textShadow: "0 2px 4px rgba(0,0,0,0.15)",
-                letterSpacing: "-0.2px",
+                fontSize: 15,
+                fontWeight: 700,
+                textShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                letterSpacing: "-0.3px",
+                position: "relative",
+                zIndex: 1,
               }}>
-                Тусламж авах
+                Тусламж хэрэгтэй юу?
               </span>
               
-              {/* Online indicator with pulse */}
+              {/* Online indicator with enhanced pulse */}
               <span style={{
-                position: "absolute", bottom: 2, left: 42,
+                position: "absolute", bottom: 4, left: 46,
                 width: 14, height: 14, borderRadius: "50%",
-                background: "linear-gradient(135deg, #22C55E, #4ADE80)",
-                border: "3px solid #fff",
-                boxShadow: "0 0 0 0 rgba(34,197,94,0.4)",
+                background: "linear-gradient(135deg, #22C55E 0%, #4ADE80 100%)",
+                border: "2.5px solid rgba(255,255,255,0.9)",
+                boxShadow: "0 0 12px rgba(34,197,94,0.6)",
                 animation: "hw-online-pulse 2s ease-in-out infinite",
+                zIndex: 2,
               }} />
             </button>
           </div>
