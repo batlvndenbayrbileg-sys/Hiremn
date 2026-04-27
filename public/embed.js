@@ -15,9 +15,9 @@
     return;
   }
 
-  // Button size - pill shaped button needs more width
-  var BUTTON_SIZE = "200px";
-  var BUTTON_HEIGHT = "80px";
+  // Button size - pill shaped button with pulse ring space
+  var BUTTON_SIZE = "220px";
+  var BUTTON_HEIGHT = "90px";
 
   // ── Wrapper div (fixed, bottom-right) ────────────────────────────────────
   var wrapper = document.createElement("div");
@@ -74,21 +74,21 @@
           iframe.style.width = "100%";
           iframe.style.height = "100%";
         } else {
-          wrapper.style.width = "380px";
-          wrapper.style.height = "720px";
-          wrapper.style.bottom = "12px";
-          wrapper.style.right = "12px";
+          wrapper.style.width = "400px";
+          wrapper.style.height = "700px";
+          wrapper.style.bottom = "16px";
+          wrapper.style.right = "16px";
           wrapper.style.left = "auto";
           wrapper.style.top = "auto";
-          iframe.style.width = "380px";
-          iframe.style.height = "720px";
+          iframe.style.width = "400px";
+          iframe.style.height = "700px";
         }
       } else {
-        // Closed - pill button size
+        // Closed - pill button with pulse ring space
         wrapper.style.width = BUTTON_SIZE;
         wrapper.style.height = BUTTON_HEIGHT;
-        wrapper.style.bottom = "12px";
-        wrapper.style.right = "12px";
+        wrapper.style.bottom = "16px";
+        wrapper.style.right = "16px";
         wrapper.style.left = "auto";
         wrapper.style.top = "auto";
         iframe.style.width = BUTTON_SIZE;

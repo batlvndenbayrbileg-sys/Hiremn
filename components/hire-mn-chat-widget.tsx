@@ -982,7 +982,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     const initialMessages: Message[] = [
       {
         role: "assistant",
-        content: "Сайн байна уу!\n\nБи бол hire.mn-ы AI туслагч. Та надаас:\n\n- **Тест санал болгох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар зөвлөгөө авах боломжтой.",
+        content: "Сайн байна уу!\n\nБи бол hire.mn-ы AI туслагч. Та надаас:\n\n- **Тест санал бол��ох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар зөвлөгөө авах боломжтой.",
       },
     ]
 
@@ -1335,6 +1335,28 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }
         }
+        
+        /* New creative animations */
+        @keyframes hw-float {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-8px) scale(1.02); }
+        }
+        @keyframes hw-ring {
+          0% { transform: scale(1); opacity: 0.6; }
+          100% { transform: scale(1.5); opacity: 0; }
+        }
+        @keyframes hw-online-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+          50% { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+        }
+        @keyframes hw-msg-in {
+          from { transform: translateY(15px) scale(0.95); opacity: 0; }
+          to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        @keyframes hw-glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(232,84,26,0.3); }
+          50% { box-shadow: 0 0 40px rgba(232,84,26,0.5); }
+        }
 
         .hw-msg { animation: hw-pop 0.4s cubic-bezier(.34,1.56,.64,1) both; }
 
@@ -1429,67 +1451,126 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           <div style={{ animation: "hw-chat-open 0.4s cubic-bezier(.34,1.56,.64,1)" }}>
             <div className="hw-panel" style={{
               width: 380,
-              height: "min(600px, calc(100vh - 120px))",
+              height: "min(620px, calc(100vh - 100px))",
               position: "relative",
               overflow: "hidden",
               maxWidth: "calc(100vw - 48px)",
 
-              borderRadius: 16,
-              background: "#fff",
-              boxShadow: "0 25px 60px rgba(0,0,0,.2), 0 10px 30px rgba(0,0,0,.1)",
+              borderRadius: 28,
+              background: "linear-gradient(180deg, #FFF9F5 0%, #FFFFFF 100%)",
+              boxShadow: "0 25px 80px rgba(232,84,26,.15), 0 10px 40px rgba(0,0,0,.08), 0 0 0 1px rgba(232,84,26,.08)",
               display: "flex", flexDirection: "column",
               border: "none",
             }}>
 
-              {/* Header - Dark PeachWeb style */}
+              {/* Header - Warm gradient with glassmorphism */}
               <div style={{
-                background: "#1a1a1a",
-                padding: "16px 20px 0 20px",
+                background: "linear-gradient(135deg, #FF8C42 0%, #E8541A 50%, #D64000 100%)",
+                padding: "20px 20px 16px 20px",
                 flexShrink: 0, position: "relative",
-                borderRadius: "20px 20px 0 0",
+                borderRadius: "28px 28px 0 0",
+                overflow: "hidden",
               }}>
-                {/* Tab navigation */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ display: "flex", gap: 24 }}>
-                    {["Чат", "Түгээмэл", "Холбоо"].map((tab, i) => (
-                      <button
-                        key={tab}
-                        onClick={() => setActiveTab(i)}
-                        style={{
-                          background: "none", border: "none", cursor: "pointer",
-                          color: activeTab === i ? "#fff" : "rgba(255,255,255,0.5)",
-                          fontSize: 14, fontWeight: 500, paddingBottom: 12,
-                          borderBottom: activeTab === i ? "2px solid #fff" : "2px solid transparent",
-                          transition: "all 0.2s",
-                        }}
-                      >
-                        {tab}
-                      </button>
-                    ))}
+                {/* Animated background circles */}
+                <div style={{
+                  position: "absolute", top: -30, right: -30, width: 100, height: 100,
+                  borderRadius: "50%", background: "rgba(255,255,255,0.1)",
+                  animation: "hw-float 6s ease-in-out infinite",
+                }} />
+                <div style={{
+                  position: "absolute", bottom: -20, left: 40, width: 60, height: 60,
+                  borderRadius: "50%", background: "rgba(255,255,255,0.08)",
+                  animation: "hw-float 8s ease-in-out infinite reverse",
+                }} />
+                
+                {/* Top row - Mascot, title, close */}
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16, position: "relative", zIndex: 1 }}>
+                  <div style={{
+                    width: 52, height: 52, borderRadius: 16,
+                    background: "rgba(255,255,255,0.95)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: "0 4px 20px rgba(0,0,0,.15)",
+                    overflow: "hidden",
+                    animation: "hw-mascot-float 3s ease-in-out infinite",
+                  }}>
+                    <img src="/mascot.png" alt="AI" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 12 }} />
+                  </div>
+                  
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ color: "#fff", fontWeight: 700, fontSize: 17, textShadow: "0 2px 8px rgba(0,0,0,.15)" }}>
+                        hire.mn AI
+                      </span>
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, letterSpacing: "0.5px",
+                        color: "#E8541A", background: "#fff",
+                        padding: "3px 8px", borderRadius: 12,
+                        textTransform: "uppercase",
+                      }}>Online</span>
+                    </div>
+                    <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 12, marginTop: 4 }}>
+                      Танд туслахад бэлэн
+                    </div>
                   </div>
                   
                   <button
                     onClick={() => setIsOpen(false)}
                     style={{
-                      width: 28, height: 28, borderRadius: 8,
-                      background: "rgba(255,255,255,0.1)", border: "none",
-                      color: "rgba(255,255,255,0.6)", cursor: "pointer",
+                      width: 36, height: 36, borderRadius: 12,
+                      background: "rgba(255,255,255,0.2)", border: "none",
+                      backdropFilter: "blur(10px)",
+                      color: "#fff", cursor: "pointer",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      transition: "all .18s",
+                      transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
                     }}
                     onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.2)"
-                      ; (e.currentTarget as HTMLElement).style.color = "#fff"
+                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.35)"
+                      ; (e.currentTarget as HTMLElement).style.transform = "scale(1.1) rotate(90deg)"
                     }}
                     onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.1)"
-                      ; (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.6)"
+                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.2)"
+                      ; (e.currentTarget as HTMLElement).style.transform = "scale(1) rotate(0deg)"
                     }}
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                       <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
                   </button>
+                </div>
+
+                {/* Tab navigation - pill style */}
+                <div style={{
+                  display: "flex", gap: 6,
+                  background: "rgba(0,0,0,0.15)", borderRadius: 14, padding: 4,
+                  backdropFilter: "blur(10px)",
+                  position: "relative", zIndex: 1,
+                }}>
+                  {[
+                    { label: "Чат", icon: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" },
+                    { label: "FAQ", icon: "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 16v-4M12 8h.01" },
+                    { label: "Холбоо", icon: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72" },
+                  ].map((tab, i) => (
+                    <button
+                      key={tab.label}
+                      onClick={() => setActiveTab(i)}
+                      style={{
+                        flex: 1, padding: "10px 12px", borderRadius: 10,
+                        background: activeTab === i ? "rgba(255,255,255,0.95)" : "transparent",
+                        border: "none", cursor: "pointer",
+                        color: activeTab === i ? "#E8541A" : "rgba(255,255,255,0.8)",
+                        fontSize: 12, fontWeight: 600,
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                        transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
+                        boxShadow: activeTab === i ? "0 4px 15px rgba(0,0,0,.1)" : "none",
+                        transform: activeTab === i ? "scale(1.02)" : "scale(1)",
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d={tab.icon} />
+                      </svg>
+                      {tab.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -1498,9 +1579,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 <>
                   {/* Chat Tab - Messages */}
                   <div className="hw-scroll" style={{
-                    flex: 1, overflowY: "auto", padding: "16px 14px 10px",
-                    display: "flex", flexDirection: "column", gap: 12,
-                    background: "#fff",
+                    flex: 1, overflowY: "auto", padding: "20px 16px 12px",
+                    display: "flex", flexDirection: "column", gap: 14,
+                    background: "linear-gradient(180deg, #FFFBF8 0%, #FFFFFF 100%)",
                   }}>
                     {messages.map((msg, i) => {
                       const prevUserMsg = msg.role === "assistant" && i > 0
@@ -1508,7 +1589,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         : ""
 
                       return (
-                        <div key={i} className="hw-msg">
+                        <div 
+                          key={i} 
+                          className="hw-msg"
+                          style={{
+                            animation: `hw-msg-in 0.4s cubic-bezier(.34,1.56,.64,1) ${i * 0.05}s both`,
+                          }}
+                        >
                           {msg.role === "assistant"
                             ? <BotMessage message={msg} fontSize={fontSize} userQuestion={prevUserMsg} />
                             : <UserMessage content={msg.content} fontSize={fontSize} />
@@ -1518,39 +1605,56 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     })}
 
                     {isTyping && (
-                      <div className="hw-msg">
+                      <div className="hw-msg" style={{ animation: "hw-msg-in 0.3s ease-out" }}>
                         <TypingIndicator />
                       </div>
                     )}
 
                     {showQuickReplies && !isTyping && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+                      <div style={{ 
+                        display: "flex", flexWrap: "wrap", gap: 10, marginTop: 12,
+                        padding: "16px",
+                        background: "linear-gradient(135deg, #FFF5EE 0%, #FFEFE5 100%)",
+                        borderRadius: 20,
+                        border: "1px solid rgba(232,84,26,0.1)",
+                      }}>
+                        <div style={{ 
+                          width: "100%", fontSize: 11, color: "#E8541A", fontWeight: 600, 
+                          marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.5px" 
+                        }}>
+                          Түргэн хариултууд
+                        </div>
                         {QUICK_REPLIES.map((qr, i) => (
                           <button
                             key={qr.text}
                             className="hw-chip"
                             onClick={() => sendMessage(qr.text)}
                             style={{
-                              background: "#fff",
-                              border: "1.5px solid #e5e5e5",
-                              color: "#333",
-                              borderRadius: 20, padding: "8px 16px",
-                              fontSize: fontSize - 1, fontWeight: 500,
+                              background: "linear-gradient(135deg, #FFFFFF 0%, #FFF9F5 100%)",
+                              border: "1.5px solid rgba(232,84,26,0.2)",
+                              color: "#E8541A",
+                              borderRadius: 24, padding: "10px 18px",
+                              fontSize: fontSize - 1, fontWeight: 600,
                               cursor: "pointer", whiteSpace: "nowrap",
-                              animation: `hw-chip-in 0.35s cubic-bezier(.34,1.56,.64,1) ${i * 0.08}s both`,
-                              boxShadow: "none",
-                              display: "flex", alignItems: "center", gap: 6,
-                              transition: "all 0.2s",
+                              animation: `hw-chip-in 0.4s cubic-bezier(.34,1.56,.64,1) ${i * 0.08}s both`,
+                              boxShadow: "0 4px 12px rgba(232,84,26,0.08)",
+                              display: "flex", alignItems: "center", gap: 8,
+                              transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
                             }}
                             onMouseEnter={e => {
-                              (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
-                              ; (e.currentTarget as HTMLElement).style.color = "#E8541A"
+                              (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)"
+                              ; (e.currentTarget as HTMLElement).style.color = "#fff"
+                              ; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px) scale(1.02)"
+                              ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 20px rgba(232,84,26,0.25)"
                             }}
                             onMouseLeave={e => {
-                              (e.currentTarget as HTMLElement).style.borderColor = "#e5e5e5"
-                              ; (e.currentTarget as HTMLElement).style.color = "#333"
+                              (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, #FFFFFF 0%, #FFF9F5 100%)"
+                              ; (e.currentTarget as HTMLElement).style.color = "#E8541A"
+                              ; (e.currentTarget as HTMLElement).style.transform = "translateY(0) scale(1)"
+                              ; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(232,84,26,0.08)"
                             }}
                           >
+                            <span style={{ fontSize: fontSize + 2 }}>{qr.icon}</span>
                             {qr.text}
                           </button>
                         ))}
@@ -1563,93 +1667,159 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               )}
 
               {activeTab === 1 && (
-                /* FAQs Tab */
+                /* FAQs Tab - Warm themed */
                 <div className="hw-scroll" style={{
                   flex: 1, overflowY: "auto", padding: "20px 16px",
-                  background: "#1a1a1a",
+                  background: "linear-gradient(180deg, #FFFBF8 0%, #FFFFFF 100%)",
                 }}>
-                  <h3 style={{ color: "#fff", fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
-                    Түгээмэл асуултууд
-                  </h3>
-                  {[
-                    "Hire.mn гэж юу вэ?",
-                    "Тест өгөхөд төлбөртэй юу?",
-                    "Үр дүнгээ хэрхэн харах вэ?",
-                    "Компани хэрхэн бүртгүүлэх вэ?",
-                    "Тестийн төрлүүд юу юу байдаг вэ?",
-                    "Үнэлгээний систем хэрхэн ажилладаг вэ?",
-                  ].map((faq, i) => (
-                    <button
-                      key={i}
-                      onClick={() => { setActiveTab(0); sendMessage(faq); }}
-                      style={{
-                        width: "100%", textAlign: "left",
-                        background: "transparent", border: "none",
-                        borderBottom: "1px solid rgba(255,255,255,0.1)",
-                        padding: "14px 0",
-                        color: "#fff", fontSize: 14,
-                        cursor: "pointer",
-                        display: "flex", justifyContent: "space-between", alignItems: "center",
-                      }}
-                    >
-                      <span>{faq}</span>
-                      <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 18 }}>+</span>
-                    </button>
-                  ))}
+                  <div style={{ 
+                    display: "flex", alignItems: "center", gap: 10, marginBottom: 20,
+                    padding: "14px 16px", background: "linear-gradient(135deg, #FFF5EE 0%, #FFE8DC 100%)",
+                    borderRadius: 16, border: "1px solid rgba(232,84,26,0.1)",
+                  }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 12,
+                      background: "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: "#333" }}>Түгээмэл асуултууд</div>
+                      <div style={{ fontSize: 12, color: "#888" }}>Дарж асуултаа илгээнэ үү</div>
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {[
+                      { q: "Hire.mn гэж юу вэ?", icon: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" },
+                      { q: "Тест өгөхөд төлбөртэй юу?", icon: "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2" },
+                      { q: "Үр дүнгээ хэрхэн харах вэ?", icon: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" },
+                      { q: "Компани хэрхэн бүртгүүлэх вэ?", icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" },
+                      { q: "Тестийн төрлүүд юу юу байдаг вэ?", icon: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" },
+                    ].map((faq, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { setActiveTab(0); sendMessage(faq.q); }}
+                        style={{
+                          width: "100%", textAlign: "left",
+                          background: "#fff", 
+                          border: "1.5px solid rgba(232,84,26,0.12)",
+                          borderRadius: 16, padding: "14px 16px",
+                          color: "#333", fontSize: 14, fontWeight: 500,
+                          cursor: "pointer",
+                          display: "flex", alignItems: "center", gap: 12,
+                          transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
+                          boxShadow: "0 2px 8px rgba(232,84,26,0.05)",
+                          animation: `hw-msg-in 0.4s cubic-bezier(.34,1.56,.64,1) ${i * 0.08}s both`,
+                        }}
+                        onMouseEnter={e => {
+                          (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
+                          ; (e.currentTarget as HTMLElement).style.transform = "translateX(4px)"
+                          ; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(232,84,26,0.12)"
+                        }}
+                        onMouseLeave={e => {
+                          (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.12)"
+                          ; (e.currentTarget as HTMLElement).style.transform = "translateX(0)"
+                          ; (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 8px rgba(232,84,26,0.05)"
+                        }}
+                      >
+                        <div style={{
+                          width: 32, height: 32, borderRadius: 10,
+                          background: "linear-gradient(135deg, #FFF5EE 0%, #FFE8DC 100%)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          flexShrink: 0,
+                        }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8541A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d={faq.icon} />
+                          </svg>
+                        </div>
+                        <span style={{ flex: 1 }}>{faq.q}</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8541A" strokeWidth="2" strokeLinecap="round">
+                          <path d="M9 18l6-6-6-6" />
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
 
               {activeTab === 2 && (
-                /* Contact Tab */
+                /* Contact Tab - Warm themed */
                 <div className="hw-scroll" style={{
                   flex: 1, overflowY: "auto", padding: "20px 16px",
-                  background: "#1a1a1a",
+                  background: "linear-gradient(180deg, #FFFBF8 0%, #FFFFFF 100%)",
                 }}>
-                  <h3 style={{ color: "#fff", fontSize: 18, fontWeight: 600, marginBottom: 8 }}>
-                    Холбоо барих
-                  </h3>
-                  <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, marginBottom: 20 }}>
-                    Бидэнтэй холбогдож дэлгэрэнгүй мэдээлэл аваарай.
-                  </p>
-                  
-                  <a
-                    href="mailto:info@hire.mn"
-                    style={{
-                      display: "inline-block",
-                      background: "#fff", color: "#1a1a1a",
-                      padding: "12px 24px", borderRadius: 8,
-                      fontSize: 14, fontWeight: 500, textDecoration: "none",
-                      marginBottom: 20,
-                    }}
-                  >
-                    info@hire.mn
-                  </a>
-                  
-                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 16 }}>
-                    Утас: +976 7011-1234
-                  </p>
-                  
+                  {/* Contact header card */}
                   <div style={{
-                    background: "#fff", borderRadius: 12, padding: 16, marginTop: 20,
+                    background: "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)",
+                    borderRadius: 20, padding: "24px 20px", marginBottom: 20,
+                    position: "relative", overflow: "hidden",
                   }}>
-                    <p style={{ color: "#666", fontSize: 13, marginBottom: 12 }}>
-                      Санал хүсэлт илгээх:
+                    <div style={{
+                      position: "absolute", top: -20, right: -20, width: 80, height: 80,
+                      borderRadius: "50%", background: "rgba(255,255,255,0.1)",
+                    }} />
+                    <h3 style={{ color: "#fff", fontSize: 20, fontWeight: 700, marginBottom: 8, position: "relative" }}>
+                      Холбоо барих
+                    </h3>
+                    <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 14, lineHeight: 1.5, position: "relative" }}>
+                      Асуулт байвал бидэнтэй холбогдоорой
                     </p>
-                    <textarea
-                      placeholder="Таны мессеж..."
-                      style={{
-                        width: "100%", minHeight: 80, border: "1px solid #e5e5e5",
-                        borderRadius: 8, padding: 12, fontSize: 14, resize: "none",
-                        outline: "none",
-                      }}
-                    />
-                    <button style={{
-                      background: "#E8541A", color: "#fff", border: "none",
-                      padding: "10px 20px", borderRadius: 8, fontSize: 14, fontWeight: 500,
-                      cursor: "pointer", marginTop: 12,
-                    }}>
-                      Илгээх
-                    </button>
+                  </div>
+                  
+                  {/* Contact options */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    {[
+                      { label: "И-мэйл", value: "info@hire.mn", icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6", href: "mailto:info@hire.mn" },
+                      { label: "Утас", value: "+976 7011-1234", icon: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72", href: "tel:+97670111234" },
+                      { label: "Веб", value: "hire.mn", icon: "M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z", href: "https://hire.mn" },
+                    ].map((item, i) => (
+                      <a
+                        key={item.label}
+                        href={item.href}
+                        target={item.href.startsWith("http") ? "_blank" : undefined}
+                        rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 14,
+                          background: "#fff", border: "1.5px solid rgba(232,84,26,0.12)",
+                          borderRadius: 16, padding: "16px",
+                          textDecoration: "none",
+                          transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
+                          animation: `hw-msg-in 0.4s cubic-bezier(.34,1.56,.64,1) ${i * 0.1}s both`,
+                        }}
+                        onMouseEnter={e => {
+                          (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
+                          ; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
+                          ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(232,84,26,0.15)"
+                        }}
+                        onMouseLeave={e => {
+                          (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.12)"
+                          ; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
+                          ; (e.currentTarget as HTMLElement).style.boxShadow = "none"
+                        }}
+                      >
+                        <div style={{
+                          width: 44, height: 44, borderRadius: 14,
+                          background: "linear-gradient(135deg, #FFF5EE 0%, #FFE8DC 100%)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8541A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d={item.icon} />
+                          </svg>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 12, color: "#888", marginBottom: 2 }}>{item.label}</div>
+                          <div style={{ fontSize: 15, color: "#333", fontWeight: 600 }}>{item.value}</div>
+                        </div>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8541A" strokeWidth="2" strokeLinecap="round">
+                          <path d="M7 17L17 7M17 7H7M17 7v10" />
+                        </svg>
+                      </a>
+                    ))}
                   </div>
                 </div>
               )}
@@ -1657,30 +1827,30 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               {/* Input - Only show on Chat tab */}
               {activeTab === 0 && (
               <div style={{
-                padding: "10px 12px 12px", borderTop: "1px solid #f0f0f0",
-                background: "#fff", flexShrink: 0,
+                padding: "12px 16px 16px",
+                background: "linear-gradient(180deg, #FFFFFF 0%, #FFF9F5 100%)",
+                flexShrink: 0,
+                borderTop: "1px solid rgba(232,84,26,0.08)",
               }}>
-
                 <div style={{
-                  display: "flex", gap: 8, alignItems: "center",
-                  background: "#f8f8f8", border: "1.5px solid #e8e8e8",
-                  borderRadius: 24, padding: "0 6px 0 14px", height: 46,
-                  transition: "border-color .18s, box-shadow .18s",
+                  display: "flex", gap: 10, alignItems: "center",
+                  background: "linear-gradient(135deg, #FFF9F5 0%, #FFFFFF 100%)",
+                  border: "2px solid rgba(232,84,26,0.15)",
+                  borderRadius: 20, padding: "6px 8px 6px 16px", 
+                  transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
+                  boxShadow: "0 4px 20px rgba(232,84,26,0.08), inset 0 1px 2px rgba(255,255,255,0.8)",
                 }}
                   onFocusCapture={e => {
                     (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
-                      ; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 3px rgba(232,84,26,.08)"
+                    ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 30px rgba(232,84,26,0.15), inset 0 1px 2px rgba(255,255,255,0.8)"
+                    ; (e.currentTarget as HTMLElement).style.transform = "scale(1.01)"
                   }}
                   onBlurCapture={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "#e8e8e8"
-                      ; (e.currentTarget as HTMLElement).style.boxShadow = "none"
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.15)"
+                    ; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 20px rgba(232,84,26,0.08), inset 0 1px 2px rgba(255,255,255,0.8)"
+                    ; (e.currentTarget as HTMLElement).style.transform = "scale(1)"
                   }}
                 >
-                  <img
-                    src="/mascot.png"
-                    alt=""
-                    style={{ width: 24, height: 24, borderRadius: 6, objectFit: "cover", flexShrink: 0 }}
-                  />
                   <input
                     ref={inputRef as any}
                     value={input}
@@ -1690,7 +1860,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     style={{
                       flex: 1, border: "none", background: "transparent",
                       fontSize: fontSize, outline: "none",
-                      color: "#333",
+                      color: "#333", padding: "8px 0",
                     }}
                   />
                   <button
@@ -1698,15 +1868,31 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     onClick={() => sendMessage(input)}
                     disabled={!input.trim() || isTyping}
                     style={{
-                      width: 36, height: 36, borderRadius: "50%",
-                      background: input.trim() && !isTyping ? "#E8541A" : "#ddd",
+                      width: 44, height: 44, borderRadius: 14,
+                      background: input.trim() && !isTyping 
+                        ? "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)" 
+                        : "linear-gradient(135deg, #E0D8D4 0%, #D5CCC7 100%)",
                       border: "none",
                       cursor: input.trim() && !isTyping ? "pointer" : "not-allowed",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0, transition: "all .18s",
+                      flexShrink: 0, 
+                      transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
+                      boxShadow: input.trim() && !isTyping 
+                        ? "0 4px 15px rgba(232,84,26,0.3)" 
+                        : "none",
+                    }}
+                    onMouseEnter={e => {
+                      if (input.trim() && !isTyping) {
+                        (e.currentTarget as HTMLElement).style.transform = "scale(1.1) rotate(15deg)"
+                        ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 25px rgba(232,84,26,0.4)"
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.transform = "scale(1) rotate(0deg)"
+                      ; (e.currentTarget as HTMLElement).style.boxShadow = input.trim() && !isTyping ? "0 4px 15px rgba(232,84,26,0.3)" : "none"
                     }}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="22" y1="2" x2="11" y2="13" />
                       <polygon points="22 2 15 22 11 13 2 9 22 2" fill="white" stroke="none" />
                     </svg>
@@ -1764,53 +1950,89 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           </div>
         )}
 
-        {/* Mascot button - PeachWeb style */}
+        {/* Mascot button - Creative warm design */}
         {!isOpen && (
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", gap: 12, padding: 10 }}>
-          <button
-            className="hw-mascot"
-            onClick={() => setIsOpen(o => !o)}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            aria-label="hire.mn чат нээх"
-            style={{
-              height: 52, 
-              borderRadius: 26,
-              background: "#1a1a1a",
-              border: "none",
-              cursor: "pointer",
-              display: "flex", alignItems: "center", gap: 10,
-              paddingLeft: 6, paddingRight: 18,
-              flexShrink: 0, position: "relative",
-              boxShadow: "0 8px 24px rgba(0,0,0,.25)",
-              transition: "all 0.2s ease",
-            }}
-          >
-            <img
-              src="/mascot.png"
-              alt="AI Assistant"
-              className="hw-mascot-bounce"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: "50%",
-                objectFit: "cover",
-              }}
-            />
-            <span style={{
-              color: "#fff",
-              fontSize: 14,
-              fontWeight: 500,
-            }}>
-              Тусламж авах
-            </span>
-            <span style={{
-              position: "absolute", bottom: 4, left: 38,
-              width: 10, height: 10, borderRadius: "50%",
-              background: "#22C55E",
-              border: "2px solid #1a1a1a",
+          {/* Pulsing background rings */}
+          <div style={{ position: "relative" }}>
+            <div style={{
+              position: "absolute", inset: -8,
+              borderRadius: 32, 
+              background: "rgba(232,84,26,0.15)",
+              animation: "hw-ring 2.5s ease-out infinite",
             }} />
-          </button>
+            <div style={{
+              position: "absolute", inset: -4,
+              borderRadius: 30,
+              background: "rgba(232,84,26,0.1)",
+              animation: "hw-ring 2.5s ease-out 0.5s infinite",
+            }} />
+            
+            <button
+              className="hw-mascot"
+              onClick={() => setIsOpen(o => !o)}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              aria-label="hire.mn чат нээх"
+              style={{
+                height: 56, 
+                borderRadius: 28,
+                background: "linear-gradient(135deg, #E8541A 0%, #FF6B3D 50%, #FF8C42 100%)",
+                border: "3px solid rgba(255,255,255,0.9)",
+                cursor: "pointer",
+                display: "flex", alignItems: "center", gap: 12,
+                paddingLeft: 6, paddingRight: 20,
+                flexShrink: 0, position: "relative",
+                boxShadow: isHovered 
+                  ? "0 12px 40px rgba(232,84,26,0.5), 0 4px 15px rgba(0,0,0,0.1)"
+                  : "0 8px 30px rgba(232,84,26,0.35), 0 4px 10px rgba(0,0,0,0.08)",
+                transition: "all 0.4s cubic-bezier(.34,1.56,.64,1)",
+                transform: isHovered ? "scale(1.05) translateY(-3px)" : "scale(1) translateY(0)",
+              }}
+            >
+              {/* Mascot avatar with glow */}
+              <div style={{
+                width: 44, height: 44, borderRadius: "50%",
+                background: "#fff",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                overflow: "hidden",
+                transition: "transform 0.4s cubic-bezier(.34,1.56,.64,1)",
+                transform: isHovered ? "rotate(-10deg) scale(1.1)" : "rotate(0) scale(1)",
+              }}>
+                <img
+                  src="/mascot.png"
+                  alt="AI Assistant"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+              </div>
+              
+              <span style={{
+                color: "#fff",
+                fontSize: 14,
+                fontWeight: 600,
+                textShadow: "0 2px 4px rgba(0,0,0,0.15)",
+                letterSpacing: "-0.2px",
+              }}>
+                Тусламж авах
+              </span>
+              
+              {/* Online indicator with pulse */}
+              <span style={{
+                position: "absolute", bottom: 2, left: 42,
+                width: 14, height: 14, borderRadius: "50%",
+                background: "linear-gradient(135deg, #22C55E, #4ADE80)",
+                border: "3px solid #fff",
+                boxShadow: "0 0 0 0 rgba(34,197,94,0.4)",
+                animation: "hw-online-pulse 2s ease-in-out infinite",
+              }} />
+            </button>
+          </div>
         </div>
         )}
 
