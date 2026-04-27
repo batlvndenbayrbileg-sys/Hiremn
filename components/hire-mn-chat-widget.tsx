@@ -67,7 +67,6 @@ interface Test {
   price: string
   duration: string
   url: string
-  emoji: string
   color: string
   free: boolean
   desc: string
@@ -77,13 +76,22 @@ interface Test {
   image?: string
 }
 
-// ── Quick replies with icons ──────────────────────────────────────────────────
+// Quick reply SVG icons
+const QuickReplyIcon = ({ type }: { type: string }) => {
+  const icons: Record<string, JSX.Element> = {
+    list: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>,
+    target: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+    gift: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>,
+    info: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>,
+  }
+  return icons[type] || icons.info
+}
 
 const QUICK_REPLIES = [
-  { text: "Бүх тест харах", icon: "📋" },
-  { text: "Надад тохирох тест хэл", icon: "🎯" },
-  { text: "Үнэгүй тестүүд", icon: "🆓" },
-  { text: "Hire.mn тухай", icon: "ℹ️" },
+  { text: "Бүх тест харах", iconType: "list" },
+  { text: "Надад тохирох тест", iconType: "target" },
+  { text: "Үнэгүй тестүүд", iconType: "gift" },
+  { text: "Hire.mn тухай", iconType: "info" },
 ]
 
 // ── Animated Mascot Robot ─────────────────────────────────────────────────────
@@ -296,15 +304,20 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
           background: "linear-gradient(160deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.35) 100%)",
         }} />
 
-        {/* Emoji badge */}
+        {/* Test icon badge */}
         <div style={{
           position: "absolute", top: 8, right: 8,
-          fontSize: 20, lineHeight: 1,
-          background: "rgba(255,255,255,.2)",
+          background: "rgba(255,255,255,.25)",
           backdropFilter: "blur(8px)",
-          borderRadius: 10, padding: "5px 7px",
-          border: "1px solid rgba(255,255,255,.3)",
-        }}>{test.emoji || "📋"}</div>
+          borderRadius: 10, padding: "6px 8px",
+          border: "1px solid rgba(255,255,255,.35)",
+          color: "#fff",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
+          </svg>
+        </div>
 
         {/* Free badge */}
         {test.free && (
@@ -830,7 +843,16 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
           {message.teamCategories.map((cat, catIdx) => (
             <div key={cat.label} style={{ marginBottom: catIdx < message.teamCategories!.length - 1 ? 20 : 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                <span style={{ fontSize: 16 }}>{cat.icon}</span>
+                <span style={{ 
+                  width: 28, height: 28, borderRadius: 8,
+                  background: `${cat.color}15`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: cat.color,
+                }}>
+                  {cat.icon === "system" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>}
+                  {cat.icon === "test" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>}
+                  {cat.icon === "rocket" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>}
+                </span>
                 <span style={{
                   fontSize: fontSize, fontWeight: 700, color: cat.color,
                   letterSpacing: 0.3,
@@ -1000,7 +1022,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       const { data } = initialContext
       initialMessages.push({
         role: "assistant",
-        content: `**${data.assessmentName}** үнэлгээний үр дүнд үндэслээд зөвлөгөө өгье.\n\n📊 **Таны оноо:** ${data.score}\n🎯 **Түвшин:** ${data.interpretation}\n\n${data.advice}`,
+        content: `**${data.assessmentName}** үнэлгээний үр дүнд үндэслээд зөвлөгөө өгье.\n\n**Таны оноо:** ${data.score}\n**Түвшин:** ${data.interpretation}\n\n${data.advice}`,
       })
     }
 
@@ -1070,21 +1092,21 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         const { reportTitle, reportData, userInfo, analysisResults, prompt } = event.data.payload
         
         // Build a comprehensive context message for the AI
-        let analysisContext = `**🔬 AI Тайлан Дүн Шинжилгээ**\n\n`
+        let analysisContext = `**AI Тайлан Дүн Шинжилгээ**\n\n`
         
         if (reportTitle) {
-          analysisContext += `📋 **Тайлангийн нэр:** ${reportTitle}\n\n`
+          analysisContext += `**Тайлангийн нэр:** ${reportTitle}\n\n`
         }
         
         if (userInfo && Object.keys(userInfo).length > 0) {
-          analysisContext += `👤 **Хэрэглэгчийн мэдээлэл:**\n`
+          analysisContext += `**Хэрэглэгчийн мэдээлэл:**\n`
           if (userInfo.name) analysisContext += `- Нэр: ${userInfo.name}\n`
           if (userInfo.email) analysisContext += `- Имэйл: ${userInfo.email}\n`
           analysisContext += `\n`
         }
         
         if (analysisResults && Object.keys(analysisResults).length > 0) {
-          analysisContext += `📊 **Үр дүн:**\n`
+          analysisContext += `**Үр дүн:**\n`
           Object.entries(analysisResults).forEach(([key, value]) => {
             analysisContext += `- ${key}: ${value}\n`
           })
@@ -1092,13 +1114,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         }
         
         if (reportData && Object.keys(reportData).length > 0) {
-          analysisContext += `📄 **Тайлангийн дата:**\n\`\`\`json\n${JSON.stringify(reportData, null, 2)}\n\`\`\`\n\n`
+          analysisContext += `**Тайлангийн дата:**\n\`\`\`json\n${JSON.stringify(reportData, null, 2)}\n\`\`\`\n\n`
         }
         
         // Add the AI analysis request message first (as system context)
         const contextMsg: Message = {
           role: "assistant",
-          content: analysisContext + `\n---\n\n🤖 **Тайлбар хүсэлт хүлээн авлаа.** Одоо таны үр дүнг задлан шинжилж байна...`,
+          content: analysisContext + `\n---\n\n**Тайлбар хүсэлт хүлээн авлаа.** Одоо таны үр дүнг задлан шинжилж байна...`,
         }
         
         // Then trigger the actual AI analysis
@@ -1140,7 +1162,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     setActiveConversation(conv)
     setMessages(conv.messages.length > 0 ? conv.messages : [{
       role: "assistant",
-      content: "Сайн байна уу!\n\nБи hire.mn AI туслагч. Та надаас:\n\n- **Тест санал болгох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар туслана",
+      content: "Сайн байна уу!\n\nБи hire.mn AI туслагч. Та надаас:\n\n- **Тест сан��л болгох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар туслана",
     }])
     messageCountRef.current = conv.messageCount || 0
     setShowSidebar(false)
@@ -1231,7 +1253,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               content: `**${member.name}**\n\n${member.role}\n\n${member.description}`,
               teamCategories: [{
                 label: member.role,
-                icon: member.category === 'system' ? "💻" : member.category === 'test' ? "📊" : "🚀",
+                icon: member.category === 'system' ? "system" : member.category === 'test' ? "test" : "rocket",
                 color: member.roleColor,
                 members: [member]
               }],
@@ -1250,7 +1272,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               content: `**${founder.name}**\n\n${founder.role}\n\n${founder.description}`,
               teamCategories: [{
                 label: founder.role,
-                icon: "🚀",
+                icon: "rocket",
                 color: founder.roleColor,
                 members: [founder]
               }],
@@ -1790,7 +1812,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 </div>
               </div>
 
-              {/* ══════════ TAB CONTENT ══════════ */}
+              {/* ══════════ TAB CONTENT ═════════�� */}
               {activeTab === 0 && (
                 <>
                   {/* Chat Messages Area - Glass Effect */}
@@ -1832,49 +1854,63 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
                     {showQuickReplies && !isTyping && (
                       <div style={{ 
-                        display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12,
-                        padding: "14px",
-                        background: "linear-gradient(135deg, rgba(255,248,244,0.8), rgba(255,255,255,0.9))",
-                        borderRadius: 16,
-                        border: "1px solid rgba(232,84,26,0.08)",
-                        backdropFilter: "blur(10px)",
+                        display: "flex", flexDirection: "column", gap: 8, marginTop: 14,
+                        padding: "16px",
+                        background: "linear-gradient(145deg, rgba(255,255,255,0.95), rgba(255,252,250,0.9))",
+                        borderRadius: 18,
+                        border: "1px solid rgba(232,84,26,0.06)",
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
                       }}>
-                        {QUICK_REPLIES.map((qr, i) => (
-                          <button
-                            key={qr.text}
-                            className="hw-chip"
-                            onClick={() => sendMessage(qr.text)}
-                            style={{
-                              background: "linear-gradient(135deg, #fff 0%, #FFFAF8 100%)",
-                              border: "1.5px solid rgba(232,84,26,0.12)",
-                              color: "#D64810",
-                              borderRadius: 20, padding: "9px 16px",
-                              fontSize: fontSize - 1, fontWeight: 600,
-                              cursor: "pointer", whiteSpace: "nowrap",
-                              animation: `hw-chip-in 0.35s cubic-bezier(.16,1,.3,1) ${i * 0.08}s both`,
-                              boxShadow: "0 2px 8px rgba(232,84,26,0.06), inset 0 1px 0 rgba(255,255,255,0.8)",
-                              display: "flex", alignItems: "center", gap: 7,
-                              transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
-                            }}
-                            onMouseEnter={e => {
-                              (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)"
-                              ; (e.currentTarget as HTMLElement).style.color = "#fff"
-                              ; (e.currentTarget as HTMLElement).style.borderColor = "transparent"
-                              ; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px) scale(1.02)"
-                              ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 20px rgba(232,84,26,0.25)"
-                            }}
-                            onMouseLeave={e => {
-                              (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, #fff 0%, #FFFAF8 100%)"
-                              ; (e.currentTarget as HTMLElement).style.color = "#D64810"
-                              ; (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.12)"
-                              ; (e.currentTarget as HTMLElement).style.transform = "translateY(0) scale(1)"
-                              ; (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 8px rgba(232,84,26,0.06), inset 0 1px 0 rgba(255,255,255,0.8)"
-                            }}
-                          >
-                            <span style={{ fontSize: fontSize + 1 }}>{qr.icon}</span>
-                            {qr.text}
-                          </button>
-                        ))}
+                        <div style={{ 
+                          fontSize: 11, fontWeight: 600, color: "#9CA3AF", 
+                          marginBottom: 4, letterSpacing: "0.5px",
+                          textTransform: "uppercase" 
+                        }}>
+                          Түгээмэл асуултууд
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                          {QUICK_REPLIES.map((qr, i) => (
+                            <button
+                              key={qr.text}
+                              className="hw-chip"
+                              onClick={() => sendMessage(qr.text)}
+                              style={{
+                                background: "#fff",
+                                border: "1.5px solid #E5E7EB",
+                                color: "#374151",
+                                borderRadius: 12, 
+                                padding: "10px 14px",
+                                fontSize: fontSize - 1, 
+                                fontWeight: 500,
+                                cursor: "pointer", 
+                                whiteSpace: "nowrap",
+                                animation: `hw-chip-in 0.3s cubic-bezier(.16,1,.3,1) ${i * 0.06}s both`,
+                                boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                                display: "flex", alignItems: "center", gap: 8,
+                                transition: "all 0.25s cubic-bezier(.16,1,.3,1)",
+                              }}
+                              onMouseEnter={e => {
+                                (e.currentTarget as HTMLElement).style.background = "#E8541A"
+                                ; (e.currentTarget as HTMLElement).style.color = "#fff"
+                                ; (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
+                                ; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
+                                ; (e.currentTarget as HTMLElement).style.boxShadow = "0 6px 16px rgba(232,84,26,0.2)"
+                              }}
+                              onMouseLeave={e => {
+                                (e.currentTarget as HTMLElement).style.background = "#fff"
+                                ; (e.currentTarget as HTMLElement).style.color = "#374151"
+                                ; (e.currentTarget as HTMLElement).style.borderColor = "#E5E7EB"
+                                ; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
+                                ; (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)"
+                              }}
+                            >
+                              <span style={{ opacity: 0.7 }}>
+                                <QuickReplyIcon type={qr.iconType} />
+                              </span>
+                              {qr.text}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
 
