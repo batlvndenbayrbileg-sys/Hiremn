@@ -55,11 +55,87 @@
     "color-scheme:light !important;" +
     "transition:width 0.3s ease, height 0.3s ease !important;";
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // EXTERNAL API - hire.mn developers can use these methods
+  // ══════════════════════════════════════════════════════════════════════════
+  
+  /**
+   * HireMnChat API
+   * 
+   * Usage from hire.mn website:
+   * 
+   * // Open chatbot and send AI analysis request with report data
+   * window.HireMnChat.openWithAnalysis({
+   *   reportTitle: "Personality Test Results",
+   *   reportData: { ... },           // Report content/data
+   *   userInfo: { name: "...", email: "..." },
+   *   analysisResults: { ... },      // Pre-computed analysis if any
+   *   prompt: "Миний тестийн үр дүнг тайлбарлана уу"  // Optional custom prompt
+   * });
+   * 
+   * // Just open the chatbot
+   * window.HireMnChat.open();
+   * 
+   * // Close the chatbot
+   * window.HireMnChat.close();
+   * 
+   * // Check if chatbot is open
+   * window.HireMnChat.isOpen();
+   */
+  
+  var chatIsOpen = false;
+  
+  window.HireMnChat = {
+    // Open chatbot
+    open: function() {
+      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, "*");
+    },
+    
+    // Close chatbot
+    close: function() {
+      iframe.contentWindow.postMessage({ type: "HIREMN_CLOSE" }, "*");
+    },
+    
+    // Check if open
+    isOpen: function() {
+      return chatIsOpen;
+    },
+    
+    // Open chatbot and trigger AI analysis with data
+    openWithAnalysis: function(data) {
+      // Open the chatbot first
+      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, "*");
+      
+      // Then send the analysis data (with small delay to ensure widget is open)
+      setTimeout(function() {
+        iframe.contentWindow.postMessage({
+          type: "HIREMN_AI_ANALYSIS",
+          payload: {
+            reportTitle: data.reportTitle || "",
+            reportData: data.reportData || {},
+            userInfo: data.userInfo || {},
+            analysisResults: data.analysisResults || {},
+            prompt: data.prompt || "Миний тестийн үр дүнг задлан шинжилж, надад зөвлөгөө өгнө үү."
+          }
+        }, "*");
+      }, 500);
+    },
+    
+    // Send a message to the chatbot
+    sendMessage: function(message) {
+      iframe.contentWindow.postMessage({
+        type: "HIREMN_SEND_MESSAGE",
+        message: message
+      }, "*");
+    }
+  };
+
   // ── PostMessage for size changes from widget ─────────────────────────────
   window.addEventListener("message", function (e) {
     if (!e.data || !e.data.type) return;
 
     if (e.data && e.data.type === "HIREMN_RESIZE") {
+      chatIsOpen = e.data.isOpen;
       var isOpen = e.data.isOpen;
       var mobile = window.innerWidth <= 480;
 

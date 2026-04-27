@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hire.mn - Тестийн тайлан (Жишээ)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .report-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      padding: 40px;
+      margin-bottom: 30px;
+    }
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .report-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    .report-date {
+      color: #666;
+      font-size: 14px;
+    }
+    .results-grid {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .result-label {
+      width: 180px;
+      font-weight: 500;
+      color: #333;
+    }
+    .result-bar {
+      flex: 1;
+      height: 24px;
+      background: #f0f0f0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .result-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #E8541A 0%, #FF8C42 100%);
+      border-radius: 12px;
+      transition: width 0.5s ease;
+    }
+    .result-value {
+      width: 50px;
+      text-align: right;
+      font-weight: 600;
+      color: #E8541A;
+    }
+    
+    /* AI Analysis Button - Энэ бол таны хуудаст нэмэх товч */
+    .ai-analysis-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, #E8541A 0%, #FF6B3D 50%, #FF8C42 100%);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 24px rgba(232,84,26,0.3);
+    }
+    .ai-analysis-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(232,84,26,0.4);
+    }
+    .ai-analysis-btn:active {
+      transform: translateY(0);
+    }
+    .ai-analysis-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .note {
+      background: #FFF5EE;
+      border: 1px solid #FDDCCC;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 30px;
+    }
+    .note-title {
+      font-weight: 600;
+      color: #E8541A;
+      margin-bottom: 8px;
+    }
+    .note-text {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="report-card">
+      <div class="report-header">
+        <h1 class="report-title">Багийн дүр тодорхойлох тест</h1>
+        <span class="report-date">2024.01.15</span>
+      </div>
+      
+      <div class="results-grid">
+        <div class="result-item">
+          <span class="result-label">Удирдагч (Leader)</span>
+          <div class="result-bar">
+            <div class="result-fill" style="width: 85%"></div>
+          </div>
+          <span class="result-value">85%</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Бүтээлч (Creative)</span>
+          <div class="result-bar">
+            <div class="result-fill" style="width: 72%"></div>
+          </div>
+          <span class="result-value">72%</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Гүйцэтгэгч (Implementer)</span>
+          <div class="result-bar">
+            <div class="result-fill" style="width: 65%"></div>
+          </div>
+          <span class="result-value">65%</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Шинжээч (Analyst)</span>
+          <div class="result-bar">
+            <div class="result-fill" style="width: 58%"></div>
+          </div>
+          <span class="result-value">58%</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Зохицуулагч (Coordinator)</span>
+          <div class="result-bar">
+            <div class="result-fill" style="width: 45%"></div>
+          </div>
+          <span class="result-value">45%</span>
+        </div>
+      </div>
+      
+      <!-- ═══════════════════════════════════════════════════════════════════
+           AI ANALYSIS BUTTON - Энэ товчийг таны тайлангийн хуудаст нэмнэ
+           ═══════════════════════════════════════════════════════════════════ -->
+      <button id="ai-analysis-btn" class="ai-analysis-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+          <circle cx="7.5" cy="14.5" r="1.5" fill="currentColor"/>
+          <circle cx="16.5" cy="14.5" r="1.5" fill="currentColor"/>
+        </svg>
+        AI analysis хийх
+      </button>
+      
+      <div class="note">
+        <div class="note-title">Developer-д зориулсан тэмдэглэл</div>
+        <div class="note-text">
+          Дээрх товч дээр дарахад chatbot нээгдэж, тестийн үр дүнг AI-д илгээнэ. 
+          Доорх JavaScript код нь <code>window.HireMnChat.openWithAnalysis()</code> функцийг дуудаж байна.
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       CHATBOT EMBED SCRIPT - Энэ script-ийг нэг л удаа нэмнэ (body хаалтын өмнө)
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <script src="/embed.js"></script>
+  
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       AI ANALYSIS INTEGRATION CODE - Энэ код нь товч дээр дарахад ажиллана
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <script>
+    // Жишээ өгөгдөл - Таны системээс авна
+    const testResults = {
+      "Удирдагч (Leader)": 85,
+      "Бүтээлч (Creative)": 72,
+      "Гүйцэтгэгч (Implementer)": 65,
+      "Шинжээч (Analyst)": 58,
+      "Зохицуулагч (Coordinator)": 45
+    };
+    
+    const reportData = {
+      testId: "team-role-test-v2",
+      testType: "personality",
+      completedAt: new Date().toISOString(),
+      totalQuestions: 40,
+      answeredQuestions: 40,
+      timeSpent: "12 минут"
+    };
+    
+    const userInfo = {
+      name: "Батболд",
+      email: "batbold@example.com"
+    };
+    
+    // AI Analysis товч дээр дарахад
+    document.getElementById('ai-analysis-btn').addEventListener('click', function() {
+      // Chatbot ачаалагдсан эсэхийг шалгана
+      if (typeof window.HireMnChat === 'undefined') {
+        alert('Chatbot ачаалагдаж байна, түр хүлээнэ үү...');
+        return;
+      }
+      
+      // Chatbot-г нээж, тестийн өгөгдлийг илгээнэ
+      window.HireMnChat.openWithAnalysis({
+        // Тайлангийн нэр
+        reportTitle: document.querySelector('.report-title').textContent,
+        
+        // Тестийн түүхий өгөгдөл
+        reportData: reportData,
+        
+        // Хэрэглэгчийн мэдээлэл
+        userInfo: userInfo,
+        
+        // Тооцоолсон үр дүн
+        analysisResults: testResults,
+        
+        // AI-д өгөх prompt (заавал биш)
+        prompt: "Миний багийн дүрийн тестийн үр дүнг дэлгэрэнгүй тайлбарлаж, ажлын байранд хэрхэн ашиглах талаар зөвлөгөө өгнө үү."
+      });
+    });
+  </script>
+</body>
+</html>

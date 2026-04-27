@@ -1021,6 +1021,89 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     setConversation(active)
   }, [])
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // EXTERNAL API HANDLER - Listen for messages from parent window (hire.mn)
+  // ══════════════════════════════════════════════════════════════════════════
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    
+    const handleExternalMessage = (event: MessageEvent) => {
+      if (!event.data || !event.data.type) return
+      
+      // Open chatbot
+      if (event.data.type === "HIREMN_OPEN") {
+        setIsOpen(true)
+      }
+      
+      // Close chatbot
+      if (event.data.type === "HIREMN_CLOSE") {
+        setIsOpen(false)
+      }
+      
+      // Send a simple message
+      if (event.data.type === "HIREMN_SEND_MESSAGE" && event.data.message) {
+        sendMessage(event.data.message)
+      }
+      
+      // AI Analysis request with report data
+      if (event.data.type === "HIREMN_AI_ANALYSIS" && event.data.payload) {
+        const { reportTitle, reportData, userInfo, analysisResults, prompt } = event.data.payload
+        
+        // Build a comprehensive context message for the AI
+        let analysisContext = `**🔬 AI Тайлан Дүн Шинжилгээ**\n\n`
+        
+        if (reportTitle) {
+          analysisContext += `📋 **Тайлангийн нэр:** ${reportTitle}\n\n`
+        }
+        
+        if (userInfo && Object.keys(userInfo).length > 0) {
+          analysisContext += `👤 **Хэрэглэгчийн мэдээлэл:**\n`
+          if (userInfo.name) analysisContext += `- Нэр: ${userInfo.name}\n`
+          if (userInfo.email) analysisContext += `- Имэйл: ${userInfo.email}\n`
+          analysisContext += `\n`
+        }
+        
+        if (analysisResults && Object.keys(analysisResults).length > 0) {
+          analysisContext += `📊 **Үр дүн:**\n`
+          Object.entries(analysisResults).forEach(([key, value]) => {
+            analysisContext += `- ${key}: ${value}\n`
+          })
+          analysisContext += `\n`
+        }
+        
+        if (reportData && Object.keys(reportData).length > 0) {
+          analysisContext += `📄 **Тайлангийн дата:**\n\`\`\`json\n${JSON.stringify(reportData, null, 2)}\n\`\`\`\n\n`
+        }
+        
+        // Add the AI analysis request message first (as system context)
+        const contextMsg: Message = {
+          role: "assistant",
+          content: analysisContext + `\n---\n\n🤖 **Тайлбар хүсэлт хүлээн авлаа.** Одоо таны үр дүнг задлан шинжилж байна...`,
+        }
+        
+        // Then trigger the actual AI analysis
+        const userPrompt = prompt || "Миний тестийн үр дүнг задлан шинжилж, надад зөвлөгөө өгнө үү."
+        
+        // Add context message and then send user prompt
+        setMessages(prev => [...prev, contextMsg])
+        
+        // Small delay then send the actual analysis request
+        setTimeout(() => {
+          // Create a special analysis prompt that includes all the data
+          const fullPrompt = `Дараах тайлангийн үр дүнг задлан шинжилж, практик зөвлөгөө өгнө үү:\n\n` +
+            `Тайлан: ${reportTitle || 'Тест'}\n` +
+            `Үр дүн: ${JSON.stringify(analysisResults || reportData || {})}\n\n` +
+            `Хэрэглэгчийн хүсэлт: ${userPrompt}`
+          
+          sendMessage(fullPrompt)
+        }, 1000)
+      }
+    }
+    
+    window.addEventListener("message", handleExternalMessage)
+    return () => window.removeEventListener("message", handleExternalMessage)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleNewConversation = () => {
     const newConv = createNewConversation()
     setActiveConversation(newConv)
@@ -2008,7 +2091,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 </div>
               )}
 
-              {/* ══════════ FUTURISTIC INPUT AREA ══════════ */}
+              {/* ═════��════ FUTURISTIC INPUT AREA ══════════ */}
               {activeTab === 0 && (
               <div style={{
                 padding: "12px 14px 16px",
