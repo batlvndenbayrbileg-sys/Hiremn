@@ -62,9 +62,69 @@ window.HireMnChat.sendMessage("Миний тестийн үр дүнг тайл�
 
 ---
 
-### `HireMnChat.openWithAnalysis(data)`
+### `HireMnChat.analyzeFromAPI(options)` - RECOMMENDED
 
-**This is the main method for AI analysis.** Opens the chatbot and sends report data for AI analysis.
+**hire.mn API-аас шууд өгөгдөл татаж AI analysis хийх.** Энэ бол хамгийн тохиромжтой арга.
+
+#### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `apiUrl` | string | **Yes** | hire.mn backend API endpoint (жишээ: `/api/test-results/123`) |
+| `headers` | object | No | HTTP headers (auth token гэх мэт) |
+| `testName` | string | No | Тестийн нэр |
+| `prompt` | string | No | AI-д өгөх хүсэлт |
+
+#### Example - hire.mn дээр ашиглах
+
+```javascript
+// "AI analysis хийх" товч дээр дарахад
+document.getElementById('ai-analysis-btn').addEventListener('click', function() {
+  // API URL-г бэлдэх (тухайн хэрэглэгчийн test result ID-г ашиглана)
+  const testResultId = document.querySelector('[data-result-id]').dataset.resultId;
+  const apiUrl = `/api/test-results/${testResultId}`;
+  
+  // Chatbot-г нээж, API-аас өгөгдөл татаж, AI analysis хийх
+  window.HireMnChat.analyzeFromAPI({
+    apiUrl: apiUrl,
+    headers: {
+      'Authorization': 'Bearer ' + getAuthToken() // Хэрэв auth шаардлагатай бол
+    },
+    testName: "Багийн дүр тодорхойлох тест",
+    prompt: "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж, практик зөвлөгөө өгнө үү."
+  });
+});
+```
+
+#### API Response Format
+
+hire.mn API дараах форматаар JSON буцаах ёстой:
+
+```json
+{
+  "testName": "Багийн дүр тодорхойлох тест",
+  "completedAt": "2024-01-15T10:30:00Z",
+  "results": {
+    "Удирдагч": 85,
+    "Бүтээлч": 72,
+    "Гүйцэтгэгч": 65
+  },
+  "scores": {
+    "leader": 85,
+    "creative": 72
+  },
+  "answers": [...],
+  "user": {
+    "name": "Батболд"
+  }
+}
+```
+
+---
+
+### `HireMnChat.openWithAnalysis(data)` - Alternative
+
+Хэрэв өгөгдөл аль хэдийн байгаа бол шууд илгээх. Opens the chatbot and sends report data for AI analysis.
 
 #### Parameters
 

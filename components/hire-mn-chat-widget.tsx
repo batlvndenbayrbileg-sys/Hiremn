@@ -1045,7 +1045,27 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         sendMessage(event.data.message)
       }
       
-      // AI Analysis request with report data
+      // Loading state - show when fetching from API
+      if (event.data.type === "HIREMN_LOADING") {
+        const loadingMsg: Message = {
+          role: "assistant",
+          content: `**${event.data.message || "Уншиж байна..."}**`,
+        }
+        setMessages(prev => [...prev, loadingMsg])
+        setIsTyping(true)
+      }
+      
+      // Error state - show API error
+      if (event.data.type === "HIREMN_ERROR") {
+        setIsTyping(false)
+        const errorMsg: Message = {
+          role: "assistant",
+          content: `**Алдаа:** ${event.data.message || "Өгөгдөл татахад алдаа гарлаа."}\n\nДахин оролдоно уу эсвэл hire.mn хэрэглэгчийн тусламжтай холбогдоно уу.`,
+        }
+        setMessages(prev => [...prev, errorMsg])
+      }
+      
+      // AI Analysis request with report data (from API or direct)
       if (event.data.type === "HIREMN_AI_ANALYSIS" && event.data.payload) {
         const { reportTitle, reportData, userInfo, analysisResults, prompt } = event.data.payload
         
@@ -1911,7 +1931,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         icon: "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2" 
                       },
                       { 
-                        q: "Үр дүнгээ хэрхэн харах вэ?", 
+                        q: "Үр дүнгээ хэрхэ�� харах вэ?", 
                         a: "Тест дуусмагц таны үр дүн шууд гарна. Профайл хэсэгт орж бүх үр дүнгээ харах, татаж авах, хуваалцах боломжтой. Мөн и-мэйлээр илгээх боломжтой.",
                         icon: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" 
                       },

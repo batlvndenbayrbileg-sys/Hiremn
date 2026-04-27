@@ -101,12 +101,70 @@
       return chatIsOpen;
     },
     
-    // Open chatbot and trigger AI analysis with data
-    openWithAnalysis: function(data) {
-      // Open the chatbot first
+    // ═══════════════════════════════════════════════════════════════════════
+    // MAIN METHOD: Fetch test results from API and send to AI for analysis
+    // ═══════════════════════════════════════════════════════════════════════
+    analyzeFromAPI: function(options) {
+      var apiUrl = options.apiUrl;           // Required: hire.mn API endpoint
+      var headers = options.headers || {};   // Optional: Auth headers, etc.
+      var testName = options.testName || "Тест";
+      var prompt = options.prompt || "Миний тестийн үр дүнг задлан шинжилж, дэлгэрэнгүй тайлбар болон зөвлөгөө өгнө үү.";
+      
+      if (!apiUrl) {
+        console.error("[HireMnChat] apiUrl is required");
+        return Promise.reject(new Error("apiUrl is required"));
+      }
+      
+      // Open chatbot first
       iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, "*");
       
-      // Then send the analysis data (with small delay to ensure widget is open)
+      // Show loading state
+      iframe.contentWindow.postMessage({ 
+        type: "HIREMN_LOADING", 
+        message: "Тестийн үр дүнг татаж байна..." 
+      }, "*");
+      
+      // Fetch from hire.mn API
+      return fetch(apiUrl, {
+        method: "GET",
+        headers: Object.assign({
+          "Content-Type": "application/json"
+        }, headers)
+      })
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error("API error: " + response.status);
+        }
+        return response.json();
+      })
+      .then(function(data) {
+        // Send the fetched data to chatbot for AI analysis
+        iframe.contentWindow.postMessage({
+          type: "HIREMN_AI_ANALYSIS",
+          payload: {
+            reportTitle: testName,
+            reportData: data,
+            analysisResults: data.results || data.scores || data,
+            prompt: prompt,
+            fromAPI: true
+          }
+        }, "*");
+        return data;
+      })
+      .catch(function(error) {
+        console.error("[HireMnChat] API fetch error:", error);
+        iframe.contentWindow.postMessage({ 
+          type: "HIREMN_ERROR", 
+          message: "Өгөгдөл татахад алдаа гарлаа: " + error.message 
+        }, "*");
+        throw error;
+      });
+    },
+    
+    // Open chatbot and trigger AI analysis with pre-loaded data
+    openWithAnalysis: function(data) {
+      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, "*");
+      
       setTimeout(function() {
         iframe.contentWindow.postMessage({
           type: "HIREMN_AI_ANALYSIS",
