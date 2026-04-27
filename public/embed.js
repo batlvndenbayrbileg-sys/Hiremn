@@ -15,17 +15,17 @@
     return;
   }
 
-  // Button size - compact pill button
-  var BUTTON_SIZE = "220px";
-  var BUTTON_HEIGHT = "80px";
+  // Futuristic button size with glow ring space
+  var BUTTON_SIZE = "240px";
+  var BUTTON_HEIGHT = "90px";
 
   // ── Wrapper div (fixed, bottom-right) ────────────────────────────────────
   var wrapper = document.createElement("div");
   wrapper.id = "hiremn-widget-root";
   wrapper.style.cssText =
     "position:fixed !important;" +
-    "bottom:16px !important;" +
-    "right:16px !important;" +
+    "bottom:12px !important;" +
+    "right:12px !important;" +
     "z-index:2147483647 !important;" +
     "pointer-events:none !important;" +
     "overflow:visible !important;" +
@@ -75,20 +75,20 @@
           iframe.style.height = "100%";
         } else {
           wrapper.style.width = "420px";
-          wrapper.style.height = "700px";
-          wrapper.style.bottom = "16px";
-          wrapper.style.right = "16px";
+          wrapper.style.height = "680px";
+          wrapper.style.bottom = "12px";
+          wrapper.style.right = "12px";
           wrapper.style.left = "auto";
           wrapper.style.top = "auto";
           iframe.style.width = "420px";
-          iframe.style.height = "700px";
+          iframe.style.height = "680px";
         }
       } else {
-        // Closed - compact button
+        // Closed - futuristic floating button
         wrapper.style.width = BUTTON_SIZE;
         wrapper.style.height = BUTTON_HEIGHT;
-        wrapper.style.bottom = "16px";
-        wrapper.style.right = "16px";
+        wrapper.style.bottom = "12px";
+        wrapper.style.right = "12px";
         wrapper.style.left = "auto";
         wrapper.style.top = "auto";
         iframe.style.width = BUTTON_SIZE;

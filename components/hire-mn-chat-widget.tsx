@@ -189,14 +189,14 @@ function MascotRobot({ size = 58, white = false, waving = false }: { size?: numb
 function BrainAvatar() {
   return (
     <div style={{
-      width: 32, height: 32, borderRadius: 10,
-      background: "linear-gradient(145deg, #FEF3EE, #FFE8DC)",
-      border: "1.5px solid #FDDCCC",
+      width: 34, height: 34, borderRadius: 11,
+      background: "linear-gradient(145deg, #FFF8F5, #FFE8DC)",
+      border: "1.5px solid rgba(232,84,26,0.15)",
       display: "flex", alignItems: "center", justifyContent: "center",
       flexShrink: 0,
-      boxShadow: "0 2px 8px rgba(232,84,26,0.12)",
+      boxShadow: "0 4px 12px rgba(232,84,26,0.1), inset 0 1px 0 rgba(255,255,255,0.8)",
     }}>
-      <img src="/mascot.png" alt="AI" className="hw-mascot-float" style={{ width: 26, height: 26, borderRadius: 6, objectFit: "cover" }} />
+      <img src="/mascot.png" alt="AI" className="hw-mascot-float" style={{ width: 28, height: 28, borderRadius: 8, objectFit: "cover" }} />
     </div>
   )
 }
@@ -208,18 +208,20 @@ function TypingIndicator() {
     <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
       <BrainAvatar />
       <div style={{
-        background: "#fff", border: "1px solid #F0EAE6",
+        background: "linear-gradient(135deg, #fff 0%, #FFFCFA 100%)", 
+        border: "1px solid rgba(232,84,26,0.1)",
         borderRadius: 16, borderBottomLeftRadius: 4,
-        padding: "12px 16px",
-        display: "flex", gap: 5, alignItems: "center",
-        boxShadow: "0 2px 8px rgba(0,0,0,.04)",
+        padding: "14px 18px",
+        display: "flex", gap: 6, alignItems: "center",
+        boxShadow: "0 4px 16px rgba(0,0,0,.04), inset 0 1px 0 rgba(255,255,255,0.8)",
       }}>
         {[0, 1, 2].map(i => (
           <div key={i} style={{
-            width: 8, height: 8,
-            background: "linear-gradient(135deg, #E8541A, #F5A07A)",
+            width: 9, height: 9,
+            background: "linear-gradient(135deg, #E8541A, #FF8C42)",
             borderRadius: "50%",
-            animation: `hw-bounce 1.4s ease-in-out ${i * 0.15}s infinite`,
+            animation: `hw-bounce 1.4s ease-in-out ${i * 0.16}s infinite`,
+            boxShadow: "0 2px 6px rgba(232,84,26,0.3)",
           }} />
         ))}
       </div>
@@ -262,12 +264,14 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
       className="hw-card"
       style={{
         display: "flex", flexDirection: "column",
-        background: "#fff",
-        border: "1.5px solid #EAE0D9", borderRadius: 18,
+        background: "linear-gradient(145deg, #fff 0%, #FFFCFA 100%)",
+        border: "1.5px solid rgba(232,84,26,0.08)", 
+        borderRadius: 18,
         overflow: "hidden", textDecoration: "none",
         width: CARD_W, minWidth: CARD_W, maxWidth: CARD_W, flexShrink: 0,
         height: 310,
-        animation: `hw-card-in 0.4s cubic-bezier(.34,1.56,.64,1) ${index * 0.07}s both`,
+        animation: `hw-card-in 0.45s cubic-bezier(.16,1,.3,1) ${index * 0.08}s both`,
+        boxShadow: "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9)",
       }}
     >
       {/* Cover image header */}
@@ -775,15 +779,16 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {cleanText && (
-        <div style={{ display: "flex", gap: 10, alignItems: "flex-end", animation: "hw-slide-up 0.35s ease-out" }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "flex-end", animation: "hw-msg-in 0.4s cubic-bezier(.16,1,.3,1)" }}>
           <BrainAvatar />
           <div style={{
-            maxWidth: "80%", background: "#fff",
-            border: "1.5px solid #F0EAE6",
-            borderRadius: 16, borderBottomLeftRadius: 4,
-            padding: "12px 16px",
-            fontSize: fontSize, lineHeight: 1.6, color: "#1F2937",
-            boxShadow: "0 2px 8px rgba(0,0,0,.04)",
+            maxWidth: "82%", 
+            background: "linear-gradient(145deg, #fff 0%, #FFFCFA 100%)",
+            border: "1.5px solid rgba(232,84,26,0.08)",
+            borderRadius: 18, borderBottomLeftRadius: 4,
+            padding: "14px 18px",
+            fontSize: fontSize, lineHeight: 1.65, color: "#1F2937",
+            boxShadow: "0 4px 16px rgba(0,0,0,.04), inset 0 1px 0 rgba(255,255,255,0.9)",
             wordBreak: "break-word",
           }}>
             {renderFormattedText(cleanText)}
@@ -937,15 +942,18 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
 
 function UserMessage({ content, fontSize }: { content: string; fontSize: number }) {
   return (
-    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+    <div style={{ display: "flex", justifyContent: "flex-end", animation: "hw-msg-in 0.35s cubic-bezier(.16,1,.3,1)" }}>
       <div style={{
-        maxWidth: "80%",
-        background: "linear-gradient(135deg, #E8541A 0%, #F06030 100%)",
+        maxWidth: "82%",
+        background: "linear-gradient(135deg, #E8541A 0%, #F06835 50%, #FF8C42 100%)",
+        backgroundSize: "200% 200%",
         color: "#fff",
-        borderRadius: 16, borderBottomRightRadius: 4,
-        padding: "12px 16px",
+        borderRadius: 18, borderBottomRightRadius: 4,
+        padding: "13px 17px",
         fontSize: fontSize, lineHeight: 1.65, wordBreak: "break-word",
-        boxShadow: "0 4px 12px rgba(232,84,26,.2)",
+        fontWeight: 500,
+        boxShadow: "0 6px 20px rgba(232,84,26,.22), inset 0 1px 0 rgba(255,255,255,0.15)",
+        textShadow: "0 1px 2px rgba(0,0,0,0.1)",
       }}>
         {content}
       </div>
@@ -983,7 +991,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     const initialMessages: Message[] = [
       {
         role: "assistant",
-        content: "Сайн байна уу!\n\nБ�� бол hire.mn-ы AI туслагч. Та надаас:\n\n- **Тест санал бол����ох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар зөвлөгөө авах боломжтой.",
+        content: "Сайн байна уу!\n\nБ���� бол hire.mn-ы AI туслагч. Та надаас:\n\n- **Тест санал бол����ох:** Таны нөхцөл байдал, асуудалд тохирсон тестүүдийг олж өгнө (40+ төрлийн тест)\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг дүн шинжилгээ хийж, практик зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, зан төлөв, ажлын байрны асуудлаар зөвлөгөө авах боломжтой.",
       },
     ]
 
@@ -1337,53 +1345,67 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           100% { background-position: 200% 0; }
         }
         
-        /* Liquid Glass Futuristic Animations */
+        /* ═══════════════════════════════════════════════════════════════════════
+           LIQUID GLASS MORPHISM - FUTURISTIC UI ANIMATIONS
+           ═══════════════════════════════════════════════════════════════════════ */
+        
         @keyframes hw-float {
           0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-10px) scale(1.03); }
+          50% { transform: translateY(-8px) scale(1.02); }
         }
         @keyframes hw-ring {
-          0% { transform: scale(1); opacity: 0.7; }
-          100% { transform: scale(1.8); opacity: 0; }
+          0% { transform: scale(1); opacity: 0.8; }
+          100% { transform: scale(2.2); opacity: 0; }
         }
         @keyframes hw-online-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
-          50% { box-shadow: 0 0 0 10px rgba(34,197,94,0); }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+          50% { box-shadow: 0 0 0 12px rgba(34,197,94,0); }
         }
         @keyframes hw-msg-in {
-          from { transform: translateY(20px) scale(0.92); opacity: 0; filter: blur(4px); }
-          to { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
+          from { transform: translateY(16px) scale(0.95); opacity: 0; }
+          to { transform: translateY(0) scale(1); opacity: 1; }
         }
         @keyframes hw-glow {
-          0%, 100% { box-shadow: 0 0 30px rgba(232,84,26,0.3); }
-          50% { box-shadow: 0 0 60px rgba(232,84,26,0.5); }
+          0%, 100% { box-shadow: 0 0 40px rgba(232,84,26,0.25); }
+          50% { box-shadow: 0 0 80px rgba(232,84,26,0.45); }
         }
         @keyframes hw-aurora {
-          0%, 100% { transform: rotate(0deg) scale(1); }
-          25% { transform: rotate(5deg) scale(1.05); }
-          50% { transform: rotate(0deg) scale(1.1); }
-          75% { transform: rotate(-5deg) scale(1.05); }
+          0% { transform: rotate(0deg) translate(0, 0); }
+          33% { transform: rotate(120deg) translate(10px, -10px); }
+          66% { transform: rotate(240deg) translate(-10px, 10px); }
+          100% { transform: rotate(360deg) translate(0, 0); }
         }
-        @keyframes hw-orb {
-          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
-          33% { transform: translate(10px, -15px) scale(1.1); opacity: 0.7; }
-          66% { transform: translate(-5px, 10px) scale(0.95); opacity: 0.4; }
-        }
-        @keyframes hw-grid-move {
-          0% { transform: translate(0, 0); }
-          100% { transform: translate(20px, 20px); }
-        }
-        @keyframes hw-pulse {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.2); opacity: 0.8; }
-        }
-        @keyframes hw-mascot-glow {
-          0%, 100% { box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 0 40px rgba(255,200,150,0.2); }
-          50% { box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 0 60px rgba(255,200,150,0.4); }
+        @keyframes hw-orb-float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(15px, -10px) scale(1.1); }
+          50% { transform: translate(5px, 15px) scale(0.95); }
+          75% { transform: translate(-10px, 5px) scale(1.05); }
         }
         @keyframes hw-shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes hw-pulse-ring {
+          0% { transform: scale(0.95); opacity: 1; }
+          50% { transform: scale(1.05); opacity: 0.8; }
+          100% { transform: scale(0.95); opacity: 1; }
+        }
+        @keyframes hw-gradient-shift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes hw-breathe {
+          0%, 100% { transform: scale(1); filter: brightness(1); }
+          50% { transform: scale(1.02); filter: brightness(1.05); }
+        }
+        @keyframes hw-border-glow {
+          0%, 100% { border-color: rgba(232,84,26,0.3); }
+          50% { border-color: rgba(232,84,26,0.6); }
+        }
+        @keyframes hw-sparkle {
+          0%, 100% { opacity: 0.3; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.2); }
         }
 
         .hw-msg { animation: hw-pop 0.4s cubic-bezier(.34,1.56,.64,1) both; }
@@ -1474,98 +1496,150 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 16,
       }}>
 
-        {/* Chat panel */}
+        {/* ═══════════════════════════════════════════════════════════════════════
+            FUTURISTIC LIQUID GLASS CHAT PANEL
+            ═══════════════════════════════════════════════════════════════════════ */}
         {isOpen && (
-          <div style={{ animation: "hw-chat-open 0.5s cubic-bezier(.22,1,.36,1)" }}>
-            {/* Liquid Glass Morphism Panel */}
+          <div style={{ animation: "hw-chat-open 0.6s cubic-bezier(.16,1,.3,1)" }}>
             <div className="hw-panel" style={{
               width: 400,
-              height: "min(650px, calc(100vh - 100px))",
+              height: "min(620px, calc(100vh - 80px))",
               position: "relative",
               overflow: "hidden",
-              maxWidth: "calc(100vw - 32px)",
-              borderRadius: 28,
-              /* Liquid Glass Effect */
-              background: "linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(255,252,250,0.95) 50%, rgba(255,250,245,0.92) 100%)",
-              backdropFilter: "blur(40px) saturate(180%)",
-              WebkitBackdropFilter: "blur(40px) saturate(180%)",
+              maxWidth: "calc(100vw - 24px)",
+              borderRadius: 24,
+              /* Premium Liquid Glass Effect */
+              background: `linear-gradient(165deg, 
+                rgba(255,255,255,0.95) 0%, 
+                rgba(255,253,251,0.92) 40%, 
+                rgba(255,248,244,0.88) 100%)`,
+              backdropFilter: "blur(40px) saturate(200%)",
+              WebkitBackdropFilter: "blur(40px) saturate(200%)",
               boxShadow: `
-                0 0 0 1px rgba(255,255,255,0.9),
-                0 0 0 2px rgba(232,84,26,0.06),
-                0 25px 80px -15px rgba(232,84,26,0.2),
-                0 40px 120px -25px rgba(0,0,0,0.12),
-                inset 0 1px 0 rgba(255,255,255,1),
-                inset 0 -1px 0 rgba(232,84,26,0.03)
+                0 0 0 1px rgba(255,255,255,0.7),
+                0 25px 60px -12px rgba(232,84,26,0.25),
+                0 12px 24px -8px rgba(0,0,0,0.1),
+                inset 0 1px 1px rgba(255,255,255,1)
               `,
               display: "flex", flexDirection: "column",
-              border: "none",
+              border: "1px solid rgba(232,84,26,0.08)",
             }}>
-              {/* Compact Futuristic Header */}
+              
+              {/* ══════════ ANIMATED BACKGROUND EFFECTS ══════════ */}
+              <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: 24, pointerEvents: "none", zIndex: 0 }}>
+                {/* Floating orbs */}
+                <div style={{
+                  position: "absolute", top: "15%", right: "-10%", width: 200, height: 200, borderRadius: "50%",
+                  background: "radial-gradient(circle, rgba(232,84,26,0.08) 0%, transparent 70%)",
+                  animation: "hw-orb-float 20s ease-in-out infinite",
+                }} />
+                <div style={{
+                  position: "absolute", bottom: "20%", left: "-15%", width: 160, height: 160, borderRadius: "50%",
+                  background: "radial-gradient(circle, rgba(255,140,66,0.06) 0%, transparent 70%)",
+                  animation: "hw-orb-float 25s ease-in-out infinite reverse",
+                }} />
+              </div>
+
+              {/* ══════════ FUTURISTIC HEADER ══════════ */}
               <div style={{
-                background: "linear-gradient(135deg, rgba(232,84,26,0.98) 0%, rgba(255,107,61,0.95) 100%)",
-                padding: "16px 18px 14px 18px",
-                flexShrink: 0, position: "relative",
-                borderRadius: "28px 28px 0 0",
+                background: `linear-gradient(135deg, 
+                  #E8541A 0%, 
+                  #F06835 40%, 
+                  #FF8C42 100%)`,
+                backgroundSize: "200% 200%",
+                animation: "hw-gradient-shift 8s ease infinite",
+                padding: "18px 16px 16px",
+                flexShrink: 0, 
+                position: "relative",
+                borderRadius: "24px 24px 0 0",
                 overflow: "hidden",
               }}>
-                {/* Subtle grid overlay */}
+                {/* Header shimmer effect */}
                 <div style={{
-                  position: "absolute", inset: 0, opacity: 0.08,
-                  backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-                  backgroundSize: "16px 16px",
+                  position: "absolute", inset: 0, overflow: "hidden",
+                }}>
+                  <div style={{
+                    position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%",
+                    background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)",
+                    animation: "hw-shimmer 3s ease-in-out infinite",
+                  }} />
+                </div>
+                
+                {/* Decorative circles */}
+                <div style={{
+                  position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: "50%",
+                  background: "rgba(255,255,255,0.1)",
+                  animation: "hw-breathe 4s ease-in-out infinite",
+                }} />
+                <div style={{
+                  position: "absolute", bottom: -20, left: 30, width: 60, height: 60, borderRadius: "50%",
+                  background: "rgba(255,255,255,0.08)",
+                  animation: "hw-breathe 5s ease-in-out infinite 1s",
                 }} />
                 
-                {/* Header content - compact */}
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14, position: "relative", zIndex: 1 }}>
-                  {/* Mascot */}
+                {/* Header content */}
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14, position: "relative", zIndex: 1 }}>
+                  {/* Glowing Mascot Container */}
                   <div style={{
-                    width: 46, height: 46, borderRadius: 14,
+                    width: 50, height: 50, borderRadius: 16,
                     background: "rgba(255,255,255,0.98)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.15), 0 0 0 2px rgba(255,255,255,0.5)",
                     overflow: "hidden",
-                    border: "2px solid rgba(255,255,255,0.5)",
+                    animation: "hw-pulse-ring 3s ease-in-out infinite",
                   }}>
-                    <img src="/mascot.png" alt="AI" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 10 }} />
+                    <img src="/mascot.png" alt="AI" style={{ width: 42, height: 42, objectFit: "cover", borderRadius: 12 }} />
                   </div>
                   
                   <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ color: "#fff", fontWeight: 700, fontSize: 16, textShadow: "0 1px 4px rgba(0,0,0,0.15)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ 
+                        color: "#fff", fontWeight: 700, fontSize: 17, 
+                        textShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                        letterSpacing: "-0.3px"
+                      }}>
                         hire.mn AI
                       </span>
+                      {/* Animated Online Badge */}
                       <span style={{
-                        fontSize: 8, fontWeight: 700, letterSpacing: "0.5px",
-                        color: "#22C55E", background: "rgba(255,255,255,0.95)",
-                        padding: "3px 8px", borderRadius: 10,
-                        display: "flex", alignItems: "center", gap: 3,
+                        fontSize: 9, fontWeight: 700, letterSpacing: "0.8px",
+                        color: "#fff", 
+                        background: "linear-gradient(135deg, rgba(34,197,94,0.9), rgba(74,222,128,0.9))",
+                        padding: "4px 10px", borderRadius: 12,
+                        display: "flex", alignItems: "center", gap: 5,
+                        boxShadow: "0 2px 8px rgba(34,197,94,0.4)",
                       }}>
-                        <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#22C55E" }} />
+                        <span style={{ 
+                          width: 6, height: 6, borderRadius: "50%", background: "#fff",
+                          animation: "hw-sparkle 1.5s ease-in-out infinite" 
+                        }} />
                         ONLINE
                       </span>
                     </div>
-                    <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 12, marginTop: 2 }}>
-                      Танд туслахад бэлэн
+                    <div style={{ color: "rgba(255,255,255,0.9)", fontSize: 12, marginTop: 3, fontWeight: 500 }}>
+                      24/7 танд туслахад бэлэн
                     </div>
                   </div>
                   
+                  {/* Close Button - Glassmorphism */}
                   <button
                     onClick={() => setIsOpen(false)}
                     style={{
-                      width: 34, height: 34, borderRadius: 10,
-                      background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.2)",
+                      width: 36, height: 36, borderRadius: 12,
+                      background: "rgba(255,255,255,0.15)", 
+                      backdropFilter: "blur(10px)",
+                      border: "1px solid rgba(255,255,255,0.25)",
                       color: "#fff", cursor: "pointer",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      transition: "all 0.3s ease",
+                      transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
                     }}
                     onMouseEnter={e => {
                       (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.25)"
-                      ; (e.currentTarget as HTMLElement).style.transform = "rotate(90deg)"
+                      ; (e.currentTarget as HTMLElement).style.transform = "rotate(90deg) scale(1.1)"
                     }}
                     onMouseLeave={e => {
                       (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.15)"
-                      ; (e.currentTarget as HTMLElement).style.transform = "rotate(0deg)"
+                      ; (e.currentTarget as HTMLElement).style.transform = "rotate(0deg) scale(1)"
                     }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -1574,10 +1648,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   </button>
                 </div>
 
-                {/* Tab navigation - compact */}
+                {/* ══════════ GLASS TAB NAVIGATION ══════════ */}
                 <div style={{
-                  display: "flex", gap: 4,
-                  background: "rgba(0,0,0,0.1)", borderRadius: 12, padding: 4,
+                  display: "flex", gap: 6,
+                  background: "rgba(0,0,0,0.12)", 
+                  backdropFilter: "blur(8px)",
+                  borderRadius: 14, padding: 5,
                   position: "relative", zIndex: 1,
                 }}>
                   {[
@@ -1589,17 +1665,20 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       key={tab.label}
                       onClick={() => setActiveTab(i)}
                       style={{
-                        flex: 1, padding: "10px 10px", borderRadius: 9,
-                        background: activeTab === i ? "rgba(255,255,255,0.95)" : "transparent",
+                        flex: 1, padding: "10px 12px", borderRadius: 10,
+                        background: activeTab === i 
+                          ? "linear-gradient(135deg, rgba(255,255,255,0.98), rgba(255,252,250,0.95))" 
+                          : "transparent",
                         border: "none", cursor: "pointer",
-                        color: activeTab === i ? "#E8541A" : "rgba(255,255,255,0.8)",
+                        color: activeTab === i ? "#E8541A" : "rgba(255,255,255,0.85)",
                         fontSize: 12, fontWeight: 600,
                         display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                        transition: "all 0.3s ease",
-                        boxShadow: activeTab === i ? "0 4px 12px rgba(0,0,0,0.1)" : "none",
+                        transition: "all 0.35s cubic-bezier(.16,1,.3,1)",
+                        boxShadow: activeTab === i ? "0 4px 16px rgba(0,0,0,0.12)" : "none",
+                        transform: activeTab === i ? "translateY(-1px)" : "translateY(0)",
                       }}
                     >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d={tab.icon} />
                       </svg>
                       {tab.label}
@@ -1608,17 +1687,18 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 </div>
               </div>
 
-              {/* Tab Content */}
+              {/* ══════════ TAB CONTENT ══════════ */}
               {activeTab === 0 && (
                 <>
-                  {/* Chat Tab - Messages - More space for content */}
+                  {/* Chat Messages Area - Glass Effect */}
                   <div className="hw-scroll" style={{
                     flex: 1, 
-                    minHeight: 0, /* Important for flex scroll */
+                    minHeight: 0,
                     overflowY: "auto", 
-                    padding: "16px 14px 10px",
-                    display: "flex", flexDirection: "column", gap: 12,
-                    background: "linear-gradient(180deg, rgba(255,252,250,0.5) 0%, rgba(255,255,255,0.8) 100%)",
+                    padding: "18px 16px 12px",
+                    display: "flex", flexDirection: "column", gap: 14,
+                    background: "linear-gradient(180deg, rgba(255,253,251,0.4) 0%, rgba(255,255,255,0.6) 100%)",
+                    position: "relative", zIndex: 1,
                   }}>
                     {messages.map((msg, i) => {
                       const prevUserMsg = msg.role === "assistant" && i > 0
@@ -1648,36 +1728,47 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     )}
 
                     {showQuickReplies && !isTyping && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+                      <div style={{ 
+                        display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12,
+                        padding: "14px",
+                        background: "linear-gradient(135deg, rgba(255,248,244,0.8), rgba(255,255,255,0.9))",
+                        borderRadius: 16,
+                        border: "1px solid rgba(232,84,26,0.08)",
+                        backdropFilter: "blur(10px)",
+                      }}>
                         {QUICK_REPLIES.map((qr, i) => (
                           <button
                             key={qr.text}
                             className="hw-chip"
                             onClick={() => sendMessage(qr.text)}
                             style={{
-                              background: "#fff",
-                              border: "1.5px solid rgba(232,84,26,0.15)",
-                              color: "#E8541A",
-                              borderRadius: 20, padding: "8px 14px",
-                              fontSize: fontSize - 1, fontWeight: 500,
+                              background: "linear-gradient(135deg, #fff 0%, #FFFAF8 100%)",
+                              border: "1.5px solid rgba(232,84,26,0.12)",
+                              color: "#D64810",
+                              borderRadius: 20, padding: "9px 16px",
+                              fontSize: fontSize - 1, fontWeight: 600,
                               cursor: "pointer", whiteSpace: "nowrap",
-                              animation: `hw-chip-in 0.3s ease ${i * 0.06}s both`,
-                              boxShadow: "0 2px 8px rgba(232,84,26,0.06)",
-                              display: "flex", alignItems: "center", gap: 6,
-                              transition: "all 0.25s ease",
+                              animation: `hw-chip-in 0.35s cubic-bezier(.16,1,.3,1) ${i * 0.08}s both`,
+                              boxShadow: "0 2px 8px rgba(232,84,26,0.06), inset 0 1px 0 rgba(255,255,255,0.8)",
+                              display: "flex", alignItems: "center", gap: 7,
+                              transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
                             }}
                             onMouseEnter={e => {
-                              (e.currentTarget as HTMLElement).style.background = "#E8541A"
+                              (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)"
                               ; (e.currentTarget as HTMLElement).style.color = "#fff"
-                              ; (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
+                              ; (e.currentTarget as HTMLElement).style.borderColor = "transparent"
+                              ; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px) scale(1.02)"
+                              ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 20px rgba(232,84,26,0.25)"
                             }}
                             onMouseLeave={e => {
-                              (e.currentTarget as HTMLElement).style.background = "#fff"
-                              ; (e.currentTarget as HTMLElement).style.color = "#E8541A"
-                              ; (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.15)"
+                              (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, #fff 0%, #FFFAF8 100%)"
+                              ; (e.currentTarget as HTMLElement).style.color = "#D64810"
+                              ; (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.12)"
+                              ; (e.currentTarget as HTMLElement).style.transform = "translateY(0) scale(1)"
+                              ; (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 8px rgba(232,84,26,0.06), inset 0 1px 0 rgba(255,255,255,0.8)"
                             }}
                           >
-                            <span style={{ fontSize: fontSize }}>{qr.icon}</span>
+                            <span style={{ fontSize: fontSize + 1 }}>{qr.icon}</span>
                             {qr.text}
                           </button>
                         ))}
@@ -1917,29 +2008,33 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 </div>
               )}
 
-              {/* Input - Only show on Chat tab - Compact */}
+              {/* ══════════ FUTURISTIC INPUT AREA ══════════ */}
               {activeTab === 0 && (
               <div style={{
-                padding: "10px 14px 14px",
-                background: "rgba(255,255,255,0.95)",
+                padding: "12px 14px 16px",
+                background: "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,253,251,0.95) 100%)",
+                backdropFilter: "blur(20px)",
                 flexShrink: 0,
                 borderTop: "1px solid rgba(232,84,26,0.06)",
+                position: "relative", zIndex: 1,
               }}>
                 <div style={{
-                  display: "flex", gap: 8, alignItems: "center",
-                  background: "#fff",
-                  border: "1.5px solid rgba(232,84,26,0.12)",
-                  borderRadius: 16, padding: "4px 6px 4px 14px", 
-                  transition: "all 0.2s ease",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                  display: "flex", gap: 10, alignItems: "center",
+                  background: "linear-gradient(135deg, #fff 0%, #FFFCFA 100%)",
+                  border: "2px solid rgba(232,84,26,0.1)",
+                  borderRadius: 18, padding: "5px 6px 5px 16px", 
+                  transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
                 }}
                   onFocusCapture={e => {
                     (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
-                    ; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(232,84,26,0.12)"
+                    ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(232,84,26,0.15), inset 0 1px 0 rgba(255,255,255,0.8)"
+                    ; (e.currentTarget as HTMLElement).style.transform = "scale(1.01)"
                   }}
                   onBlurCapture={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.12)"
-                    ; (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)"
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.1)"
+                    ; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)"
+                    ; (e.currentTarget as HTMLElement).style.transform = "scale(1)"
                   }}
                 >
                   <input
@@ -1952,6 +2047,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       flex: 1, border: "none", background: "transparent",
                       fontSize: fontSize, outline: "none",
                       color: "#333", padding: "10px 0",
+                      fontWeight: 500,
                     }}
                   />
                   <button
@@ -1959,20 +2055,28 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     onClick={() => sendMessage(input)}
                     disabled={!input.trim() || isTyping}
                     style={{
-                      width: 38, height: 38, borderRadius: 12,
-                      background: input.trim() && !isTyping ? "#E8541A" : "#ddd",
+                      width: 42, height: 42, borderRadius: 14,
+                      background: input.trim() && !isTyping 
+                        ? "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)" 
+                        : "linear-gradient(135deg, #E5E5E5 0%, #D9D9D9 100%)",
                       border: "none",
                       cursor: input.trim() && !isTyping ? "pointer" : "not-allowed",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0, transition: "all 0.2s ease",
+                      flexShrink: 0, 
+                      transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
+                      boxShadow: input.trim() && !isTyping 
+                        ? "0 4px 16px rgba(232,84,26,0.3)" 
+                        : "none",
                     }}
                     onMouseEnter={e => {
                       if (input.trim() && !isTyping) {
-                        (e.currentTarget as HTMLElement).style.transform = "scale(1.05)"
+                        (e.currentTarget as HTMLElement).style.transform = "scale(1.08) rotate(5deg)"
+                        ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(232,84,26,0.4)"
                       }
                     }}
                     onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.transform = "scale(1)"
+                      (e.currentTarget as HTMLElement).style.transform = "scale(1) rotate(0deg)"
+                      ; (e.currentTarget as HTMLElement).style.boxShadow = input.trim() && !isTyping ? "0 4px 16px rgba(232,84,26,0.3)" : "none"
                     }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -2033,9 +2137,24 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           </div>
         )}
 
-        {/* Compact Mascot Button */}
+        {/* ═══════════════════════════════════════════════════════════════════════
+            FUTURISTIC FLOATING ACTION BUTTON
+            ═══════════════════════════════════════════════════════════════════════ */}
         {!isOpen && (
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", padding: 10 }}>
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", padding: 12 }}>
+          {/* Animated ring effects */}
+          <div style={{ position: "relative" }}>
+            <div style={{
+              position: "absolute", inset: -8, borderRadius: 30,
+              background: "linear-gradient(135deg, rgba(232,84,26,0.2), rgba(255,140,66,0.15))",
+              animation: "hw-ring 3s ease-out infinite",
+            }} />
+            <div style={{
+              position: "absolute", inset: -4, borderRadius: 28,
+              background: "linear-gradient(135deg, rgba(232,84,26,0.15), rgba(255,107,61,0.1))",
+              animation: "hw-ring 3s ease-out 0.8s infinite",
+            }} />
+            
             <button
               className="hw-mascot"
               onClick={() => setIsOpen(o => !o)}
@@ -2043,52 +2162,81 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               onMouseLeave={() => setIsHovered(false)}
               aria-label="hire.mn чат нээх"
               style={{
-                height: 52, 
-                borderRadius: 26,
-                background: "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)",
-                border: "none",
+                height: 56, 
+                borderRadius: 28,
+                /* Gradient with animation */
+                background: `linear-gradient(135deg, #E8541A 0%, #F06835 50%, #FF8C42 100%)`,
+                backgroundSize: "200% 200%",
+                animation: isHovered ? "hw-gradient-shift 3s ease infinite" : "none",
+                border: "2px solid rgba(255,255,255,0.3)",
                 cursor: "pointer",
-                display: "flex", alignItems: "center", gap: 10,
-                paddingLeft: 6, paddingRight: 18,
+                display: "flex", alignItems: "center", gap: 12,
+                paddingLeft: 8, paddingRight: 20,
                 flexShrink: 0, position: "relative",
                 boxShadow: isHovered 
-                  ? "0 12px 32px rgba(232,84,26,0.4), 0 4px 12px rgba(0,0,0,0.1)"
-                  : "0 8px 24px rgba(232,84,26,0.3), 0 2px 8px rgba(0,0,0,0.08)",
-                transition: "all 0.3s ease",
-                transform: isHovered ? "scale(1.03) translateY(-2px)" : "scale(1) translateY(0)",
+                  ? `0 16px 40px rgba(232,84,26,0.45), 
+                     0 8px 16px rgba(0,0,0,0.1),
+                     inset 0 1px 0 rgba(255,255,255,0.3)`
+                  : `0 10px 30px rgba(232,84,26,0.35), 
+                     0 4px 10px rgba(0,0,0,0.08),
+                     inset 0 1px 0 rgba(255,255,255,0.2)`,
+                transition: "all 0.4s cubic-bezier(.16,1,.3,1)",
+                transform: isHovered ? "scale(1.05) translateY(-3px)" : "scale(1) translateY(0)",
+                overflow: "hidden",
               }}
             >
-              {/* Mascot avatar */}
+              {/* Shimmer overlay on hover */}
               <div style={{
-                width: 40, height: 40, borderRadius: "50%",
-                background: "#fff",
+                position: "absolute", inset: 0, overflow: "hidden", borderRadius: 26,
+              }}>
+                <div style={{
+                  position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%",
+                  background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)",
+                  animation: isHovered ? "hw-shimmer 1.2s ease-in-out infinite" : "none",
+                }} />
+              </div>
+              
+              {/* Mascot avatar with glow */}
+              <div style={{
+                width: 42, height: 42, borderRadius: 14,
+                background: "rgba(255,255,255,0.98)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
                 overflow: "hidden",
+                transition: "transform 0.4s cubic-bezier(.16,1,.3,1)",
+                transform: isHovered ? "rotate(-5deg) scale(1.05)" : "rotate(0) scale(1)",
+                position: "relative", zIndex: 1,
               }}>
                 <img
                   src="/mascot.png"
                   alt="AI Assistant"
-                  style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover" }}
+                  style={{ width: 36, height: 36, borderRadius: 10, objectFit: "cover" }}
                 />
               </div>
               
               <span style={{
                 color: "#fff",
                 fontSize: 14,
-                fontWeight: 600,
+                fontWeight: 700,
+                textShadow: "0 2px 4px rgba(0,0,0,0.15)",
+                letterSpacing: "-0.2px",
+                position: "relative", zIndex: 1,
               }}>
                 Тусламж авах
               </span>
               
-              {/* Online indicator */}
+              {/* Pulsing online indicator */}
               <span style={{
-                position: "absolute", bottom: 2, left: 38,
-                width: 12, height: 12, borderRadius: "50%",
-                background: "#22C55E",
-                border: "2px solid #fff",
+                position: "absolute", bottom: 4, left: 42,
+                width: 14, height: 14, borderRadius: "50%",
+                background: "linear-gradient(135deg, #22C55E, #4ADE80)",
+                border: "2.5px solid #fff",
+                boxShadow: "0 0 0 0 rgba(34,197,94,0.5)",
+                animation: "hw-online-pulse 2s ease-in-out infinite",
+                zIndex: 2,
               }} />
             </button>
+          </div>
         </div>
         )}
 
