@@ -258,7 +258,7 @@ function getCoverImage(test: Test): string {
 
 // ── Test Card ─────────────────────────────────────────────────────────────────
 
-const CARD_W = 200
+const CARD_W = 180
 
 function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; fontSize: number }) {
   const [imgLoaded, setImgLoaded] = useState(false)
@@ -1607,11 +1607,59 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         .hw-tab { transition: all 0.2s cubic-bezier(.34,1.56,.64,1); }
         .hw-tab:hover { transform: translateY(-2px); }
 
+        /* Mobile fullscreen */
+        @media (max-width: 480px) {
+          .hw-root {
+            bottom: 0 !important;
+            right: 0 !important;
+          }
+          .hw-panel {
+            width: 100vw !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            max-width: 100vw !important;
+            border-radius: 0 !important;
+          }
+          .hw-panel-animation {
+            animation: none !important;
+          }
+        }
+        
+        /* Small mobile */
         @media (max-width: 380px) {
           .hw-panel {
-            width: 340px !important;
-            height: 520px !important;
-            border-radius: 16px !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            border-radius: 0 !important;
+          }
+        }
+        
+        /* Tablet */
+        @media (min-width: 481px) and (max-width: 768px) {
+          .hw-panel {
+            width: 380px !important;
+            height: min(600px, calc(100vh - 100px)) !important;
+          }
+        }
+        
+        /* Landscape mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+          .hw-panel {
+            height: 100vh !important;
+            height: 100dvh !important;
+            width: min(400px, 60vw) !important;
+          }
+        }
+        
+        /* FAB mobile adjustments */
+        @media (max-width: 480px) {
+          .hw-fab-text {
+            display: none !important;
+          }
+          .hw-mascot {
+            padding-right: 8px !important;
+            gap: 0 !important;
           }
         }
       `}</style>
@@ -1625,7 +1673,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             FUTURISTIC LIQUID GLASS CHAT PANEL
             ═══════════════════════════════════════════════════════════════════════ */}
         {isOpen && (
-          <div style={{ animation: "hw-chat-open 0.6s cubic-bezier(.16,1,.3,1)" }}>
+          <div className="hw-panel-animation" style={{ animation: "hw-chat-open 0.6s cubic-bezier(.16,1,.3,1)" }}>
             <div className="hw-panel" style={{
               width: 400,
               height: "min(620px, calc(100vh - 80px))",
@@ -1703,23 +1751,24 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 }} />
                 
                 {/* Header content */}
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14, position: "relative", zIndex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, position: "relative", zIndex: 1 }}>
                   {/* Glowing Mascot Container */}
                   <div style={{
-                    width: 50, height: 50, borderRadius: 16,
+                    width: 44, height: 44, borderRadius: 14,
                     background: "rgba(255,255,255,0.98)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     boxShadow: "0 8px 24px rgba(0,0,0,0.15), 0 0 0 2px rgba(255,255,255,0.5)",
                     overflow: "hidden",
                     animation: "hw-pulse-ring 3s ease-in-out infinite",
+                    flexShrink: 0,
                   }}>
-                    <img src="/mascot.png" alt="AI" style={{ width: 42, height: 42, objectFit: "cover", borderRadius: 12 }} />
+                    <img src="/mascot.png" alt="AI" style={{ width: 36, height: 36, objectFit: "cover", borderRadius: 10 }} />
                   </div>
                   
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                       <span style={{ 
-                        color: "#fff", fontWeight: 700, fontSize: 17, 
+                        color: "#fff", fontWeight: 700, fontSize: 16, 
                         textShadow: "0 2px 8px rgba(0,0,0,0.2)",
                         letterSpacing: "-0.3px"
                       }}>
@@ -1727,21 +1776,21 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       </span>
                       {/* Animated Online Badge */}
                       <span style={{
-                        fontSize: 9, fontWeight: 700, letterSpacing: "0.8px",
+                        fontSize: 8, fontWeight: 700, letterSpacing: "0.6px",
                         color: "#fff", 
                         background: "linear-gradient(135deg, rgba(34,197,94,0.9), rgba(74,222,128,0.9))",
-                        padding: "4px 10px", borderRadius: 12,
-                        display: "flex", alignItems: "center", gap: 5,
+                        padding: "3px 8px", borderRadius: 10,
+                        display: "flex", alignItems: "center", gap: 4,
                         boxShadow: "0 2px 8px rgba(34,197,94,0.4)",
                       }}>
                         <span style={{ 
-                          width: 6, height: 6, borderRadius: "50%", background: "#fff",
+                          width: 5, height: 5, borderRadius: "50%", background: "#fff",
                           animation: "hw-sparkle 1.5s ease-in-out infinite" 
                         }} />
                         ONLINE
                       </span>
                     </div>
-                    <div style={{ color: "rgba(255,255,255,0.9)", fontSize: 12, marginTop: 3, fontWeight: 500 }}>
+                    <div style={{ color: "rgba(255,255,255,0.9)", fontSize: 11, marginTop: 2, fontWeight: 500 }}>
                       24/7 танд туслахад бэлэн
                     </div>
                   </div>
@@ -1820,8 +1869,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     flex: 1, 
                     minHeight: 0,
                     overflowY: "auto", 
-                    padding: "18px 16px 12px",
-                    display: "flex", flexDirection: "column", gap: 14,
+                    padding: "16px 12px 10px",
+                    display: "flex", flexDirection: "column", gap: 12,
                     background: "linear-gradient(180deg, rgba(255,253,251,0.4) 0%, rgba(255,255,255,0.6) 100%)",
                     position: "relative", zIndex: 1,
                   }}>
@@ -1868,7 +1917,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         }}>
                           Түгээмэл асуултууд
                         </div>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                           {QUICK_REPLIES.map((qr, i) => (
                             <button
                               key={qr.text}
@@ -1878,9 +1927,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                                 background: "#fff",
                                 border: "1.5px solid #E5E7EB",
                                 color: "#374151",
-                                borderRadius: 12, 
-                                padding: "10px 14px",
-                                fontSize: fontSize - 1, 
+                                borderRadius: 10, 
+                                padding: "8px 12px",
+                                fontSize: Math.max(fontSize - 2, 12), 
                                 fontWeight: 500,
                                 cursor: "pointer", 
                                 whiteSpace: "nowrap",
@@ -2150,7 +2199,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               {/* INPUT AREA */}
               {activeTab === 0 && (
               <div style={{
-                padding: "12px 14px 16px",
+                padding: "10px 12px max(14px, env(safe-area-inset-bottom, 14px))",
                 background: "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,253,251,0.95) 100%)",
                 backdropFilter: "blur(20px)",
                 flexShrink: 0,
@@ -2158,10 +2207,10 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 position: "relative", zIndex: 1,
               }}>
                 <div style={{
-                  display: "flex", gap: 10, alignItems: "center",
+                  display: "flex", gap: 8, alignItems: "center",
                   background: "linear-gradient(135deg, #fff 0%, #FFFCFA 100%)",
                   border: "2px solid rgba(232,84,26,0.1)",
-                  borderRadius: 18, padding: "5px 6px 5px 16px", 
+                  borderRadius: 16, padding: "4px 5px 4px 14px", 
                   transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
                   boxShadow: "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
                 }}
@@ -2194,7 +2243,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     onClick={() => sendMessage(input)}
                     disabled={!input.trim() || isTyping}
                     style={{
-                      width: 42, height: 42, borderRadius: 14,
+                      width: 40, height: 40, borderRadius: 12,
                       background: input.trim() && !isTyping 
                         ? "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)" 
                         : "linear-gradient(135deg, #E5E5E5 0%, #D9D9D9 100%)",
@@ -2361,7 +2410,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 letterSpacing: "-0.2px",
                 position: "relative", zIndex: 1,
               }}>
-                Тусламж авах
+                <span className="hw-fab-text">Тусламж авах</span>
               </span>
               
               {/* Pulsing online indicator */}
