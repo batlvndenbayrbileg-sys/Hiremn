@@ -15,17 +15,17 @@
     return;
   }
 
-  // Button size - liquid glass pill with glow rings
-  var BUTTON_SIZE = "280px";
-  var BUTTON_HEIGHT = "110px";
+  // Button size - compact pill button
+  var BUTTON_SIZE = "220px";
+  var BUTTON_HEIGHT = "80px";
 
   // ── Wrapper div (fixed, bottom-right) ────────────────────────────────────
   var wrapper = document.createElement("div");
   wrapper.id = "hiremn-widget-root";
   wrapper.style.cssText =
     "position:fixed !important;" +
-    "bottom:20px !important;" +
-    "right:20px !important;" +
+    "bottom:16px !important;" +
+    "right:16px !important;" +
     "z-index:2147483647 !important;" +
     "pointer-events:none !important;" +
     "overflow:visible !important;" +
@@ -74,21 +74,21 @@
           iframe.style.width = "100%";
           iframe.style.height = "100%";
         } else {
-          wrapper.style.width = "440px";
-          wrapper.style.height = "780px";
-          wrapper.style.bottom = "20px";
-          wrapper.style.right = "20px";
+          wrapper.style.width = "420px";
+          wrapper.style.height = "700px";
+          wrapper.style.bottom = "16px";
+          wrapper.style.right = "16px";
           wrapper.style.left = "auto";
           wrapper.style.top = "auto";
-          iframe.style.width = "440px";
-          iframe.style.height = "780px";
+          iframe.style.width = "420px";
+          iframe.style.height = "700px";
         }
       } else {
-        // Closed - liquid glass button with glow space
+        // Closed - compact button
         wrapper.style.width = BUTTON_SIZE;
         wrapper.style.height = BUTTON_HEIGHT;
-        wrapper.style.bottom = "20px";
-        wrapper.style.right = "20px";
+        wrapper.style.bottom = "16px";
+        wrapper.style.right = "16px";
         wrapper.style.left = "auto";
         wrapper.style.top = "auto";
         iframe.style.width = BUTTON_SIZE;
