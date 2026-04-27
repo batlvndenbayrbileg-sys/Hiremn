@@ -1665,8 +1665,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       `}</style>
 
       <div className="hw-root" style={{
-        position: "fixed", bottom: 24, right: 24, zIndex: 99999,
-        display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 16,
+        position: "fixed", bottom: 16, right: 16, zIndex: 99999,
+        display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 14,
       }}>
 
         {/* ═══════════════════════════════════════════════════════════════════════
@@ -2338,7 +2338,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               animation: "hw-ring 3s ease-out infinite",
             }} />
             <div style={{
-              position: "absolute", inset: -4, borderRadius: 28,
+              position: "absolute", inset: -3, borderRadius: 25,
               background: "linear-gradient(135deg, rgba(232,84,26,0.15), rgba(255,107,61,0.1))",
               animation: "hw-ring 3s ease-out 0.8s infinite",
             }} />
@@ -2350,16 +2350,16 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               onMouseLeave={() => setIsHovered(false)}
               aria-label="hire.mn чат нээх"
               style={{
-                height: 56, 
-                borderRadius: 28,
+                height: 50, 
+                borderRadius: 25,
                 /* Gradient with animation */
                 background: `linear-gradient(135deg, #E8541A 0%, #F06835 50%, #FF8C42 100%)`,
                 backgroundSize: "200% 200%",
                 animation: isHovered ? "hw-gradient-shift 3s ease infinite" : "none",
                 border: "2px solid rgba(255,255,255,0.3)",
                 cursor: "pointer",
-                display: "flex", alignItems: "center", gap: 12,
-                paddingLeft: 8, paddingRight: 20,
+                display: "flex", alignItems: "center", gap: 10,
+                paddingLeft: 6, paddingRight: 16,
                 flexShrink: 0, position: "relative",
                 boxShadow: isHovered 
                   ? `0 16px 40px rgba(232,84,26,0.45), 
@@ -2386,7 +2386,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               
               {/* Mascot avatar with glow */}
               <div style={{
-                width: 42, height: 42, borderRadius: 14,
+                width: 38, height: 38, borderRadius: 12,
                 background: "rgba(255,255,255,0.98)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
@@ -2398,13 +2398,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 <img
                   src="/mascot.png"
                   alt="AI Assistant"
-                  style={{ width: 36, height: 36, borderRadius: 10, objectFit: "cover" }}
+                  style={{ width: 32, height: 32, borderRadius: 8, objectFit: "cover" }}
                 />
               </div>
               
               <span style={{
                 color: "#fff",
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: 700,
                 textShadow: "0 2px 4px rgba(0,0,0,0.15)",
                 letterSpacing: "-0.2px",
@@ -2415,8 +2415,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               
               {/* Pulsing online indicator */}
               <span style={{
-                position: "absolute", bottom: 4, left: 42,
-                width: 14, height: 14, borderRadius: "50%",
+                position: "absolute", bottom: 3, left: 38,
+                width: 12, height: 12, borderRadius: "50%",
                 background: "linear-gradient(135deg, #22C55E, #4ADE80)",
                 border: "2.5px solid #fff",
                 boxShadow: "0 0 0 0 rgba(34,197,94,0.5)",
