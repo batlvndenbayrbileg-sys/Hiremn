@@ -2328,7 +2328,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
         {/* ═══════════════════════════════════════════════════════════════════════
             FUTURISTIC FLOATING ACTION BUTTON
-            ═══════════════════════════������══════════════════════════════════════════ */}
+            ═════════════════════════���═������══════════════════════════════════════════ */}
         {!isOpen && (
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", padding: 12 }}>
           {/* Animated ring effects */}
@@ -2360,7 +2360,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 border: "1.5px solid rgba(255,255,255,0.25)",
                 cursor: "pointer",
                 display: "flex", alignItems: "center", gap: 10,
-                paddingLeft: 8, paddingRight: 18,
+                paddingLeft: 62, paddingRight: 18,
                 flexShrink: 0, position: "relative",
                 boxShadow: isHovered 
                   ? `0 12px 32px rgba(232,84,26,0.4), 
@@ -2371,7 +2371,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                      inset 0 1px 0 rgba(255,255,255,0.15)`,
                 transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
                 transform: isHovered ? "scale(1.04) translateY(-2px)" : "scale(1) translateY(0)",
-                overflow: "hidden",
+                overflow: "visible",
               }}
             >
               {/* Shimmer overlay on hover */}
@@ -2383,20 +2383,6 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)",
                   animation: isHovered ? "hw-shimmer 1.2s ease-in-out infinite" : "none",
                 }} />
-              </div>
-              
-              {/* Mascot avatar */}
-              <div style={{
-                width: 46, height: 46, borderRadius: 13,
-                background: "rgba(255,255,255,0.95)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
-                overflow: "hidden",
-                transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
-                transform: isHovered ? "rotate(-3deg) scale(1.08)" : "rotate(0) scale(1)",
-                position: "relative", zIndex: 1,
-              }}>
-                <SplineMascot width={40} height={40} borderRadius={12} />
               </div>
               
               <span style={{
@@ -2421,6 +2407,21 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 zIndex: 2,
               }} />
             </button>
+            
+            {/* Mascot avatar - overlaid outside button */}
+            <div style={{
+              position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)",
+              width: 54, height: 54, borderRadius: 16,
+              background: "rgba(255,255,255,0.95)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+              zIndex: 10,
+              transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
+              transform: isHovered ? "rotate(-3deg) scale(1.1) translateY(-3px)" : "rotate(0) scale(1) translateY(0)",
+              overflow: "hidden",
+            }}>
+              <SplineMascot width={46} height={46} borderRadius={13} />
+            </div>
           </div>
         </div>
         )}
