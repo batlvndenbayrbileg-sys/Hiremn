@@ -2328,7 +2328,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
         {/* ═══════════════════════════════════════════════════════════════════════
             FUTURISTIC FLOATING ACTION BUTTON
-            ═══════════════════════════������══════════════════════════════════════════ */}
+            ═════════════════════════���═������══════════════════════════════════════════ */}
         {!isOpen && (
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", padding: 12 }}>
           {/* Animated ring effects */}
@@ -2359,7 +2359,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 animation: isHovered ? "hw-gradient-shift 3s ease infinite" : "none",
                 border: "1.5px solid rgba(255,255,255,0.25)",
                 cursor: "pointer",
-                display: "flex", alignItems: "center", gap: 10,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
                 paddingLeft: 8, paddingRight: 18,
                 flexShrink: 0, position: "relative",
                 boxShadow: isHovered 
@@ -2371,12 +2371,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                      inset 0 1px 0 rgba(255,255,255,0.15)`,
                 transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
                 transform: isHovered ? "scale(1.04) translateY(-2px)" : "scale(1) translateY(0)",
-                overflow: "hidden",
+                overflow: "visible",
               }}
             >
               {/* Shimmer overlay on hover */}
               <div style={{
                 position: "absolute", inset: 0, overflow: "hidden", borderRadius: 29,
+                zIndex: 0,
               }}>
                 <div style={{
                   position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%",
@@ -2385,18 +2386,22 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 }} />
               </div>
               
-              {/* Mascot avatar */}
+              {/* Mascot avatar - Large and popping out */}
               <div style={{
-                width: 46, height: 46, borderRadius: 13,
+                width: 56, height: 56, borderRadius: 16,
                 background: "rgba(255,255,255,0.95)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
                 overflow: "hidden",
                 transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
-                transform: isHovered ? "rotate(-3deg) scale(1.08)" : "rotate(0) scale(1)",
-                position: "relative", zIndex: 1,
+                transform: isHovered ? "translateY(-8px) scale(1.1)" : "translateY(-4px) scale(1)",
+                position: "absolute", 
+                top: -4,
+                left: "50%",
+                marginLeft: -28,
+                zIndex: 10,
+                boxShadow: "0 8px 20px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.1)",
               }}>
-                <SplineMascot width={40} height={40} borderRadius={12} />
+                <SplineMascot width={50} height={50} borderRadius={14} />
               </div>
               
               <span style={{
@@ -2405,20 +2410,22 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 fontWeight: 600,
                 textShadow: "0 1px 3px rgba(0,0,0,0.2)",
                 letterSpacing: "-0.3px",
-                position: "relative", zIndex: 1,
+                position: "relative", 
+                zIndex: 1,
+                marginLeft: 8,
               }}>
                 <span className="hw-fab-text">Чат</span>
               </span>
               
               {/* Pulsing online indicator */}
               <span style={{
-                position: "absolute", bottom: 3, right: 6,
+                position: "absolute", bottom: 6, right: 8,
                 width: 10, height: 10, borderRadius: "50%",
                 background: "#4ADE80",
                 border: "2px solid #fff",
                 boxShadow: "0 0 0 3px rgba(34,197,94,0.2)",
                 animation: "hw-online-pulse 2s ease-in-out infinite",
-                zIndex: 2,
+                zIndex: 11,
               }} />
             </button>
           </div>
