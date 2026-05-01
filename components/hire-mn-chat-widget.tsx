@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { MessageFeedback } from './message-feedback'
 import { ConversationSidebar } from './conversation-sidebar'
+import { SplineMascot } from './spline-mascot'
 import {
   Conversation,
   createNewConversation,
@@ -204,7 +205,7 @@ function BrainAvatar() {
       flexShrink: 0,
       boxShadow: "0 4px 12px rgba(232,84,26,0.1), inset 0 1px 0 rgba(255,255,255,0.8)",
     }}>
-      <img src="/mascot.png" alt="AI" className="hw-mascot-float" style={{ width: 28, height: 28, borderRadius: 8, objectFit: "cover" }} />
+      <SplineMascot width={28} height={28} borderRadius={8} />
     </div>
   )
 }
@@ -1762,7 +1763,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     animation: "hw-pulse-ring 3s ease-in-out infinite",
                     flexShrink: 0,
                   }}>
-                    <img src="/mascot.png" alt="AI" style={{ width: 36, height: 36, objectFit: "cover", borderRadius: 10 }} />
+                    <SplineMascot width={36} height={36} borderRadius={10} />
                   </div>
                   
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -2395,11 +2396,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 transform: isHovered ? "rotate(-5deg) scale(1.05)" : "rotate(0) scale(1)",
                 position: "relative", zIndex: 1,
               }}>
-                <img
-                  src="/mascot.png"
-                  alt="AI Assistant"
-                  style={{ width: 32, height: 32, borderRadius: 8, objectFit: "cover" }}
-                />
+                <SplineMascot width={32} height={32} borderRadius={8} />
               </div>
               
               <span style={{
