@@ -90,7 +90,7 @@ export function SplineMascot({
         />
       </div>
 
-      {/* Spline 3D - loads after delay */}
+      {/* Spline 3D - loads after delay, shifted right to show arms */}
       {showSpline && (
         <div
           style={{
@@ -98,6 +98,8 @@ export function SplineMascot({
             inset: -15,
             overflow: 'visible',
             zIndex: 10,
+            transform: 'translateX(20px) scale(0.95)',
+            transformOrigin: 'left center',
           }}
         >
           <SplineComponent scene={SCENE_URL} />
