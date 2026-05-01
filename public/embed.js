@@ -16,8 +16,8 @@
   }
 
   // Futuristic button size with glow ring space
-  var BUTTON_SIZE = "220px";
-  var BUTTON_HEIGHT = "80px";
+  var BUTTON_SIZE = "250px";
+  var BUTTON_HEIGHT = "95px";
 
   // ── Wrapper div (fixed, bottom-right) ────────────────────────────────────
   var wrapper = document.createElement("div");

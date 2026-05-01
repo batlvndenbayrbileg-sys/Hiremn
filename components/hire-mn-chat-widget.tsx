@@ -198,14 +198,14 @@ function MascotRobot({ size = 58, white = false, waving = false }: { size?: numb
 function BrainAvatar() {
   return (
     <div style={{
-      width: 34, height: 34, borderRadius: 11,
+      width: 40, height: 40, borderRadius: 12,
       background: "linear-gradient(145deg, #FFF8F5, #FFE8DC)",
       border: "1.5px solid rgba(232,84,26,0.15)",
       display: "flex", alignItems: "center", justifyContent: "center",
       flexShrink: 0,
       boxShadow: "0 4px 12px rgba(232,84,26,0.1), inset 0 1px 0 rgba(255,255,255,0.8)",
     }}>
-      <SplineMascot width={28} height={28} borderRadius={8} />
+      <SplineMascot width={34} height={34} borderRadius={10} />
     </div>
   )
 }
@@ -1755,7 +1755,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, position: "relative", zIndex: 1 }}>
                   {/* Glowing Mascot Container */}
                   <div style={{
-                    width: 44, height: 44, borderRadius: 14,
+                    width: 52, height: 52, borderRadius: 16,
                     background: "rgba(255,255,255,0.98)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     boxShadow: "0 8px 24px rgba(0,0,0,0.15), 0 0 0 2px rgba(255,255,255,0.5)",
@@ -1763,7 +1763,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     animation: "hw-pulse-ring 3s ease-in-out infinite",
                     flexShrink: 0,
                   }}>
-                    <SplineMascot width={36} height={36} borderRadius={10} />
+                    <SplineMascot width={46} height={46} borderRadius={12} />
                   </div>
                   
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -2339,7 +2339,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               animation: "hw-ring 3s ease-out infinite",
             }} />
             <div style={{
-              position: "absolute", inset: -3, borderRadius: 25,
+              position: "absolute", inset: -4, borderRadius: 29,
               background: "linear-gradient(135deg, rgba(232,84,26,0.15), rgba(255,107,61,0.1))",
               animation: "hw-ring 3s ease-out 0.8s infinite",
             }} />
@@ -2351,8 +2351,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               onMouseLeave={() => setIsHovered(false)}
               aria-label="hire.mn чат нээх"
               style={{
-                height: 50, 
-                borderRadius: 25,
+                height: 58, 
+                borderRadius: 29,
                 /* Gradient with animation */
                 background: `linear-gradient(135deg, #E8541A 0%, #F06835 50%, #FF8C42 100%)`,
                 backgroundSize: "200% 200%",
@@ -2387,7 +2387,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               
               {/* Mascot avatar with glow */}
               <div style={{
-                width: 38, height: 38, borderRadius: 12,
+                width: 46, height: 46, borderRadius: 14,
                 background: "rgba(255,255,255,0.98)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
@@ -2396,7 +2396,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 transform: isHovered ? "rotate(-5deg) scale(1.05)" : "rotate(0) scale(1)",
                 position: "relative", zIndex: 1,
               }}>
-                <SplineMascot width={32} height={32} borderRadius={8} />
+                <SplineMascot width={40} height={40} borderRadius={10} />
               </div>
               
               <span style={{
@@ -2412,8 +2412,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               
               {/* Pulsing online indicator */}
               <span style={{
-                position: "absolute", bottom: 3, left: 38,
-                width: 12, height: 12, borderRadius: "50%",
+                position: "absolute", bottom: 4, left: 46,
+                width: 14, height: 14, borderRadius: "50%",
                 background: "linear-gradient(135deg, #22C55E, #4ADE80)",
                 border: "2.5px solid #fff",
                 boxShadow: "0 0 0 0 rgba(34,197,94,0.5)",

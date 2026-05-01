@@ -1,46 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 const SCENE_URL = 'https://prod.spline.design/wfat5gF0Q5BMp2kc/scene.splinecode'
-
-// Module-level singleton - scene loads once, shared across all instances
-let splineApp: any = null
-let splineLoading = false
-let splineLoaded = false
-let splineListeners: Array<() => void> = []
-
-function onSplineReady(cb: () => void) {
-  if (splineLoaded) { cb(); return }
-  splineListeners.push(cb)
-}
-
-function notifyReady() {
-  splineLoaded = true
-  splineListeners.forEach(cb => cb())
-  splineListeners = []
-}
-
-// Preload Spline runtime as early as possible
-function preloadSpline() {
-  if (splineLoading || splineLoaded || typeof window === 'undefined') return
-  splineLoading = true
-  import('@splinetool/react-spline').then(() => {
-    notifyReady()
-  }).catch(() => {
-    splineLoading = false
-  })
-}
-
-// Kick off preload immediately on module import (client side)
-if (typeof window !== 'undefined') {
-  // Use requestIdleCallback if available, else immediate
-  if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(preloadSpline)
-  } else {
-    setTimeout(preloadSpline, 0)
-  }
-}
 
 interface SplineMascotProps {
   width?: number | string
@@ -48,76 +10,104 @@ interface SplineMascotProps {
   borderRadius?: number | string
   className?: string
   style?: React.CSSProperties
+  /** If true, shows static image only (no 3D) for better performance */
+  staticOnly?: boolean
 }
 
 export function SplineMascot({
-  width = '100%',
-  height = '100%',
-  borderRadius = 'inherit',
+  width = 48,
+  height = 48,
+  borderRadius = 12,
   className,
   style,
+  staticOnly = false,
 }: SplineMascotProps) {
-  const [ready, setReady] = useState(splineLoaded)
   const [SplineComponent, setSplineComponent] = useState<any>(null)
-  const mountedRef = useRef(true)
+  const [showSpline, setShowSpline] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
+  // Load Spline only after user hovers or after 3 seconds
   useEffect(() => {
-    mountedRef.current = true
+    if (staticOnly) return
+    
+    let mounted = true
+    let timeout: NodeJS.Timeout
 
-    // Import component
-    import('@splinetool/react-spline').then(mod => {
-      if (!mountedRef.current) return
-      setSplineComponent(() => mod.default)
-      setReady(true)
-    })
-
-    return () => { mountedRef.current = false }
-  }, [])
-
-  const placeholder = (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      background: 'linear-gradient(135deg, #E8541A 0%, #FF8C42 100%)',
-      borderRadius: 'inherit',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}>
-      {/* Animated pulse while loading */}
-      <div style={{
-        width: '40%',
-        height: '40%',
-        borderRadius: '50%',
-        background: 'rgba(255,255,255,0.3)',
-        animation: 'spline-pulse 1.4s ease-in-out infinite',
-      }} />
-      <style>{`
-        @keyframes spline-pulse {
-          0%, 100% { opacity: 0.4; transform: scale(0.85); }
-          50% { opacity: 1; transform: scale(1); }
+    const loadSpline = () => {
+      import('@splinetool/react-spline').then(mod => {
+        if (mounted) {
+          setSplineComponent(() => mod.default)
+          setShowSpline(true)
         }
-      `}</style>
-    </div>
+      }).catch(() => {})
+    }
+
+    // Load after 3 seconds idle
+    timeout = setTimeout(loadSpline, 3000)
+
+    // Or load immediately on hover
+    const handleHover = () => {
+      clearTimeout(timeout)
+      loadSpline()
+    }
+
+    const el = containerRef.current
+    if (el) {
+      el.addEventListener('mouseenter', handleHover, { once: true })
+    }
+
+    return () => {
+      mounted = false
+      clearTimeout(timeout)
+      if (el) el.removeEventListener('mouseenter', handleHover)
+    }
+  }, [staticOnly])
+
+  // Static mascot image - always shows first for instant load
+  const staticMascot = (
+    <img
+      src="/mascot.png"
+      alt="AI Assistant"
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        borderRadius: 'inherit',
+      }}
+    />
   )
 
   return (
     <div
+      ref={containerRef}
       className={className}
       style={{
         width,
         height,
         borderRadius,
         overflow: 'hidden',
+        position: 'relative',
+        background: '#FFF8F5',
         ...style,
       }}
     >
-      {ready && SplineComponent ? (
-        <SplineComponent
-          scene={SCENE_URL}
-          style={{ width: '100%', height: '100%' }}
-        />
-      ) : placeholder}
+      {/* Static image shows instantly */}
+      {(!showSpline || !SplineComponent) && staticMascot}
+      
+      {/* Spline 3D loads lazily on top */}
+      {showSpline && SplineComponent && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: 'inherit',
+          overflow: 'hidden',
+        }}>
+          <SplineComponent
+            scene={SCENE_URL}
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
+      )}
     </div>
   )
 }
