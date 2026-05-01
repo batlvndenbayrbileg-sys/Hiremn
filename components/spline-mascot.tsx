@@ -95,10 +95,13 @@ export function SplineMascot({
         <div
           style={{
             position: 'absolute',
-            inset: -15,
+            left: '-30px',
+            right: '-30px',
+            top: '-20px',
+            bottom: '-20px',
             overflow: 'visible',
             zIndex: 10,
-            transform: 'translateX(20px) scale(0.95)',
+            transform: 'translateX(50px)',
             transformOrigin: 'left center',
           }}
         >
