@@ -66,43 +66,42 @@ export function SplineMascot({
       }}
       onMouseEnter={handleMouseEnter}
     >
-      {/* Animated placeholder - always visible initially */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          borderRadius,
-          background: 'linear-gradient(135deg, #FFE8DC 0%, #FFF5F0 50%, #FFE0D0 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          animation: showSpline ? 'fadeOut 0.5s ease-out forwards' : 'pulse 1.5s ease-in-out infinite',
-          zIndex: showSpline ? -1 : 1,
-        }}
-      >
+      {/* Animated placeholder - hidden once Spline loads */}
+      {!showSpline && (
         <div
           style={{
-            width: '40%',
-            height: '40%',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, rgba(232,84,26,0.3) 0%, rgba(255,107,61,0.2) 100%)',
+            position: 'absolute',
+            inset: 0,
+            background: 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-        />
-      </div>
+        >
+          <div
+            style={{
+              width: '60%',
+              height: '60%',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #FFE8DC 0%, #FFF0E8 100%)',
+              animation: 'pulse 1.5s ease-in-out infinite',
+            }}
+          />
+        </div>
+      )}
 
-      {/* Spline 3D - loads after delay, shifted right to show arms */}
+      {/* Spline 3D - centered with slight right offset for arms */}
       {showSpline && (
         <div
           style={{
             position: 'absolute',
-            left: '-30px',
-            right: '-30px',
-            top: '-20px',
-            bottom: '-20px',
+            left: '-25px',
+            right: '-25px',
+            top: '-25px',
+            bottom: '-25px',
             overflow: 'visible',
             zIndex: 10,
-            transform: 'translateX(50px)',
-            transformOrigin: 'left center',
+            transform: 'translateX(15px)',
           }}
         >
           <SplineComponent scene={SCENE_URL} />
