@@ -85,22 +85,33 @@ export function SplineMascot({
         width,
         height,
         borderRadius,
-        overflow: 'hidden',
+        overflow: 'visible',
         position: 'relative',
-        background: '#FFF8F5',
         ...style,
       }}
     >
-      {/* Static image shows instantly */}
-      {(!showSpline || !SplineComponent) && staticMascot}
-      
-      {/* Spline 3D loads lazily on top */}
+      {/* Static image — fills and can overflow container */}
+      {(!showSpline || !SplineComponent) && (
+        <img
+          src="/mascot.png"
+          alt="AI Assistant"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            borderRadius,
+            display: 'block',
+          }}
+        />
+      )}
+
+      {/* Spline 3D loads lazily */}
       {showSpline && SplineComponent && (
         <div style={{
           position: 'absolute',
           inset: 0,
-          borderRadius: 'inherit',
-          overflow: 'hidden',
+          borderRadius,
+          overflow: 'visible',
         }}>
           <SplineComponent
             scene={SCENE_URL}

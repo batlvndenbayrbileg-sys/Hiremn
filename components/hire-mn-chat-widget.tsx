@@ -2328,7 +2328,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
         {/* ═══════════════════════════════════════════════════════════════════════
             FUTURISTIC FLOATING ACTION BUTTON
-            ═════════════════════════�����═������══════════════════════════════════════════ */}
+            ═══════════════════════���═�����═������══════════════════════════════════════════ */}
         {!isOpen && (
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", padding: 12 }}>
           {/* Animated ring effects */}
@@ -2386,36 +2386,33 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 }} />
               </div>
               
-              {/* White button background container */}
+              {/* White circular background — z-0, stays behind mascot */}
               <div style={{
-                width: 56, height: 56, borderRadius: 28,
-                background: "rgba(255,255,255,0.95)",
+                width: 52, height: 52, borderRadius: "50%",
+                background: "rgba(255,255,255,0.97)",
                 position: "absolute", 
-                top: "50%",
-                left: "50%",
-                marginTop: -28,
-                marginLeft: -28,
+                bottom: 4,
+                left: 8,
                 zIndex: 0,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
               }} />
-              
-              {/* Mascot avatar - Large and popping out */}
-              <div style={{
-                width: 92, height: 92, borderRadius: 28,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                overflow: "visible",
-                transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
-                transform: isHovered ? "translateY(-12px) scale(1.08)" : "translateY(-22px) scale(1)",
-                position: "absolute", 
-                top: "50%",
-                left: "50%",
-                marginLeft: -46,
-                marginTop: -46,
-                zIndex: 10,
-                filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.18)) drop-shadow(0 4px 12px rgba(0,0,0,0.12))",
-              }}>
-                <SplineMascot width={80} height={80} borderRadius={24} />
-              </div>
+
+              {/* Mascot — 1.5x the white circle, popping out from top */}
+              <SplineMascot
+                width={78}
+                height={78}
+                borderRadius={0}
+                style={{
+                  position: "absolute",
+                  bottom: -4,
+                  left: -6,
+                  zIndex: 10,
+                  overflow: "visible",
+                  filter: "drop-shadow(0 10px 10px rgba(0,0,0,0.2))",
+                  transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
+                  transform: isHovered ? "translateY(-6px) scale(1.06)" : "translateY(0) scale(1)",
+                }}
+              />
               
               <span style={{
                 color: "#fff",
