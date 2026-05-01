@@ -2018,7 +2018,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       },
                       { 
                         q: "Үр дүнгээ хэрхэн харах вэ?", 
-                        a: "Тест дуусмагц таны үр дүн шууд гарна. Профайл х����сэгт орж бүх үр дүнгээ харах, татаж авах, хуваалцах боломжтой. Мөн и-мэйлээр илгээх боломжтой.",
+                        a: "Тест дуусмагц таны үр дүн шууд гарна. Профайл х������сэгт орж бүх үр дүнгээ харах, татаж авах, хуваалцах боломжтой. Мөн и-мэйлээр илгээх боломжтой.",
                         icon: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" 
                       },
                       { 
@@ -2328,7 +2328,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
         {/* ═══════════════════════════════════════════════════════════════════════
             FUTURISTIC FLOATING ACTION BUTTON
-            ═════════════════════════���═������══════════════════════════════════════════ */}
+            ═════════════════════════�����═������══════════════════════════════════════════ */}
         {!isOpen && (
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", padding: 12 }}>
           {/* Animated ring effects */}
@@ -2386,22 +2386,35 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 }} />
               </div>
               
+              {/* White button background container */}
+              <div style={{
+                width: 56, height: 56, borderRadius: 28,
+                background: "rgba(255,255,255,0.95)",
+                position: "absolute", 
+                top: "50%",
+                left: "50%",
+                marginTop: -28,
+                marginLeft: -28,
+                zIndex: 0,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)",
+              }} />
+              
               {/* Mascot avatar - Large and popping out */}
               <div style={{
-                width: 56, height: 56, borderRadius: 16,
-                background: "rgba(255,255,255,0.95)",
+                width: 92, height: 92, borderRadius: 28,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                overflow: "hidden",
+                overflow: "visible",
                 transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
-                transform: isHovered ? "translateY(-8px) scale(1.1)" : "translateY(-4px) scale(1)",
+                transform: isHovered ? "translateY(-12px) scale(1.08)" : "translateY(-22px) scale(1)",
                 position: "absolute", 
-                top: -4,
+                top: "50%",
                 left: "50%",
-                marginLeft: -28,
+                marginLeft: -46,
+                marginTop: -46,
                 zIndex: 10,
-                boxShadow: "0 8px 20px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.1)",
+                filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.18)) drop-shadow(0 4px 12px rgba(0,0,0,0.12))",
               }}>
-                <SplineMascot width={50} height={50} borderRadius={14} />
+                <SplineMascot width={80} height={80} borderRadius={24} />
               </div>
               
               <span style={{
