@@ -2018,7 +2018,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       },
                       { 
                         q: "Үр дүнгээ хэрхэн харах вэ?", 
-                        a: "Тест дуусмагц таны үр дүн шууд гарна. Профайл х��сэгт орж бүх үр дүнгээ харах, татаж авах, хуваалцах боломжтой. Мөн и-мэйлээр илгээх боломжтой.",
+                        a: "Тест дуусмагц таны үр дүн шууд гарна. Профайл х����сэгт орж бүх үр дүнгээ харах, татаж авах, хуваалцах боломжтой. Мөн и-мэйлээр илгээх боломжтой.",
                         icon: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" 
                       },
                       { 
@@ -2328,7 +2328,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
         {/* ═══════════════════════════════════════════════════════════════════════
             FUTURISTIC FLOATING ACTION BUTTON
-            ═══════════════════════════����══════════════════════════════════════════ */}
+            ═══════════════════════════������══════════════════════════════════════════ */}
         {!isOpen && (
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", padding: 12 }}>
           {/* Animated ring effects */}
@@ -2357,66 +2357,66 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 background: `linear-gradient(135deg, #E8541A 0%, #F06835 50%, #FF8C42 100%)`,
                 backgroundSize: "200% 200%",
                 animation: isHovered ? "hw-gradient-shift 3s ease infinite" : "none",
-                border: "3px solid rgba(255,255,255,0.3)",
+                border: "1.5px solid rgba(255,255,255,0.25)",
                 cursor: "pointer",
-                display: "flex", alignItems: "center", gap: 12,
-                paddingLeft: 8, paddingRight: 20,
+                display: "flex", alignItems: "center", gap: 10,
+                paddingLeft: 8, paddingRight: 18,
                 flexShrink: 0, position: "relative",
                 boxShadow: isHovered 
-                  ? `0 16px 40px rgba(232,84,26,0.45), 
-                     0 8px 16px rgba(0,0,0,0.1),
-                     inset 0 1px 0 rgba(255,255,255,0.3)`
-                  : `0 10px 30px rgba(232,84,26,0.35), 
-                     0 4px 10px rgba(0,0,0,0.08),
-                     inset 0 1px 0 rgba(255,255,255,0.2)`,
-                transition: "all 0.4s cubic-bezier(.16,1,.3,1)",
-                transform: isHovered ? "scale(1.05) translateY(-3px)" : "scale(1) translateY(0)",
+                  ? `0 12px 32px rgba(232,84,26,0.4), 
+                     0 6px 12px rgba(0,0,0,0.08),
+                     inset 0 1px 0 rgba(255,255,255,0.25)`
+                  : `0 8px 24px rgba(232,84,26,0.3), 
+                     0 3px 8px rgba(0,0,0,0.06),
+                     inset 0 1px 0 rgba(255,255,255,0.15)`,
+                transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
+                transform: isHovered ? "scale(1.04) translateY(-2px)" : "scale(1) translateY(0)",
                 overflow: "hidden",
               }}
             >
               {/* Shimmer overlay on hover */}
               <div style={{
-                position: "absolute", inset: 0, overflow: "hidden", borderRadius: 26,
+                position: "absolute", inset: 0, overflow: "hidden", borderRadius: 29,
               }}>
                 <div style={{
                   position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%",
-                  background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)",
+                  background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)",
                   animation: isHovered ? "hw-shimmer 1.2s ease-in-out infinite" : "none",
                 }} />
               </div>
               
-              {/* Mascot avatar with glow */}
+              {/* Mascot avatar */}
               <div style={{
-                width: 38, height: 38, borderRadius: 12,
-                background: "rgba(255,255,255,0.98)",
+                width: 46, height: 46, borderRadius: 13,
+                background: "rgba(255,255,255,0.95)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+                boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
                 overflow: "hidden",
-                transition: "transform 0.4s cubic-bezier(.16,1,.3,1)",
-                transform: isHovered ? "rotate(-5deg) scale(1.05)" : "rotate(0) scale(1)",
+                transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
+                transform: isHovered ? "rotate(-3deg) scale(1.08)" : "rotate(0) scale(1)",
                 position: "relative", zIndex: 1,
               }}>
-                <SplineMascot width={72} height={72} borderRadius={18} />
+                <SplineMascot width={40} height={40} borderRadius={12} />
               </div>
               
               <span style={{
                 color: "#fff",
-                fontSize: 13,
-                fontWeight: 700,
-                textShadow: "0 2px 4px rgba(0,0,0,0.15)",
-                letterSpacing: "-0.2px",
+                fontSize: 12,
+                fontWeight: 600,
+                textShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                letterSpacing: "-0.3px",
                 position: "relative", zIndex: 1,
               }}>
-                <span className="hw-fab-text">Тусламж авах</span>
+                <span className="hw-fab-text">Чат</span>
               </span>
               
               {/* Pulsing online indicator */}
               <span style={{
-                position: "absolute", bottom: 4, left: 38,
-                width: 12, height: 12, borderRadius: "50%",
-                background: "linear-gradient(135deg, #22C55E, #4ADE80)",
-                border: "2.5px solid #fff",
-                boxShadow: "0 0 0 0 rgba(34,197,94,0.5)",
+                position: "absolute", bottom: 3, right: 6,
+                width: 10, height: 10, borderRadius: "50%",
+                background: "#4ADE80",
+                border: "2px solid #fff",
+                boxShadow: "0 0 0 3px rgba(34,197,94,0.2)",
                 animation: "hw-online-pulse 2s ease-in-out infinite",
                 zIndex: 2,
               }} />
