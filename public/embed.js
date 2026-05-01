@@ -19,13 +19,13 @@
   var BUTTON_SIZE = "280px";
   var BUTTON_HEIGHT = "120px";
 
-  // ── Wrapper div (fixed, bottom-right) ────────────────────────────────────
+  // ── Wrapper div (fixed, bottom-left) ────────────────────────────────────
   var wrapper = document.createElement("div");
   wrapper.id = "hiremn-widget-root";
   wrapper.style.cssText =
     "position:fixed !important;" +
     "bottom:16px !important;" +
-    "right:16px !important;" +
+    "left:16px !important;" +
     "z-index:2147483647 !important;" +
     "pointer-events:none !important;" +
     "overflow:visible !important;" +
@@ -44,7 +44,7 @@
   iframe.style.cssText =
     "position:absolute !important;" +
     "bottom:0 !important;" +
-    "right:0 !important;" +
+    "left:0 !important;" +
     "width:" + BUTTON_SIZE + " !important;" +
     "height:" + BUTTON_HEIGHT + " !important;" +
     "border:none !important;" +
@@ -202,8 +202,8 @@
           wrapper.style.width = "100vw";
           wrapper.style.height = "100vh";
           wrapper.style.bottom = "0";
-          wrapper.style.right = "0";
           wrapper.style.left = "0";
+          wrapper.style.right = "0";
           wrapper.style.top = "0";
           iframe.style.width = "100%";
           iframe.style.height = "100%";
@@ -211,8 +211,8 @@
           wrapper.style.width = "420px";
           wrapper.style.height = "680px";
           wrapper.style.bottom = "16px";
-          wrapper.style.right = "16px";
-          wrapper.style.left = "auto";
+          wrapper.style.left = "16px";
+          wrapper.style.right = "auto";
           wrapper.style.top = "auto";
           iframe.style.width = "420px";
           iframe.style.height = "680px";
@@ -222,8 +222,8 @@
         wrapper.style.width = BUTTON_SIZE;
         wrapper.style.height = BUTTON_HEIGHT;
         wrapper.style.bottom = "16px";
-        wrapper.style.right = "16px";
-        wrapper.style.left = "auto";
+        wrapper.style.left = "16px";
+        wrapper.style.right = "auto";
         wrapper.style.top = "auto";
         iframe.style.width = BUTTON_SIZE;
         iframe.style.height = BUTTON_HEIGHT;
