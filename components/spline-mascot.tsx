@@ -1,23 +1,15 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
+import dynamic from 'next/dynamic'
 
 const SCENE_URL = 'https://prod.spline.design/wfat5gF0Q5BMp2kc/scene.splinecode'
 
-// Use absolute URL for embed compatibility
-const getMascotUrl = () => {
-  if (typeof window !== 'undefined') {
-    // Check if we're in an iframe (embed mode)
-    try {
-      const isEmbed = window.location.pathname.includes('/embed')
-      if (isEmbed) {
-        // Use the origin from the current page
-        return `${window.location.origin}/mascot.png`
-      }
-    } catch (e) {}
-  }
-  return '/mascot.png'
-}
+// Dynamically import Spline for Next.js
+const Spline = dynamic(() => import('@splinetool/react-spline/next'), {
+  ssr: false,
+  loading: () => null,
+})
 
 interface SplineMascotProps {
   width?: number | string
@@ -25,8 +17,6 @@ interface SplineMascotProps {
   borderRadius?: number | string
   className?: string
   style?: React.CSSProperties
-  /** If true, shows static image only (no 3D) for better performance */
-  staticOnly?: boolean
 }
 
 export function SplineMascot({
@@ -35,38 +25,22 @@ export function SplineMascot({
   borderRadius = 12,
   className,
   style,
-  staticOnly = false,
 }: SplineMascotProps) {
-  const [SplineComponent, setSplineComponent] = useState<any>(null)
-  const [showSpline, setShowSpline] = useState(false)
-  const [imageLoaded, setImageLoaded] = useState(false)
-  const [imageError, setImageError] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [shouldLoadSpline, setShouldLoadSpline] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const mascotUrl = getMascotUrl()
 
-  // Load Spline only after user hovers or after 3 seconds
+  // Start loading Spline after a short delay or on hover
   useEffect(() => {
-    if (staticOnly) return
-    
     let mounted = true
-    let timeout: NodeJS.Timeout
+    
+    // Load immediately for better UX
+    const timeout = setTimeout(() => {
+      if (mounted) setShouldLoadSpline(true)
+    }, 500)
 
-    const loadSpline = () => {
-      import('@splinetool/react-spline').then(mod => {
-        if (mounted) {
-          setSplineComponent(() => mod.default)
-          setShowSpline(true)
-        }
-      }).catch(() => {})
-    }
-
-    // Load after 3 seconds idle
-    timeout = setTimeout(loadSpline, 3000)
-
-    // Or load immediately on hover
     const handleHover = () => {
-      clearTimeout(timeout)
-      loadSpline()
+      if (mounted) setShouldLoadSpline(true)
     }
 
     const el = containerRef.current
@@ -79,18 +53,7 @@ export function SplineMascot({
       clearTimeout(timeout)
       if (el) el.removeEventListener('mouseenter', handleHover)
     }
-  }, [staticOnly])
-
-  // Fallback gradient placeholder
-  const placeholderStyle: React.CSSProperties = {
-    width: '100%',
-    height: '100%',
-    borderRadius,
-    background: 'linear-gradient(135deg, #FFE8DC 0%, #FFF5F0 50%, #FFE0D0 100%)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
+  }, [])
 
   return (
     <div
@@ -102,52 +65,66 @@ export function SplineMascot({
         borderRadius,
         overflow: 'visible',
         position: 'relative',
-        background: '#FFF5F0',
+        background: 'transparent',
         ...style,
       }}
     >
-      {/* Static image or placeholder */}
-      {(!showSpline || !SplineComponent) && (
-        <>
-          {!imageLoaded && !imageError && (
-            <div style={placeholderStyle}>
-              <svg width="60%" height="60%" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="8" r="4" fill="#E8541A" opacity="0.6"/>
-                <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="#E8541A" strokeWidth="2" strokeLinecap="round" opacity="0.4"/>
-              </svg>
-            </div>
-          )}
-          <img
-            src={mascotUrl}
-            alt=""
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
+      {/* Loading placeholder - simple gradient circle */}
+      {!isLoaded && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius,
+            background: 'linear-gradient(135deg, #FFE8DC 0%, #FFF5F0 50%, #FFE0D0 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            animation: 'pulse 1.5s ease-in-out infinite',
+          }}
+        >
+          <div
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              borderRadius,
-              display: imageLoaded ? 'block' : 'none',
-              position: imageLoaded ? 'relative' : 'absolute',
+              width: '50%',
+              height: '50%',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #E8541A 0%, #FF8C42 100%)',
+              opacity: 0.4,
             }}
-          />
-        </>
-      )}
-
-      {/* Spline 3D loads lazily */}
-      {showSpline && SplineComponent && (
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          borderRadius,
-          overflow: 'visible',
-        }}>
-          <SplineComponent
-            scene={SCENE_URL}
-            style={{ width: '100%', height: '100%' }}
           />
         </div>
       )}
+
+      {/* Spline 3D Scene */}
+      {shouldLoadSpline && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: -10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'visible',
+          }}
+        >
+          <Spline
+            scene={SCENE_URL}
+            onLoad={() => setIsLoaded(true)}
+            style={{
+              width: '120%',
+              height: '120%',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Pulse animation */}
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.6; }
+        }
+      `}</style>
     </div>
   )
 }
