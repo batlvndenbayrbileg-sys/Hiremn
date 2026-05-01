@@ -4,6 +4,21 @@ import { useEffect, useState, useRef } from 'react'
 
 const SCENE_URL = 'https://prod.spline.design/wfat5gF0Q5BMp2kc/scene.splinecode'
 
+// Use absolute URL for embed compatibility
+const getMascotUrl = () => {
+  if (typeof window !== 'undefined') {
+    // Check if we're in an iframe (embed mode)
+    try {
+      const isEmbed = window.location.pathname.includes('/embed')
+      if (isEmbed) {
+        // Use the origin from the current page
+        return `${window.location.origin}/mascot.png`
+      }
+    } catch (e) {}
+  }
+  return '/mascot.png'
+}
+
 interface SplineMascotProps {
   width?: number | string
   height?: number | string
@@ -24,7 +39,10 @@ export function SplineMascot({
 }: SplineMascotProps) {
   const [SplineComponent, setSplineComponent] = useState<any>(null)
   const [showSpline, setShowSpline] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageError, setImageError] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const mascotUrl = getMascotUrl()
 
   // Load Spline only after user hovers or after 3 seconds
   useEffect(() => {
@@ -63,19 +81,16 @@ export function SplineMascot({
     }
   }, [staticOnly])
 
-  // Static mascot image - always shows first for instant load
-  const staticMascot = (
-    <img
-      src="/mascot.png"
-      alt="AI Assistant"
-      style={{
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        borderRadius: 'inherit',
-      }}
-    />
-  )
+  // Fallback gradient placeholder
+  const placeholderStyle: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
+    borderRadius,
+    background: 'linear-gradient(135deg, #FFE8DC 0%, #FFF5F0 50%, #FFE0D0 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 
   return (
     <div
@@ -87,22 +102,36 @@ export function SplineMascot({
         borderRadius,
         overflow: 'visible',
         position: 'relative',
+        background: '#FFF5F0',
         ...style,
       }}
     >
-      {/* Static image — fills and can overflow container */}
+      {/* Static image or placeholder */}
       {(!showSpline || !SplineComponent) && (
-        <img
-          src="/mascot.png"
-          alt="AI Assistant"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
-            borderRadius,
-            display: 'block',
-          }}
-        />
+        <>
+          {!imageLoaded && !imageError && (
+            <div style={placeholderStyle}>
+              <svg width="60%" height="60%" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="8" r="4" fill="#E8541A" opacity="0.6"/>
+                <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="#E8541A" strokeWidth="2" strokeLinecap="round" opacity="0.4"/>
+              </svg>
+            </div>
+          )}
+          <img
+            src={mascotUrl}
+            alt=""
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              borderRadius,
+              display: imageLoaded ? 'block' : 'none',
+              position: imageLoaded ? 'relative' : 'absolute',
+            }}
+          />
+        </>
       )}
 
       {/* Spline 3D loads lazily */}
