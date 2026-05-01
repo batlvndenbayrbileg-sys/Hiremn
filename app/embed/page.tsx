@@ -5,6 +5,15 @@ import HireMnChatWidget from "@/components/hire-mn-chat-widget"
 export default function EmbedPage() {
   return (
     <>
+      {/* Preconnect + preload Spline scene as early as possible */}
+      <link rel="preconnect" href="https://prod.spline.design" crossOrigin="anonymous" />
+      <link rel="dns-prefetch" href="https://prod.spline.design" />
+      <link
+        rel="preload"
+        href="https://prod.spline.design/wfat5gF0Q5BMp2kc/scene.splinecode"
+        as="fetch"
+        crossOrigin="anonymous"
+      />
       <style>{`
         * {
           margin: 0;

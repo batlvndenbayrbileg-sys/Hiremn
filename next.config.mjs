@@ -65,6 +65,19 @@ const nextConfig = {
           { key: "Cache-Control", value: "public, max-age=3600, must-revalidate" },
         ],
       },
+      {
+        // Preconnect to Spline CDN on widget/embed pages
+        source: "/(embed|widget)",
+        headers: [
+          {
+            key: "Link",
+            value: [
+              '<https://prod.spline.design>; rel=preconnect',
+              '<https://prod.spline.design>; rel=dns-prefetch',
+            ].join(', '),
+          },
+        ],
+      },
     ]
   },
 }
