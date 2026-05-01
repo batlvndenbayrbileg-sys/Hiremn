@@ -19,13 +19,13 @@
   var BUTTON_SIZE = "280px";
   var BUTTON_HEIGHT = "120px";
 
-  // ── Wrapper div (fixed, bottom-left) ────────────────────────────────────
+  // ── Wrapper div (fixed, bottom-right with extra margin) ────────────────────────────────────
   var wrapper = document.createElement("div");
   wrapper.id = "hiremn-widget-root";
   wrapper.style.cssText =
     "position:fixed !important;" +
-    "bottom:16px !important;" +
-    "left:16px !important;" +
+    "bottom:20px !important;" +
+    "right:50px !important;" +
     "z-index:2147483647 !important;" +
     "pointer-events:none !important;" +
     "overflow:visible !important;" +
@@ -44,7 +44,7 @@
   iframe.style.cssText =
     "position:absolute !important;" +
     "bottom:0 !important;" +
-    "left:0 !important;" +
+    "right:0 !important;" +
     "width:" + BUTTON_SIZE + " !important;" +
     "height:" + BUTTON_HEIGHT + " !important;" +
     "border:none !important;" +
@@ -210,9 +210,9 @@
         } else {
           wrapper.style.width = "420px";
           wrapper.style.height = "680px";
-          wrapper.style.bottom = "16px";
-          wrapper.style.left = "16px";
-          wrapper.style.right = "auto";
+          wrapper.style.bottom = "20px";
+          wrapper.style.right = "50px";
+          wrapper.style.left = "auto";
           wrapper.style.top = "auto";
           iframe.style.width = "420px";
           iframe.style.height = "680px";
@@ -221,9 +221,9 @@
         // Closed - futuristic floating button
         wrapper.style.width = BUTTON_SIZE;
         wrapper.style.height = BUTTON_HEIGHT;
-        wrapper.style.bottom = "16px";
-        wrapper.style.left = "16px";
-        wrapper.style.right = "auto";
+        wrapper.style.bottom = "20px";
+        wrapper.style.right = "50px";
+        wrapper.style.left = "auto";
         wrapper.style.top = "auto";
         iframe.style.width = BUTTON_SIZE;
         iframe.style.height = BUTTON_HEIGHT;
