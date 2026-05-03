@@ -2330,7 +2330,21 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             FUTURISTIC FLOATING ACTION BUTTON
             ═══════════════════════���═�����═������══════════════════════════════════════════ */}
         {!isOpen && (
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", padding: 12 }}>
+        <div style={{
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "flex-end",
+          // Extra padding so the 3D Spline mascot's overflow (~25px on each
+          // side, plus the -4px bottom offset on the mascot itself) stays
+          // inside the iframe and isn't clipped at the edges.
+          paddingTop: 40,
+          paddingBottom: 35,
+          paddingLeft: 35,
+          paddingRight: 20,
+          width: "100%",
+          height: "100%",
+          boxSizing: "border-box",
+        }}>
           {/* Animated ring effects */}
           <div style={{ position: "relative" }}>
             <div style={{
