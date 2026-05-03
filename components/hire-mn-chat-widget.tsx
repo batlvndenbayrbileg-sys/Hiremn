@@ -80,10 +80,10 @@ interface Test {
 // Quick reply SVG icons
 const QuickReplyIcon = ({ type }: { type: string }) => {
   const icons: Record<string, JSX.Element> = {
-    list: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>,
-    target: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
-    gift: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>,
-    info: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>,
+    list: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>,
+    target: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>,
+    gift: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" /><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5" /></svg>,
+    info: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>,
   }
   return icons[type] || icons.info
 }
@@ -217,7 +217,7 @@ function TypingIndicator() {
     <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
       <BrainAvatar />
       <div style={{
-        background: "linear-gradient(135deg, #fff 0%, #FFFCFA 100%)", 
+        background: "linear-gradient(135deg, #fff 0%, #FFFCFA 100%)",
         border: "1px solid rgba(232,84,26,0.1)",
         borderRadius: 16, borderBottomLeftRadius: 4,
         padding: "14px 18px",
@@ -274,7 +274,7 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
       style={{
         display: "flex", flexDirection: "column",
         background: "linear-gradient(145deg, #fff 0%, #FFFCFA 100%)",
-        border: "1.5px solid rgba(232,84,26,0.08)", 
+        border: "1.5px solid rgba(232,84,26,0.08)",
         borderRadius: 18,
         overflow: "hidden", textDecoration: "none",
         width: CARD_W, minWidth: CARD_W, maxWidth: CARD_W, flexShrink: 0,
@@ -316,7 +316,7 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
           display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /><path d="M16 13H8" /><path d="M16 17H8" /><path d="M10 9H8" />
           </svg>
         </div>
 
@@ -796,7 +796,7 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
         <div style={{ display: "flex", gap: 10, alignItems: "flex-end", animation: "hw-msg-in 0.4s cubic-bezier(.16,1,.3,1)" }}>
           <BrainAvatar />
           <div style={{
-            maxWidth: "82%", 
+            maxWidth: "82%",
             background: "linear-gradient(145deg, #fff 0%, #FFFCFA 100%)",
             border: "1.5px solid rgba(232,84,26,0.08)",
             borderRadius: 18, borderBottomLeftRadius: 4,
@@ -844,15 +844,15 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
           {message.teamCategories.map((cat, catIdx) => (
             <div key={cat.label} style={{ marginBottom: catIdx < message.teamCategories!.length - 1 ? 20 : 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                <span style={{ 
+                <span style={{
                   width: 28, height: 28, borderRadius: 8,
                   background: `${cat.color}15`,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   color: cat.color,
                 }}>
-                  {cat.icon === "system" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>}
-                  {cat.icon === "test" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>}
-                  {cat.icon === "rocket" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>}
+                  {cat.icon === "system" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg>}
+                  {cat.icon === "test" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>}
+                  {cat.icon === "rocket" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" /><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" /><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" /><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" /></svg>}
                 </span>
                 <span style={{
                   fontSize: fontSize, fontWeight: 700, color: cat.color,
@@ -1049,25 +1049,25 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   // ══════════════════════════════════════════════════════════════════════════
   useEffect(() => {
     if (typeof window === 'undefined') return
-    
+
     const handleExternalMessage = (event: MessageEvent) => {
       if (!event.data || !event.data.type) return
-      
+
       // Open chatbot
       if (event.data.type === "HIREMN_OPEN") {
         setIsOpen(true)
       }
-      
+
       // Close chatbot
       if (event.data.type === "HIREMN_CLOSE") {
         setIsOpen(false)
       }
-      
+
       // Send a simple message
       if (event.data.type === "HIREMN_SEND_MESSAGE" && event.data.message) {
         sendMessage(event.data.message)
       }
-      
+
       // Loading state - show when fetching from API
       if (event.data.type === "HIREMN_LOADING") {
         const loadingMsg: Message = {
@@ -1077,7 +1077,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         setMessages(prev => [...prev, loadingMsg])
         setIsTyping(true)
       }
-      
+
       // Error state - show API error
       if (event.data.type === "HIREMN_ERROR") {
         setIsTyping(false)
@@ -1087,25 +1087,25 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         }
         setMessages(prev => [...prev, errorMsg])
       }
-      
+
       // AI Analysis request with report data (from API or direct)
       if (event.data.type === "HIREMN_AI_ANALYSIS" && event.data.payload) {
         const { reportTitle, reportData, userInfo, analysisResults, prompt } = event.data.payload
-        
+
         // Build a comprehensive context message for the AI
         let analysisContext = `**AI Тайлан Дүн Шинжилгээ**\n\n`
-        
+
         if (reportTitle) {
           analysisContext += `**Тайлангийн нэр:** ${reportTitle}\n\n`
         }
-        
+
         if (userInfo && Object.keys(userInfo).length > 0) {
           analysisContext += `**Хэрэглэгчийн мэдээлэл:**\n`
           if (userInfo.name) analysisContext += `- Нэр: ${userInfo.name}\n`
           if (userInfo.email) analysisContext += `- Имэйл: ${userInfo.email}\n`
           analysisContext += `\n`
         }
-        
+
         if (analysisResults && Object.keys(analysisResults).length > 0) {
           analysisContext += `**Үр дүн:**\n`
           Object.entries(analysisResults).forEach(([key, value]) => {
@@ -1113,23 +1113,23 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           })
           analysisContext += `\n`
         }
-        
+
         if (reportData && Object.keys(reportData).length > 0) {
           analysisContext += `**Тайлангийн дата:**\n\`\`\`json\n${JSON.stringify(reportData, null, 2)}\n\`\`\`\n\n`
         }
-        
+
         // Add the AI analysis request message first (as system context)
         const contextMsg: Message = {
           role: "assistant",
           content: analysisContext + `\n---\n\n**Тайлбар хүсэлт хүлээн авлаа.** Одоо таны үр дүнг задлан шинжилж байна...`,
         }
-        
+
         // Then trigger the actual AI analysis
         const userPrompt = prompt || "Миний тестийн үр дүнг задлан шинжилж, надад зөвлөгөө өгнө үү."
-        
+
         // Add context message and then send user prompt
         setMessages(prev => [...prev, contextMsg])
-        
+
         // Small delay then send the actual analysis request
         setTimeout(() => {
           // Create a special analysis prompt that includes all the data
@@ -1137,12 +1137,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             `Тайлан: ${reportTitle || 'Тест'}\n` +
             `Үр дүн: ${JSON.stringify(analysisResults || reportData || {})}\n\n` +
             `Хэрэглэгчийн хүсэлт: ${userPrompt}`
-          
+
           sendMessage(fullPrompt)
         }, 1000)
       }
     }
-    
+
     window.addEventListener("message", handleExternalMessage)
     return () => window.removeEventListener("message", handleExternalMessage)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -1698,7 +1698,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               display: "flex", flexDirection: "column",
               border: "1px solid rgba(232,84,26,0.08)",
             }}>
-              
+
               {/* ══════════ ANIMATED BACKGROUND EFFECTS ══════════ */}
               <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: 24, pointerEvents: "none", zIndex: 0 }}>
                 {/* Floating orbs */}
@@ -1723,7 +1723,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 backgroundSize: "200% 200%",
                 animation: "hw-gradient-shift 8s ease infinite",
                 padding: "18px 16px 16px",
-                flexShrink: 0, 
+                flexShrink: 0,
                 position: "relative",
                 borderRadius: "24px 24px 0 0",
                 overflow: "hidden",
@@ -1738,7 +1738,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     animation: "hw-shimmer 3s ease-in-out infinite",
                   }} />
                 </div>
-                
+
                 {/* Decorative circles */}
                 <div style={{
                   position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: "50%",
@@ -1750,7 +1750,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   background: "rgba(255,255,255,0.08)",
                   animation: "hw-breathe 5s ease-in-out infinite 1s",
                 }} />
-                
+
                 {/* Header content */}
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, position: "relative", zIndex: 1 }}>
                   {/* Glowing Mascot Container */}
@@ -1765,11 +1765,11 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   }}>
                     <SplineMascot width={82} height={82} borderRadius={22} />
                   </div>
-                  
+
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                      <span style={{ 
-                        color: "#fff", fontWeight: 700, fontSize: 16, 
+                      <span style={{
+                        color: "#fff", fontWeight: 700, fontSize: 16,
                         textShadow: "0 2px 8px rgba(0,0,0,0.2)",
                         letterSpacing: "-0.3px"
                       }}>
@@ -1778,15 +1778,15 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       {/* Animated Online Badge */}
                       <span style={{
                         fontSize: 8, fontWeight: 700, letterSpacing: "0.6px",
-                        color: "#fff", 
+                        color: "#fff",
                         background: "linear-gradient(135deg, rgba(34,197,94,0.9), rgba(74,222,128,0.9))",
                         padding: "3px 8px", borderRadius: 10,
                         display: "flex", alignItems: "center", gap: 4,
                         boxShadow: "0 2px 8px rgba(34,197,94,0.4)",
                       }}>
-                        <span style={{ 
+                        <span style={{
                           width: 5, height: 5, borderRadius: "50%", background: "#fff",
-                          animation: "hw-sparkle 1.5s ease-in-out infinite" 
+                          animation: "hw-sparkle 1.5s ease-in-out infinite"
                         }} />
                         ONLINE
                       </span>
@@ -1795,13 +1795,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       24/7 танд туслахад бэлэн
                     </div>
                   </div>
-                  
+
                   {/* Close Button - Glassmorphism */}
                   <button
                     onClick={() => setIsOpen(false)}
                     style={{
                       width: 36, height: 36, borderRadius: 12,
-                      background: "rgba(255,255,255,0.15)", 
+                      background: "rgba(255,255,255,0.15)",
                       backdropFilter: "blur(10px)",
                       border: "1px solid rgba(255,255,255,0.25)",
                       color: "#fff", cursor: "pointer",
@@ -1810,11 +1810,11 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     }}
                     onMouseEnter={e => {
                       (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.25)"
-                      ; (e.currentTarget as HTMLElement).style.transform = "rotate(90deg) scale(1.1)"
+                        ; (e.currentTarget as HTMLElement).style.transform = "rotate(90deg) scale(1.1)"
                     }}
                     onMouseLeave={e => {
                       (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.15)"
-                      ; (e.currentTarget as HTMLElement).style.transform = "rotate(0deg) scale(1)"
+                        ; (e.currentTarget as HTMLElement).style.transform = "rotate(0deg) scale(1)"
                     }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -1826,7 +1826,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 {/* ══════════ GLASS TAB NAVIGATION ══════════ */}
                 <div style={{
                   display: "flex", gap: 6,
-                  background: "rgba(0,0,0,0.12)", 
+                  background: "rgba(0,0,0,0.12)",
                   backdropFilter: "blur(8px)",
                   borderRadius: 14, padding: 5,
                   position: "relative", zIndex: 1,
@@ -1841,8 +1841,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       onClick={() => setActiveTab(i)}
                       style={{
                         flex: 1, padding: "10px 12px", borderRadius: 10,
-                        background: activeTab === i 
-                          ? "linear-gradient(135deg, rgba(255,255,255,0.98), rgba(255,252,250,0.95))" 
+                        background: activeTab === i
+                          ? "linear-gradient(135deg, rgba(255,255,255,0.98), rgba(255,252,250,0.95))"
                           : "transparent",
                         border: "none", cursor: "pointer",
                         color: activeTab === i ? "#E8541A" : "rgba(255,255,255,0.85)",
@@ -1867,9 +1867,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 <>
                   {/* Chat Messages Area - Glass Effect */}
                   <div className="hw-scroll" style={{
-                    flex: 1, 
+                    flex: 1,
                     minHeight: 0,
-                    overflowY: "auto", 
+                    overflowY: "auto",
                     padding: "16px 12px 10px",
                     display: "flex", flexDirection: "column", gap: 12,
                     background: "linear-gradient(180deg, rgba(255,253,251,0.4) 0%, rgba(255,255,255,0.6) 100%)",
@@ -1881,8 +1881,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         : ""
 
                       return (
-                        <div 
-                          key={i} 
+                        <div
+                          key={i}
                           className="hw-msg"
                           style={{
                             animation: `hw-msg-in 0.4s cubic-bezier(.34,1.56,.64,1) ${i * 0.05}s both`,
@@ -1903,7 +1903,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     )}
 
                     {showQuickReplies && !isTyping && (
-                      <div style={{ 
+                      <div style={{
                         display: "flex", flexDirection: "column", gap: 8, marginTop: 14,
                         padding: "16px",
                         background: "linear-gradient(145deg, rgba(255,255,255,0.95), rgba(255,252,250,0.9))",
@@ -1911,10 +1911,10 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         border: "1px solid rgba(232,84,26,0.06)",
                         boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
                       }}>
-                        <div style={{ 
-                          fontSize: 11, fontWeight: 600, color: "#9CA3AF", 
+                        <div style={{
+                          fontSize: 11, fontWeight: 600, color: "#9CA3AF",
                           marginBottom: 4, letterSpacing: "0.5px",
-                          textTransform: "uppercase" 
+                          textTransform: "uppercase"
                         }}>
                           Түгээмэл асуултууд
                         </div>
@@ -1928,11 +1928,11 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                                 background: "#fff",
                                 border: "1.5px solid #E5E7EB",
                                 color: "#374151",
-                                borderRadius: 10, 
+                                borderRadius: 10,
                                 padding: "8px 12px",
-                                fontSize: Math.max(fontSize - 2, 12), 
+                                fontSize: Math.max(fontSize - 2, 12),
                                 fontWeight: 500,
-                                cursor: "pointer", 
+                                cursor: "pointer",
                                 whiteSpace: "nowrap",
                                 animation: `hw-chip-in 0.3s cubic-bezier(.16,1,.3,1) ${i * 0.06}s both`,
                                 boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
@@ -1941,17 +1941,17 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                               }}
                               onMouseEnter={e => {
                                 (e.currentTarget as HTMLElement).style.background = "#E8541A"
-                                ; (e.currentTarget as HTMLElement).style.color = "#fff"
-                                ; (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
-                                ; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
-                                ; (e.currentTarget as HTMLElement).style.boxShadow = "0 6px 16px rgba(232,84,26,0.2)"
+                                  ; (e.currentTarget as HTMLElement).style.color = "#fff"
+                                  ; (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
+                                  ; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
+                                  ; (e.currentTarget as HTMLElement).style.boxShadow = "0 6px 16px rgba(232,84,26,0.2)"
                               }}
                               onMouseLeave={e => {
                                 (e.currentTarget as HTMLElement).style.background = "#fff"
-                                ; (e.currentTarget as HTMLElement).style.color = "#374151"
-                                ; (e.currentTarget as HTMLElement).style.borderColor = "#E5E7EB"
-                                ; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
-                                ; (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)"
+                                  ; (e.currentTarget as HTMLElement).style.color = "#374151"
+                                  ; (e.currentTarget as HTMLElement).style.borderColor = "#E5E7EB"
+                                  ; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
+                                  ; (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)"
                               }}
                             >
                               <span style={{ opacity: 0.7 }}>
@@ -1977,12 +1977,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   position: "relative", zIndex: 1,
                 }}>
                   {/* FAQ Header */}
-                  <div style={{ 
+                  <div style={{
                     display: "flex", alignItems: "center", gap: 14, marginBottom: 24,
-                    padding: "18px 20px", 
+                    padding: "18px 20px",
                     background: "linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,250,245,0.8) 100%)",
                     backdropFilter: "blur(20px)",
-                    borderRadius: 20, 
+                    borderRadius: 20,
                     border: "1px solid rgba(255,255,255,0.6)",
                     boxShadow: "0 8px 32px rgba(232,84,26,0.1), inset 0 1px 0 rgba(255,255,255,0.8)",
                   }}>
@@ -2002,55 +2002,55 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       <div style={{ fontSize: 13, color: "#888", marginTop: 2 }}>Асуултаа сонгоод хариултыг нь үзнэ үү</div>
                     </div>
                   </div>
-                  
+
                   {/* FAQ Accordion */}
                   <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     {[
-                      { 
-                        q: "Hire.mn гэж юу вэ?", 
+                      {
+                        q: "Hire.mn гэж юу вэ?",
                         a: "Hire.mn бол Монголын анхны AI-д суурилсан ажил горилогч болон ажил олгогчдыг холбосон платформ юм. Бид мэргэжлийн тест, ур чадварын үнэлгээ зэргээр таныг тохирох ажлын байртай холбоно.",
-                        icon: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" 
+                        icon: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
                       },
-                      { 
-                        q: "Тест өгөхөд төлбөртэй юу?", 
+                      {
+                        q: "Тест өгөхөд төлбөртэй юу?",
                         a: "Үгүй, ихэнх тестүүд бүрэн үнэгүй. Зарим нэмэлт функц, дэлгэрэнгүй тайлан авахад төлбөртэй сонголтууд байдаг боловч үндсэн тестүүд бүгд үнэгүй.",
-                        icon: "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2" 
+                        icon: "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2"
                       },
-                      { 
-                        q: "Үр дүнгээ хэрхэн харах вэ?", 
+                      {
+                        q: "Үр дүнгээ хэрхэн харах вэ?",
                         a: "Тест дуусмагц таны үр дүн шууд гарна. Профайл х������сэгт орж бүх үр дүнгээ харах, татаж авах, хуваалцах боломжтой. Мөн и-мэйлээр илгээх боломжтой.",
-                        icon: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" 
+                        icon: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"
                       },
-                      { 
-                        q: "Компани хэрхэн бүртгүүлэх вэ?", 
+                      {
+                        q: "Компани хэрхэн бүртгүүлэх вэ?",
                         a: "hire.mn вэбсайтад орж \"Компани бүртгүүлэх\" товч дарна уу. Компанийн мэдээллээ оруулаад баталгаажуулах процессыг дуусгана. 24 цагийн дотор хянагдаж баталгаажна.",
-                        icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" 
+                        icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
                       },
-                      { 
-                        q: "Тестийн төрлүүд юу юу байдаг вэ?", 
+                      {
+                        q: "Тестийн төрлүүд юу юу байдаг вэ?",
                         a: "IQ тест, EQ тест, зан чанарын тест, мэргэжлийн ур чадварын тест, хэлний түвшин тодорхойлох тест гэх мэт 50+ төрлийн тест байдаг. Та өөрт тохирох тестүүдийг сонгон өгч болно.",
-                        icon: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" 
+                        icon: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
                       },
-                      { 
-                        q: "Үнэлгээний систем хэрхэн ажилладаг вэ?", 
+                      {
+                        q: "Үнэлгээний систем хэрхэн ажилладаг вэ?",
                         a: "AI алгоритм таны хариултуудыг дүн шинжилгээ хийж, олон улсын стандарт болон Монголын статистик дата-тай харьцуулан үнэлдэг. Үр дүн нь 95%+ нарийвчлалтай.",
-                        icon: "M12 20V10M18 20V4M6 20v-4" 
+                        icon: "M12 20V10M18 20V4M6 20v-4"
                       },
                     ].map((faq, i) => (
                       <div
                         key={i}
                         style={{
-                          background: expandedFaq === i 
+                          background: expandedFaq === i
                             ? "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,250,245,0.9) 100%)"
                             : "linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,250,245,0.7) 100%)",
                           backdropFilter: "blur(20px)",
-                          border: expandedFaq === i 
-                            ? "1.5px solid rgba(232,84,26,0.3)" 
+                          border: expandedFaq === i
+                            ? "1.5px solid rgba(232,84,26,0.3)"
                             : "1.5px solid rgba(255,255,255,0.6)",
-                          borderRadius: 18, 
+                          borderRadius: 18,
                           overflow: "hidden",
                           transition: "all 0.4s cubic-bezier(.22,1,.36,1)",
-                          boxShadow: expandedFaq === i 
+                          boxShadow: expandedFaq === i
                             ? "0 12px 40px rgba(232,84,26,0.15), inset 0 1px 0 rgba(255,255,255,0.9)"
                             : "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
                           animation: `hw-msg-in 0.5s cubic-bezier(.22,1,.36,1) ${i * 0.08}s both`,
@@ -2070,7 +2070,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         >
                           <div style={{
                             width: 38, height: 38, borderRadius: 12,
-                            background: expandedFaq === i 
+                            background: expandedFaq === i
                               ? "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)"
                               : "linear-gradient(135deg, rgba(232,84,26,0.1) 0%, rgba(255,140,66,0.1) 100%)",
                             display: "flex", alignItems: "center", justifyContent: "center",
@@ -2078,9 +2078,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                             transition: "all 0.4s cubic-bezier(.22,1,.36,1)",
                             boxShadow: expandedFaq === i ? "0 4px 12px rgba(232,84,26,0.3)" : "none",
                           }}>
-                            <svg 
-                              width="18" height="18" viewBox="0 0 24 24" fill="none" 
-                              stroke={expandedFaq === i ? "#fff" : "#E8541A"} 
+                            <svg
+                              width="18" height="18" viewBox="0 0 24 24" fill="none"
+                              stroke={expandedFaq === i ? "#fff" : "#E8541A"}
                               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                             >
                               <path d={faq.icon} />
@@ -2099,7 +2099,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                             </svg>
                           </div>
                         </button>
-                        
+
                         {/* Answer - Animated dropdown */}
                         <div style={{
                           maxHeight: expandedFaq === i ? "200px" : "0px",
@@ -2143,7 +2143,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       Асуулт байвал бидэнтэй холбогдоорой
                     </p>
                   </div>
-                  
+
                   {/* Contact options */}
                   <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     {[
@@ -2166,13 +2166,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         }}
                         onMouseEnter={e => {
                           (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
-                          ; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
-                          ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(232,84,26,0.15)"
+                            ; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
+                            ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(232,84,26,0.15)"
                         }}
                         onMouseLeave={e => {
                           (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.12)"
-                          ; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
-                          ; (e.currentTarget as HTMLElement).style.boxShadow = "none"
+                            ; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
+                            ; (e.currentTarget as HTMLElement).style.boxShadow = "none"
                         }}
                       >
                         <div style={{
@@ -2199,113 +2199,113 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
               {/* INPUT AREA */}
               {activeTab === 0 && (
-              <div style={{
-                padding: "10px 12px max(14px, env(safe-area-inset-bottom, 14px))",
-                background: "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,253,251,0.95) 100%)",
-                backdropFilter: "blur(20px)",
-                flexShrink: 0,
-                borderTop: "1px solid rgba(232,84,26,0.06)",
-                position: "relative", zIndex: 1,
-              }}>
                 <div style={{
-                  display: "flex", gap: 8, alignItems: "center",
-                  background: "linear-gradient(135deg, #fff 0%, #FFFCFA 100%)",
-                  border: "2px solid rgba(232,84,26,0.1)",
-                  borderRadius: 16, padding: "4px 5px 4px 14px", 
-                  transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
-                  boxShadow: "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
-                }}
-                  onFocusCapture={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
-                    ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(232,84,26,0.15), inset 0 1px 0 rgba(255,255,255,0.8)"
-                    ; (e.currentTarget as HTMLElement).style.transform = "scale(1.01)"
+                  padding: "10px 12px max(14px, env(safe-area-inset-bottom, 14px))",
+                  background: "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,253,251,0.95) 100%)",
+                  backdropFilter: "blur(20px)",
+                  flexShrink: 0,
+                  borderTop: "1px solid rgba(232,84,26,0.06)",
+                  position: "relative", zIndex: 1,
+                }}>
+                  <div style={{
+                    display: "flex", gap: 8, alignItems: "center",
+                    background: "linear-gradient(135deg, #fff 0%, #FFFCFA 100%)",
+                    border: "2px solid rgba(232,84,26,0.1)",
+                    borderRadius: 16, padding: "4px 5px 4px 14px",
+                    transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
+                    boxShadow: "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
                   }}
-                  onBlurCapture={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.1)"
-                    ; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)"
-                    ; (e.currentTarget as HTMLElement).style.transform = "scale(1)"
-                  }}
-                >
-                  <input
-                    ref={inputRef as any}
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                    onKeyDown={handleKey}
-                    placeholder="Асуулт бичнэ үү..."
-                    style={{
-                      flex: 1, border: "none", background: "transparent",
-                      fontSize: fontSize, outline: "none",
-                      color: "#333", padding: "10px 0",
-                      fontWeight: 500,
+                    onFocusCapture={e => {
+                      (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
+                        ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(232,84,26,0.15), inset 0 1px 0 rgba(255,255,255,0.8)"
+                        ; (e.currentTarget as HTMLElement).style.transform = "scale(1.01)"
                     }}
-                  />
-                  <button
-                    className="hw-send"
-                    onClick={() => sendMessage(input)}
-                    disabled={!input.trim() || isTyping}
-                    style={{
-                      width: 40, height: 40, borderRadius: 12,
-                      background: input.trim() && !isTyping 
-                        ? "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)" 
-                        : "linear-gradient(135deg, #E5E5E5 0%, #D9D9D9 100%)",
-                      border: "none",
-                      cursor: input.trim() && !isTyping ? "pointer" : "not-allowed",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0, 
-                      transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
-                      boxShadow: input.trim() && !isTyping 
-                        ? "0 4px 16px rgba(232,84,26,0.3)" 
-                        : "none",
-                    }}
-                    onMouseEnter={e => {
-                      if (input.trim() && !isTyping) {
-                        (e.currentTarget as HTMLElement).style.transform = "scale(1.08) rotate(5deg)"
-                        ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(232,84,26,0.4)"
-                      }
-                    }}
-                    onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.transform = "scale(1) rotate(0deg)"
-                      ; (e.currentTarget as HTMLElement).style.boxShadow = input.trim() && !isTyping ? "0 4px 16px rgba(232,84,26,0.3)" : "none"
+                    onBlurCapture={e => {
+                      (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.1)"
+                        ; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)"
+                        ; (e.currentTarget as HTMLElement).style.transform = "scale(1)"
                     }}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="22" y1="2" x2="11" y2="13" />
-                      <polygon points="22 2 15 22 11 13 2 9 22 2" fill="white" stroke="none" />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Warning - shows when 10 or less remaining */}
-                {getRemainingMessages() <= 10 && getRemainingMessages() > 0 && (
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 6,
-                    marginTop: 10,
-                    padding: "8px 12px",
-                    borderRadius: 8,
-                    backgroundColor: getRemainingMessages() <= 3 ? "#FEF2F2" : "#FFFBEB",
-                    border: `1px solid ${getRemainingMessages() <= 3 ? "#FECACA" : "#FDE68A"}`,
-                  }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={getRemainingMessages() <= 3 ? "#DC2626" : "#D97706"} strokeWidth="2">
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M12 8v4M12 16h.01" />
-                    </svg>
-                    <span style={{
-                      fontSize: 12,
-                      fontWeight: 500,
-                      color: getRemainingMessages() <= 3 ? "#DC2626" : "#92400E",
-                    }}>
-                      Танд {getRemainingMessages()} асуулт асуух эрх үлдсэн байна
-                    </span>
+                    <input
+                      ref={inputRef as any}
+                      value={input}
+                      onChange={e => setInput(e.target.value)}
+                      onKeyDown={handleKey}
+                      placeholder="Асуулт бичнэ үү..."
+                      style={{
+                        flex: 1, border: "none", background: "transparent",
+                        fontSize: fontSize, outline: "none",
+                        color: "#333", padding: "10px 0",
+                        fontWeight: 500,
+                      }}
+                    />
+                    <button
+                      className="hw-send"
+                      onClick={() => sendMessage(input)}
+                      disabled={!input.trim() || isTyping}
+                      style={{
+                        width: 40, height: 40, borderRadius: 12,
+                        background: input.trim() && !isTyping
+                          ? "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)"
+                          : "linear-gradient(135deg, #E5E5E5 0%, #D9D9D9 100%)",
+                        border: "none",
+                        cursor: input.trim() && !isTyping ? "pointer" : "not-allowed",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0,
+                        transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
+                        boxShadow: input.trim() && !isTyping
+                          ? "0 4px 16px rgba(232,84,26,0.3)"
+                          : "none",
+                      }}
+                      onMouseEnter={e => {
+                        if (input.trim() && !isTyping) {
+                          (e.currentTarget as HTMLElement).style.transform = "scale(1.08) rotate(5deg)"
+                            ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(232,84,26,0.4)"
+                        }
+                      }}
+                      onMouseLeave={e => {
+                        (e.currentTarget as HTMLElement).style.transform = "scale(1) rotate(0deg)"
+                          ; (e.currentTarget as HTMLElement).style.boxShadow = input.trim() && !isTyping ? "0 4px 16px rgba(232,84,26,0.3)" : "none"
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13" />
+                        <polygon points="22 2 15 22 11 13 2 9 22 2" fill="white" stroke="none" />
+                      </svg>
+                    </button>
                   </div>
-                )}
 
-                <div style={{ textAlign: "center", marginTop: 10, fontSize: 10, color: "#aaa", fontWeight: 500 }}>
-                  hire.mn AI
+                  {/* Warning - shows when 10 or less remaining */}
+                  {getRemainingMessages() <= 10 && getRemainingMessages() > 0 && (
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 6,
+                      marginTop: 10,
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      backgroundColor: getRemainingMessages() <= 3 ? "#FEF2F2" : "#FFFBEB",
+                      border: `1px solid ${getRemainingMessages() <= 3 ? "#FECACA" : "#FDE68A"}`,
+                    }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={getRemainingMessages() <= 3 ? "#DC2626" : "#D97706"} strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 8v4M12 16h.01" />
+                      </svg>
+                      <span style={{
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: getRemainingMessages() <= 3 ? "#DC2626" : "#92400E",
+                      }}>
+                        Танд {getRemainingMessages()} асуулт асуух эрх үлдсэн байна
+                      </span>
+                    </div>
+                  )}
+
+                  <div style={{ textAlign: "center", marginTop: 10, fontSize: 10, color: "#aaa", fontWeight: 500 }}>
+                    hire.mn AI
+                  </div>
                 </div>
-              </div>
               )}
 
               {/* Usage Limit Popup */}
@@ -2330,130 +2330,116 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             FUTURISTIC FLOATING ACTION BUTTON
             ═══════════════════════���═�����═������══════════════════════════════════════════ */}
         {!isOpen && (
-        <div style={{
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "flex-end",
-          // Extra padding so the 3D Spline mascot's overflow (~25px on each
-          // side, plus the -4px bottom offset on the mascot itself) stays
-          // inside the iframe and isn't clipped at the edges.
-          paddingTop: 40,
-          paddingBottom: 35,
-          paddingLeft: 35,
-          paddingRight: 20,
-          width: "100%",
-          height: "100%",
-          boxSizing: "border-box",
-        }}>
-          {/* Animated ring effects */}
-          <div style={{ position: "relative" }}>
-            <div style={{
-              position: "absolute", inset: -8, borderRadius: 30,
-              background: "linear-gradient(135deg, rgba(232,84,26,0.2), rgba(255,140,66,0.15))",
-              animation: "hw-ring 3s ease-out infinite",
-            }} />
-            <div style={{
-              position: "absolute", inset: -3, borderRadius: 29,
-              background: "linear-gradient(135deg, rgba(232,84,26,0.15), rgba(255,107,61,0.1))",
-              animation: "hw-ring 3s ease-out 0.8s infinite",
-            }} />
-            
-            <button
-              className="hw-mascot"
-              onClick={() => setIsOpen(o => !o)}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-              aria-label="hire.mn чат нээх"
-              style={{
-                height: 58, 
-                borderRadius: 29,
-                /* Gradient with animation */
-                background: `linear-gradient(135deg, #E8541A 0%, #F06835 50%, #FF8C42 100%)`,
-                backgroundSize: "200% 200%",
-                animation: isHovered ? "hw-gradient-shift 3s ease infinite" : "none",
-                border: "1.5px solid rgba(255,255,255,0.25)",
-                cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                paddingLeft: 8, paddingRight: 18,
-                flexShrink: 0, position: "relative",
-                boxShadow: isHovered 
-                  ? `0 12px 32px rgba(232,84,26,0.4), 
-                     0 6px 12px rgba(0,0,0,0.08),
-                     inset 0 1px 0 rgba(255,255,255,0.25)`
-                  : `0 8px 24px rgba(232,84,26,0.3), 
-                     0 3px 8px rgba(0,0,0,0.06),
-                     inset 0 1px 0 rgba(255,255,255,0.15)`,
-                transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
-                transform: isHovered ? "scale(1.04) translateY(-2px)" : "scale(1) translateY(0)",
-                overflow: "visible",
-              }}
-            >
-              {/* Shimmer overlay on hover */}
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", paddingTop: 40, paddingBottom: 35, paddingLeft: 35, paddingRight: 20, width: "100%", height: "100%", boxSizing: "border-box" as const }}>
+            {/* Animated ring effects */}
+            <div style={{ position: "relative" }}>
               <div style={{
-                position: "absolute", inset: 0, overflow: "hidden", borderRadius: 29,
-                zIndex: 0,
-              }}>
-                <div style={{
-                  position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%",
-                  background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)",
-                  animation: isHovered ? "hw-shimmer 1.2s ease-in-out infinite" : "none",
-                }} />
-              </div>
-              
-              {/* White circular background — z-0, stays behind mascot */}
+                position: "absolute", inset: -8, borderRadius: 30,
+                background: "linear-gradient(135deg, rgba(232,84,26,0.2), rgba(255,140,66,0.15))",
+                animation: "hw-ring 3s ease-out infinite",
+              }} />
               <div style={{
-                width: 52, height: 52, borderRadius: "50%",
-                background: "rgba(255,255,255,0.97)",
-                position: "absolute", 
-                bottom: 4,
-                left: 8,
-                zIndex: 0,
-                boxShadow: "0 4px 14px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
+                position: "absolute", inset: -3, borderRadius: 29,
+                background: "linear-gradient(135deg, rgba(232,84,26,0.15), rgba(255,107,61,0.1))",
+                animation: "hw-ring 3s ease-out 0.8s infinite",
               }} />
 
-              {/* Mascot — 1.5x the white circle, popping out from top */}
-              <SplineMascot
-                width={78}
-                height={78}
-                borderRadius={0}
+              <button
+                className="hw-mascot"
+                onClick={() => setIsOpen(o => !o)}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                aria-label="hire.mn чат нээх"
                 style={{
-                  position: "absolute",
-                  bottom: -4,
-                  left: -6,
-                  zIndex: 10,
+                  height: 58,
+                  borderRadius: 29,
+                  /* Gradient with animation */
+                  background: `linear-gradient(135deg, #E8541A 0%, #F06835 50%, #FF8C42 100%)`,
+                  backgroundSize: "200% 200%",
+                  animation: isHovered ? "hw-gradient-shift 3s ease infinite" : "none",
+                  border: "1.5px solid rgba(255,255,255,0.25)",
+                  cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                  paddingLeft: 8, paddingRight: 18,
+                  flexShrink: 0, position: "relative",
+                  boxShadow: isHovered
+                    ? `0 12px 32px rgba(232,84,26,0.4), 
+                     0 6px 12px rgba(0,0,0,0.08),
+                     inset 0 1px 0 rgba(255,255,255,0.25)`
+                    : `0 8px 24px rgba(232,84,26,0.3), 
+                     0 3px 8px rgba(0,0,0,0.06),
+                     inset 0 1px 0 rgba(255,255,255,0.15)`,
+                  transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
+                  transform: isHovered ? "scale(1.04) translateY(-2px)" : "scale(1) translateY(0)",
                   overflow: "visible",
-                  filter: "drop-shadow(0 10px 10px rgba(0,0,0,0.2))",
-                  transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
-                  transform: isHovered ? "translateY(-6px) scale(1.06)" : "translateY(0) scale(1)",
                 }}
-              />
-              
-              <span style={{
-                color: "#fff",
-                fontSize: 12,
-                fontWeight: 600,
-                textShadow: "0 1px 3px rgba(0,0,0,0.2)",
-                letterSpacing: "-0.3px",
-                position: "relative", 
-                zIndex: 1,
-                marginLeft: 8,
-              }}>
-                <span className="hw-fab-text">Чат</span>
-              </span>
-              
-              {/* Pulsing online indicator */}
-              <span style={{
-                position: "absolute", bottom: 6, right: 8,
-                width: 10, height: 10, borderRadius: "50%",
-                background: "#4ADE80",
-                border: "2px solid #fff",
-                boxShadow: "0 0 0 3px rgba(34,197,94,0.2)",
-                animation: "hw-online-pulse 2s ease-in-out infinite",
-                zIndex: 11,
-              }} />
-            </button>
+              >
+                {/* Shimmer overlay on hover */}
+                <div style={{
+                  position: "absolute", inset: 0, overflow: "hidden", borderRadius: 29,
+                  zIndex: 0,
+                }}>
+                  <div style={{
+                    position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%",
+                    background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)",
+                    animation: isHovered ? "hw-shimmer 1.2s ease-in-out infinite" : "none",
+                  }} />
+                </div>
+
+                {/* White circular background — z-0, stays behind mascot */}
+                <div style={{
+                  width: 52, height: 52, borderRadius: "50%",
+                  background: "rgba(255,255,255,0.97)",
+                  position: "absolute",
+                  bottom: 4,
+                  left: 8,
+                  zIndex: 0,
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
+                }} />
+
+                {/* Mascot — 1.5x the white circle, popping out from top */}
+                <SplineMascot
+                  width={78}
+                  height={78}
+                  borderRadius={0}
+                  style={{
+                    position: "absolute",
+                    bottom: -4,
+                    left: -6,
+                    zIndex: 10,
+                    overflow: "visible",
+                    filter: "drop-shadow(0 10px 10px rgba(0,0,0,0.2))",
+                    transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
+                    transform: isHovered ? "translateY(-6px) scale(1.06)" : "translateY(0) scale(1)",
+                  }}
+                />
+
+                <span style={{
+                  color: "#fff",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  textShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                  letterSpacing: "-0.3px",
+                  position: "relative",
+                  zIndex: 1,
+                  marginLeft: 8,
+                }}>
+                  <span className="hw-fab-text">Чат</span>
+                </span>
+
+                {/* Pulsing online indicator */}
+                <span style={{
+                  position: "absolute", bottom: 6, right: 8,
+                  width: 10, height: 10, borderRadius: "50%",
+                  background: "#4ADE80",
+                  border: "2px solid #fff",
+                  boxShadow: "0 0 0 3px rgba(34,197,94,0.2)",
+                  animation: "hw-online-pulse 2s ease-in-out infinite",
+                  zIndex: 11,
+                }} />
+              </button>
+            </div>
           </div>
-        </div>
         )}
 
       </div>
