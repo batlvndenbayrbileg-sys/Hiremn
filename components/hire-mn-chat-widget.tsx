@@ -1421,194 +1421,114 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           from { opacity: 0; transform: translateX(10px) scale(0.95); }
           to   { opacity: 1; transform: translateX(0) scale(1); }
         }
-        
-        /* Mascot animations */
-        @keyframes hw-mascot-bounce {
-          0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-6px) scale(1.02); }
-        }
-        @keyframes hw-mascot-float {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          25% { transform: translateY(-3px) rotate(-2deg); }
-          50% { transform: translateY(-5px) rotate(0deg); }
-          75% { transform: translateY(-3px) rotate(2deg); }
-        }
-        @keyframes hw-mascot-wave {
-          0%, 100% { transform: rotate(0deg); }
-          20% { transform: rotate(15deg); }
-          40% { transform: rotate(-10deg); }
-          60% { transform: rotate(15deg); }
-          80% { transform: rotate(-5deg); }
-        }
-        .hw-mascot-bounce {
-          animation: hw-mascot-bounce 2s ease-in-out infinite;
-        }
-        .hw-mascot-float {
-          animation: hw-mascot-float 3s ease-in-out infinite;
-        }
-        .hw-mascot-wave {
-          animation: hw-mascot-wave 1.5s ease-in-out infinite;
-        }
-        
-        @keyframes wave-hand {
-          0%, 100% { transform: rotate(0deg); }
-          25% { transform: rotate(20deg); }
-          50% { transform: rotate(-5deg); }
-          75% { transform: rotate(20deg); }
-        }
-        @keyframes wave-arm {
-          0%, 100% { transform: rotate(0deg); }
-          50% { transform: rotate(-15deg); }
-        }
-        @keyframes glow-pulse {
-          0%, 100% { filter: drop-shadow(0 0 6px rgba(232,84,26,0.3)); }
-          50% { filter: drop-shadow(0 0 20px rgba(232,84,26,0.7)); }
-        }
-        @keyframes typing-bounce {
-          0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-6px); }
-        }
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-        
-        /* ═══════════════════════════════════════════════════════════════════════
-           LIQUID GLASS MORPHISM - FUTURISTIC UI ANIMATIONS
-           ═══════════════════════════════════════════════════════════════════════ */
-        
-        @keyframes hw-float {
-          0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-8px) scale(1.02); }
-        }
         @keyframes hw-ring {
-          0% { transform: scale(1); opacity: 0.8; }
-          100% { transform: scale(2.2); opacity: 0; }
-        }
-        @keyframes hw-online-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
-          50% { box-shadow: 0 0 0 12px rgba(34,197,94,0); }
+          0% { transform: scale(1); opacity: 0.7; }
+          100% { transform: scale(2.4); opacity: 0; }
         }
         @keyframes hw-msg-in {
-          from { transform: translateY(16px) scale(0.95); opacity: 0; }
+          from { transform: translateY(12px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes hw-chat-open {
+          from { transform: translateY(20px) scale(0.96); opacity: 0; }
           to { transform: translateY(0) scale(1); opacity: 1; }
-        }
-        @keyframes hw-glow {
-          0%, 100% { box-shadow: 0 0 40px rgba(232,84,26,0.25); }
-          50% { box-shadow: 0 0 80px rgba(232,84,26,0.45); }
-        }
-        @keyframes hw-aurora {
-          0% { transform: rotate(0deg) translate(0, 0); }
-          33% { transform: rotate(120deg) translate(10px, -10px); }
-          66% { transform: rotate(240deg) translate(-10px, 10px); }
-          100% { transform: rotate(360deg) translate(0, 0); }
-        }
-        @keyframes hw-orb-float {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(15px, -10px) scale(1.1); }
-          50% { transform: translate(5px, 15px) scale(0.95); }
-          75% { transform: translate(-10px, 5px) scale(1.05); }
         }
         @keyframes hw-shimmer {
           0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-        @keyframes hw-pulse-ring {
-          0% { transform: scale(0.95); opacity: 1; }
-          50% { transform: scale(1.05); opacity: 0.8; }
-          100% { transform: scale(0.95); opacity: 1; }
+          100% { transform: translateX(300%); }
         }
         @keyframes hw-gradient-shift {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
-        @keyframes hw-breathe {
-          0%, 100% { transform: scale(1); filter: brightness(1); }
-          50% { transform: scale(1.02); filter: brightness(1.05); }
+        @keyframes hw-online-dot {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.4); opacity: 0.7; }
         }
-        @keyframes hw-border-glow {
-          0%, 100% { border-color: rgba(232,84,26,0.3); }
-          50% { border-color: rgba(232,84,26,0.6); }
+        @keyframes hw-orb-float {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(8px, -12px); }
         }
-        @keyframes hw-sparkle {
-          0%, 100% { opacity: 0.3; transform: scale(0.8); }
-          50% { opacity: 1; transform: scale(1.2); }
+        @keyframes hw-pop {
+          from { transform: scale(0.9); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes hw-chip-in {
+          from { transform: translateY(8px) scale(0.95); opacity: 0; }
+          to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        @keyframes hw-bounce {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-5px); }
         }
 
-        .hw-msg { animation: hw-pop 0.4s cubic-bezier(.34,1.56,.64,1) both; }
+        .hw-msg { animation: hw-msg-in 0.3s ease both; }
 
         .hw-card {
-          transition: transform 0.28s cubic-bezier(.34,1.56,.64,1), box-shadow 0.28s ease, border-color 0.2s ease;
+          transition: transform 0.25s cubic-bezier(.16,1,.3,1), box-shadow 0.25s ease, border-color 0.2s;
           will-change: transform;
         }
         .hw-card:hover {
-          transform: translateY(-6px) scale(1.02);
-          box-shadow: 0 20px 40px rgba(232,84,26,.18), 0 6px 16px rgba(0,0,0,.08);
-          border-color: #F5C8B8 !important;
+          transform: translateY(-4px);
+          box-shadow: 0 16px 36px rgba(232,84,26,.14), 0 4px 12px rgba(0,0,0,.06) !important;
+          border-color: rgba(232,84,26,0.2) !important;
         }
         .hw-card:hover .hw-cta {
-          background: linear-gradient(135deg, #D44810 0%, #E8541A 100%) !important;
-          box-shadow: 0 6px 20px rgba(232,84,26,.4) !important;
-          transform: translateY(-2px);
+          background: #D44810 !important;
+          box-shadow: 0 4px 14px rgba(232,84,26,.35) !important;
         }
 
-        .hw-cta { transition: all 0.22s cubic-bezier(.34,1.56,.64,1); }
+        .hw-cta { transition: all 0.2s ease; }
 
-        .hw-chip {
-          transition: all 0.22s cubic-bezier(.34,1.56,.64,1);
-        }
+        .hw-chip { transition: all 0.18s ease; }
         .hw-chip:hover {
-          background: linear-gradient(135deg, #E8541A, #F07040) !important;
+          background: #E8541A !important;
           color: #fff !important;
           border-color: #E8541A !important;
-          transform: translateY(-3px) scale(1.05);
-          box-shadow: 0 6px 16px rgba(232,84,26,.3);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(232,84,26,.25) !important;
         }
-        .hw-chip:active { transform: scale(0.96); }
+        .hw-chip:active { transform: scale(0.97); }
 
-        .hw-send { transition: all 0.2s cubic-bezier(.34,1.56,.64,1); }
+        .hw-send { transition: all 0.18s ease; }
         .hw-send:hover:not(:disabled) {
-          background: linear-gradient(135deg, #D44810 0%, #E8541A 100%) !important;
-          transform: scale(1.08);
-          box-shadow: 0 6px 20px rgba(232,84,26,.4) !important;
+          background: #D44810 !important;
+          transform: scale(1.06);
+          box-shadow: 0 4px 16px rgba(232,84,26,.35) !important;
         }
-        .hw-send:active:not(:disabled) { transform: scale(0.92); }
+        .hw-send:active:not(:disabled) { transform: scale(0.94); }
 
-        .hw-mascot {
-          transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease;
-          
-          will-change: transform;
-        }
-       .hw-mascot:hover {
-  box-shadow: none !important;
-  background: #FFFFFF !important;
-}
-        .hw-mascot:active { transform: scale(0.94); }
+        .hw-mascot { transition: transform 0.25s cubic-bezier(.16,1,.3,1); will-change: transform; }
+        .hw-mascot:hover { box-shadow: none !important; background: #FFFFFF !important; }
+        .hw-mascot:active { transform: scale(0.95); }
 
-        .hw-arrow {
-          transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
-        }
+        .hw-arrow { transition: all 0.18s ease; }
         .hw-arrow:hover {
-          transform: translateY(-50%) scale(1.15);
-          box-shadow: 0 4px 16px rgba(232,84,26,.25);
-          border-color: #F5C8B8;
+          transform: translateY(-50%) scale(1.12);
+          box-shadow: 0 3px 12px rgba(232,84,26,.2);
+          border-color: rgba(232,84,26,0.2);
         }
 
-        .hw-scroll::-webkit-scrollbar { width: 4px; }
+        .hw-tab { transition: all 0.18s ease; }
+
+        .hw-scroll::-webkit-scrollbar { width: 3px; }
         .hw-scroll::-webkit-scrollbar-track { background: transparent; }
-        .hw-scroll::-webkit-scrollbar-thumb { background: rgba(232,84,26,.15); border-radius: 4px; }
-        .hw-scroll::-webkit-scrollbar-thumb:hover { background: rgba(232,84,26,.3); }
+        .hw-scroll::-webkit-scrollbar-thumb { background: rgba(232,84,26,.12); border-radius: 3px; }
+        .hw-scroll::-webkit-scrollbar-thumb:hover { background: rgba(232,84,26,.25); }
 
         .hw-font-slider { -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px; outline: none; cursor: pointer;
           background: linear-gradient(to right, #E8541A calc((var(--val) - 11) / 6 * 100%), #F0E4DF calc((var(--val) - 11) / 6 * 100%));
         }
-        .hw-font-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, #E8541A, #F07040); border: 2.5px solid #fff; box-shadow: 0 2px 8px rgba(232,84,26,.4); cursor: pointer; transition: transform 0.15s; }
+        .hw-font-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #E8541A; border: 2.5px solid #fff; box-shadow: 0 2px 8px rgba(232,84,26,.35); cursor: pointer; transition: transform 0.15s; }
         .hw-font-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
-        .hw-font-slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, #E8541A, #F07040); border: 2.5px solid #fff; cursor: pointer; }
+        .hw-font-slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #E8541A; border: 2.5px solid #fff; cursor: pointer; }
 
-        .hw-tab { transition: all 0.2s cubic-bezier(.34,1.56,.64,1); }
-        .hw-tab:hover { transform: translateY(-2px); }
+        /* Input focus ring */
+        .hw-input-wrap:focus-within {
+          border-color: #E8541A !important;
+          box-shadow: 0 0 0 3px rgba(232,84,26,0.12), 0 2px 8px rgba(0,0,0,0.06) !important;
+        }
 
         /* Mobile fullscreen */
         @media (max-width: 480px) {
@@ -1679,159 +1599,104 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           <div className="hw-panel-animation" style={{ animation: "hw-chat-open 0.6s cubic-bezier(.16,1,.3,1)" }}>
             <div className="hw-panel" style={{
               width: 400,
-              height: "min(620px, calc(100vh - 80px))",
+              height: "min(640px, calc(100vh - 80px))",
               position: "relative",
               overflow: "hidden",
               maxWidth: "calc(100vw - 24px)",
-              borderRadius: 24,
-              /* Premium Liquid Glass Effect */
-              background: `linear-gradient(165deg, 
-                rgba(255,255,255,0.95) 0%, 
-                rgba(255,253,251,0.92) 40%, 
-                rgba(255,248,244,0.88) 100%)`,
-              backdropFilter: "blur(40px) saturate(200%)",
-              WebkitBackdropFilter: "blur(40px) saturate(200%)",
-              boxShadow: `
-                0 0 0 1px rgba(255,255,255,0.7),
-                0 25px 60px -12px rgba(232,84,26,0.25),
-                0 12px 24px -8px rgba(0,0,0,0.1),
-                inset 0 1px 1px rgba(255,255,255,1)
-              `,
+              borderRadius: 20,
+              background: "#FFFFFF",
+              boxShadow: "0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
               display: "flex", flexDirection: "column",
-              border: "1px solid rgba(232,84,26,0.08)",
+              border: "1px solid rgba(0,0,0,0.06)",
             }}>
 
-              {/* ══════════ ANIMATED BACKGROUND EFFECTS ══════════ */}
-              <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: 24, pointerEvents: "none", zIndex: 0 }}>
-                {/* Floating orbs */}
-                <div style={{
-                  position: "absolute", top: "15%", right: "-10%", width: 200, height: 200, borderRadius: "50%",
-                  background: "radial-gradient(circle, rgba(232,84,26,0.08) 0%, transparent 70%)",
-                  animation: "hw-orb-float 20s ease-in-out infinite",
-                }} />
-                <div style={{
-                  position: "absolute", bottom: "20%", left: "-15%", width: 160, height: 160, borderRadius: "50%",
-                  background: "radial-gradient(circle, rgba(255,140,66,0.06) 0%, transparent 70%)",
-                  animation: "hw-orb-float 25s ease-in-out infinite reverse",
-                }} />
-              </div>
-
-              {/* ══════════ FUTURISTIC HEADER ══════════ */}
+              {/* ══════════ CLEAN HEADER ══════════ */}
               <div style={{
-                background: `linear-gradient(135deg, 
-                  #E8541A 0%, 
-                  #F06835 40%, 
-                  #FF8C42 100%)`,
-                backgroundSize: "200% 200%",
-                animation: "hw-gradient-shift 8s ease infinite",
-                padding: "18px 16px 16px",
+                background: "#E8541A",
+                padding: "16px 16px 0",
                 flexShrink: 0,
+                borderRadius: "20px 20px 0 0",
                 position: "relative",
-                borderRadius: "24px 24px 0 0",
                 overflow: "hidden",
               }}>
-                {/* Header shimmer effect */}
+                {/* Subtle decorative orb */}
                 <div style={{
-                  position: "absolute", inset: 0, overflow: "hidden",
-                }}>
-                  <div style={{
-                    position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%",
-                    background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)",
-                    animation: "hw-shimmer 3s ease-in-out infinite",
-                  }} />
-                </div>
-
-                {/* Decorative circles */}
-                <div style={{
-                  position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: "50%",
-                  background: "rgba(255,255,255,0.1)",
-                  animation: "hw-breathe 4s ease-in-out infinite",
+                  position: "absolute", top: -40, right: -40, width: 120, height: 120, borderRadius: "50%",
+                  background: "rgba(255,255,255,0.08)", pointerEvents: "none",
                 }} />
                 <div style={{
-                  position: "absolute", bottom: -20, left: 30, width: 60, height: 60, borderRadius: "50%",
-                  background: "rgba(255,255,255,0.08)",
-                  animation: "hw-breathe 5s ease-in-out infinite 1s",
+                  position: "absolute", bottom: -20, left: -10, width: 70, height: 70, borderRadius: "50%",
+                  background: "rgba(255,255,255,0.05)", pointerEvents: "none",
                 }} />
 
                 {/* Header content */}
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, position: "relative", zIndex: 1 }}>
-                  {/* Glowing Mascot Container */}
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, position: "relative", zIndex: 1 }}>
+                  {/* Mascot avatar */}
                   <div style={{
-                    width: 44, height: 44, borderRadius: 14,
-                    background: "rgba(255,255,255,0.98)",
+                    width: 46, height: 46, borderRadius: 14,
+                    background: "rgba(255,255,255,0.95)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.15), 0 0 0 2px rgba(255,255,255,0.5)",
-                    overflow: "hidden",
-                    animation: "hw-pulse-ring 3s ease-in-out infinite",
-                    flexShrink: 0,
+                    overflow: "hidden", flexShrink: 0,
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                   }}>
-                    <SplineMascot width={82} height={82} borderRadius={22} />
+                    <SplineMascot width={46} height={46} borderRadius={0} />
                   </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                      <span style={{
-                        color: "#fff", fontWeight: 700, fontSize: 16,
-                        textShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                        letterSpacing: "-0.3px"
-                      }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ color: "#fff", fontWeight: 700, fontSize: 15, letterSpacing: "-0.2px" }}>
                         hire.mn AI
                       </span>
-                      {/* Animated Online Badge */}
                       <span style={{
-                        fontSize: 8, fontWeight: 700, letterSpacing: "0.6px",
-                        color: "#fff",
-                        background: "linear-gradient(135deg, rgba(34,197,94,0.9), rgba(74,222,128,0.9))",
-                        padding: "3px 8px", borderRadius: 10,
                         display: "flex", alignItems: "center", gap: 4,
-                        boxShadow: "0 2px 8px rgba(34,197,94,0.4)",
+                        background: "rgba(255,255,255,0.18)",
+                        border: "1px solid rgba(255,255,255,0.25)",
+                        padding: "2px 8px", borderRadius: 20,
                       }}>
                         <span style={{
-                          width: 5, height: 5, borderRadius: "50%", background: "#fff",
-                          animation: "hw-sparkle 1.5s ease-in-out infinite"
+                          width: 6, height: 6, borderRadius: "50%", background: "#4ADE80",
+                          animation: "hw-online-dot 2s ease-in-out infinite",
+                          display: "inline-block",
                         }} />
-                        ONLINE
+                        <span style={{ color: "rgba(255,255,255,0.95)", fontSize: 10, fontWeight: 600, letterSpacing: "0.3px" }}>
+                          ОНЛАЙН
+                        </span>
                       </span>
                     </div>
-                    <div style={{ color: "rgba(255,255,255,0.9)", fontSize: 11, marginTop: 2, fontWeight: 500 }}>
+                    <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, marginTop: 2, fontWeight: 400 }}>
                       24/7 танд туслахад бэлэн
                     </div>
                   </div>
 
-                  {/* Close Button - Glassmorphism */}
+                  {/* Close button */}
                   <button
                     onClick={() => setIsOpen(false)}
                     style={{
-                      width: 36, height: 36, borderRadius: 12,
+                      width: 34, height: 34, borderRadius: 10,
                       background: "rgba(255,255,255,0.15)",
-                      backdropFilter: "blur(10px)",
-                      border: "1px solid rgba(255,255,255,0.25)",
+                      border: "1px solid rgba(255,255,255,0.2)",
                       color: "#fff", cursor: "pointer",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
+                      transition: "all 0.2s ease", flexShrink: 0,
                     }}
                     onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.25)"
-                        ; (e.currentTarget as HTMLElement).style.transform = "rotate(90deg) scale(1.1)"
+                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.28)"
+                      ;(e.currentTarget as HTMLElement).style.transform = "rotate(90deg)"
                     }}
                     onMouseLeave={e => {
                       (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.15)"
-                        ; (e.currentTarget as HTMLElement).style.transform = "rotate(0deg) scale(1)"
+                      ;(e.currentTarget as HTMLElement).style.transform = "rotate(0deg)"
                     }}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                       <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
 
-                {/* ══════════ GLASS TAB NAVIGATION ══════════ */}
+                {/* ══════════ TAB NAVIGATION ══════════ */}
                 <div style={{
-                  display: "flex", gap: 6,
-                  background: "rgba(0,0,0,0.12)",
-                  backdropFilter: "blur(8px)",
-                  borderRadius: 14, padding: 5,
-                  position: "relative", zIndex: 1,
+                  display: "flex", position: "relative", zIndex: 1,
                 }}>
                   {[
                     { label: "Чат", icon: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" },
@@ -1841,21 +1706,20 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     <button
                       key={tab.label}
                       onClick={() => setActiveTab(i)}
+                      className="hw-tab"
                       style={{
-                        flex: 1, padding: "10px 12px", borderRadius: 10,
-                        background: activeTab === i
-                          ? "linear-gradient(135deg, rgba(255,255,255,0.98), rgba(255,252,250,0.95))"
-                          : "transparent",
+                        flex: 1, padding: "10px 8px 12px", borderRadius: 0,
+                        background: "transparent",
                         border: "none", cursor: "pointer",
-                        color: activeTab === i ? "#E8541A" : "rgba(255,255,255,0.85)",
-                        fontSize: 12, fontWeight: 600,
+                        color: activeTab === i ? "#fff" : "rgba(255,255,255,0.55)",
+                        fontSize: 13, fontWeight: 600,
                         display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                        transition: "all 0.35s cubic-bezier(.16,1,.3,1)",
-                        boxShadow: activeTab === i ? "0 4px 16px rgba(0,0,0,0.12)" : "none",
-                        transform: activeTab === i ? "translateY(-1px)" : "translateY(0)",
+                        transition: "all 0.2s ease",
+                        borderBottom: activeTab === i ? "2px solid #fff" : "2px solid transparent",
+                        letterSpacing: "-0.1px",
                       }}
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d={tab.icon} />
                       </svg>
                       {tab.label}
@@ -1867,14 +1731,14 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               {/* TAB CONTENT */}
               {activeTab === 0 && (
                 <>
-                  {/* Chat Messages Area - Glass Effect */}
+                  {/* Chat Messages Area */}
                   <div className="hw-scroll" style={{
                     flex: 1,
                     minHeight: 0,
                     overflowY: "auto",
-                    padding: "16px 12px 10px",
-                    display: "flex", flexDirection: "column", gap: 12,
-                    background: "linear-gradient(180deg, rgba(255,253,251,0.4) 0%, rgba(255,255,255,0.6) 100%)",
+                    padding: "20px 14px 12px",
+                    display: "flex", flexDirection: "column", gap: 14,
+                    background: "#F9FAFB",
                     position: "relative", zIndex: 1,
                   }}>
                     {messages.map((msg, i) => {
