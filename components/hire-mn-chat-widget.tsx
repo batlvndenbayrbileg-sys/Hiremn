@@ -2360,7 +2360,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             FUTURISTIC FLOATING ACTION BUTTON
             ═══════════════════════���═�����═������══��═══════════════════════════════════════ */}
         {!isOpen && (
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", paddingTop: 40, paddingBottom: 35, paddingLeft: 35, paddingRight: 20, width: "100%", height: "100%", boxSizing: "border-box" as const }}>
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", paddingTop: 60, paddingBottom: 20, paddingLeft: 60, paddingRight: 16, width: "100%", height: "100%", boxSizing: "border-box" as const }}>
             {/* Animated ring effects */}
             <div style={{ position: "relative" }}>
               <div style={{
@@ -2418,29 +2418,28 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
                 {/* White circular background — z-0, stays behind mascot */}
                 <div style={{
-                  width: 52, height: 52, borderRadius: "50%",
+                  width: 54, height: 54, borderRadius: "50%",
                   background: "rgba(255,255,255,0.97)",
                   position: "absolute",
-                  bottom: 4,
-                  left: 8,
+                  bottom: 2,
+                  left: 4,
                   zIndex: 0,
                   boxShadow: "0 4px 14px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
                 }} />
 
-                {/* Mascot — 1.5x the white circle, popping out from top */}
+                {/* Mascot — fills the white circle area entirely */}
                 <SplineMascot
-                  width={78}
-                  height={78}
+                  width={110}
+                  height={110}
                   borderRadius={0}
                   style={{
                     position: "absolute",
-                    bottom: -4,
-                    left: -6,
+                    bottom: -26,
+                    left: -22,
                     zIndex: 10,
-                    overflow: "visible",
-                    filter: "drop-shadow(0 10px 10px rgba(0,0,0,0.2))",
+                    filter: "drop-shadow(0 6px 8px rgba(0,0,0,0.18))",
                     transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
-                    transform: isHovered ? "translateY(-6px) scale(1.06)" : "translateY(0) scale(1)",
+                    transform: isHovered ? "translateY(-4px) scale(1.04)" : "translateY(0) scale(1)",
                   }}
                 />
 

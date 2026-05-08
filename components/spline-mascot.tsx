@@ -90,21 +90,20 @@ export function SplineMascot({
         </div>
       )}
 
-      {/* Spline 3D - centered with slight right offset for arms */}
+      {/* Spline 3D - sized to fill container, centered */}
       {showSpline && (
         <div
           style={{
             position: 'absolute',
-            left: '-25px',
-            right: '-25px',
-            top: '-25px',
-            bottom: '-25px',
-            overflow: 'visible',
+            inset: 0,
+            overflow: 'hidden',
             zIndex: 10,
-            transform: 'translateX(15px)',
           }}
         >
-          <SplineComponent scene={SCENE_URL} />
+          <SplineComponent
+            scene={SCENE_URL}
+            style={{ width: '100%', height: '100%' }}
+          />
         </div>
       )}
 
