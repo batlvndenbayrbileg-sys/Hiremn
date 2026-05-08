@@ -19,8 +19,8 @@
   // Note: the 3D Spline mascot has ~25px overflow on all sides plus a -4px
   // bottom offset, so the iframe must be tall/wide enough to contain it,
   // otherwise the mascot gets clipped at the iframe edge.
-  var BUTTON_SIZE = "180px";
-  var BUTTON_HEIGHT = "112px";
+  var BUTTON_SIZE = "210px";
+  var BUTTON_HEIGHT = "130px";
 
   // ── Wrapper div (fixed, bottom-right with extra margin) ────────────────────────────────────
   var wrapper = document.createElement("div");
