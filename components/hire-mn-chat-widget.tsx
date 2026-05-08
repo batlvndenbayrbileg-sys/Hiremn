@@ -2014,8 +2014,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   {/* Contact options */}
                   <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     {[
-                      { label: "И-мэйл", value: "info@hire.mn", icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6", href: "mailto:info@hire.mn" },
-                      { label: "Утас", value: "+976 7011-1234", icon: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72", href: "tel:+97675111111" },
+                      { label: "И-мэйл", value: "info@axiominc.mn", icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6", href: "mailto:info@axiominc.mn" },
+                      { label: "Утас", value: "+976 7011-1234", icon: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72", href: "tel:+9767511 1111" },
                       { label: "Веб", value: "hire.mn", icon: "M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z", href: "https://hire.mn" },
                     ].map((item, i) => (
                       <a
