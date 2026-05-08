@@ -2360,16 +2360,16 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             FUTURISTIC FLOATING ACTION BUTTON
             ═══════════════════════���═�����═������══��═══════════════════════════════════════ */}
         {!isOpen && (
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", paddingTop: 60, paddingBottom: 20, paddingLeft: 60, paddingRight: 16, width: "100%", height: "100%", boxSizing: "border-box" as const }}>
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", padding: 12, width: "100%", height: "100%", boxSizing: "border-box" as const }}>
             {/* Animated ring effects */}
             <div style={{ position: "relative" }}>
               <div style={{
-                position: "absolute", inset: -8, borderRadius: 30,
+                position: "absolute", inset: -8, borderRadius: 40,
                 background: "linear-gradient(135deg, rgba(232,84,26,0.2), rgba(255,140,66,0.15))",
                 animation: "hw-ring 3s ease-out infinite",
               }} />
               <div style={{
-                position: "absolute", inset: -3, borderRadius: 29,
+                position: "absolute", inset: -3, borderRadius: 38,
                 background: "linear-gradient(135deg, rgba(232,84,26,0.15), rgba(255,107,61,0.1))",
                 animation: "hw-ring 3s ease-out 0.8s infinite",
               }} />
@@ -2381,34 +2381,26 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 onMouseLeave={() => setIsHovered(false)}
                 aria-label="hire.mn чат нээх"
                 style={{
-                  height: 58,
-                  borderRadius: 29,
-                  /* Gradient with animation */
+                  height: 72,
+                  borderRadius: 36,
                   background: `linear-gradient(135deg, #E8541A 0%, #F06835 50%, #FF8C42 100%)`,
                   backgroundSize: "200% 200%",
                   animation: isHovered ? "hw-gradient-shift 3s ease infinite" : "none",
                   border: "1.5px solid rgba(255,255,255,0.25)",
                   cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                  paddingLeft: 8, paddingRight: 18,
+                  display: "flex", alignItems: "center", gap: 8,
+                  paddingLeft: 6, paddingRight: 20,
                   flexShrink: 0, position: "relative",
                   boxShadow: isHovered
-                    ? `0 12px 32px rgba(232,84,26,0.4), 
-                     0 6px 12px rgba(0,0,0,0.08),
-                     inset 0 1px 0 rgba(255,255,255,0.25)`
-                    : `0 8px 24px rgba(232,84,26,0.3), 
-                     0 3px 8px rgba(0,0,0,0.06),
-                     inset 0 1px 0 rgba(255,255,255,0.15)`,
+                    ? `0 12px 32px rgba(232,84,26,0.4), 0 6px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.25)`
+                    : `0 8px 24px rgba(232,84,26,0.3), 0 3px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.15)`,
                   transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
                   transform: isHovered ? "scale(1.04) translateY(-2px)" : "scale(1) translateY(0)",
-                  overflow: "visible",
+                  overflow: "hidden",
                 }}
               >
                 {/* Shimmer overlay on hover */}
-                <div style={{
-                  position: "absolute", inset: 0, overflow: "hidden", borderRadius: 29,
-                  zIndex: 0,
-                }}>
+                <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: 36, zIndex: 0 }}>
                   <div style={{
                     position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%",
                     background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)",
@@ -2416,42 +2408,34 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   }} />
                 </div>
 
-                {/* White circular background — z-0, stays behind mascot */}
+                {/* White circle with mascot fully inside */}
                 <div style={{
-                  width: 54, height: 54, borderRadius: "50%",
+                  width: 60, height: 60, borderRadius: "50%",
                   background: "rgba(255,255,255,0.97)",
-                  position: "absolute",
-                  bottom: 2,
-                  left: 4,
-                  zIndex: 0,
-                  boxShadow: "0 4px 14px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
-                }} />
-
-                {/* Mascot — fills the white circle area entirely */}
-                <SplineMascot
-                  width={110}
-                  height={110}
-                  borderRadius={0}
-                  style={{
-                    position: "absolute",
-                    bottom: -26,
-                    left: -22,
-                    zIndex: 10,
-                    filter: "drop-shadow(0 6px 8px rgba(0,0,0,0.18))",
-                    transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
-                    transform: isHovered ? "translateY(-4px) scale(1.04)" : "translateY(0) scale(1)",
-                  }}
-                />
+                  flexShrink: 0,
+                  position: "relative",
+                  zIndex: 1,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+                  overflow: "hidden",
+                  transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
+                  transform: isHovered ? "scale(1.06)" : "scale(1)",
+                }}>
+                  <SplineMascot
+                    width={60}
+                    height={60}
+                    borderRadius={30}
+                    style={{ display: "block" }}
+                  />
+                </div>
 
                 <span style={{
                   color: "#fff",
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: 600,
                   textShadow: "0 1px 3px rgba(0,0,0,0.2)",
                   letterSpacing: "-0.3px",
                   position: "relative",
                   zIndex: 1,
-                  marginLeft: 8,
                 }}>
                   <span className="hw-fab-text">Чат</span>
                 </span>

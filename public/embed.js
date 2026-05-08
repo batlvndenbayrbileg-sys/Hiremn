@@ -19,15 +19,15 @@
   // Note: the 3D Spline mascot has ~25px overflow on all sides plus a -4px
   // bottom offset, so the iframe must be tall/wide enough to contain it,
   // otherwise the mascot gets clipped at the iframe edge.
-  var BUTTON_SIZE = "300px";
-  var BUTTON_HEIGHT = "160px";
+  var BUTTON_SIZE = "180px";
+  var BUTTON_HEIGHT = "112px";
 
   // ── Wrapper div (fixed, bottom-right with extra margin) ────────────────────────────────────
   var wrapper = document.createElement("div");
   wrapper.id = "hiremn-widget-root";
   wrapper.style.cssText =
     "position:fixed !important;" +
-    "bottom:10px !important;" +
+    "bottom:20px !important;" +
     "right:20px !important;" +
     "z-index:2147483647 !important;" +
     "pointer-events:none !important;" +
@@ -295,20 +295,20 @@
           iframe.style.width = "100%";
           iframe.style.height = "100%";
         } else {
-          wrapper.style.width = "420px";
+            wrapper.style.width = "420px";
           wrapper.style.height = "680px";
           wrapper.style.bottom = "20px";
-          wrapper.style.right = "50px";
+          wrapper.style.right = "20px";
           wrapper.style.left = "auto";
           wrapper.style.top = "auto";
           iframe.style.width = "420px";
           iframe.style.height = "680px";
         }
       } else {
-        // Closed - futuristic floating button
+        // Closed - FAB button
         wrapper.style.width = BUTTON_SIZE;
         wrapper.style.height = BUTTON_HEIGHT;
-        wrapper.style.bottom = "10px";
+        wrapper.style.bottom = "20px";
         wrapper.style.right = "20px";
         wrapper.style.left = "auto";
         wrapper.style.top = "auto";
