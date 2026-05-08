@@ -994,6 +994,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const [showSidebar, setShowSidebar] = useState(false)
   const [activeTab, setActiveTab] = useState(0) // 0: Chat, 1: FAQs, 2: Contact
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null) // FAQ accordion state
+  const [rateLimitPopupDismissed, setRateLimitPopupDismissed] = useState(false) // Rate limit popup dismissed
 
   // Notify parent window of open/close state for iframe resizing
   // ✅ ЗӨВ — 2 тусдаа useEffect
@@ -2207,20 +2208,44 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   borderTop: "1px solid rgba(232,84,26,0.06)",
                   position: "relative", zIndex: 1,
                 }}>
+                  {/* Rate limit banner - shows when popup is dismissed */}
+                  {isUserLocked() && rateLimitPopupDismissed && (
+                    <div style={{
+                      background: "linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)",
+                      border: "1px solid #F59E0B",
+                      borderRadius: 12,
+                      padding: "10px 14px",
+                      marginBottom: 10,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                    }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                      </svg>
+                      <span style={{ fontSize: 12, color: "#92400E", fontWeight: 500 }}>
+                        Өнөөдрийн эрх дууссан байна. {formatUnlockTime()} хүртэл хүлээнэ үү.
+                      </span>
+                    </div>
+                  )}
                   <div style={{
                     display: "flex", gap: 8, alignItems: "center",
-                    background: "linear-gradient(135deg, #fff 0%, #FFFCFA 100%)",
-                    border: "2px solid rgba(232,84,26,0.1)",
+                    background: isUserLocked() ? "#F3F4F6" : "linear-gradient(135deg, #fff 0%, #FFFCFA 100%)",
+                    border: isUserLocked() ? "2px solid #E5E7EB" : "2px solid rgba(232,84,26,0.1)",
                     borderRadius: 16, padding: "4px 5px 4px 14px",
                     transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
                     boxShadow: "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+                    opacity: isUserLocked() ? 0.7 : 1,
                   }}
                     onFocusCapture={e => {
+                      if (isUserLocked()) return
                       (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
                         ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(232,84,26,0.15), inset 0 1px 0 rgba(255,255,255,0.8)"
                         ; (e.currentTarget as HTMLElement).style.transform = "scale(1.01)"
                     }}
                     onBlurCapture={e => {
+                      if (isUserLocked()) return
                       (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.1)"
                         ; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)"
                         ; (e.currentTarget as HTMLElement).style.transform = "scale(1)"
@@ -2231,18 +2256,20 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                       value={input}
                       onChange={e => setInput(e.target.value)}
                       onKeyDown={handleKey}
-                      placeholder="Асуулт бичнэ үү..."
+                      placeholder={isUserLocked() ? "Өнөөдрийн эрх дууссан..." : "Асуулт бичнэ үү..."}
+                      disabled={isUserLocked()}
                       style={{
                         flex: 1, border: "none", background: "transparent",
                         fontSize: fontSize, outline: "none",
-                        color: "#333", padding: "10px 0",
+                        color: isUserLocked() ? "#9CA3AF" : "#333", padding: "10px 0",
                         fontWeight: 500,
+                        cursor: isUserLocked() ? "not-allowed" : "text",
                       }}
                     />
                     <button
                       className="hw-send"
                       onClick={() => sendMessage(input)}
-                      disabled={!input.trim() || isTyping}
+                      disabled={!input.trim() || isTyping || isUserLocked()}
                       style={{
                         width: 40, height: 40, borderRadius: 12,
                         background: input.trim() && !isTyping
@@ -2309,7 +2336,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               )}
 
               {/* Usage Limit Popup */}
-              {isUserLocked() && <UsageLimitPopup />}
+              {isUserLocked() && !rateLimitPopupDismissed && (
+                <UsageLimitPopup onClose={() => setRateLimitPopupDismissed(true)} />
+              )}
 
               {/* Sidebar Overlay */}
               {showSidebar && (
@@ -2328,7 +2357,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
         {/* ═══════════════════════════════════════════════════════════════════════
             FUTURISTIC FLOATING ACTION BUTTON
-            ═══════════════════════���═�����═������══════════════════════════════════════════ */}
+            ═══════════════════════���═�����═������══��═══════════════════════════════════════ */}
         {!isOpen && (
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", paddingTop: 40, paddingBottom: 35, paddingLeft: 35, paddingRight: 20, width: "100%", height: "100%", boxSizing: "border-box" as const }}>
             {/* Animated ring effects */}

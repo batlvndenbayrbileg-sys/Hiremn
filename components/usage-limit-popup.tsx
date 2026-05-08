@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { formatUnlockTime, getUnlockTime } from '@/lib/conversation-storage'
 
 interface UsageLimitPopupProps {
@@ -10,6 +10,21 @@ interface UsageLimitPopupProps {
 export function UsageLimitPopup({ onClose }: UsageLimitPopupProps) {
   const [timeLeft, setTimeLeft] = useState('')
   const [unlockTimeStr, setUnlockTimeStr] = useState('')
+
+  const handleClose = useCallback(() => {
+    if (onClose) onClose()
+  }, [onClose])
+
+  // ESC key handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [handleClose])
 
   useEffect(() => {
     setUnlockTimeStr(formatUnlockTime())
@@ -60,7 +75,35 @@ export function UsageLimitPopup({ onClose }: UsageLimitPopupProps) {
         textAlign: 'center',
         boxShadow: '0 20px 60px rgba(0, 0, 0, 0.2)',
         animation: 'scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        position: 'relative',
       }}>
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          style={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
+            border: 'none',
+            background: '#F3F4F6',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'background 0.2s',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#E5E7EB'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#F3F4F6'}
+          aria-label="Хаах"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2" strokeLinecap="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+
         {/* Icon */}
         <div style={{
           width: 64,
