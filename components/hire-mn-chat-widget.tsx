@@ -996,6 +996,14 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const [activeTab, setActiveTab] = useState(0) // 0: Chat, 1: FAQs, 2: Contact
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null) // FAQ accordion state
   const [rateLimitPopupDismissed, setRateLimitPopupDismissed] = useState(false) // Rate limit popup dismissed
+  const [showBubble, setShowBubble] = useState(false)
+
+useEffect(() => {
+  if (isOpen) return
+  const show = setTimeout(() => setShowBubble(true), 4000)
+  const hide = setTimeout(() => setShowBubble(false), 7000)
+  return () => { clearTimeout(show); clearTimeout(hide) }
+}, [isOpen])
 
   // Notify parent window of open/close state for iframe resizing
   // ✅ ЗӨВ — 2 тусдаа useEffect
@@ -1409,6 +1417,14 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           50%  { transform: scale(1.03) translateY(-6px); transform-origin: bottom right; }
           to   { opacity: 1; transform: scale(1) translateY(0); transform-origin: bottom right; }
         }
+          @keyframes hw-btn-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes hw-bubble-in {
+  0% { opacity: 0; transform: translateX(10px) scale(0.9); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
         @keyframes hw-pulse {
          0%, 100% { box-shadow: 0 10px 30px rgba(232,84,26,.4); }
   50%       { box-shadow: 0 10px 30px rgba(232,84,26,.4); }
