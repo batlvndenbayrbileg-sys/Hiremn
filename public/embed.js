@@ -20,7 +20,7 @@
   // bottom offset, so the iframe must be tall/wide enough to contain it,
   // otherwise the mascot gets clipped at the iframe edge.
   var BUTTON_SIZE = "210px";
-  var BUTTON_HEIGHT = "130px";
+  var BUTTON_HEIGHT = "180px";
 
   // ── Wrapper div (fixed, bottom-right with extra margin) ────────────────────────────────────
   var wrapper = document.createElement("div");
@@ -232,8 +232,12 @@
             analysisResults: (examData && (examData.results || examData.scores)) ||
               (answerData && (answerData.results || answerData.scores)) ||
               examData || answerData,
-            prompt: options.prompt ||
-              "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж: 1) Гол дүгнэлт, 2) Давуу/сул тал, 3) Практик зөвлөмж, 4) Цаашид сайжруулах алхмууд гарган гаргаж өгнө үү."
+           prompt: options.prompt ||
+  "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж өгнө үү:\n" +
+  "1) Гол дүгнэлт — ямар хүн бэ, ямар онцлогтой вэ\n" +
+  "2) Хүчтэй болон сул талуудыг тодорхой тайлбарла\n" +
+  "3) Ажил мэргэжил болон хамт олондоо хэрхэн хандах практик зөвлөмж\n" +
+  "4) Цаашид хөгжихийн тулд хийж болох тодорхой алхмууд"
           }
         }, "*");
 
@@ -295,7 +299,7 @@
           iframe.style.width = "100%";
           iframe.style.height = "100%";
         } else {
-            wrapper.style.width = "420px";
+          wrapper.style.width = "420px";
           wrapper.style.height = "680px";
           wrapper.style.bottom = "20px";
           wrapper.style.right = "20px";
