@@ -54,29 +54,35 @@ export function UsageLimitPopup({ onClose }: UsageLimitPopupProps) {
   }, [])
 
   return (
-    <div style={{
-      position: 'absolute',
-      inset: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-      backdropFilter: 'blur(4px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 100,
-      borderRadius: 24,
-      padding: 20,
-    }}>
-      <div style={{
-        backgroundColor: '#fff',
-        borderRadius: 20,
-        padding: '28px 24px',
-        maxWidth: 320,
-        width: '100%',
-        textAlign: 'center',
-        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.2)',
-        animation: 'scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        position: 'relative',
-      }}>
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        backdropFilter: 'blur(4px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 100,
+        borderRadius: 24,
+        padding: 20,
+      }}
+      onClick={handleClose}
+    >
+      <div
+        style={{
+          backgroundColor: '#fff',
+          borderRadius: 20,
+          padding: '28px 24px',
+          maxWidth: 320,
+          width: '100%',
+          textAlign: 'center',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.2)',
+          animation: 'scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          position: 'relative',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Close button */}
         <button
           onClick={handleClose}

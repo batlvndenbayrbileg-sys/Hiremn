@@ -14,7 +14,8 @@ import {
   saveConversation,
   generateConversationTitle,
   incrementDailyCount,
-  isUserLocked
+  isUserLocked,
+  formatUnlockTime
 } from '@/lib/conversation-storage'
 import { UsageLimitPopup } from './usage-limit-popup'
 
