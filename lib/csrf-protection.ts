@@ -32,7 +32,12 @@ export async function validateCSRFToken(token: string): Promise<boolean> {
   const cookieStore = await cookies()
   const storedToken = cookieStore.get(CSRF_TOKEN_NAME)?.value
 
-  if (!storedToken || !token) {
+   if (!storedToken || !token) {
+    return false
+  }
+
+  // Length mismatch → timingSafeEqual throws RangeError
+  if (Buffer.byteLength(storedToken) !== Buffer.byteLength(token)) {
     return false
   }
 
