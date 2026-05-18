@@ -48,6 +48,16 @@ const nextConfig = {
         ],
       },
       {
+        source: "/api/extract-report",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "GET,OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Content-Type,Authorization" },
+          { key: "Access-Control-Max-Age", value: "86400" },
+        ],
+      },
+      {
+
         // Chat API security
         source: "/api/chat",
         headers: [
