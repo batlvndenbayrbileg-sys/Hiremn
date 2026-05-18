@@ -3,10 +3,13 @@ import { headers } from 'next/headers'
 import { RateLimiter } from 'limiter'
 
 // Rate limiter - 100 requests per minute per IP
-const limiter = new RateLimiter({ tokensPerInterval: 100, interval: 'minute' })
+const limiters = new Map<string, RateLimiter>()
 
 export async function checkRateLimit(ip: string): Promise<boolean> {
-  const remaining = await limiter.removeTokens(1)
+  if (!limiters.has(ip)) {
+    limiters.set(ip, new RateLimiter({ tokensPerInterval: 100, interval: 'minute' }))
+  }
+  const remaining = await limiters.get(ip)!.removeTokens(1)
   return remaining >= 0
 }
 
