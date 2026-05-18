@@ -2132,7 +2132,7 @@ useEffect(() => {
                     }}
                   >
                     <input
-                      ref={inputRef as any}
+                     ref={inputRef}
                       value={input}
                       onChange={e => setInput(e.target.value)}
                       onKeyDown={handleKey}
