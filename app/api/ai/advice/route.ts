@@ -7,7 +7,7 @@ import { validateCSRFToken } from '@/lib/csrf-protection'
 export async function POST(request: NextRequest) {
   try {
     // 1. Rate limiting
-    const ip = getClientIP()
+    const ip = await getClientIP()                        // ← await нэмсэн
     const allowed = await checkRateLimit(ip)
     if (!allowed) {
       return NextResponse.json(
@@ -26,18 +26,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 3. CSRF Token validation (for browser requests)
+    // 3. CSRF Token validation — заавал байх ёстой
     const csrfToken = request.headers.get('x-csrf-token')
-    if (csrfToken) {
-      const isCsrfValid = await validateCSRFToken(csrfToken)
-      if (!isCsrfValid) {
-        console.warn(`[SECURITY] CSRF token validation failed from IP: ${ip}`)
-        return NextResponse.json(
-          { error: 'Invalid CSRF token' },
-          { status: 403 }
-        )
-      }
+    if (!csrfToken) {                                     // ← optional биш, required болгосон
+      return NextResponse.json(
+        { error: 'CSRF token required' },
+        { status: 403 }
+      )
     }
+    const isCsrfValid = await validateCSRFToken(csrfToken)
+    if (!isCsrfValid) {
+      console.warn(`[SECURITY] CSRF token validation failed from IP: ${ip}`)
+      return NextResponse.json(
+        { error: 'Invalid CSRF token' },
+        { status: 403 }
+      )
+    }
+
     const body = await request.json()
     const { examResult, consent } = body
 
@@ -68,7 +73,15 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Generate AI advice with sanitized data
-    const advice = await getAIAdvice(sanitizedResult)
+    const advice = await getAIAdvice({
+      assessmentId: String(sanitizedResult.assessmentId),
+      assessmentName: sanitizedResult.assessmentName,
+      score: sanitizedResult.score,
+      scoreRange: { min: 0, max: sanitizedResult.maxScore },
+      interpretation: sanitizedResult.interpretation,
+      timestamp: sanitizedResult.completedAt,
+      userResponses: examResult?.userResponses ?? [],
+    })
 
     if (!advice.success) {
       return NextResponse.json(
