@@ -90,7 +90,9 @@ export function AIAdviceButton({ examResult }: AIAdviceButtonProps) {
       }))
 
       // Open chat in new tab/window
-      const chatUrl = new URL(process.env.NEXT_PUBLIC_CHAT_URL || '')
+      const chatUrlStr = process.env.NEXT_PUBLIC_CHAT_URL
+if (!chatUrlStr) throw new Error('NEXT_PUBLIC_CHAT_URL not configured')
+const chatUrl = new URL(chatUrlStr)
       chatUrl.searchParams.set('examId', examResult.examId)
       chatUrl.searchParams.set('source', 'exam-result')
 

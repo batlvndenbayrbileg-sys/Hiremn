@@ -91,7 +91,7 @@
   window.HireMnChat = {
     // Open chatbot
     open: function () {
-      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, "*");
+      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN)
     },
 
     // Close chatbot
@@ -119,7 +119,7 @@
       }
 
       // Open chatbot first
-      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, "*");
+     iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN)
 
       // Show loading state
       iframe.contentWindow.postMessage({
@@ -193,7 +193,7 @@
       }
 
       // Open chatbot
-      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, "*");
+      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN)
       iframe.contentWindow.postMessage({
         type: "HIREMN_LOADING",
         message: "Тайлангаа AI-д шилжүүлж байна..."
@@ -213,23 +213,23 @@
         fetch(examUrl, fetchOpts).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
         fetch(answerUrl, fetchOpts).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
       ]).then(function (results) {
-  var examRaw = results[0];
-  var answerRaw = results[1];
+        var examRaw = results[0];
+        var answerRaw = results[1];
 
-  // hire.mn { succeed: true, payload: ... } бүтцээс payload авна
-  var examData = (examRaw && examRaw.payload && !Array.isArray(examRaw.payload))
-    ? examRaw.payload
-    : (examRaw && examRaw.succeed ? null : examRaw);
+        // hire.mn { succeed: true, payload: ... } бүтцээс payload авна
+        var examData = (examRaw && examRaw.payload && !Array.isArray(examRaw.payload))
+          ? examRaw.payload
+          : (examRaw && examRaw.succeed ? null : examRaw);
 
-  var answerData = (answerRaw && answerRaw.payload && !Array.isArray(answerRaw.payload))
-    ? answerRaw.payload
-    : (answerRaw && Array.isArray(answerRaw.payload) && answerRaw.payload.length > 0)
-      ? answerRaw.payload
-      : (answerRaw && answerRaw.succeed ? null : answerRaw);
+        var answerData = (answerRaw && answerRaw.payload && !Array.isArray(answerRaw.payload))
+          ? answerRaw.payload
+          : (answerRaw && Array.isArray(answerRaw.payload) && answerRaw.payload.length > 0)
+            ? answerRaw.payload
+            : (answerRaw && answerRaw.succeed ? null : answerRaw);
 
-  if (!examData && !answerData) {
-    throw new Error("Тайлангийн өгөгдөл олдсонгүй");
-  }
+        if (!examData && !answerData) {
+          throw new Error("Тайлангийн өгөгдөл олдсонгүй");
+        }
 
         var testName = (examData && (examData.name || examData.title || examData.testName)) ||
           (options.testName) ||
