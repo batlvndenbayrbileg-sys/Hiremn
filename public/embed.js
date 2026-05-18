@@ -213,12 +213,23 @@
         fetch(examUrl, fetchOpts).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
         fetch(answerUrl, fetchOpts).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
       ]).then(function (results) {
-        var examData = results[0];
-        var answerData = results[1];
+  var examRaw = results[0];
+  var answerRaw = results[1];
 
-        if (!examData && !answerData) {
-          throw new Error("Тайлангийн өгөгдөл олдсонгүй");
-        }
+  // hire.mn { succeed: true, payload: ... } бүтцээс payload авна
+  var examData = (examRaw && examRaw.payload && !Array.isArray(examRaw.payload))
+    ? examRaw.payload
+    : (examRaw && examRaw.succeed ? null : examRaw);
+
+  var answerData = (answerRaw && answerRaw.payload && !Array.isArray(answerRaw.payload))
+    ? answerRaw.payload
+    : (answerRaw && Array.isArray(answerRaw.payload) && answerRaw.payload.length > 0)
+      ? answerRaw.payload
+      : (answerRaw && answerRaw.succeed ? null : answerRaw);
+
+  if (!examData && !answerData) {
+    throw new Error("Тайлангийн өгөгдөл олдсонгүй");
+  }
 
         var testName = (examData && (examData.name || examData.title || examData.testName)) ||
           (options.testName) ||
