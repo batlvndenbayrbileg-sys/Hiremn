@@ -5,6 +5,10 @@
 const API_BASE = process.env.HIRE_API_URL || 'https://api.hire.mn/api/v1'
 const API_KEY = process.env.HIRE_API_KEY || ''
 
+if (!API_KEY) {
+  console.error('[hire-api] HIRE_API_KEY тохируулагдаагүй — /assessment/all зэрэг auth шаардсан API дуудалтууд 401 алдаа өгнө. .env файлд HIRE_API_KEY= тавина уу.')
+}
+
 interface ApiOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'
   body?: unknown
@@ -38,10 +42,6 @@ async function apiCall<T>(endpoint: string, options: ApiOptions = {}): Promise<T
   }
 }
 
-// ─────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────
-
 export interface AssessmentCategory {
   id: number
   index?: number
@@ -57,28 +57,26 @@ export interface Assessment {
   nameEn?: string
   description?: string
   descriptionEn?: string
-  usage?: string   // "Хэн ашиглах вэ"
-  measure?: string   // "Юу хэмжих вэ"
-  price: number   // 0 = үнэгүй
-  duration?: number   // минут
+  usage?: string
+  measure?: string
+  price: number
+  duration?: number
   questionCount?: number
-  icons?: string   // зургийн файл нэр
+  icons?: string
   author?: string
-  status?: number   // 10=идэвхтэй, 30=идэвхгүй
-  count?: number   // хэдэн хэрэглэгч авсан
+  status?: number
+  count?: number
   category?: AssessmentCategory
-  isFree?: boolean  // price===0
-  isActive?: boolean  // status===10
+  isFree?: boolean
+  isActive?: boolean
 }
 
-// API-ийн нэг item: { data: Assessment, user: {...}, category: {...} }
 interface AssessmentItem {
   data: Assessment
   user?: unknown
   category?: AssessmentCategory
 }
 
-// /api/v1/assessment/all бүрэн response
 interface AssessmentListResponse {
   succeed: boolean
   payload: {
@@ -99,56 +97,38 @@ function normalize(item: AssessmentItem): Assessment {
   }
 }
 
-// ─────────────────────────────────────────
-// Category API calls
-// ─────────────────────────────────────────
-
 export interface AssessmentCategoryWithTests extends AssessmentCategory {
   assessments?: Assessment[]
 }
 
-// 🔓 GET /api/v1/assessmentCategory — бүх категори + тестүүд
 export async function getAssessmentCategories(): Promise<AssessmentCategoryWithTests[]> {
   const res = await apiCall<{ succeed: boolean; payload: AssessmentCategoryWithTests[] }>('/assessmentCategory')
   if (!res?.succeed || !Array.isArray(res.payload)) return []
   return res.payload
 }
 
-// ─────────────────────────────────────────
-// Assessment API calls
-// ─────────────────────────────────────────
-
-// 🔒 GET /api/v1/assessment/all?limit=50&page=1
-// Нийт 47 тест байна → limit=50 бол нэг дуудалтаар бүгдийг авна
 export async function getAllAssessments(limit = 50, page = 1): Promise<Assessment[]> {
   const res = await apiCall<AssessmentListResponse>(
     `/assessment/all?limit=${limit}&page=${page}`,
     { auth: true }
   )
   if (!res?.succeed || !Array.isArray(res.payload?.data)) return []
-
   return res.payload.data
     .map(normalize)
-    .filter(a => a.id && a.isActive) // зөвхөн status=10 тестүүд
+    .filter(a => a.id && a.isActive)
 }
 
-// 🔒 GET /api/v1/assessment/home/page
 export async function getHomeAssessments(): Promise<Assessment[]> {
   const res = await apiCall<AssessmentListResponse>('/assessment/home/page', { auth: true })
   if (!res?.succeed || !Array.isArray(res.payload?.data)) return []
   return res.payload.data.map(normalize).filter(a => a.id)
 }
 
-// 🔒 GET /api/v1/assessment/{id}
 export async function getAssessmentById(id: number): Promise<Assessment | null> {
   const res = await apiCall<{ succeed: boolean; payload: AssessmentItem }>(`/assessment/${id}`, { auth: true })
   if (!res?.succeed || !res.payload) return null
   return normalize(res.payload)
 }
-
-// ─────────────────────────────────────────
-// UserAnswer — 🔓 БҮГД PUBLIC (lock байхгүй)
-// ─────────────────────────────────────────
 
 export interface UserAnswerResult {
   code?: string
@@ -160,7 +140,6 @@ export interface UserAnswerResult {
   createdAt?: string
 }
 
-// 🔓 GET /api/v1/userAnswer/code/code/{code}
 export async function getResultByCode(code: string): Promise<UserAnswerResult | null> {
   const res = await apiCall<unknown>(`/userAnswer/code/code/${code}`)
   if (!res) return null
@@ -170,7 +149,6 @@ export async function getResultByCode(code: string): Promise<UserAnswerResult | 
   return null
 }
 
-// 🔓 POST /api/v1/userAnswer
 export async function submitUserAnswers(payload: {
   assessmentId: number
   answers: Array<{ questionId: number; answerId?: number; value?: number }>
@@ -182,10 +160,6 @@ export async function submitUserAnswers(payload: {
   if (obj.succeed && obj.payload) return obj.payload as UserAnswerResult
   return res as UserAnswerResult
 }
-
-// ─────────────────────────────────────────
-// Widget formatter
-// ─────────────────────────────────────────
 
 export function getIconUrl(icons?: string): string {
   if (!icons) return ''
@@ -207,7 +181,6 @@ const CATEGORY_COLORS: Record<string, string> = {
   'default': '#E8541A',
 }
 
-// Test-specific image mapping (AI-generated professional illustrations)
 const TEST_IMAGES: Record<number, string> = {
   1: '/images/tests/test-1-growth-mindset.jpg',
   2: '/images/tests/test-2-work-life-balance.jpg',
@@ -220,7 +193,6 @@ const TEST_IMAGES: Record<number, string> = {
 export function formatAssessmentForWidget(a: Assessment, lang: 'mn' | 'en' = 'mn') {
   const isFree = a.price === 0
   const categoryKey = (a.category?.name || '').toLowerCase()
-
   return {
     id: a.id,
     name: lang === 'en' && a.nameEn ? a.nameEn : a.name,
@@ -231,10 +203,10 @@ export function formatAssessmentForWidget(a: Assessment, lang: 'mn' | 'en' = 'mn
     emoji: CATEGORY_EMOJIS[categoryKey] || CATEGORY_EMOJIS.default,
     color: CATEGORY_COLORS[categoryKey] || CATEGORY_COLORS.default,
     free: isFree,
-    icon: getIconUrl(a.icons),   // зургийн бүрэн URL
-    image: TEST_IMAGES[a.id],    // AI-generated test illustration
+    icon: getIconUrl(a.icons),
+    image: TEST_IMAGES[a.id],
     category: a.category?.name || '',
-    count: a.count || 0,          // хэдэн хэрэглэгч авсан (social proof)
+    count: a.count || 0,
     author: a.author || '',
   }
 }
