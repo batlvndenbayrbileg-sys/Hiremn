@@ -1019,6 +1019,10 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     }
   }, [isHovered, isOpen])
   const [conversation, setConversation] = useState<Conversation | null>(null)
+  const conversationRef = useRef<Conversation | null>(null)
+useEffect(() => {
+  conversationRef.current = conversation
+}, [conversation])
   const messageCountRef = useRef(0)
   const [messages, setMessages] = useState<Message[]>(() => {
     const initialMessages: Message[] = [
@@ -1197,7 +1201,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   }, [messages, conversation])
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
