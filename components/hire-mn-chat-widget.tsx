@@ -611,7 +611,7 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
                   : priceFilter === "paid" ? "rgba(255,255,255,.6)"
                     : "#9CA3AF",
               }} />
-              {priceFilter === "free" ? "Үнэгүй" : priceFilter === "paid" ? "өлбөртэй" : "Бүгд"}
+              {priceFilter === "free" ? "Үнэгүй" : priceFilter === "paid" ? "Төлбөртэй" : "Бүгд"}
               {/* Chevron */}
               <svg
                 width="10" height="10" viewBox="0 0 16 16" fill="none"
