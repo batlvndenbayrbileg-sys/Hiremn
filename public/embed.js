@@ -1,11 +1,9 @@
 ; (function () {
   "use strict";
 
-  // Prevent double-init
   if (window.__HireMnWidget) return;
   window.__HireMnWidget = true;
 
-  // Auto-detect host from the script tag src
   var scripts = document.getElementsByTagName("script");
   var me = scripts[scripts.length - 1];
   var ORIGIN = me.src ? me.src.replace(/\/embed\.js(\?.*)?$/, "") : "";
@@ -15,14 +13,9 @@
     return;
   }
 
-  // Futuristic button size with glow ring space
-  // Note: the 3D Spline mascot has ~25px overflow on all sides plus a -4px
-  // bottom offset, so the iframe must be tall/wide enough to contain it,
-  // otherwise the mascot gets clipped at the iframe edge.
   var BUTTON_SIZE = "210px";
   var BUTTON_HEIGHT = "180px";
 
-  // ── Wrapper div (fixed, bottom-right with extra margin) ────────────────────────────────────
   var wrapper = document.createElement("div");
   wrapper.id = "hiremn-widget-root";
   wrapper.style.cssText =
@@ -36,7 +29,6 @@
     "height:" + BUTTON_HEIGHT + " !important;" +
     "background:transparent !important;";
 
-  // ── iframe ────────────────────────────────────────────────────────────────
   var iframe = document.createElement("iframe");
   iframe.src = ORIGIN + "/embed";
   iframe.id = "hiremn-widget-iframe";
@@ -58,58 +50,24 @@
     "color-scheme:light !important;" +
     "transition:width 0.3s ease, height 0.3s ease !important;";
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // EXTERNAL API - hire.mn developers can use these methods
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /**
-   * HireMnChat API
-   * 
-   * Usage from hire.mn website:
-   * 
-   * // Open chatbot and send AI analysis request with report data
-   * window.HireMnChat.openWithAnalysis({
-   *   reportTitle: "Personality Test Results",
-   *   reportData: { ... },           // Report content/data
-   *   userInfo: { name: "...", email: "..." },
-   *   analysisResults: { ... },      // Pre-computed analysis if any
-   *   prompt: "Миний тестийн үр дүнг тайлбарлана уу"  // Optional custom prompt
-   * });
-   * 
-   * // Just open the chatbot
-   * window.HireMnChat.open();
-   * 
-   * // Close the chatbot
-   * window.HireMnChat.close();
-   * 
-   * // Check if chatbot is open
-   * window.HireMnChat.isOpen();
-   */
-
   var chatIsOpen = false;
 
   window.HireMnChat = {
-    // Open chatbot
     open: function () {
-      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN)
+      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN);
     },
 
-    // Close chatbot
     close: function () {
-      iframe.contentWindow.postMessage({ type: "HIREMN_CLOSE" }, "*");
+      iframe.contentWindow.postMessage({ type: "HIREMN_CLOSE" }, ORIGIN);
     },
 
-    // Check if open
     isOpen: function () {
       return chatIsOpen;
     },
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // MAIN METHOD: Fetch test results from API and send to AI for analysis
-    // ═══════════════════════════════════════════════════════════════════════
     analyzeFromAPI: function (options) {
-      var apiUrl = options.apiUrl;           // Required: hire.mn API endpoint
-      var headers = options.headers || {};   // Optional: Auth headers, etc.
+      var apiUrl = options.apiUrl;
+      var headers = options.headers || {};
       var testName = options.testName || "Тест";
       var prompt = options.prompt || "Миний тестийн үр дүнг задлан шинжилж, дэлгэрэнгүй тайлбар болон зөвлөгөө өгнө үү.";
 
@@ -118,30 +76,21 @@
         return Promise.reject(new Error("apiUrl is required"));
       }
 
-      // Open chatbot first
-     iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN)
-
-      // Show loading state
+      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN);
       iframe.contentWindow.postMessage({
         type: "HIREMN_LOADING",
         message: "Тестийн үр дүнг татаж байна..."
-      }, "*");
+      }, ORIGIN);
 
-      // Fetch from hire.mn API
       return fetch(apiUrl, {
         method: "GET",
-        headers: Object.assign({
-          "Content-Type": "application/json"
-        }, headers)
+        headers: Object.assign({ "Content-Type": "application/json" }, headers)
       })
         .then(function (response) {
-          if (!response.ok) {
-            throw new Error("API error: " + response.status);
-          }
+          if (!response.ok) throw new Error("API error: " + response.status);
           return response.json();
         })
         .then(function (data) {
-          // Send the fetched data to chatbot for AI analysis
           iframe.contentWindow.postMessage({
             type: "HIREMN_AI_ANALYSIS",
             payload: {
@@ -151,7 +100,7 @@
               prompt: prompt,
               fromAPI: true
             }
-          }, "*");
+          }, ORIGIN);
           return data;
         })
         .catch(function (error) {
@@ -159,21 +108,11 @@
           iframe.contentWindow.postMessage({
             type: "HIREMN_ERROR",
             message: "Өгөгдөл татахад алдаа гарлаа: " + error.message
-          }, "*");
+          }, ORIGIN);
           throw error;
         });
     },
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // EASIEST METHOD FOR HIRE.MN — give it the exam code, it does the rest.
-    // Usage from hire.mn report page:
-    //   window.HireMnChat.analyzeReport("ABC123");
-    //   window.HireMnChat.analyzeReport("ABC123", { token: "Bearer ..." });
-    // It will:
-    //   1) open the chatbot
-    //   2) fetch /api/v1/exam/exam/{code} + /api/v1/userAnswer/code/code/{code}
-    //   3) send the structured data to the AI for analysis & recommendations
-    // ═══════════════════════════════════════════════════════════════════════
     analyzeReport: function (code, options) {
       options = options || {};
       var API_BASE = options.apiBase || "https://api.hire.mn";
@@ -192,71 +131,61 @@
         return Promise.reject(new Error("code is required"));
       }
 
-      // Open chatbot
-      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN)
+      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN);
       iframe.contentWindow.postMessage({
         type: "HIREMN_LOADING",
         message: "Тайлангаа AI-д шилжүүлж байна..."
-      }, "*");
+      }, ORIGIN);
 
-      var fetchOpts = {
+      var extractUrl = ORIGIN + "/api/extract-report"
+        + "?code=" + encodeURIComponent(code)
+        + "&apiBase=" + encodeURIComponent(API_BASE);
+
+      return fetch(extractUrl, {
         method: "GET",
         headers: Object.assign({ "Content-Type": "application/json" }, headers),
+      })
+        .then(function (r) {
+          if (!r.ok) throw new Error("Extract error: " + r.status);
+          return r.json();
+        })
+        .then(function (result) {
+          if (!result.success || !result.data) {
+            throw new Error("Тайлангийн өгөгдөл олдсонгүй");
+          }
+          var reportContent = result.source === "pdf"
+            ? result.data.text
+            : JSON.stringify(result.data);
 
-      };
+          iframe.contentWindow.postMessage({
+            type: "HIREMN_AI_ANALYSIS",
+            payload: {
+              reportTitle: options.testName || "Тест",
+              reportData: { content: reportContent, code: code, source: result.source },
+              analysisResults: reportContent,
+              prompt: options.prompt ||
+                "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж өгнө үү:\n" +
+                "1) Гол дүгнэлт — ямар хүн бэ, ямар онцлогтой вэ\n" +
+                "2) Хүчтэй болон сул талуудыг тодорхой тайлбарла\n" +
+                "3) Ажил мэргэжил болон хамт олондоо хэрхэн хандах практик зөвлөмж\n" +
+                "4) Цаашид хөгжихийн тулд хийж болох тодорхой алхмууд"
+            }
+          }, ORIGIN);
 
-      // Fetch exam metadata + user answers in parallel
-      var extractUrl = ORIGIN + "/api/extract-report"
-  + "?code=" + encodeURIComponent(code)
-  + "&apiBase=" + encodeURIComponent(API_BASE);
+          return result.data;
+        })
+        .catch(function (error) {
+          console.error("[HireMnChat] analyzeReport error:", error);
+          iframe.contentWindow.postMessage({
+            type: "HIREMN_ERROR",
+            message: "Тайлан татахад алдаа гарлаа: " + error.message
+          }, ORIGIN);
+          throw error;
+        });
+    },
 
-return fetch(extractUrl, {
-  method: "GET",
-  headers: Object.assign({ "Content-Type": "application/json" }, headers),
-})
-.then(function (r) {
-  if (!r.ok) throw new Error("Extract error: " + r.status);
-  return r.json();
-})
-.then(function (result) {
-  if (!result.success || !result.data) {
-    throw new Error("Тайлангийн өгөгдөл олдсонгүй");
-  }
-
-  var reportContent = result.source === "pdf"
-    ? result.data.text
-    : JSON.stringify(result.data);
-
-  iframe.contentWindow.postMessage({
-    type: "HIREMN_AI_ANALYSIS",
-    payload: {
-      reportTitle: options.testName || "Тест",
-      reportData: { content: reportContent, code: code, source: result.source },
-      analysisResults: reportContent,
-      prompt: options.prompt ||
-        "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж өгнө үү:\n" +
-        "1) Гол дүгнэлт — ямар хүн бэ, ямар онцлогтой вэ\n" +
-        "2) Хүчтэй болон сул талуудыг тодорхой тайлбарла\n" +
-        "3) Ажил мэргэжил болон хамт олондоо хэрхэн хандах практик зөвлөмж\n" +
-        "4) Цаашид хөгжихийн тулд хийж болох тодорхой алхмууд"
-    }
-  }, ORIGIN);
-
-  return result.data;
-})
-.catch(function (error) {
-  console.error("[HireMnChat] analyzeReport error:", error);
-  iframe.contentWindow.postMessage({
-    type: "HIREMN_ERROR",
-    message: "Тайлан татахад алдаа гарлаа: " + error.message
-  }, ORIGIN);
-  throw error;
-});
-
-    // Open chatbot and trigger AI analysis with pre-loaded data
     openWithAnalysis: function (data) {
-      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, "*");
-
+      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN);
       setTimeout(function () {
         iframe.contentWindow.postMessage({
           type: "HIREMN_AI_ANALYSIS",
@@ -267,24 +196,23 @@ return fetch(extractUrl, {
             analysisResults: data.analysisResults || {},
             prompt: data.prompt || "Миний тестийн үр дүнг задлан шинжилж, надад зөвлөгөө өгнө үү."
           }
-        }, "*");
+        }, ORIGIN);
       }, 500);
     },
 
-    // Send a message to the chatbot
     sendMessage: function (message) {
       iframe.contentWindow.postMessage({
         type: "HIREMN_SEND_MESSAGE",
         message: message
-      }, "*");
+      }, ORIGIN);
     }
   };
 
-  // ── PostMessage for size changes from widget ─────────────────────────────
   window.addEventListener("message", function (e) {
     if (!e.data || !e.data.type) return;
+    if (e.origin !== ORIGIN) return;
 
-    if (e.data && e.data.type === "HIREMN_RESIZE") {
+    if (e.data.type === "HIREMN_RESIZE") {
       chatIsOpen = e.data.isOpen;
       var isOpen = e.data.isOpen;
       var mobile = window.innerWidth <= 480;
@@ -310,7 +238,6 @@ return fetch(extractUrl, {
           iframe.style.height = "680px";
         }
       } else {
-        // Closed - FAB button
         wrapper.style.width = BUTTON_SIZE;
         wrapper.style.height = BUTTON_HEIGHT;
         wrapper.style.bottom = "20px";
@@ -322,14 +249,13 @@ return fetch(extractUrl, {
       }
     }
 
-    if (e.data && e.data.type === "HIREMN_OPEN_URL" && e.data.url) {
+    if (e.data.type === "HIREMN_OPEN_URL" && e.data.url) {
       window.open(e.data.url, "_blank", "noopener,noreferrer");
     }
   });
 
-  // Error handling
-  iframe.addEventListener("error", function (e) {
-    console.error("[hire.mn Widget] iframe failed to load:", e);
+  iframe.addEventListener("error", function () {
+    console.error("[hire.mn Widget] iframe failed to load");
     wrapper.style.display = "none";
   });
 
