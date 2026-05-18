@@ -202,7 +202,7 @@
       var fetchOpts = {
         method: "GET",
         headers: Object.assign({ "Content-Type": "application/json" }, headers),
-        credentials: "include"
+
       };
 
       // Fetch exam metadata + user answers in parallel
@@ -232,12 +232,12 @@
             analysisResults: (examData && (examData.results || examData.scores)) ||
               (answerData && (answerData.results || answerData.scores)) ||
               examData || answerData,
-           prompt: options.prompt ||
-  "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж өгнө үү:\n" +
-  "1) Гол дүгнэлт — ямар хүн бэ, ямар онцлогтой вэ\n" +
-  "2) Хүчтэй болон сул талуудыг тодорхой тайлбарла\n" +
-  "3) Ажил мэргэжил болон хамт олондоо хэрхэн хандах практик зөвлөмж\n" +
-  "4) Цаашид хөгжихийн тулд хийж болох тодорхой алхмууд"
+            prompt: options.prompt ||
+              "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж өгнө үү:\n" +
+              "1) Гол дүгнэлт — ямар хүн бэ, ямар онцлогтой вэ\n" +
+              "2) Хүчтэй болон сул талуудыг тодорхой тайлбарла\n" +
+              "3) Ажил мэргэжил болон хамт олондоо хэрхэн хандах практик зөвлөмж\n" +
+              "4) Цаашид хөгжихийн тулд хийж болох тодорхой алхмууд"
           }
         }, "*");
 
