@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import crypto from 'crypto'
 
 const CSRF_TOKEN_LENGTH = 32
-const CSRF_COOKIE_NAME = 'csrf-token'
+const CSRF_TOKEN_NAME = 'csrf-token'
 const CSRF_HEADER_NAME = 'x-csrf-token'
 
 export function generateCSRFToken(): string {
@@ -46,7 +46,7 @@ export async function validateCSRFToken(token: string): Promise<boolean> {
 export async function setCSRFCookie(): Promise<void> {
   const token = await getCSRFToken()
   const cookieStore = await cookies()
-  
+
   cookieStore.set(CSRF_TOKEN_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
