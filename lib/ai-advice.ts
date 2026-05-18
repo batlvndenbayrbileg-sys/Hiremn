@@ -1,5 +1,5 @@
-import { generateText } from 'ai'
-import { openai } from '@ai-sdk/openai'
+import Anthropic from '@anthropic-ai/sdk'
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export async function getAIAdvice(examResult: {
   assessmentId: string
