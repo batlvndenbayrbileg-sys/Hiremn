@@ -998,12 +998,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const [rateLimitPopupDismissed, setRateLimitPopupDismissed] = useState(false) // Rate limit popup dismissed
   const [showBubble, setShowBubble] = useState(false)
 
-useEffect(() => {
-  if (isOpen) return
-  const show = setTimeout(() => setShowBubble(true), 4000)
-  const hide = setTimeout(() => setShowBubble(false), 7000)
-  return () => { clearTimeout(show); clearTimeout(hide) }
-}, [isOpen])
+  useEffect(() => {
+    if (isOpen) return
+    const show = setTimeout(() => setShowBubble(true), 4000)
+    const hide = setTimeout(() => setShowBubble(false), 7000)
+    return () => { clearTimeout(show); clearTimeout(hide) }
+  }, [isOpen])
 
   // Notify parent window of open/close state for iframe resizing
   // ✅ ЗӨВ — 2 тусдаа useEffect
@@ -1103,54 +1103,48 @@ useEffect(() => {
       if (event.data.type === "HIREMN_AI_ANALYSIS" && event.data.payload) {
         const { reportTitle, reportData, userInfo, analysisResults, prompt } = event.data.payload
 
-        // Build a comprehensive context message for the AI
-        let analysisContext = `**AI Тайлан Дүн Шинжилгээ**\n\n`
+        // Зөвхөн loading indicator харуулна — raw data огт харуулахгүй
+        setIsTyping(true)
+        setMessages(prev => [...prev, {
+          role: "assistant" as const,
+          content: "⏳ Тайлангийн үр дүнг шинжилж байна...",
+        }])
 
-        if (reportTitle) {
-          analysisContext += `**Тайлангийн нэр:** ${reportTitle}\n\n`
-        }
+        // Data-г API руу шууд явуулна — sendMessage ашиглахгүй (UI-д гарна)
+        const silentPrompt =
+          (prompt || "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж өгнө үү.") +
+          "\n\nТайлан: " + (reportTitle || "Тест") +
+          "\nҮр дүн: " + JSON.stringify(analysisResults || reportData || {})
 
-        if (userInfo && Object.keys(userInfo).length > 0) {
-          analysisContext += `**Хэрэглэгчийн мэдээлэл:**\n`
-          if (userInfo.name) analysisContext += `- Нэр: ${userInfo.name}\n`
-          if (userInfo.email) analysisContext += `- Имэйл: ${userInfo.email}\n`
-          analysisContext += `\n`
-        }
-
-        if (analysisResults && Object.keys(analysisResults).length > 0) {
-          analysisContext += `**Үр дүн:**\n`
-          Object.entries(analysisResults).forEach(([key, value]) => {
-            analysisContext += `- ${key}: ${value}\n`
+        fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [{ role: "user", content: silentPrompt }],
+            sessionId: conversation?.id,
+          }),
+        })
+          .then(function (r) { return r.json() })
+          .then(function (data) {
+            setIsTyping(false)
+            setMessages(prev => [
+              ...prev.slice(0, -1), // loading message-г устгана
+              {
+                role: "assistant" as const,
+                content: data.reply || "Хариу авахад алдаа гарлаа.",
+              },
+            ])
           })
-          analysisContext += `\n`
-        }
-
-        if (reportData && Object.keys(reportData).length > 0) {
-          analysisContext += `**Тайлангийн дата:**\n\`\`\`json\n${JSON.stringify(reportData, null, 2)}\n\`\`\`\n\n`
-        }
-
-        // Add the AI analysis request message first (as system context)
-        const contextMsg: Message = {
-          role: "assistant",
-          content: analysisContext + `\n---\n\n**Тайлбар хүсэлт хүлээн авлаа.** Одоо таны үр дүнг задлан шинжилж байна...`,
-        }
-
-        // Then trigger the actual AI analysis
-        const userPrompt = prompt || "Миний тестийн үр дүнг задлан шинжилж, надад зөвлөгөө өгнө үү."
-
-        // Add context message and then send user prompt
-        setMessages(prev => [...prev, contextMsg])
-
-        // Small delay then send the actual analysis request
-        setTimeout(() => {
-          // Create a special analysis prompt that includes all the data
-          const fullPrompt = `Дараах тайлангийн үр дүнг задлан шинжилж, практик зөвлөгөө өгнө үү:\n\n` +
-            `Тайлан: ${reportTitle || 'Тест'}\n` +
-            `Үр дүн: ${JSON.stringify(analysisResults || reportData || {})}\n\n` +
-            `Хэрэглэгчийн хүсэлт: ${userPrompt}`
-
-          sendMessage(fullPrompt)
-        }, 1000)
+          .catch(function () {
+            setIsTyping(false)
+            setMessages(prev => [
+              ...prev.slice(0, -1),
+              {
+                role: "assistant" as const,
+                content: "Алдаа гарлаа. Дахин оролдоно уу.",
+              },
+            ])
+          })
       }
     }
 
@@ -1698,11 +1692,11 @@ useEffect(() => {
                     }}
                     onMouseEnter={e => {
                       (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.28)"
-                      ;(e.currentTarget as HTMLElement).style.transform = "rotate(90deg)"
+                        ; (e.currentTarget as HTMLElement).style.transform = "rotate(90deg)"
                     }}
                     onMouseLeave={e => {
                       (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.15)"
-                      ;(e.currentTarget as HTMLElement).style.transform = "rotate(0deg)"
+                        ; (e.currentTarget as HTMLElement).style.transform = "rotate(0deg)"
                     }}
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -2103,8 +2097,8 @@ useEffect(() => {
                       gap: 10,
                     }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
                       </svg>
                       <span style={{ fontSize: 12, color: "#92400E", fontWeight: 500 }}>
                         Өнөөдрийн эрх дууссан байна. {formatUnlockTime()} хүртэл хүлээнэ үү.
