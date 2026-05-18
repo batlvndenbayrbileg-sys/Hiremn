@@ -1,18 +1,19 @@
-// lib/input-validation.ts
 import DOMPurify from 'isomorphic-dompurify'
 
 export function sanitizeString(input: string): string {
   if (typeof input !== 'string') return ''
-  return DOMPurify.sanitize(input, { 
-    ALLOWED_TAGS: [], 
-    ALLOWED_ATTR: [] 
+  return DOMPurify.sanitize(input, {
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
   }).trim()
 }
 
 export function validateExamId(examId: string): boolean {
-  // UUID v4 pattern
+  if (typeof examId !== 'string' || examId.length === 0) return false
+  // hire.mn numeric ID (10-20 digits) эсвэл UUID аль алийг хүлээнэ
+  const numericId = /^\d{10,20}$/.test(examId)
   const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-  return typeof examId === 'string' && examId.length > 0 && examId.length <= 100
+  return numericId || uuidPattern.test(examId)
 }
 
 export function validateScore(score: number, maxScore: number): boolean {
@@ -31,7 +32,7 @@ export function validateAssessmentName(name: string): boolean {
     typeof name === 'string' &&
     name.length > 0 &&
     name.length <= 200 &&
-    !/[<>{}]/g.test(name) // No dangerous characters
+    !/[<>{}]/g.test(name)
   )
 }
 
