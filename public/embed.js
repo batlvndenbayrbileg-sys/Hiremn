@@ -206,62 +206,52 @@
       };
 
       // Fetch exam metadata + user answers in parallel
-      var examUrl = API_BASE + "/api/v1/exam/exam/" + encodeURIComponent(code);
-      var answerUrl = API_BASE + "/api/v1/userAnswer/code/code/" + encodeURIComponent(code);
+      var extractUrl = ORIGIN + "/api/extract-report"
+  + "?code=" + encodeURIComponent(code)
+  + "&apiBase=" + encodeURIComponent(API_BASE);
 
-      return Promise.all([
-        fetch(examUrl, fetchOpts).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
-        fetch(answerUrl, fetchOpts).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
-      ]).then(function (results) {
-        var examRaw = results[0];
-        var answerRaw = results[1];
+return fetch(extractUrl, {
+  method: "GET",
+  headers: Object.assign({ "Content-Type": "application/json" }, headers),
+})
+.then(function (r) {
+  if (!r.ok) throw new Error("Extract error: " + r.status);
+  return r.json();
+})
+.then(function (result) {
+  if (!result.success || !result.data) {
+    throw new Error("Тайлангийн өгөгдөл олдсонгүй");
+  }
 
-        // hire.mn { succeed: true, payload: ... } бүтцээс payload авна
-        var examData = (examRaw && examRaw.payload && !Array.isArray(examRaw.payload))
-          ? examRaw.payload
-          : (examRaw && examRaw.succeed ? null : examRaw);
+  var reportContent = result.source === "pdf"
+    ? result.data.text
+    : JSON.stringify(result.data);
 
-        var answerData = (answerRaw && answerRaw.payload && !Array.isArray(answerRaw.payload))
-          ? answerRaw.payload
-          : (answerRaw && Array.isArray(answerRaw.payload) && answerRaw.payload.length > 0)
-            ? answerRaw.payload
-            : (answerRaw && answerRaw.succeed ? null : answerRaw);
+  iframe.contentWindow.postMessage({
+    type: "HIREMN_AI_ANALYSIS",
+    payload: {
+      reportTitle: options.testName || "Тест",
+      reportData: { content: reportContent, code: code, source: result.source },
+      analysisResults: reportContent,
+      prompt: options.prompt ||
+        "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж өгнө үү:\n" +
+        "1) Гол дүгнэлт — ямар хүн бэ, ямар онцлогтой вэ\n" +
+        "2) Хүчтэй болон сул талуудыг тодорхой тайлбарла\n" +
+        "3) Ажил мэргэжил болон хамт олондоо хэрхэн хандах практик зөвлөмж\n" +
+        "4) Цаашид хөгжихийн тулд хийж болох тодорхой алхмууд"
+    }
+  }, ORIGIN);
 
-        if (!examData && !answerData) {
-          throw new Error("Тайлангийн өгөгдөл олдсонгүй");
-        }
-
-        var testName = (examData && (examData.name || examData.title || examData.testName)) ||
-          (options.testName) ||
-          "Тест";
-
-        iframe.contentWindow.postMessage({
-          type: "HIREMN_AI_ANALYSIS",
-          payload: {
-            reportTitle: testName,
-            reportData: { exam: examData, answers: answerData, code: code },
-            analysisResults: (examData && (examData.results || examData.scores)) ||
-              (answerData && (answerData.results || answerData.scores)) ||
-              examData || answerData,
-            prompt: options.prompt ||
-              "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж өгнө үү:\n" +
-              "1) Гол дүгнэлт — ямар хүн бэ, ямар онцлогтой вэ\n" +
-              "2) Хүчтэй болон сул талуудыг тодорхой тайлбарла\n" +
-              "3) Ажил мэргэжил болон хамт олондоо хэрхэн хандах практик зөвлөмж\n" +
-              "4) Цаашид хөгжихийн тулд хийж болох тодорхой алхмууд"
-          }
-        }, "*");
-
-        return { exam: examData, answers: answerData };
-      }).catch(function (error) {
-        console.error("[HireMnChat] analyzeReport error:", error);
-        iframe.contentWindow.postMessage({
-          type: "HIREMN_ERROR",
-          message: "Тайлан татахад алдаа гарлаа: " + error.message
-        }, "*");
-        throw error;
-      });
-    },
+  return result.data;
+})
+.catch(function (error) {
+  console.error("[HireMnChat] analyzeReport error:", error);
+  iframe.contentWindow.postMessage({
+    type: "HIREMN_ERROR",
+    message: "Тайлан татахад алдаа гарлаа: " + error.message
+  }, ORIGIN);
+  throw error;
+});
 
     // Open chatbot and trigger AI analysis with pre-loaded data
     openWithAnalysis: function (data) {
