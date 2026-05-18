@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export async function getAIAdvice(examResult: {
@@ -36,22 +37,18 @@ export async function getAIAdvice(examResult: {
 
 Миний үр дүнд үндэслээд ГҮНЗГИЙ, МЭРГЭЖЛИЙН зөвлөгөө өгөөч.`
 
-    const response = await generateText({
-      model: openai('gpt-4-turbo'),
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 1500,
       system: systemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: userMessage,
-        }
-      ],
-      temperature: 0.7,
-      maxTokens: 1500,
+      messages: [{ role: 'user', content: userMessage }],
     })
+
+    const text = response.content[0].type === 'text' ? response.content[0].text : ''
 
     return {
       success: true,
-      advice: response.text,
+      advice: text,
       assessmentName: examResult.assessmentName,
       score: examResult.score,
       interpretation: examResult.interpretation,
