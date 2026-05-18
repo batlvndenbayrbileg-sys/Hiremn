@@ -1020,9 +1020,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   }, [isHovered, isOpen])
   const [conversation, setConversation] = useState<Conversation | null>(null)
   const conversationRef = useRef<Conversation | null>(null)
-useEffect(() => {
-  conversationRef.current = conversation
-}, [conversation])
+  useEffect(() => {
+    conversationRef.current = conversation
+  }, [conversation])
   const messageCountRef = useRef(0)
   const [messages, setMessages] = useState<Message[]>(() => {
     const initialMessages: Message[] = [
@@ -1125,7 +1125,7 @@ useEffect(() => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             messages: [{ role: "user", content: silentPrompt }],
-            sessionId: conversation?.id,
+            sessionId: conversationRef.current?.id,
           }),
         })
           .then(function (r) { return r.json() })
@@ -1302,7 +1302,7 @@ useEffect(() => {
           const data = await res.json()
           setMessages(prev => [...prev, {
             role: "assistant",
-            content: "**Үнэүй тестүүд**\n\nТа эдгээр тестүүдийг ямар ч төлбөргүйгээр өгч, өөрийнхөө талаар илүү ихийг мэдэж авах боломжтой:",
+            content: "**Үнэгүй тестүүд**\n\nТа эдгээр тестүүдийг ямар ч төлбөргүйгээр өгч, өөрийнхөө талаар илүү ихийг мэдэж авах боломжтой:",
             tests: data.tests || [],
             categories: ["free"],
           }])
@@ -2132,7 +2132,7 @@ useEffect(() => {
                     }}
                   >
                     <input
-                     ref={inputRef}
+                      ref={inputRef}
                       value={input}
                       onChange={e => setInput(e.target.value)}
                       onKeyDown={handleKey}
