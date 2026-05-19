@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 
-const SCENE_URL = 'https://my.spline.design/genkubgreetingrobot-jUaiwTJIX5JHfU4eUwIFgMrO/'
+const SCENE_URL = 'https://my.spline.design/genkubgreetingrobot-jUaiwTJIX5JHfU4eUwIFgMrO'
 
 // Safely import Spline with proper error handling
 const SplineComponent = dynamic(() =>
