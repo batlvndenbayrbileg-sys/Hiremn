@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 
-const CORS_HEADERS = {
+const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS_HEADERS })
+  return new NextResponse(null, { status: 204, headers: CORS })
 }
 
 export async function GET(request: NextRequest) {
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   if (!code) {
     return NextResponse.json(
       { error: 'code is required' },
-      { status: 400, headers: CORS_HEADERS }
+      { status: 400, headers: CORS }
     )
   }
 
@@ -37,57 +37,46 @@ export async function GET(request: NextRequest) {
     if (!res.ok) {
       return NextResponse.json(
         { error: 'Report татахад алдаа: ' + res.status },
-        { status: res.status, headers: CORS_HEADERS }
+        { status: res.status, headers: CORS }
       )
     }
 
     const contentType = res.headers.get('content-type') || ''
 
-    // JSON бол шууд буцаана
     if (contentType.includes('application/json')) {
       const data = await res.json()
       return NextResponse.json(
         { success: true, data, source: 'json' },
-        { headers: CORS_HEADERS }
+        { headers: CORS }
       )
     }
 
-    // PDF бол текст гаргана
     const pdfBuffer = await res.arrayBuffer()
 
-    let pdfText = ''
-    try {
-      const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default
-      const parsed = await pdfParse(Buffer.from(pdfBuffer))
-      pdfText = parsed.text || ''
-    } catch (pdfErr) {
-      console.error('[extract-report] pdf-parse error:', pdfErr)
-      return NextResponse.json(
-        { error: 'PDF уншихад алдаа гарлаа' },
-        { status: 422, headers: CORS_HEADERS }
-      )
-    }
+    // Dynamic import only — static import-тай давхцуулахгүй
+    const { default: pdfParse } = await import('pdf-parse')
+    const parsed = await pdfParse(Buffer.from(pdfBuffer))
 
-    if (!pdfText.trim()) {
+    if (!parsed.text?.trim()) {
       return NextResponse.json(
         { error: 'PDF-ээс өгөгдөл гаргаж чадсангүй' },
-        { status: 422, headers: CORS_HEADERS }
+        { status: 422, headers: CORS }
       )
     }
 
     return NextResponse.json(
       {
         success: true,
-        data: { text: pdfText.trim(), code },
+        data: { text: parsed.text.trim(), pages: parsed.numpages, code },
         source: 'pdf',
       },
-      { headers: CORS_HEADERS }
+      { headers: CORS }
     )
   } catch (error) {
     console.error('[extract-report]', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Серверийн алдаа' },
-      { status: 500, headers: CORS_HEADERS }
+      { status: 500, headers: CORS }
     )
   }
 }
