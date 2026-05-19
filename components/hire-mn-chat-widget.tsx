@@ -1115,17 +1115,23 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         }])
 
         // Data-г API руу шууд явуулна — sendMessage ашиглахгүй (UI-д гарна)
+        // PDF text бол string, object бол stringify — давхар quote хийхгүй
+        const resultStr = typeof analysisResults === 'string'
+          ? analysisResults
+          : JSON.stringify(analysisResults || reportData || {})
+
         const silentPrompt =
           (prompt || "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж өгнө үү.") +
           "\n\nТайлан: " + (reportTitle || "Тест") +
-          "\nҮр дүн: " + JSON.stringify(analysisResults || reportData || {})
+          "\n\nТайлангийн агуулга:\n" + resultStr
 
         fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             messages: [{ role: "user", content: silentPrompt }],
-            sessionId: conversationRef.current?.id,
+            sessionId: conversationRef.current?.id,  // stale closure засвар
+            lang: lang === "МН" ? "mn" : "en",
           }),
         })
           .then(function (r) { return r.json() })
@@ -1857,7 +1863,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     a: "Hire.mn бол Монголын анхны AI-д суурилсан HR платформ юм. Мэргэжлийн тест, ур чадварын үнэлгээгээр таныг тохирох ажлын байртай холбоно.",
                     renderIcon: (active: boolean) => (
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#A8A29E"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                        <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
                       </svg>
                     ),
                   },
@@ -1866,7 +1872,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     a: "Үнэгүй болон төлбөртэй тестүүд хоёулаа байдаг. Qpay ашиглан илүү дэлгэрэнгүй тестүүдийг авах боломжтой.",
                     renderIcon: (active: boolean) => (
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#A8A29E"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                        <rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" />
                       </svg>
                     ),
                   },
@@ -1875,7 +1881,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     a: "Тест дуусмагц үр дүн шууд гарна. Профайл хэсэгт орж харах, татаж авах, хуваалцах болон и-мэйлээр илгээх боломжтой.",
                     renderIcon: (active: boolean) => (
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#A8A29E"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                        <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
                       </svg>
                     ),
                   },
@@ -1884,7 +1890,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     a: "Манай администраторуудтай эсвэл Hire.mn Facebook хуудсаар холбогдоно уу. Хурдан хариу өгнө.",
                     renderIcon: (active: boolean) => (
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#A8A29E"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
                       </svg>
                     ),
                   },
@@ -1893,7 +1899,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     a: "IQ, EQ, зан чанар, мэргэжлийн ур чадвар, хэлний түвшин гэх мэт 40+ тест байдаг. Та өөрт тохирохыг сонгоно.",
                     renderIcon: (active: boolean) => (
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#A8A29E"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/>
+                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /><rect x="9" y="3" width="6" height="4" rx="1" /><line x1="9" y1="12" x2="15" y2="12" /><line x1="9" y1="16" x2="13" y2="16" />
                       </svg>
                     ),
                   },
@@ -1902,7 +1908,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     a: "AI алгоритм хариултыг олон улсын стандарт болон Монголын дататай харьцуулан дүн шинжилгээ хийдэг. Нарийвчлал 95%+.",
                     renderIcon: (active: boolean) => (
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#A8A29E"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>
+                        <rect x="4" y="4" width="16" height="16" rx="2" /><rect x="9" y="9" width="6" height="6" /><line x1="9" y1="1" x2="9" y2="4" /><line x1="15" y1="1" x2="15" y2="4" /><line x1="9" y1="20" x2="9" y2="23" /><line x1="15" y1="20" x2="15" y2="23" /><line x1="20" y1="9" x2="23" y2="9" /><line x1="20" y1="14" x2="23" y2="14" /><line x1="1" y1="9" x2="4" y2="9" /><line x1="1" y1="14" x2="4" y2="14" />
                       </svg>
                     ),
                   },
@@ -1965,7 +1971,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                                 strokeWidth="2.5" strokeLinecap="round"
                                 style={{ flexShrink: 0, transition: "transform 0.22s ease", transform: active ? "rotate(180deg)" : "rotate(0deg)" }}
                               >
-                                <path d="M6 9l6 6 6-6"/>
+                                <path d="M6 9l6 6 6-6" />
                               </svg>
                             </button>
                             <div style={{
@@ -2012,8 +2018,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         bg: "#EEF2FF",
                         icon: (
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="2" y="4" width="20" height="16" rx="2"/>
-                            <path d="M2 7l10 7 10-7"/>
+                            <rect x="2" y="4" width="20" height="16" rx="2" />
+                            <path d="M2 7l10 7 10-7" />
                           </svg>
                         ),
                       },
@@ -2026,7 +2032,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         bg: "#FEF3EE",
                         icon: (
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                           </svg>
                         ),
                       },
@@ -2039,9 +2045,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         bg: "#E0F2FE",
                         icon: (
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="2" y1="12" x2="22" y2="12"/>
-                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="2" y1="12" x2="22" y2="12" />
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                           </svg>
                         ),
                       },
@@ -2054,7 +2060,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         bg: "#EFF6FF",
                         icon: (
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                           </svg>
                         ),
                       },
@@ -2075,13 +2081,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         }}
                         onMouseEnter={e => {
                           (e.currentTarget as HTMLElement).style.borderColor = item.color
-                          ;(e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"
-                          ;(e.currentTarget as HTMLElement).style.boxShadow = `0 4px 14px ${item.color}18`
+                            ; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"
+                            ; (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 14px ${item.color}18`
                         }}
                         onMouseLeave={e => {
                           (e.currentTarget as HTMLElement).style.borderColor = "#EDEFF2"
-                          ;(e.currentTarget as HTMLElement).style.transform = "translateY(0)"
-                          ;(e.currentTarget as HTMLElement).style.boxShadow = "none"
+                            ; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
+                            ; (e.currentTarget as HTMLElement).style.boxShadow = "none"
                         }}
                       >
                         <div style={{
@@ -2097,7 +2103,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                           <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 1 }}>{item.sub}</div>
                         </div>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
-                          <path d="M9 18l6-6-6-6"/>
+                          <path d="M9 18l6-6-6-6" />
                         </svg>
                       </a>
                     ))}
@@ -2110,8 +2116,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round">
-                          <circle cx="12" cy="12" r="10"/>
-                          <path d="M12 6v6l4 2"/>
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M12 6v6l4 2" />
                         </svg>
                         <span style={{ fontSize: 12, fontWeight: 600, color: "#6B7280", letterSpacing: "0.2px" }}>АЖЛЫН ЦАГ</span>
                       </div>
