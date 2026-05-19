@@ -18,10 +18,10 @@ export interface ToolResult {
 
 export function searchTestsByProblem(problem: string, assessments: Assessment[]): ToolResult {
   const problemLower = problem.toLowerCase()
-  
+
   // Search patterns
   const matchingTests: { id: number; name: string; score: number; reason: string }[] = []
-  
+
   // Check knowledge base first
   const { tests: knowledgeMatches } = searchKnowledge(problem)
   for (const t of knowledgeMatches) {
@@ -32,11 +32,11 @@ export function searchTestsByProblem(problem: string, assessments: Assessment[])
       reason: `${t.useCases.slice(0, 2).join(', ')}`,
     })
   }
-  
+
   // Also check static database
   for (const test of Object.values(TEST_DATABASE)) {
     if (matchingTests.some(m => m.id === test.id)) continue
-    
+
     const useCasesLower = test.useCases.toLowerCase()
     if (useCasesLower.includes(problemLower) || problemLower.split(' ').some(w => useCasesLower.includes(w))) {
       matchingTests.push({
@@ -47,10 +47,10 @@ export function searchTestsByProblem(problem: string, assessments: Assessment[])
       })
     }
   }
-  
+
   // Sort by score
   matchingTests.sort((a, b) => b.score - a.score)
-  
+
   return {
     success: true,
     data: {
@@ -68,7 +68,7 @@ export function searchTestsByProblem(problem: string, assessments: Assessment[])
 export function getTestDetails(testId: number): ToolResult {
   const knowledge = TEST_KNOWLEDGE[testId]
   const staticInfo = TEST_DATABASE[testId]
-  
+
   if (!knowledge && !staticInfo) {
     return {
       success: false,
@@ -76,7 +76,7 @@ export function getTestDetails(testId: number): ToolResult {
       error: `Test ID ${testId} not found`,
     }
   }
-  
+
   if (knowledge) {
     return {
       success: true,
@@ -97,7 +97,7 @@ export function getTestDetails(testId: number): ToolResult {
       }
     }
   }
-  
+
   // Fallback to static info
   return {
     success: true,
@@ -119,13 +119,13 @@ export function getTestDetails(testId: number): ToolResult {
 
 export function getPlatformInfo(topic: string): ToolResult {
   const topicLower = topic.toLowerCase()
-  
+
   // Search platform knowledge
-  const matches = PLATFORM_KNOWLEDGE.filter(p => 
+  const matches = PLATFORM_KNOWLEDGE.filter(p =>
     p.keywords.some(k => topicLower.includes(k) || k.includes(topicLower)) ||
     p.topic.toLowerCase().includes(topicLower)
   )
-  
+
   if (matches.length === 0) {
     return {
       success: false,
@@ -133,7 +133,7 @@ export function getPlatformInfo(topic: string): ToolResult {
       error: `No platform information found for "${topic}"`,
     }
   }
-  
+
   return {
     success: true,
     data: {
@@ -151,12 +151,12 @@ export function getPlatformInfo(topic: string): ToolResult {
 
 export function getTestsByCategory(category: string, assessments: Assessment[]): ToolResult {
   const categoryLower = category.toLowerCase()
-  
-  const matches = assessments.filter(a => 
+
+  const matches = assessments.filter(a =>
     (a.category?.name || '').toLowerCase().includes(categoryLower) ||
     categoryLower.includes((a.category?.name || '').toLowerCase())
   )
-  
+
   if (matches.length === 0) {
     return {
       success: false,
@@ -164,7 +164,7 @@ export function getTestsByCategory(category: string, assessments: Assessment[]):
       error: `No tests found in category "${category}"`,
     }
   }
-  
+
   return {
     success: true,
     data: {
@@ -186,7 +186,7 @@ export function getTestsByCategory(category: string, assessments: Assessment[]):
 
 export function getFreeTests(assessments: Assessment[]): ToolResult {
   const freeTests = assessments.filter(a => a.price === 0)
-  
+
   return {
     success: true,
     data: {
@@ -208,7 +208,7 @@ export function getFreeTests(assessments: Assessment[]): ToolResult {
 
 export function getPaidTests(assessments: Assessment[]): ToolResult {
   const paidTests = assessments.filter(a => a.price > 0)
-  
+
   return {
     success: true,
     data: {
@@ -220,10 +220,10 @@ export function getPaidTests(assessments: Assessment[]): ToolResult {
         category: a.category?.name,
       })),
       totalCount: paidTests.length,
-      priceRange: {
+      priceRange: paidTests.length > 0 ? {
         min: Math.min(...paidTests.map(a => a.price)),
         max: Math.max(...paidTests.map(a => a.price)),
-      }
+      } : { min: 0, max: 0 },
     }
   }
 }
@@ -234,7 +234,7 @@ export function getPaidTests(assessments: Assessment[]): ToolResult {
 
 export function getTestAuthorInfo(testId: number): ToolResult {
   const knowledge = TEST_KNOWLEDGE[testId]
-  
+
   if (!knowledge) {
     return {
       success: false,
@@ -242,7 +242,7 @@ export function getTestAuthorInfo(testId: number): ToolResult {
       error: `Detailed author information not available for test ID ${testId}`,
     }
   }
-  
+
   return {
     success: true,
     data: {
@@ -261,7 +261,7 @@ export function getTestAuthorInfo(testId: number): ToolResult {
 
 export function getRelatedTests(testId: number): ToolResult {
   const knowledge = TEST_KNOWLEDGE[testId]
-  
+
   if (!knowledge || !knowledge.relatedTests.length) {
     return {
       success: false,
@@ -269,7 +269,7 @@ export function getRelatedTests(testId: number): ToolResult {
       error: `No related tests found for test ID ${testId}`,
     }
   }
-  
+
   const related = knowledge.relatedTests
     .map(id => TEST_KNOWLEDGE[id])
     .filter(Boolean)
@@ -278,7 +278,7 @@ export function getRelatedTests(testId: number): ToolResult {
       name: t.name,
       description: t.fullDescription.slice(0, 100) + '...',
     }))
-  
+
   return {
     success: true,
     data: {
@@ -296,7 +296,7 @@ export function getRelatedTests(testId: number): ToolResult {
 // Master tool executor
 // ══════════════════════════════════════════════════════════════════════════════
 
-export type ToolName = 
+export type ToolName =
   | 'searchTestsByProblem'
   | 'getTestDetails'
   | 'getPlatformInfo'
@@ -307,7 +307,7 @@ export type ToolName =
   | 'getRelatedTests'
 
 export function executeTool(
-  toolName: ToolName, 
+  toolName: ToolName,
   params: Record<string, any>,
   assessments: Assessment[] = []
 ): ToolResult {
