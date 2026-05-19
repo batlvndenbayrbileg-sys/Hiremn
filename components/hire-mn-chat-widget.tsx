@@ -1107,7 +1107,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       if (event.data.type === "HIREMN_AI_ANALYSIS" && event.data.payload) {
         const { reportTitle, reportData, userInfo, analysisResults, prompt } = event.data.payload
 
-        // Зөвхөн loading indicator харуулна — raw data огт харуулахгүй
+        // Зөвхөн loading indicator харуулна ��� raw data огт харуулахгүй
         setIsTyping(true)
         setMessages(prev => [...prev, {
           role: "assistant" as const,
@@ -1799,35 +1799,44 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         }}>
                           Т��гээмэл асуултууд
                         </div>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
                           {QUICK_REPLIES.map((qr, i) => (
                             <button
                               key={qr.text}
                               className="hw-chip"
                               onClick={() => sendMessage(qr.text)}
                               style={{
-                                background: "#F3F4F6",
-                                border: "1.5px solid transparent",
+                                background: "rgba(255,255,255,0.72)",
+                                backdropFilter: "blur(16px)",
+                                WebkitBackdropFilter: "blur(16px)",
+                                border: "1px solid rgba(255,255,255,0.9)",
+                                boxShadow: "0 1px 4px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)",
                                 color: "#374151",
-                                borderRadius: 20,
-                                padding: "7px 13px 7px 9px",
+                                borderRadius: 10,
+                                padding: "7px 12px 7px 9px",
                                 fontSize: Math.max(fontSize - 2, 12),
                                 fontWeight: 500,
                                 cursor: "pointer",
                                 whiteSpace: "nowrap",
-                                animation: `hw-chip-in 0.3s cubic-bezier(.16,1,.3,1) ${i * 0.07}s both`,
+                                animation: `hw-chip-in 0.35s cubic-bezier(.16,1,.3,1) ${i * 0.07}s both`,
                                 display: "flex", alignItems: "center", gap: 6,
                                 transition: "all 0.18s ease",
                               }}
                               onMouseEnter={e => {
-                                (e.currentTarget as HTMLElement).style.background = "#E8541A"
-                                ;(e.currentTarget as HTMLElement).style.color = "#fff"
-                                ;(e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"
+                                const el = e.currentTarget as HTMLElement
+                                el.style.background = "#E8541A"
+                                el.style.color = "#fff"
+                                el.style.border = "1px solid #E8541A"
+                                el.style.boxShadow = "0 4px 16px rgba(232,84,26,0.28)"
+                                el.style.transform = "translateY(-1px)"
                               }}
                               onMouseLeave={e => {
-                                (e.currentTarget as HTMLElement).style.background = "#F3F4F6"
-                                ;(e.currentTarget as HTMLElement).style.color = "#374151"
-                                ;(e.currentTarget as HTMLElement).style.transform = "translateY(0)"
+                                const el = e.currentTarget as HTMLElement
+                                el.style.background = "rgba(255,255,255,0.72)"
+                                el.style.color = "#374151"
+                                el.style.border = "1px solid rgba(255,255,255,0.9)"
+                                el.style.boxShadow = "0 1px 4px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)"
+                                el.style.transform = "translateY(0)"
                               }}
                             >
                               <QuickReplyIcon type={qr.iconType} />
@@ -1849,7 +1858,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     q: "Hire.mn гэж юу вэ?",
                     a: "Hire.mn бол Монголын анхны AI-д суурилсан HR платформ юм. Мэргэжлийн тест, ур чадварын үнэлгээгээр таныг тохирох ажлын байртай холбоно.",
                     renderIcon: (active: boolean) => (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "rgba(255,255,255,0.55)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
                       </svg>
                     ),
@@ -1858,7 +1867,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     q: "Тест өгөхөд төлбөртэй юу?",
                     a: "Үнэгүй болон төлбөртэй тестүүд хоёулаа байдаг. Qpay ашиглан илүү дэлгэрэнгүй тестүүдийг авах боломжтой.",
                     renderIcon: (active: boolean) => (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "rgba(255,255,255,0.55)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
                       </svg>
                     ),
@@ -1867,7 +1876,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     q: "Үр дүнгээ хэрхэн харах вэ?",
                     a: "Тест дуусмагц үр дүн шууд гарна. Профайл хэсэгт орж харах, татаж авах, хуваалцах болон и-мэйлээр илгээх боломжтой.",
                     renderIcon: (active: boolean) => (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "rgba(255,255,255,0.55)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
                       </svg>
                     ),
@@ -1876,7 +1885,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     q: "Компани хэрхэн бүртгүүлэх вэ?",
                     a: "Манай администраторуудтай эсвэл Hire.mn Facebook хуудсаар холбогдоно уу. Хурдан хариу өгнө.",
                     renderIcon: (active: boolean) => (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "rgba(255,255,255,0.55)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
                       </svg>
                     ),
@@ -1885,7 +1894,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     q: "Ямар төрлийн тестүүд байдаг вэ?",
                     a: "IQ, EQ, зан чанар, мэргэжлийн ур чадвар, хэлний түвшин гэх мэт 40+ тест байдаг. Та өөрт тохирохыг сонгоно.",
                     renderIcon: (active: boolean) => (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "rgba(255,255,255,0.55)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/>
                       </svg>
                     ),
@@ -1894,31 +1903,56 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     q: "Үнэлгээний систем хэрхэн ажилладаг вэ?",
                     a: "AI алгоритм хариултыг олон улсын стандарт болон Монголын дататай харьцуулан дүн шинжилгээ хийдэг. Нарийвчлал 95%+.",
                     renderIcon: (active: boolean) => (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "rgba(255,255,255,0.55)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>
                       </svg>
                     ),
                   },
                 ];
                 return (
-                  <div className="hw-scroll" style={{ flex: 1, overflowY: "auto", background: "#F9FAFB", position: "relative", zIndex: 1 }}>
-                    <div style={{ padding: "20px 16px 4px" }}>
-                      <div style={{ fontSize: 15, fontWeight: 700, color: "#111827", letterSpacing: "-0.2px" }}>Түгээмэл асуултууд</div>
-                      <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 3 }}>Асуулт сонгоод хариулт харна уу</div>
+                  <div className="hw-scroll" style={{
+                    flex: 1, overflowY: "auto", position: "relative", zIndex: 1,
+                    background: "linear-gradient(160deg, #1a1208 0%, #2d1a08 40%, #1c1008 100%)",
+                  }}>
+                    {/* Subtle ambient glow */}
+                    <div style={{
+                      position: "absolute", top: -40, right: -40, width: 200, height: 200,
+                      borderRadius: "50%", pointerEvents: "none",
+                      background: "radial-gradient(circle, rgba(232,84,26,0.18) 0%, transparent 70%)",
+                    }} />
+                    <div style={{
+                      position: "absolute", bottom: 20, left: -60, width: 180, height: 180,
+                      borderRadius: "50%", pointerEvents: "none",
+                      background: "radial-gradient(circle, rgba(232,84,26,0.10) 0%, transparent 70%)",
+                    }} />
+
+                    <div style={{ padding: "22px 16px 6px", position: "relative" }}>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: "#fff", letterSpacing: "-0.3px" }}>Түгээмэл асуултууд</div>
+                      <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 3 }}>Асуулт сонгоод хариулт харна уу</div>
                     </div>
-                    <div style={{ padding: "12px 14px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
+
+                    <div style={{ padding: "10px 14px 20px", display: "flex", flexDirection: "column", gap: 7, position: "relative" }}>
                       {faqs.map((faq, i) => {
                         const active = expandedFaq === i;
                         return (
                           <div
                             key={i}
                             style={{
-                              background: "#fff",
-                              border: active ? "1.5px solid #E8541A" : "1.5px solid #EDEFF2",
-                              borderRadius: 12,
+                              background: active
+                                ? "rgba(255,255,255,0.1)"
+                                : "rgba(255,255,255,0.06)",
+                              backdropFilter: "blur(20px)",
+                              WebkitBackdropFilter: "blur(20px)",
+                              border: active
+                                ? "1px solid rgba(232,84,26,0.6)"
+                                : "1px solid rgba(255,255,255,0.1)",
+                              borderRadius: 14,
                               overflow: "hidden",
-                              transition: "border-color 0.18s ease, box-shadow 0.18s ease",
-                              boxShadow: active ? "0 2px 12px rgba(232,84,26,0.08)" : "none",
+                              transition: "all 0.22s ease",
+                              boxShadow: active
+                                ? "0 8px 32px rgba(232,84,26,0.15), inset 0 1px 0 rgba(255,255,255,0.12)"
+                                : "inset 0 1px 0 rgba(255,255,255,0.08)",
+                              animation: `hw-msg-in 0.3s ease ${i * 0.05}s both`,
                             }}
                           >
                             <button
@@ -1933,19 +1967,26 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                             >
                               <div style={{
                                 width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-                                background: active ? "#E8541A" : "#F3F4F6",
+                                background: active ? "#E8541A" : "rgba(255,255,255,0.1)",
                                 display: "flex", alignItems: "center", justifyContent: "center",
-                                transition: "background 0.18s ease",
+                                transition: "background 0.2s ease",
+                                boxShadow: active ? "0 0 12px rgba(232,84,26,0.5)" : "none",
                               }}>
                                 {faq.renderIcon(active)}
                               </div>
-                              <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "#111827", lineHeight: 1.4 }}>
+                              <span style={{
+                                flex: 1, fontSize: 13, fontWeight: 600,
+                                color: active ? "#fff" : "rgba(255,255,255,0.82)",
+                                lineHeight: 1.4,
+                                transition: "color 0.18s ease",
+                              }}>
                                 {faq.q}
                               </span>
                               <svg
                                 width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                stroke="#C4C9D4" strokeWidth="2.5" strokeLinecap="round"
-                                style={{ flexShrink: 0, transition: "transform 0.22s ease", transform: active ? "rotate(180deg)" : "rotate(0deg)" }}
+                                stroke={active ? "#E8541A" : "rgba(255,255,255,0.3)"}
+                                strokeWidth="2.5" strokeLinecap="round"
+                                style={{ flexShrink: 0, transition: "transform 0.22s ease, stroke 0.18s ease", transform: active ? "rotate(180deg)" : "rotate(0deg)" }}
                               >
                                 <path d="M6 9l6 6 6-6"/>
                               </svg>
@@ -1954,11 +1995,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                               maxHeight: active ? "200px" : "0px",
                               opacity: active ? 1 : 0,
                               overflow: "hidden",
-                              transition: "max-height 0.3s ease, opacity 0.2s ease",
+                              transition: "max-height 0.3s ease, opacity 0.22s ease",
                             }}>
                               <div style={{
                                 margin: "0 14px 14px 54px",
-                                fontSize: 13, lineHeight: 1.65, color: "#6B7280",
+                                fontSize: 13, lineHeight: 1.65,
+                                color: "rgba(255,255,255,0.55)",
                               }}>
                                 {faq.a}
                               </div>
