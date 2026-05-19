@@ -79,7 +79,8 @@ interface Test {
 }
 
 // Quick reply SVG icons
-const QuickReplyIcon = ({ type }: { type: string }) => {
+const QuickReplyIcon = ({ type, color }: { type: string; color?: string }) => {
+  const c = color || "currentColor"
   const icons: Record<string, JSX.Element> = {
     list: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>,
     target: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>,
@@ -90,10 +91,10 @@ const QuickReplyIcon = ({ type }: { type: string }) => {
 }
 
 const QUICK_REPLIES = [
-  { text: "Бүх тест харах", iconType: "list" },
-  { text: "Надад тохирох тест", iconType: "target" },
-  { text: "Үнэгүй тестүүд", iconType: "gift" },
-  { text: "Hire.mn тухай", iconType: "info" },
+  { text: "Бүх тест харах", iconType: "list", accent: "#E8541A", accentBg: "#FEF3EE" },
+  { text: "Надад тохирох тест", iconType: "target", accent: "#7C3AED", accentBg: "#F5F3FF" },
+  { text: "Үнэгүй тестүүд", iconType: "gift", accent: "#059669", accentBg: "#ECFDF5" },
+  { text: "Hire.mn тухай", iconType: "info", accent: "#0284C7", accentBg: "#E0F2FE" },
 ]
 
 // ── Animated Mascot Robot ─────────────────────────────────────────────────────
@@ -1797,7 +1798,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                           marginBottom: 4, letterSpacing: "0.5px",
                           textTransform: "uppercase"
                         }}>
-                          Түгээмэл асуултууд
+                          Т��гээмэл асуултууд
                         </div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                           {QUICK_REPLIES.map((qr, i) => (
@@ -1806,36 +1807,41 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                               className="hw-chip"
                               onClick={() => sendMessage(qr.text)}
                               style={{
-                                background: "#fff",
-                                border: "1.5px solid #E5E7EB",
-                                color: "#374151",
-                                borderRadius: 10,
-                                padding: "8px 12px",
-                                fontSize: Math.max(fontSize - 2, 12),
-                                fontWeight: 500,
+                                background: qr.accentBg,
+                                border: `1.5px solid ${qr.accent}22`,
+                                color: qr.accent,
+                                borderRadius: 20,
+                                padding: "7px 12px 7px 8px",
+                                fontSize: Math.max(fontSize - 2, 11),
+                                fontWeight: 600,
                                 cursor: "pointer",
                                 whiteSpace: "nowrap",
-                                animation: `hw-chip-in 0.3s cubic-bezier(.16,1,.3,1) ${i * 0.06}s both`,
-                                boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-                                display: "flex", alignItems: "center", gap: 8,
-                                transition: "all 0.25s cubic-bezier(.16,1,.3,1)",
+                                animation: `hw-chip-in 0.3s cubic-bezier(.16,1,.3,1) ${i * 0.07}s both`,
+                                display: "flex", alignItems: "center", gap: 6,
+                                transition: "all 0.2s ease",
+                                letterSpacing: "0.1px",
                               }}
                               onMouseEnter={e => {
-                                (e.currentTarget as HTMLElement).style.background = "#E8541A"
+                                (e.currentTarget as HTMLElement).style.background = qr.accent
                                   ; (e.currentTarget as HTMLElement).style.color = "#fff"
-                                  ; (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
-                                  ; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
-                                  ; (e.currentTarget as HTMLElement).style.boxShadow = "0 6px 16px rgba(232,84,26,0.2)"
+                                  ; (e.currentTarget as HTMLElement).style.borderColor = qr.accent
+                                  ; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px) scale(1.02)"
+                                  ; (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 12px ${qr.accent}30`
                               }}
                               onMouseLeave={e => {
-                                (e.currentTarget as HTMLElement).style.background = "#fff"
-                                  ; (e.currentTarget as HTMLElement).style.color = "#374151"
-                                  ; (e.currentTarget as HTMLElement).style.borderColor = "#E5E7EB"
-                                  ; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
-                                  ; (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)"
+                                (e.currentTarget as HTMLElement).style.background = qr.accentBg
+                                  ; (e.currentTarget as HTMLElement).style.color = qr.accent
+                                  ; (e.currentTarget as HTMLElement).style.borderColor = `${qr.accent}22`
+                                  ; (e.currentTarget as HTMLElement).style.transform = "translateY(0) scale(1)"
+                                  ; (e.currentTarget as HTMLElement).style.boxShadow = "none"
                               }}
                             >
-                              <span style={{ opacity: 0.7 }}>
+                              <span style={{
+                                width: 22, height: 22, borderRadius: 6,
+                                background: `${qr.accent}18`,
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                flexShrink: 0,
+                              }}>
                                 <QuickReplyIcon type={qr.iconType} />
                               </span>
                               {qr.text}
@@ -1851,90 +1857,102 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               )}
 
               {activeTab === 1 && (
-                /* FAQs Tab - Liquid Glass Accordion */
                 <div className="hw-scroll" style={{
-                  flex: 1, overflowY: "auto", padding: "24px 20px",
-                  background: "transparent",
+                  flex: 1, overflowY: "auto",
+                  background: "#F9FAFB",
                   position: "relative", zIndex: 1,
                 }}>
-                  {/* FAQ Header */}
+                  {/* Hero banner */}
                   <div style={{
-                    display: "flex", alignItems: "center", gap: 14, marginBottom: 24,
-                    padding: "18px 20px",
-                    background: "linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,250,245,0.8) 100%)",
-                    backdropFilter: "blur(20px)",
-                    borderRadius: 20,
-                    border: "1px solid rgba(255,255,255,0.6)",
-                    boxShadow: "0 8px 32px rgba(232,84,26,0.1), inset 0 1px 0 rgba(255,255,255,0.8)",
+                    background: "linear-gradient(135deg, #E8541A 0%, #F07040 100%)",
+                    padding: "24px 20px 28px",
+                    position: "relative", overflow: "hidden",
                   }}>
-                    <div style={{
-                      width: 48, height: 48, borderRadius: 14,
-                      background: "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      boxShadow: "0 4px 16px rgba(232,84,26,0.3)",
-                    }}>
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
-                      </svg>
+                    <div style={{ position: "absolute", top: -24, right: -24, width: 96, height: 96, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
+                    <div style={{ position: "absolute", bottom: -16, left: 60, width: 60, height: 60, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
+                    <div style={{ position: "relative" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                        </div>
+                        <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 11, fontWeight: 600, letterSpacing: "0.5px" }}>ТҮГЭЭМЭЛ АСУУЛТУУД</span>
+                      </div>
+                      <div style={{ color: "#fff", fontSize: 18, fontWeight: 700, letterSpacing: "-0.3px", lineHeight: 1.3 }}>Асуулт байна уу?</div>
+                      <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 13, marginTop: 4 }}>Доороос хариултаа олоорой</div>
                     </div>
-                    <div>
-                      <div style={{ fontSize: 16, fontWeight: 700, color: "#333", letterSpacing: "-0.3px" }}>Түгээмэл асуултууд</div>
-                      <div style={{ fontSize: 13, color: "#888", marginTop: 2 }}>Асуултаа сонгоод хариултыг нь үзнэ үү</div>
+                    {/* Stats row */}
+                    <div style={{ display: "flex", gap: 12, marginTop: 18, position: "relative" }}>
+                      {[{ n: "40+", l: "Тест" }, { n: "95%", l: "Нарийвчлал" }, { n: "24/7", l: "Дэмжлэг" }].map(s => (
+                        <div key={s.l} style={{ flex: 1, background: "rgba(255,255,255,0.15)", borderRadius: 10, padding: "8px 0", textAlign: "center", backdropFilter: "blur(8px)" }}>
+                          <div style={{ color: "#fff", fontSize: 14, fontWeight: 700 }}>{s.n}</div>
+                          <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 10, fontWeight: 500, marginTop: 1 }}>{s.l}</div>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  {/* FAQ Accordion */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {/* FAQ list */}
+                  <div style={{ padding: "16px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
                     {[
                       {
                         q: "Hire.mn гэж юу вэ?",
-                        a: "Hire.mn бол Монголын анхны AI-д суурилсан ажил горилогч болон ажил олгогчдыг холбосон платформ юм. Бид мэргэжлийн тест, ур чадварын үнэлгээ зэргээр таныг тохирох ажлын байртай холбоно.",
+                        a: "Hire.mn бол Монголын анхны AI-д суурилсан HR платформ юм. Мэргэжлийн тест, ур чадварын үнэлгээгээр таныг тохирох ажлын байртай холбоно.",
+                        tag: "Ерөнхий",
+                        tagColor: "#6366F1",
+                        tagBg: "#EEF2FF",
                         icon: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
                       },
                       {
                         q: "Тест өгөхөд төлбөртэй юу?",
-                        a: "Төлбөртэй болон төлбөргүй тестүүд бий. Үнэгүй тестүүдээс гадна Qpay ашиглан төлбөрөө төлж илүү дэлгэрэнгүй нарийвчилсан тестүүдийг өгөх боломжтой.",
-                        icon: "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2"
+                        a: "Үнэгүй болон төлбөртэй тестүүд хоёулаа байдаг. Qpay ашиглан илүү дэлгэрэнгүй тестүүдийг авах боломжтой.",
+                        tag: "Төлбөр",
+                        tagColor: "#059669",
+                        tagBg: "#ECFDF5",
+                        icon: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2"
                       },
                       {
                         q: "Үр дүнгээ хэрхэн харах вэ?",
-                        a: "Тест дуусмагц таны үр дүн шууд гарна. Профайл хэсэгт орж бзх тестийн үр дүнгээ харах, татаж авах, хуваалцах боломжтой. Мөн и-мэйлээр илгээх боломжтой.",
-                        icon: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"
-                      },
-                      {
-                        q: "Компани хэрхэн бүртгүүлэх вэ?",
-                        a: "Та манай администраторуудтай холбогдоно уу. Эсвэл Hire.mn facebook хуудсаар холбогдох боломжтой.",
-                        icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
-                      },
-                      {
-                        q: "Тестийн ямар тестийн төрлүүд байдаг вэ?",
-                        a: "IQ тест, EQ тест, зан чанарын тест, мэргэжлийн ур чадварын тест, хэлний түвшин тодорхойлох тест гэх мэт 40+ төрлийн тест байдаг. Та өөрт тохирох тестүүдийг сонгон өгч болно.",
+                        a: "Тест дуусмагц үр дүн шууд гарна. Профайл хэсэгт орж харах, татаж авах, хуваалцах болон и-мэйлээр илгээх боломжтой.",
+                        tag: "Үр дүн",
+                        tagColor: "#E8541A",
+                        tagBg: "#FEF3EE",
                         icon: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
                       },
                       {
-                        q: "Үнэлгээний систем хэрхэн ажилладаг вэ?",
-                        a: "AI алгоритм таны хариултуудыг дүн шинжилгээ хийж, олон улсын стандарт болон Монголын статистик дата-тай харьцуулан үнэлдэг. Үр дүн нь 95%+ нарийвчлалтай.",
+                        q: "Компани хэрхэн бүртгүүлэх вэ?",
+                        a: "Манай администраторуудтай эсвэл Hire.mn Facebook хуудсаар холбогдоно уу. Хурдан хариу өгнө.",
+                        tag: "Компани",
+                        tagColor: "#7C3AED",
+                        tagBg: "#F5F3FF",
+                        icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+                      },
+                      {
+                        q: "Ямар төрлийн тестүүд байдаг вэ?",
+                        a: "IQ, EQ, зан чанар, мэргэжлийн ур чадвар, хэлний түвшин гэх мэт 40+ тест байдаг. Та өөрт тохирохыг сонгоно.",
+                        tag: "Тест",
+                        tagColor: "#0284C7",
+                        tagBg: "#E0F2FE",
                         icon: "M12 20V10M18 20V4M6 20v-4"
+                      },
+                      {
+                        q: "Үнэлгээний систем хэрхэн ажилладаг вэ?",
+                        a: "AI алгоритм хариултыг олон улсын стандарт болон Монголын дататай харьцуулан дүн шинжилгээ хийдэг. Нарийвчлал 95%+.",
+                        tag: "AI",
+                        tagColor: "#E8541A",
+                        tagBg: "#FEF3EE",
+                        icon: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
                       },
                     ].map((faq, i) => (
                       <div
                         key={i}
                         style={{
-                          background: expandedFaq === i
-                            ? "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,250,245,0.9) 100%)"
-                            : "linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,250,245,0.7) 100%)",
-                          backdropFilter: "blur(20px)",
-                          border: expandedFaq === i
-                            ? "1.5px solid rgba(232,84,26,0.3)"
-                            : "1.5px solid rgba(255,255,255,0.6)",
-                          borderRadius: 18,
+                          background: "#fff",
+                          border: expandedFaq === i ? "1.5px solid #E8541A" : "1.5px solid #F3F4F6",
+                          borderRadius: 14,
                           overflow: "hidden",
-                          transition: "all 0.4s cubic-bezier(.22,1,.36,1)",
-                          boxShadow: expandedFaq === i
-                            ? "0 12px 40px rgba(232,84,26,0.15), inset 0 1px 0 rgba(255,255,255,0.9)"
-                            : "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
-                          animation: `hw-msg-in 0.5s cubic-bezier(.22,1,.36,1) ${i * 0.08}s both`,
+                          transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+                          boxShadow: expandedFaq === i ? "0 4px 20px rgba(232,84,26,0.1)" : "0 1px 3px rgba(0,0,0,0.04)",
+                          animation: `hw-msg-in 0.3s ease ${i * 0.05}s both`,
                         }}
                       >
                         <button
@@ -1942,95 +1960,123 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                           style={{
                             width: "100%", textAlign: "left",
                             background: "transparent", border: "none",
-                            padding: "16px 18px",
-                            color: "#333", fontSize: 14, fontWeight: 600,
+                            padding: "14px 16px",
                             cursor: "pointer",
-                            display: "flex", alignItems: "center", gap: 14,
-                            transition: "all 0.3s",
+                            display: "flex", alignItems: "flex-start", gap: 12,
                           }}
                         >
+                          {/* Icon */}
                           <div style={{
-                            width: 38, height: 38, borderRadius: 12,
-                            background: expandedFaq === i
-                              ? "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)"
-                              : "linear-gradient(135deg, rgba(232,84,26,0.1) 0%, rgba(255,140,66,0.1) 100%)",
+                            width: 36, height: 36, borderRadius: 10, flexShrink: 0, marginTop: 1,
+                            background: expandedFaq === i ? "#E8541A" : "#F9FAFB",
                             display: "flex", alignItems: "center", justifyContent: "center",
-                            flexShrink: 0,
-                            transition: "all 0.4s cubic-bezier(.22,1,.36,1)",
-                            boxShadow: expandedFaq === i ? "0 4px 12px rgba(232,84,26,0.3)" : "none",
+                            transition: "all 0.2s ease",
                           }}>
-                            <svg
-                              width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                               stroke={expandedFaq === i ? "#fff" : "#E8541A"}
-                              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                            >
+                              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <path d={faq.icon} />
                             </svg>
                           </div>
-                          <span style={{ flex: 1, lineHeight: 1.4 }}>{faq.q}</span>
+                          {/* Text */}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+                              <span style={{
+                                fontSize: 9, fontWeight: 700, letterSpacing: "0.4px",
+                                color: faq.tagColor, background: faq.tagBg,
+                                padding: "2px 8px", borderRadius: 20,
+                              }}>{faq.tag}</span>
+                            </div>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: "#111827", lineHeight: 1.4, display: "block" }}>{faq.q}</span>
+                          </div>
+                          {/* Chevron */}
                           <div style={{
-                            width: 28, height: 28, borderRadius: 8,
-                            background: expandedFaq === i ? "rgba(232,84,26,0.1)" : "transparent",
+                            width: 24, height: 24, borderRadius: 6, flexShrink: 0, marginTop: 4,
                             display: "flex", alignItems: "center", justifyContent: "center",
-                            transition: "all 0.4s cubic-bezier(.22,1,.36,1)",
+                            transition: "transform 0.25s ease",
                             transform: expandedFaq === i ? "rotate(180deg)" : "rotate(0deg)",
                           }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8541A" strokeWidth="2.5" strokeLinecap="round">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round">
                               <path d="M6 9l6 6 6-6" />
                             </svg>
                           </div>
                         </button>
 
-                        {/* Answer - Animated dropdown */}
+                        {/* Answer */}
                         <div style={{
-                          maxHeight: expandedFaq === i ? "200px" : "0px",
+                          maxHeight: expandedFaq === i ? "220px" : "0px",
                           opacity: expandedFaq === i ? 1 : 0,
                           overflow: "hidden",
-                          transition: "all 0.4s cubic-bezier(.22,1,.36,1)",
+                          transition: "max-height 0.35s ease, opacity 0.25s ease",
                         }}>
                           <div style={{
-                            padding: "0 18px 18px 70px",
-                            fontSize: 13, lineHeight: 1.7, color: "#666",
+                            margin: "0 16px 16px 64px",
+                            padding: "12px 14px",
+                            background: "#F9FAFB",
+                            borderRadius: 10,
+                            fontSize: 13, lineHeight: 1.65, color: "#4B5563",
                           }}>
                             {faq.a}
                           </div>
                         </div>
                       </div>
                     ))}
+
+                    {/* Bottom CTA */}
+                    <a
+                      href="https://hire.mn"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                        marginTop: 8,
+                        padding: "13px 20px",
+                        background: "#E8541A",
+                        color: "#fff", fontSize: 13, fontWeight: 700,
+                        borderRadius: 12, textDecoration: "none",
+                        boxShadow: "0 4px 14px rgba(232,84,26,0.3)",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#D44810"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#E8541A"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                      Дэлгэрэнгүй мэдээлэл авах
+                    </a>
                   </div>
                 </div>
               )}
 
               {activeTab === 2 && (
-                /* Contact Tab - Warm themed */
                 <div className="hw-scroll" style={{
-                  flex: 1, overflowY: "auto", padding: "20px 16px",
-                  background: "linear-gradient(180deg, #FFFBF8 0%, #FFFFFF 100%)",
+                  flex: 1, overflowY: "auto",
+                  background: "#F9FAFB",
                 }}>
-                  {/* Contact header card */}
+                  {/* Hero */}
                   <div style={{
-                    background: "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)",
-                    borderRadius: 20, padding: "24px 20px", marginBottom: 20,
-                    position: "relative", overflow: "hidden",
+                    background: "linear-gradient(135deg, #E8541A 0%, #F07040 100%)",
+                    padding: "24px 20px 28px", position: "relative", overflow: "hidden",
                   }}>
-                    <div style={{
-                      position: "absolute", top: -20, right: -20, width: 80, height: 80,
-                      borderRadius: "50%", background: "rgba(255,255,255,0.1)",
-                    }} />
-                    <h3 style={{ color: "#fff", fontSize: 20, fontWeight: 700, marginBottom: 8, position: "relative" }}>
-                      Холбоо барих
-                    </h3>
-                    <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 14, lineHeight: 1.5, position: "relative" }}>
-                      Асуулт байвал бидэнтэй холбогдоорой
-                    </p>
+                    <div style={{ position: "absolute", top: -24, right: -24, width: 96, height: 96, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
+                    <div style={{ position: "relative" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/></svg>
+                        </div>
+                        <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 11, fontWeight: 600, letterSpacing: "0.5px" }}>ХОЛБОО БАРИХ</span>
+                      </div>
+                      <div style={{ color: "#fff", fontSize: 18, fontWeight: 700, letterSpacing: "-0.3px" }}>Бидэнтэй холбогдоорой</div>
+                      <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 13, marginTop: 4 }}>Ажлын өдрүүдэд 09:00–18:00</div>
+                    </div>
                   </div>
 
-                  {/* Contact options */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div style={{ padding: "16px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
+                    {/* Contact cards */}
                     {[
-                      { label: "И-мэйл", value: "info@axiominc.mn", icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6", href: "mailto:info@axiominc.mn" },
-                      { label: "Утас", value: "+976 7011-1234", icon: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72", href: "tel:+9767511 1111" },
-                      { label: "Веб", value: "hire.mn", icon: "M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z", href: "https://hire.mn" },
+                      { label: "И-мэйл", value: "info@axiominc.mn", sub: "Хариу өгөх хугацаа: 24 цаг", icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6", href: "mailto:info@axiominc.mn", color: "#6366F1", bg: "#EEF2FF" },
+                      { label: "Утас", value: "+976 7011-1234", sub: "Дуудлага хийх", icon: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72", href: "tel:+97670111234", color: "#059669", bg: "#ECFDF5" },
+                      { label: "Вэбсайт", value: "hire.mn", sub: "Дэлгэрэнгүй мэдээлэл", icon: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z", href: "https://hire.mn", color: "#E8541A", bg: "#FEF3EE" },
+                      { label: "Facebook", value: "hire.mn Facebook", sub: "Мессеж илгээх", icon: "M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z", href: "https://facebook.com/hire.mn", color: "#1877F2", bg: "#EFF6FF" },
                     ].map((item, i) => (
                       <a
                         key={item.label}
@@ -2038,42 +2084,69 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         target={item.href.startsWith("http") ? "_blank" : undefined}
                         rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
                         style={{
-                          display: "flex", alignItems: "center", gap: 14,
-                          background: "#fff", border: "1.5px solid rgba(232,84,26,0.12)",
-                          borderRadius: 16, padding: "16px",
+                          display: "flex", alignItems: "center", gap: 12,
+                          background: "#fff", border: "1.5px solid #F3F4F6",
+                          borderRadius: 14, padding: "14px 16px",
                           textDecoration: "none",
-                          transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
-                          animation: `hw-msg-in 0.4s cubic-bezier(.34,1.56,.64,1) ${i * 0.1}s both`,
+                          transition: "all 0.2s ease",
+                          animation: `hw-msg-in 0.3s ease ${i * 0.06}s both`,
                         }}
                         onMouseEnter={e => {
-                          (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
-                            ; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
-                            ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(232,84,26,0.15)"
+                          (e.currentTarget as HTMLElement).style.borderColor = item.color
+                          ;(e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
+                          ;(e.currentTarget as HTMLElement).style.boxShadow = `0 6px 20px ${item.color}20`
                         }}
                         onMouseLeave={e => {
-                          (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,84,26,0.12)"
-                            ; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
-                            ; (e.currentTarget as HTMLElement).style.boxShadow = "none"
+                          (e.currentTarget as HTMLElement).style.borderColor = "#F3F4F6"
+                          ;(e.currentTarget as HTMLElement).style.transform = "translateY(0)"
+                          ;(e.currentTarget as HTMLElement).style.boxShadow = "none"
                         }}
                       >
                         <div style={{
-                          width: 44, height: 44, borderRadius: 14,
-                          background: "linear-gradient(135deg, #FFF5EE 0%, #FFE8DC 100%)",
+                          width: 42, height: 42, borderRadius: 12, flexShrink: 0,
+                          background: item.bg,
                           display: "flex", alignItems: "center", justifyContent: "center",
                         }}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8541A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={item.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d={item.icon} />
                           </svg>
                         </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 12, color: "#888", marginBottom: 2 }}>{item.label}</div>
-                          <div style={{ fontSize: 15, color: "#333", fontWeight: 600 }}>{item.value}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500, marginBottom: 2 }}>{item.label}</div>
+                          <div style={{ fontSize: 14, color: "#111827", fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.value}</div>
+                          <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 1 }}>{item.sub}</div>
                         </div>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8541A" strokeWidth="2" strokeLinecap="round">
-                          <path d="M7 17L17 7M17 7H7M17 7v10" />
-                        </svg>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: item.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={item.color} strokeWidth="2.5" strokeLinecap="round">
+                            <path d="M7 17L17 7M17 7H7M17 7v10" />
+                          </svg>
+                        </div>
                       </a>
                     ))}
+
+                    {/* Working hours card */}
+                    <div style={{
+                      background: "#fff", border: "1.5px solid #F3F4F6",
+                      borderRadius: 14, padding: "16px",
+                      marginTop: 4,
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: "#FEF3EE", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8541A" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>Ажлын цаг</span>
+                      </div>
+                      {[
+                        { day: "Даваа – Баасан", time: "09:00 – 18:00", active: true },
+                        { day: "Бямба", time: "10:00 – 14:00", active: false },
+                        { day: "Ням", time: "Амарна", active: false },
+                      ].map(row => (
+                        <div key={row.day} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: "1px solid #F9FAFB" }}>
+                          <span style={{ fontSize: 12, color: "#6B7280" }}>{row.day}</span>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: row.active ? "#059669" : "#9CA3AF" }}>{row.time}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
