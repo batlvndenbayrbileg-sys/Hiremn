@@ -1803,7 +1803,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                           marginBottom: 4, letterSpacing: "0.5px",
                           textTransform: "uppercase"
                         }}>
-                          Т��гээмэл асуултууд
+                          Түгээмэл асуултууд
                         </div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
                           {QUICK_REPLIES.map((qr, i) => (
