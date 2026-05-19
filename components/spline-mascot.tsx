@@ -3,10 +3,10 @@
 import { useEffect, useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 
-const SCENE_URL = 'https://prod.spline.design/wfat5gF0Q5BMp2kc/scene.splinecode'
+const SCENE_URL = '"https://prod.spline.design/wfat5gF0Q5BMp2kc/scene.splinecode'
 
 // Safely import Spline with proper error handling
-const SplineComponent = dynamic(() => 
+const SplineComponent = dynamic(() =>
   import('@splinetool/react-spline').then(mod => mod.default)
     .catch(() => () => null),
   {
@@ -35,7 +35,7 @@ export function SplineMascot({
 
   useEffect(() => {
     let isMounted = true
-    
+
     // Load Spline after short delay to avoid blocking render
     const timer = setTimeout(() => {
       if (isMounted) setShowSpline(true)
