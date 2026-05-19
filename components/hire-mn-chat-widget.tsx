@@ -1112,7 +1112,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         setIsTyping(true)
         setMessages(prev => [...prev, {
           role: "assistant" as const,
-          content: "⏳ Тайлангийн үр дүнг шинжилж байна...",
+          content: "��� Тайлангийн үр дүнг шинжилж байна...",
         }])
 
         // Data-г API руу шууд явуулна — sendMessage ашиглахгүй (UI-д гарна)
@@ -1862,37 +1862,14 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   background: "#F9FAFB",
                   position: "relative", zIndex: 1,
                 }}>
-                  {/* Hero banner */}
-                  <div style={{
-                    background: "linear-gradient(135deg, #E8541A 0%, #F07040 100%)",
-                    padding: "24px 20px 28px",
-                    position: "relative", overflow: "hidden",
-                  }}>
-                    <div style={{ position: "absolute", top: -24, right: -24, width: 96, height: 96, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
-                    <div style={{ position: "absolute", bottom: -16, left: 60, width: 60, height: 60, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
-                    <div style={{ position: "relative" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
-                        </div>
-                        <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 11, fontWeight: 600, letterSpacing: "0.5px" }}>ТҮГЭЭМЭЛ АСУУЛТУУД</span>
-                      </div>
-                      <div style={{ color: "#fff", fontSize: 18, fontWeight: 700, letterSpacing: "-0.3px", lineHeight: 1.3 }}>Асуулт байна уу?</div>
-                      <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 13, marginTop: 4 }}>Доороос хариултаа олоорой</div>
-                    </div>
-                    {/* Stats row */}
-                    <div style={{ display: "flex", gap: 12, marginTop: 18, position: "relative" }}>
-                      {[{ n: "40+", l: "Тест" }, { n: "95%", l: "Нарийвчлал" }, { n: "24/7", l: "Дэмжлэг" }].map(s => (
-                        <div key={s.l} style={{ flex: 1, background: "rgba(255,255,255,0.15)", borderRadius: 10, padding: "8px 0", textAlign: "center", backdropFilter: "blur(8px)" }}>
-                          <div style={{ color: "#fff", fontSize: 14, fontWeight: 700 }}>{s.n}</div>
-                          <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 10, fontWeight: 500, marginTop: 1 }}>{s.l}</div>
-                        </div>
-                      ))}
-                    </div>
+                  {/* Header */}
+                  <div style={{ padding: "20px 16px 4px" }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "#111827", letterSpacing: "-0.2px" }}>Түгээмэл асуултууд</div>
+                    <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 3 }}>Асуулт сонгоод хариулт харна уу</div>
                   </div>
 
                   {/* FAQ list */}
-                  <div style={{ padding: "16px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
+                  <div style={{ padding: "12px 14px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
                     {[
                       {
                         q: "Hire.mn гэж юу вэ?",
@@ -1900,7 +1877,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         tag: "Ерөнхий",
                         tagColor: "#6366F1",
                         tagBg: "#EEF2FF",
-                        icon: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                        // briefcase icon
+                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="12.01"/></svg>
                       },
                       {
                         q: "Тест өгөхөд төлбөртэй юу?",
@@ -1908,7 +1886,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         tag: "Төлбөр",
                         tagColor: "#059669",
                         tagBg: "#ECFDF5",
-                        icon: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2"
+                        // credit-card icon
+                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                       },
                       {
                         q: "Үр дүнгээ хэрхэн харах вэ?",
@@ -1916,7 +1895,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         tag: "Үр дүн",
                         tagColor: "#E8541A",
                         tagBg: "#FEF3EE",
-                        icon: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
+                        // bar-chart icon
+                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                       },
                       {
                         q: "Компани хэрхэн бүртгүүлэх вэ?",
@@ -1924,7 +1904,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         tag: "Компани",
                         tagColor: "#7C3AED",
                         tagBg: "#F5F3FF",
-                        icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+                        // users icon
+                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                       },
                       {
                         q: "Ямар төрлийн тестүүд байдаг вэ?",
@@ -1932,7 +1913,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         tag: "Тест",
                         tagColor: "#0284C7",
                         tagBg: "#E0F2FE",
-                        icon: "M12 20V10M18 20V4M6 20v-4"
+                        // clipboard-list icon
+                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
                       },
                       {
                         q: "Үнэлгээний систем хэрхэн ажилладаг вэ?",
@@ -1940,19 +1922,20 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         tag: "AI",
                         tagColor: "#E8541A",
                         tagBg: "#FEF3EE",
-                        icon: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+                        // cpu icon
+                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
                       },
                     ].map((faq, i) => (
                       <div
                         key={i}
                         style={{
                           background: "#fff",
-                          border: expandedFaq === i ? "1.5px solid #E8541A" : "1.5px solid #F3F4F6",
-                          borderRadius: 14,
+                          border: expandedFaq === i ? "1.5px solid #E8541A" : "1.5px solid #EDEFF2",
+                          borderRadius: 12,
                           overflow: "hidden",
-                          transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-                          boxShadow: expandedFaq === i ? "0 4px 20px rgba(232,84,26,0.1)" : "0 1px 3px rgba(0,0,0,0.04)",
-                          animation: `hw-msg-in 0.3s ease ${i * 0.05}s both`,
+                          transition: "border-color 0.18s ease, box-shadow 0.18s ease",
+                          boxShadow: expandedFaq === i ? "0 2px 12px rgba(232,84,26,0.08)" : "none",
+                          animation: `hw-msg-in 0.25s ease ${i * 0.04}s both`,
                         }}
                       >
                         <button
@@ -1960,43 +1943,37 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                           style={{
                             width: "100%", textAlign: "left",
                             background: "transparent", border: "none",
-                            padding: "14px 16px",
+                            padding: "12px 14px",
                             cursor: "pointer",
-                            display: "flex", alignItems: "flex-start", gap: 12,
+                            display: "flex", alignItems: "center", gap: 10,
                           }}
                         >
                           {/* Icon */}
                           <div style={{
-                            width: 36, height: 36, borderRadius: 10, flexShrink: 0, marginTop: 1,
-                            background: expandedFaq === i ? "#E8541A" : "#F9FAFB",
+                            width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                            background: expandedFaq === i ? "#E8541A" : "#F3F4F6",
                             display: "flex", alignItems: "center", justifyContent: "center",
-                            transition: "all 0.2s ease",
+                            transition: "background 0.18s ease",
+                            color: expandedFaq === i ? "#fff" : "#6B7280",
                           }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                              stroke={expandedFaq === i ? "#fff" : "#E8541A"}
-                              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d={faq.icon} />
-                            </svg>
+                            {faq.icon}
                           </div>
-                          {/* Text */}
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-                              <span style={{
-                                fontSize: 9, fontWeight: 700, letterSpacing: "0.4px",
-                                color: faq.tagColor, background: faq.tagBg,
-                                padding: "2px 8px", borderRadius: 20,
-                              }}>{faq.tag}</span>
-                            </div>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: "#111827", lineHeight: 1.4, display: "block" }}>{faq.q}</span>
-                          </div>
-                          {/* Chevron */}
-                          <div style={{
-                            width: 24, height: 24, borderRadius: 6, flexShrink: 0, marginTop: 4,
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            transition: "transform 0.25s ease",
-                            transform: expandedFaq === i ? "rotate(180deg)" : "rotate(0deg)",
-                          }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round">
+                          {/* Question */}
+                          <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "#111827", lineHeight: 1.4 }}>
+                            {faq.q}
+                          </span>
+                          {/* Tag + Chevron */}
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                            <span style={{
+                              fontSize: 9, fontWeight: 700, letterSpacing: "0.3px",
+                              color: faq.tagColor, background: faq.tagBg,
+                              padding: "2px 7px", borderRadius: 20,
+                            }}>{faq.tag}</span>
+                            <svg
+                              width="14" height="14" viewBox="0 0 24 24" fill="none"
+                              stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round"
+                              style={{ transition: "transform 0.22s ease", transform: expandedFaq === i ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}
+                            >
                               <path d="M6 9l6 6 6-6" />
                             </svg>
                           </div>
@@ -2004,45 +1981,22 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
                         {/* Answer */}
                         <div style={{
-                          maxHeight: expandedFaq === i ? "220px" : "0px",
+                          maxHeight: expandedFaq === i ? "200px" : "0px",
                           opacity: expandedFaq === i ? 1 : 0,
                           overflow: "hidden",
-                          transition: "max-height 0.35s ease, opacity 0.25s ease",
+                          transition: "max-height 0.3s ease, opacity 0.2s ease",
                         }}>
                           <div style={{
-                            margin: "0 16px 16px 64px",
-                            padding: "12px 14px",
-                            background: "#F9FAFB",
-                            borderRadius: 10,
-                            fontSize: 13, lineHeight: 1.65, color: "#4B5563",
+                            margin: "0 14px 14px 56px",
+                            fontSize: 12.5, lineHeight: 1.65, color: "#6B7280",
+                            borderLeft: "2px solid #F3F4F6",
+                            paddingLeft: 12,
                           }}>
                             {faq.a}
                           </div>
                         </div>
                       </div>
                     ))}
-
-                    {/* Bottom CTA */}
-                    <a
-                      href="https://hire.mn"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                        marginTop: 8,
-                        padding: "13px 20px",
-                        background: "#E8541A",
-                        color: "#fff", fontSize: 13, fontWeight: 700,
-                        borderRadius: 12, textDecoration: "none",
-                        boxShadow: "0 4px 14px rgba(232,84,26,0.3)",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#D44810"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#E8541A"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
-                    >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
-                      Дэлгэрэнгүй мэдээлэл авах
-                    </a>
                   </div>
                 </div>
               )}
@@ -2052,31 +2006,69 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   flex: 1, overflowY: "auto",
                   background: "#F9FAFB",
                 }}>
-                  {/* Hero */}
-                  <div style={{
-                    background: "linear-gradient(135deg, #E8541A 0%, #F07040 100%)",
-                    padding: "24px 20px 28px", position: "relative", overflow: "hidden",
-                  }}>
-                    <div style={{ position: "absolute", top: -24, right: -24, width: 96, height: 96, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
-                    <div style={{ position: "relative" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/></svg>
-                        </div>
-                        <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 11, fontWeight: 600, letterSpacing: "0.5px" }}>ХОЛБОО БАРИХ</span>
-                      </div>
-                      <div style={{ color: "#fff", fontSize: 18, fontWeight: 700, letterSpacing: "-0.3px" }}>Бидэнтэй холбогдоорой</div>
-                      <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 13, marginTop: 4 }}>Ажлын өдрүүдэд 09:00–18:00</div>
-                    </div>
+                  {/* Header */}
+                  <div style={{ padding: "20px 16px 4px" }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "#111827", letterSpacing: "-0.2px" }}>Холбоо барих</div>
+                    <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 3 }}>Ажлын өдрүүдэд 09:00–18:00</div>
                   </div>
 
-                  <div style={{ padding: "16px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
-                    {/* Contact cards */}
+                  <div style={{ padding: "12px 14px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
                     {[
-                      { label: "И-мэйл", value: "info@axiominc.mn", sub: "Хариу өгөх хугацаа: 24 цаг", icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6", href: "mailto:info@axiominc.mn", color: "#6366F1", bg: "#EEF2FF" },
-                      { label: "Утас", value: "+976 7011-1234", sub: "Дуудлага хийх", icon: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72", href: "tel:+97670111234", color: "#059669", bg: "#ECFDF5" },
-                      { label: "Вэбсайт", value: "hire.mn", sub: "Дэлгэрэнгүй мэдээлэл", icon: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z", href: "https://hire.mn", color: "#E8541A", bg: "#FEF3EE" },
-                      { label: "Facebook", value: "hire.mn Facebook", sub: "Мессеж илгээх", icon: "M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z", href: "https://facebook.com/hire.mn", color: "#1877F2", bg: "#EFF6FF" },
+                      {
+                        label: "И-мэйл",
+                        value: "info@axiominc.mn",
+                        sub: "24 цагийн дотор хариу",
+                        href: "mailto:info@axiominc.mn",
+                        color: "#6366F1",
+                        bg: "#EEF2FF",
+                        icon: (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="2" y="4" width="20" height="16" rx="2"/>
+                            <path d="M2 7l10 7 10-7"/>
+                          </svg>
+                        ),
+                      },
+                      {
+                        label: "Утас",
+                        value: "+976 7011-1234",
+                        sub: "Шууд дуудлага хийх",
+                        href: "tel:+97670111234",
+                        color: "#E8541A",
+                        bg: "#FEF3EE",
+                        icon: (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                          </svg>
+                        ),
+                      },
+                      {
+                        label: "Вэбсайт",
+                        value: "hire.mn",
+                        sub: "Дэлгэрэнгүй мэдээлэл",
+                        href: "https://hire.mn",
+                        color: "#0284C7",
+                        bg: "#E0F2FE",
+                        icon: (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                          </svg>
+                        ),
+                      },
+                      {
+                        label: "Facebook",
+                        value: "hire.mn",
+                        sub: "Мессеж илгээх",
+                        href: "https://facebook.com/hire.mn",
+                        color: "#1877F2",
+                        bg: "#EFF6FF",
+                        icon: (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                          </svg>
+                        ),
+                      },
                     ].map((item, i) => (
                       <a
                         key={item.label}
@@ -2085,65 +2077,67 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
                         style={{
                           display: "flex", alignItems: "center", gap: 12,
-                          background: "#fff", border: "1.5px solid #F3F4F6",
-                          borderRadius: 14, padding: "14px 16px",
+                          background: "#fff", border: "1.5px solid #EDEFF2",
+                          borderRadius: 12, padding: "12px 14px",
                           textDecoration: "none",
-                          transition: "all 0.2s ease",
-                          animation: `hw-msg-in 0.3s ease ${i * 0.06}s both`,
+                          transition: "border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
+                          animation: `hw-msg-in 0.25s ease ${i * 0.05}s both`,
+                          color: "inherit",
                         }}
                         onMouseEnter={e => {
                           (e.currentTarget as HTMLElement).style.borderColor = item.color
-                          ;(e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
-                          ;(e.currentTarget as HTMLElement).style.boxShadow = `0 6px 20px ${item.color}20`
+                          ;(e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"
+                          ;(e.currentTarget as HTMLElement).style.boxShadow = `0 4px 14px ${item.color}18`
                         }}
                         onMouseLeave={e => {
-                          (e.currentTarget as HTMLElement).style.borderColor = "#F3F4F6"
+                          (e.currentTarget as HTMLElement).style.borderColor = "#EDEFF2"
                           ;(e.currentTarget as HTMLElement).style.transform = "translateY(0)"
                           ;(e.currentTarget as HTMLElement).style.boxShadow = "none"
                         }}
                       >
                         <div style={{
-                          width: 42, height: 42, borderRadius: 12, flexShrink: 0,
-                          background: item.bg,
+                          width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+                          background: item.bg, color: item.color,
                           display: "flex", alignItems: "center", justifyContent: "center",
                         }}>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={item.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d={item.icon} />
-                          </svg>
+                          {item.icon}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500, marginBottom: 2 }}>{item.label}</div>
-                          <div style={{ fontSize: 14, color: "#111827", fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.value}</div>
+                          <div style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500, marginBottom: 1 }}>{item.label}</div>
+                          <div style={{ fontSize: 13, color: "#111827", fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.value}</div>
                           <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 1 }}>{item.sub}</div>
                         </div>
-                        <div style={{ width: 28, height: 28, borderRadius: 8, background: item.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={item.color} strokeWidth="2.5" strokeLinecap="round">
-                            <path d="M7 17L17 7M17 7H7M17 7v10" />
-                          </svg>
-                        </div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
+                          <path d="M9 18l6-6-6-6"/>
+                        </svg>
                       </a>
                     ))}
 
-                    {/* Working hours card */}
+                    {/* Working hours */}
                     <div style={{
-                      background: "#fff", border: "1.5px solid #F3F4F6",
-                      borderRadius: 14, padding: "16px",
-                      marginTop: 4,
+                      background: "#fff", border: "1.5px solid #EDEFF2",
+                      borderRadius: 12, padding: "14px 14px",
+                      marginTop: 2,
                     }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                        <div style={{ width: 28, height: 28, borderRadius: 8, background: "#FEF3EE", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8541A" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                        </div>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>Ажлын цаг</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <path d="M12 6v6l4 2"/>
+                        </svg>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: "#6B7280", letterSpacing: "0.2px" }}>АЖЛЫН ЦАГ</span>
                       </div>
                       {[
-                        { day: "Даваа – Баасан", time: "09:00 – 18:00", active: true },
-                        { day: "Бямба", time: "10:00 – 14:00", active: false },
-                        { day: "Ням", time: "Амарна", active: false },
-                      ].map(row => (
-                        <div key={row.day} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: "1px solid #F9FAFB" }}>
+                        { day: "Даваа – Баасан", time: "09:00 – 18:00", open: true },
+                        { day: "Бямба", time: "10:00 – 14:00", open: true },
+                        { day: "Ням", time: "Амарна", open: false },
+                      ].map((row, ri) => (
+                        <div key={row.day} style={{
+                          display: "flex", justifyContent: "space-between", alignItems: "center",
+                          padding: "6px 0",
+                          borderBottom: ri < 2 ? "1px solid #F3F4F6" : "none",
+                        }}>
                           <span style={{ fontSize: 12, color: "#6B7280" }}>{row.day}</span>
-                          <span style={{ fontSize: 12, fontWeight: 600, color: row.active ? "#059669" : "#9CA3AF" }}>{row.time}</span>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: row.open ? "#111827" : "#9CA3AF" }}>{row.time}</span>
                         </div>
                       ))}
                     </div>
@@ -2277,7 +2271,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                         fontWeight: 500,
                         color: getRemainingMessages() <= 3 ? "#DC2626" : "#92400E",
                       }}>
-                        Танд {getRemainingMessages()} асуулт асуух эрх үлдсэн байна
+                        ��анд {getRemainingMessages()} асуулт асуух эрх үлдсэн байна
                       </span>
                     </div>
                   )}
