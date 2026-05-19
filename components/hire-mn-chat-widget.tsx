@@ -1112,7 +1112,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         setIsTyping(true)
         setMessages(prev => [...prev, {
           role: "assistant" as const,
-          content: "��� Тайлангийн үр дүнг шинжилж байна...",
+          content: "����� Тайлангийн үр дүнг шинжилж байна...",
         }])
 
         // Data-г API руу шууд явуулна — sendMessage ашиглахгүй (UI-д гарна)
@@ -1856,150 +1856,133 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 </>
               )}
 
-              {activeTab === 1 && (
-                <div className="hw-scroll" style={{
-                  flex: 1, overflowY: "auto",
-                  background: "#F9FAFB",
-                  position: "relative", zIndex: 1,
-                }}>
-                  {/* Header */}
-                  <div style={{ padding: "20px 16px 4px" }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#111827", letterSpacing: "-0.2px" }}>Түгээмэл асуултууд</div>
-                    <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 3 }}>Асуулт сонгоод хариулт харна уу</div>
-                  </div>
-
-                  {/* FAQ list */}
-                  <div style={{ padding: "12px 14px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
-                    {[
-                      {
-                        q: "Hire.mn гэж юу вэ?",
-                        a: "Hire.mn бол Монголын анхны AI-д суурилсан HR платформ юм. Мэргэжлийн тест, ур чадварын үнэлгээгээр таныг тохирох ажлын байртай холбоно.",
-                        tag: "Ерөнхий",
-                        tagColor: "#6366F1",
-                        tagBg: "#EEF2FF",
-                        // briefcase icon
-                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="12.01"/></svg>
-                      },
-                      {
-                        q: "Тест өгөхөд төлбөртэй юу?",
-                        a: "Үнэгүй болон төлбөртэй тестүүд хоёулаа байдаг. Qpay ашиглан илүү дэлгэрэнгүй тестүүдийг авах боломжтой.",
-                        tag: "Төлбөр",
-                        tagColor: "#059669",
-                        tagBg: "#ECFDF5",
-                        // credit-card icon
-                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                      },
-                      {
-                        q: "Үр дүнгээ хэрхэн харах вэ?",
-                        a: "Тест дуусмагц үр дүн шууд гарна. Профайл хэсэгт орж харах, татаж авах, хуваалцах болон и-мэйлээр илгээх боломжтой.",
-                        tag: "Үр дүн",
-                        tagColor: "#E8541A",
-                        tagBg: "#FEF3EE",
-                        // bar-chart icon
-                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                      },
-                      {
-                        q: "Компани хэрхэн бүртгүүлэх вэ?",
-                        a: "Манай администраторуудтай эсвэл Hire.mn Facebook хуудсаар холбогдоно уу. Хурдан хариу өгнө.",
-                        tag: "Компани",
-                        tagColor: "#7C3AED",
-                        tagBg: "#F5F3FF",
-                        // users icon
-                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                      },
-                      {
-                        q: "Ямар төрлийн тестүүд байдаг вэ?",
-                        a: "IQ, EQ, зан чанар, мэргэжлийн ур чадвар, хэлний түвшин гэх мэт 40+ тест байдаг. Та өөрт тохирохыг сонгоно.",
-                        tag: "Тест",
-                        tagColor: "#0284C7",
-                        tagBg: "#E0F2FE",
-                        // clipboard-list icon
-                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
-                      },
-                      {
-                        q: "Үнэлгээний систем хэрхэн ажилладаг вэ?",
-                        a: "AI алгоритм хариултыг олон улсын стандарт болон Монголын дататай харьцуулан дүн шинжилгээ хийдэг. Нарийвчлал 95%+.",
-                        tag: "AI",
-                        tagColor: "#E8541A",
-                        tagBg: "#FEF3EE",
-                        // cpu icon
-                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
-                      },
-                    ].map((faq, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          background: "#fff",
-                          border: expandedFaq === i ? "1.5px solid #E8541A" : "1.5px solid #EDEFF2",
-                          borderRadius: 12,
-                          overflow: "hidden",
-                          transition: "border-color 0.18s ease, box-shadow 0.18s ease",
-                          boxShadow: expandedFaq === i ? "0 2px 12px rgba(232,84,26,0.08)" : "none",
-                          animation: `hw-msg-in 0.25s ease ${i * 0.04}s both`,
-                        }}
-                      >
-                        <button
-                          onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
-                          style={{
-                            width: "100%", textAlign: "left",
-                            background: "transparent", border: "none",
-                            padding: "12px 14px",
-                            cursor: "pointer",
-                            display: "flex", alignItems: "center", gap: 10,
-                          }}
-                        >
-                          {/* Icon */}
-                          <div style={{
-                            width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                            background: expandedFaq === i ? "#E8541A" : "#F3F4F6",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            transition: "background 0.18s ease",
-                            color: expandedFaq === i ? "#fff" : "#6B7280",
-                          }}>
-                            {faq.icon}
-                          </div>
-                          {/* Question */}
-                          <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "#111827", lineHeight: 1.4 }}>
-                            {faq.q}
-                          </span>
-                          {/* Tag + Chevron */}
-                          <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                            <span style={{
-                              fontSize: 9, fontWeight: 700, letterSpacing: "0.3px",
-                              color: faq.tagColor, background: faq.tagBg,
-                              padding: "2px 7px", borderRadius: 20,
-                            }}>{faq.tag}</span>
-                            <svg
-                              width="14" height="14" viewBox="0 0 24 24" fill="none"
-                              stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round"
-                              style={{ transition: "transform 0.22s ease", transform: expandedFaq === i ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}
+              {activeTab === 1 && (() => {
+                const faqs = [
+                  {
+                    q: "Hire.mn гэж юу вэ?",
+                    a: "Hire.mn бол Монголын анхны AI-д суурилсан HR платформ юм. Мэргэжлийн тест, ур чадварын үнэлгээгээр таныг тохирох ажлын байртай холбоно.",
+                    renderIcon: (active: boolean) => (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    q: "Тест өгөхөд төлбөртэй юу?",
+                    a: "Үнэгүй болон төлбөртэй тестүүд хоёулаа байдаг. Qpay ашиглан илүү дэлгэрэнгүй тестүүдийг авах боломжтой.",
+                    renderIcon: (active: boolean) => (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    q: "Үр дүнгээ хэрхэн харах вэ?",
+                    a: "Тест дуусмагц үр дүн шууд гарна. Профайл хэсэгт орж харах, татаж авах, хуваалцах болон и-мэйлээр илгээх боломжтой.",
+                    renderIcon: (active: boolean) => (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    q: "Компани хэрхэн бүртгүүлэх вэ?",
+                    a: "Манай администраторуудтай эсвэл Hire.mn Facebook хуудсаар холбогдоно уу. Хурдан хариу өгнө.",
+                    renderIcon: (active: boolean) => (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    q: "Ямар төрлийн тестүүд байдаг вэ?",
+                    a: "IQ, EQ, зан чанар, мэргэжлийн ур чадвар, хэлний түвшин гэх мэт 40+ тест байдаг. Та өөрт тохирохыг сонгоно.",
+                    renderIcon: (active: boolean) => (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    q: "Үнэлгээний систем хэрхэн ажилладаг вэ?",
+                    a: "AI алгоритм хариултыг олон улсын стандарт болон Монголын дататай харьцуулан дүн шинжилгээ хийдэг. Нарийвчлал 95%+.",
+                    renderIcon: (active: boolean) => (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>
+                      </svg>
+                    ),
+                  },
+                ];
+                return (
+                  <div className="hw-scroll" style={{ flex: 1, overflowY: "auto", background: "#F9FAFB", position: "relative", zIndex: 1 }}>
+                    <div style={{ padding: "20px 16px 4px" }}>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: "#111827", letterSpacing: "-0.2px" }}>Түгээмэл асуултууд</div>
+                      <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 3 }}>Асуулт сонгоод хариулт харна уу</div>
+                    </div>
+                    <div style={{ padding: "12px 14px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
+                      {faqs.map((faq, i) => {
+                        const active = expandedFaq === i;
+                        return (
+                          <div
+                            key={i}
+                            style={{
+                              background: "#fff",
+                              border: active ? "1.5px solid #E8541A" : "1.5px solid #EDEFF2",
+                              borderRadius: 12,
+                              overflow: "hidden",
+                              transition: "border-color 0.18s ease, box-shadow 0.18s ease",
+                              boxShadow: active ? "0 2px 12px rgba(232,84,26,0.08)" : "none",
+                            }}
+                          >
+                            <button
+                              onClick={() => setExpandedFaq(active ? null : i)}
+                              style={{
+                                width: "100%", textAlign: "left",
+                                background: "transparent", border: "none",
+                                padding: "13px 14px",
+                                cursor: "pointer",
+                                display: "flex", alignItems: "center", gap: 10,
+                              }}
                             >
-                              <path d="M6 9l6 6 6-6" />
-                            </svg>
+                              <div style={{
+                                width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+                                background: active ? "#E8541A" : "#F3F4F6",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                transition: "background 0.18s ease",
+                              }}>
+                                {faq.renderIcon(active)}
+                              </div>
+                              <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "#111827", lineHeight: 1.4 }}>
+                                {faq.q}
+                              </span>
+                              <svg
+                                width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                stroke="#C4C9D4" strokeWidth="2.5" strokeLinecap="round"
+                                style={{ flexShrink: 0, transition: "transform 0.22s ease", transform: active ? "rotate(180deg)" : "rotate(0deg)" }}
+                              >
+                                <path d="M6 9l6 6 6-6"/>
+                              </svg>
+                            </button>
+                            <div style={{
+                              maxHeight: active ? "200px" : "0px",
+                              opacity: active ? 1 : 0,
+                              overflow: "hidden",
+                              transition: "max-height 0.3s ease, opacity 0.2s ease",
+                            }}>
+                              <div style={{
+                                margin: "0 14px 14px 54px",
+                                fontSize: 13, lineHeight: 1.65, color: "#6B7280",
+                              }}>
+                                {faq.a}
+                              </div>
+                            </div>
                           </div>
-                        </button>
-
-                        {/* Answer */}
-                        <div style={{
-                          maxHeight: expandedFaq === i ? "200px" : "0px",
-                          opacity: expandedFaq === i ? 1 : 0,
-                          overflow: "hidden",
-                          transition: "max-height 0.3s ease, opacity 0.2s ease",
-                        }}>
-                          <div style={{
-                            margin: "0 14px 14px 56px",
-                            fontSize: 12.5, lineHeight: 1.65, color: "#6B7280",
-                            borderLeft: "2px solid #F3F4F6",
-                            paddingLeft: 12,
-                          }}>
-                            {faq.a}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {activeTab === 2 && (
                 <div className="hw-scroll" style={{
