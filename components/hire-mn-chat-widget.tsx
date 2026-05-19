@@ -79,8 +79,7 @@ interface Test {
 }
 
 // Quick reply SVG icons
-const QuickReplyIcon = ({ type, color }: { type: string; color?: string }) => {
-  const c = color || "currentColor"
+const QuickReplyIcon = ({ type }: { type: string }) => {
   const icons: Record<string, JSX.Element> = {
     list: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>,
     target: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>,
@@ -91,10 +90,10 @@ const QuickReplyIcon = ({ type, color }: { type: string; color?: string }) => {
 }
 
 const QUICK_REPLIES = [
-  { text: "Бүх тест харах", iconType: "list", accent: "#E8541A", accentBg: "#FEF3EE" },
-  { text: "Надад тохирох тест", iconType: "target", accent: "#7C3AED", accentBg: "#F5F3FF" },
-  { text: "Үнэгүй тестүүд", iconType: "gift", accent: "#059669", accentBg: "#ECFDF5" },
-  { text: "Hire.mn тухай", iconType: "info", accent: "#0284C7", accentBg: "#E0F2FE" },
+  { text: "Бүх тест харах", iconType: "list" },
+  { text: "Надад тохирох тест", iconType: "target" },
+  { text: "Үнэгүй тестүүд", iconType: "gift" },
+  { text: "Hire.mn тухай", iconType: "info" },
 ]
 
 // ── Animated Mascot Robot ─────────────────────────────────────────────────────
@@ -1112,7 +1111,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         setIsTyping(true)
         setMessages(prev => [...prev, {
           role: "assistant" as const,
-          content: "����� Тайлангийн үр дүнг шинжилж байна...",
+          content: "������� Тайлангийн үр дүнг шинжилж байна...",
         }])
 
         // Data-г API руу шууд явуулна — sendMessage ашиглахгүй (UI-д гарна)
@@ -1807,43 +1806,31 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                               className="hw-chip"
                               onClick={() => sendMessage(qr.text)}
                               style={{
-                                background: qr.accentBg,
-                                border: `1.5px solid ${qr.accent}22`,
-                                color: qr.accent,
+                                background: "#F3F4F6",
+                                border: "1.5px solid transparent",
+                                color: "#374151",
                                 borderRadius: 20,
-                                padding: "7px 12px 7px 8px",
-                                fontSize: Math.max(fontSize - 2, 11),
-                                fontWeight: 600,
+                                padding: "7px 13px 7px 9px",
+                                fontSize: Math.max(fontSize - 2, 12),
+                                fontWeight: 500,
                                 cursor: "pointer",
                                 whiteSpace: "nowrap",
                                 animation: `hw-chip-in 0.3s cubic-bezier(.16,1,.3,1) ${i * 0.07}s both`,
                                 display: "flex", alignItems: "center", gap: 6,
-                                transition: "all 0.2s ease",
-                                letterSpacing: "0.1px",
+                                transition: "all 0.18s ease",
                               }}
                               onMouseEnter={e => {
-                                (e.currentTarget as HTMLElement).style.background = qr.accent
-                                  ; (e.currentTarget as HTMLElement).style.color = "#fff"
-                                  ; (e.currentTarget as HTMLElement).style.borderColor = qr.accent
-                                  ; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px) scale(1.02)"
-                                  ; (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 12px ${qr.accent}30`
+                                (e.currentTarget as HTMLElement).style.background = "#E8541A"
+                                ;(e.currentTarget as HTMLElement).style.color = "#fff"
+                                ;(e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"
                               }}
                               onMouseLeave={e => {
-                                (e.currentTarget as HTMLElement).style.background = qr.accentBg
-                                  ; (e.currentTarget as HTMLElement).style.color = qr.accent
-                                  ; (e.currentTarget as HTMLElement).style.borderColor = `${qr.accent}22`
-                                  ; (e.currentTarget as HTMLElement).style.transform = "translateY(0) scale(1)"
-                                  ; (e.currentTarget as HTMLElement).style.boxShadow = "none"
+                                (e.currentTarget as HTMLElement).style.background = "#F3F4F6"
+                                ;(e.currentTarget as HTMLElement).style.color = "#374151"
+                                ;(e.currentTarget as HTMLElement).style.transform = "translateY(0)"
                               }}
                             >
-                              <span style={{
-                                width: 22, height: 22, borderRadius: 6,
-                                background: `${qr.accent}18`,
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                flexShrink: 0,
-                              }}>
-                                <QuickReplyIcon type={qr.iconType} />
-                              </span>
+                              <QuickReplyIcon type={qr.iconType} />
                               {qr.text}
                             </button>
                           ))}
