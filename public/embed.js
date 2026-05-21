@@ -131,20 +131,43 @@
         return Promise.reject(new Error("code is required"));
       }
 
-      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN);
-      iframe.contentWindow.postMessage({
-        type: "HIREMN_LOADING",
-        message: "Тайлангаа AI-д шилжүүлж байна..."
-      }, ORIGIN);
+     iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN);
+iframe.contentWindow.postMessage({
+  type: "HIREMN_LOADING",
+  message: "Тайлангаа AI-д шилжүүлж байна..."
+}, ORIGIN);
 
-      var extractUrl = ORIGIN + "/api/extract-report"
-        + "?code=" + encodeURIComponent(code)
-        + "&apiBase=" + encodeURIComponent(API_BASE);
+// Алхам 1: PDF-г browser-аас fetch хийнэ (cookie автоматаар явна)
+var reportUrl = API_BASE + "/api/report/" + encodeURIComponent(code);
 
-      return fetch(extractUrl, {
-        method: "GET",
-        headers: Object.assign({ "Content-Type": "application/json" }, headers),
-      })
+return fetch(reportUrl, {
+  credentials: "include",
+  headers: Object.assign({ Accept: "application/pdf,*/*" }, headers),
+})
+  .then(function (res) {
+    if (!res.ok) throw new Error("Report fetch error: " + res.status);
+    return res.arrayBuffer();
+  })
+  .then(function (buffer) {
+    // Алхам 2: ArrayBuffer → base64
+    var bytes = new Uint8Array(buffer);
+    var binary = "";
+    for (var i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    var base64 = btoa(binary);
+
+    // Алхам 3: Серверт явуулж текст гарна
+    return fetch(ORIGIN + "/api/extract-report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pdf: base64, code: code }),
+    });
+  })
+  .then(function (r) {
+    if (!r.ok) throw new Error("Extract error: " + r.status);
+    return r.json();
+  })
         .then(function (r) {
           if (!r.ok) throw new Error("Extract error: " + r.status);
           return r.json();
