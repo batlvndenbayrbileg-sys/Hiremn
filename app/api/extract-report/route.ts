@@ -32,7 +32,12 @@ export async function GET(request: NextRequest) {
     if (token) fetchHeaders['Authorization'] = token
 
     const reportUrl = apiBase + '/api/report/' + encodeURIComponent(code)
+
+    console.log('[extract-report] Fetching:', reportUrl, 'token:', token ? 'present' : 'missing')
+
     const res = await fetch(reportUrl, { headers: fetchHeaders })
+
+    console.log('[extract-report] Response status:', res.status, 'content-type:', res.headers.get('content-type'))
 
     if (!res.ok) {
       return NextResponse.json(
@@ -43,6 +48,7 @@ export async function GET(request: NextRequest) {
 
     const contentType = res.headers.get('content-type') || ''
 
+    // JSON бол шууд буцаана
     if (contentType.includes('application/json')) {
       const data = await res.json()
       return NextResponse.json(
@@ -51,11 +57,30 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const pdfBuffer = await res.arrayBuffer()
+    const rawBuffer = await res.arrayBuffer()
+    const bytes = new Uint8Array(rawBuffer)
 
-    // Dynamic import only — static import-тай давхцуулахгүй
+    // PDF magic bytes шалгана: %PDF- (0x25 0x50 0x44 0x46 0x2D)
+    const isPDF = bytes[0] === 0x25 && bytes[1] === 0x50 &&
+      bytes[2] === 0x44 && bytes[3] === 0x46
+
+    if (!isPDF) {
+      // PDF биш бол текст болгон харуулна (debugging)
+      const textDecoder = new TextDecoder()
+      const preview = textDecoder.decode(bytes.slice(0, 200))
+      console.error('[extract-report] Not a PDF. Preview:', preview)
+
+      return NextResponse.json(
+        {
+          error: 'PDF биш өгөгдөл ирлээ: ' + contentType + ' — ' + preview.slice(0, 100),
+        },
+        { status: 422, headers: CORS }
+      )
+    }
+
+    // PDF parse
     const { default: pdfParse } = await import('pdf-parse')
-    const parsed = await pdfParse(Buffer.from(pdfBuffer))
+    const parsed = await pdfParse(Buffer.from(rawBuffer))
 
     if (!parsed.text?.trim()) {
       return NextResponse.json(
