@@ -113,99 +113,108 @@
         });
     },
 
-    analyzeReport: function (code, options) {
-      options = options || {};
-      var API_BASE = options.apiBase || "https://api.hire.mn";
-      var headers = {};
-      if (options.token) {
-        headers["Authorization"] = options.token.indexOf("Bearer ") === 0
-          ? options.token
-          : "Bearer " + options.token;
-      }
-      if (options.headers) {
-        Object.keys(options.headers).forEach(function (k) { headers[k] = options.headers[k]; });
-      }
+   analyzeReport: function (code, options) {
+  options = options || {};
+  var API_BASE = options.apiBase || "https://api.hire.mn";
+  var headers = {};
+  if (options.token) {
+    headers["Authorization"] = options.token.indexOf("Bearer ") === 0
+      ? options.token
+      : "Bearer " + options.token;
+  }
 
-      if (!code) {
-        console.error("[HireMnChat] analyzeReport: code is required");
-        return Promise.reject(new Error("code is required"));
-      }
+  if (!code) {
+    console.error("[HireMnChat] analyzeReport: code is required");
+    return Promise.reject(new Error("code is required"));
+  }
 
-     iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN);
-iframe.contentWindow.postMessage({
-  type: "HIREMN_LOADING",
-  message: "Тайлангаа AI-д шилжүүлж байна..."
-}, ORIGIN);
+  iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN);
+  iframe.contentWindow.postMessage({
+    type: "HIREMN_LOADING",
+    message: "Тайлангаа AI-д шилжүүлж байна..."
+  }, ORIGIN);
 
-// Алхам 1: PDF-г browser-аас fetch хийнэ (cookie автоматаар явна)
-var reportUrl = API_BASE + "/api/report/" + encodeURIComponent(code);
-
-return fetch(reportUrl, {
-  credentials: "include",
-  headers: Object.assign({ Accept: "application/pdf,*/*" }, headers),
-})
-  .then(function (res) {
-    if (!res.ok) throw new Error("Report fetch error: " + res.status);
-    return res.arrayBuffer();
-  })
-  .then(function (buffer) {
-    // Алхам 2: ArrayBuffer → base64
-    var bytes = new Uint8Array(buffer);
-    var binary = "";
-    for (var i = 0; i < bytes.byteLength; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    var base64 = btoa(binary);
-
-    // Алхам 3: Серверт явуулж текст гарна
-    return fetch(ORIGIN + "/api/extract-report", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pdf: base64, code: code }),
+  // PDF.js CDN-ээс ачаална
+  function loadPdfJs() {
+    return new Promise(function (resolve, reject) {
+      if (window.pdfjsLib) { resolve(); return; }
+      var script = document.createElement("script");
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+      script.onload = function () {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+        resolve();
+      };
+      script.onerror = function () { reject(new Error("PDF.js ачаалж чадсангүй")); };
+      document.head.appendChild(script);
     });
-  })
-  .then(function (r) {
-    if (!r.ok) throw new Error("Extract error: " + r.status);
-    return r.json();
-  })
-        .then(function (r) {
-          if (!r.ok) throw new Error("Extract error: " + r.status);
-          return r.json();
-        })
-        .then(function (result) {
-          if (!result.success || !result.data) {
-            throw new Error("Тайлангийн өгөгдөл олдсонгүй");
-          }
-          var reportContent = result.source === "pdf"
-            ? result.data.text
-            : JSON.stringify(result.data);
+  }
 
-          iframe.contentWindow.postMessage({
-            type: "HIREMN_AI_ANALYSIS",
-            payload: {
-              reportTitle: options.testName || "Тест",
-              reportData: { content: reportContent, code: code, source: result.source },
-              analysisResults: reportContent,
-              prompt: options.prompt ||
-                "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж өгнө үү:\n" +
-                "1) Гол дүгнэлт — ямар хүн бэ, ямар онцлогтой вэ\n" +
-                "2) Хүчтэй болон сул талуудыг тодорхой тайлбарла\n" +
-                "3) Ажил мэргэжил болон хамт олондоо хэрхэн хандах практик зөвлөмж\n" +
-                "4) Цаашид хөгжихийн тулд хийж болох тодорхой алхмууд"
-            }
-          }, ORIGIN);
+  // PDF ArrayBuffer → text
+  function extractText(arrayBuffer) {
+    return loadPdfJs().then(function () {
+      return window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    }).then(function (pdf) {
+      var pages = [];
+      for (var i = 1; i <= pdf.numPages; i++) {
+        pages.push(
+          pdf.getPage(i).then(function (page) {
+            return page.getTextContent().then(function (content) {
+              return content.items.map(function (item) { return item.str; }).join(" ");
+            });
+          })
+        );
+      }
+      return Promise.all(pages).then(function (texts) {
+        return texts.join("\n");
+      });
+    });
+  }
 
-          return result.data;
-        })
-        .catch(function (error) {
-          console.error("[HireMnChat] analyzeReport error:", error);
-          iframe.contentWindow.postMessage({
-            type: "HIREMN_ERROR",
-            message: "Тайлан татахад алдаа гарлаа: " + error.message
-          }, ORIGIN);
-          throw error;
-        });
-    },
+  var reportUrl = API_BASE + "/api/report/" + encodeURIComponent(code);
+
+  return fetch(reportUrl, {
+    credentials: "include",
+    headers: Object.assign({ Accept: "application/pdf,*/*" }, headers),
+  })
+    .then(function (res) {
+      if (!res.ok) throw new Error("Report татахад алдаа: " + res.status);
+      return res.arrayBuffer();
+    })
+    .then(function (buffer) {
+      return extractText(buffer);
+    })
+    .then(function (text) {
+      if (!text || !text.trim()) {
+        throw new Error("PDF-ээс өгөгдөл гаргаж чадсангүй");
+      }
+
+      iframe.contentWindow.postMessage({
+        type: "HIREMN_AI_ANALYSIS",
+        payload: {
+          reportTitle: options.testName || "Тест",
+          reportData: { text: text, code: code },
+          analysisResults: text,
+          prompt: options.prompt ||
+            "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж өгнө үү:\n" +
+            "1) Гол дүгнэлт — ямар хүн бэ, ямар онцлогтой вэ\n" +
+            "2) Хүчтэй болон сул талуудыг тодорхой тайлбарла\n" +
+            "3) Ажил мэргэжил болон хамт олондоо хэрхэн хандах практик зөвлөмж\n" +
+            "4) Цаашид хөгжихийн тулд хийж болох тодорхой алхмууд"
+        }
+      }, ORIGIN);
+
+      return { text: text };
+    })
+    .catch(function (error) {
+      console.error("[HireMnChat] analyzeReport error:", error);
+      iframe.contentWindow.postMessage({
+        type: "HIREMN_ERROR",
+        message: "Тайлан татахад алдаа гарлаа: " + error.message
+      }, ORIGIN);
+      throw error;
+    });
+},
 
     openWithAnalysis: function (data) {
       iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN);
