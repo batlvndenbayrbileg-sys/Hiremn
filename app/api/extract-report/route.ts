@@ -12,50 +12,57 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS })
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const { pdf, code } = await request.json()
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const code = searchParams.get('code')
+  const apiBase = searchParams.get('apiBase') || 'https://api.hire-test.cloud'
+  const token = request.headers.get('authorization')
 
-    if (!pdf) {
-      return NextResponse.json(
-        { error: 'pdf is required' },
-        { status: 400, headers: CORS }
-      )
-    }
-
-    const pdfBuffer = Buffer.from(pdf, 'base64')
-
-    // PDF magic bytes шалгана (%PDF-)
-    if (
-      pdfBuffer[0] !== 0x25 ||
-      pdfBuffer[1] !== 0x50 ||
-      pdfBuffer[2] !== 0x44 ||
-      pdfBuffer[3] !== 0x46
-    ) {
-      const preview = pdfBuffer.slice(0, 200).toString('utf8')
-      console.error('[extract-report] Not a PDF:', preview)
-      return NextResponse.json(
-        { error: 'PDF биш өгөгдөл ирлээ: ' + preview.slice(0, 100) },
-        { status: 422, headers: CORS }
-      )
-    }
-
-    const { default: pdfParse } = await import('pdf-parse')
-    const parsed = await pdfParse(pdfBuffer)
-
-    if (!parsed.text?.trim()) {
-      return NextResponse.json(
-        { error: 'PDF-ээс өгөгдөл гаргаж чадсангүй' },
-        { status: 422, headers: CORS }
-      )
-    }
-
+  if (!code) {
     return NextResponse.json(
-      {
-        success: true,
-        data: { text: parsed.text.trim(), pages: parsed.numpages, code },
-        source: 'pdf',
-      },
+      { error: 'code is required' },
+      { status: 400, headers: CORS }
+    )
+  }
+
+  try {
+    const fetchHeaders: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    }
+    if (token) fetchHeaders['Authorization'] = token
+
+    // /full endpoint — хамгийн бүрэн өгөгдөл
+    const fullUrl = apiBase + '/api/v1/userAnswer/report/' + encodeURIComponent(code) + '/full'
+
+    console.log('[extract-report] Fetching:', fullUrl)
+
+    const res = await fetch(fullUrl, { headers: fetchHeaders })
+
+    console.log('[extract-report] Status:', res.status)
+
+    if (!res.ok) {
+      // /full алдаа өгвөл /report/{code} fallback
+      const fallbackUrl = apiBase + '/api/v1/userAnswer/report/' + encodeURIComponent(code)
+      const fallbackRes = await fetch(fallbackUrl, { headers: fetchHeaders })
+
+      if (!fallbackRes.ok) {
+        return NextResponse.json(
+          { error: 'Report татахад алдаа: ' + fallbackRes.status },
+          { status: fallbackRes.status, headers: CORS }
+        )
+      }
+
+      const fallbackData = await fallbackRes.json()
+      return NextResponse.json(
+        { success: true, data: fallbackData, source: 'json' },
+        { headers: CORS }
+      )
+    }
+
+    const data = await res.json()
+    return NextResponse.json(
+      { success: true, data, source: 'json' },
       { headers: CORS }
     )
   } catch (error) {
@@ -65,11 +72,4 @@ export async function POST(request: NextRequest) {
       { status: 500, headers: CORS }
     )
   }
-}
-
-export async function GET() {
-  return NextResponse.json(
-    { error: 'POST method ашиглана уу' },
-    { status: 405, headers: CORS }
-  )
 }
