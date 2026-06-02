@@ -286,7 +286,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
 
   // Dynamic character based on score + context
   const heroChar: keyof typeof CHARS = data.healthScore >= 75 ? "ok" : data.healthScore >= 50 ? "thumbsup" : "thinking"
-  const celebChar: keyof typeof CHARS = allGoalsDone ? "celebrate" : "thumbsup"
+
 
   useEffect(() => { setTimeout(() => setBar(true), 300) }, [])
   useEffect(() => { setGoals(new Array(todayGoals.length).fill(false)) }, [data])
@@ -374,17 +374,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                     </span>
                   </div>
                 )}
-                {(data as any).actualTotal != null && (data as any).actualMax != null && (
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#F1F5F9", borderRadius: 20, padding: "3px 12px", marginBottom: 6, border: "1px solid #E2E8F0" }}>
-                    <span style={{ fontSize: 12, fontWeight: 800, color: "#475569" }}>
-                      {(data as any).actualTotal}/{(data as any).actualMax} оноо
-                    </span>
-                    <span style={{ color: "#CBD5E1" }}>·</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: scoreColor(data.healthScore) }}>
-                      {data.healthScore}%
-                    </span>
-                  </div>
-                )}
+
                 <p style={{ fontSize: 12, color: "#64748B", lineHeight: 1.6, margin: 0 }}>{data.summary.description}</p>
               </div>
               <Char type={heroChar} size={72} style={{ flexShrink: 0 }} />
