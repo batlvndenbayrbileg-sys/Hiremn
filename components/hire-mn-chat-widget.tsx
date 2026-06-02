@@ -1118,8 +1118,18 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       if (event.data.type === "HIREMN_LOADING") {
         const loadingMsg: Message = {
           role: "assistant",
+          
           content: `**${event.data.message || "Уншиж байна..."}**`,
         }
+              if (event.data.type === "HIREMN_LOADING") {
+        const loadingMsg: Message = {
+          role: "assistant",
+          content: `**${event.data.message || "Уншиж байна..."}**`,
+          skipFeedback: true,
+        }
+        setMessages(prev => [...prev, loadingMsg])
+        setIsTyping(true)
+      }
         setMessages(prev => [...prev, loadingMsg])
         setIsTyping(true)
       }
