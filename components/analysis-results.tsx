@@ -210,22 +210,14 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
       <div style={{ padding: "12px 16px 8px" }}>
         {data.metrics.map((m, i) => (
           <div key={i} style={{ marginBottom: 10 }}>
+          
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: "#1E293B" }}>{m.label}</span>
               <span style={{
                 fontSize: 11, fontWeight: 800,
-                color: m.score / m.maxScore > 0.7 ? "#059669" : m.score / m.maxScore > 0.4 ? "#D97706" : "#DC2626",
-                background: m.score / m.maxScore > 0.7 ? "#F0FDF4" : m.score / m.maxScore > 0.4 ? "#FFFBEB" : "#FFF2F2",
-                borderRadius: 8, padding: "2px 8px"
-              }}>{m.score}/{m.maxScore}</span>
-            </div>
-                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#1E293B" }}>{m.label}</span>
-              <span style={{
-                fontSize: 11, fontWeight: 800,
-                color: (m.score/m.maxScore) > 0.66 ? "#059669" : (m.score/m.maxScore) > 0.33 ? "#D97706" : "#DC2626",
-                background: (m.score/m.maxScore) > 0.66 ? "#F0FDF4" : (m.score/m.maxScore) > 0.33 ? "#FFFBEB" : "#FFF2F2",
-                borderRadius: 8, padding: "2px 8px", border: `1px solid ${(m.score/m.maxScore) > 0.66 ? "#BBF7D0" : (m.score/m.maxScore) > 0.33 ? "#FDE68A" : "#FECACA"}`
+                color: (m.score / m.maxScore) > 0.66 ? "#059669" : (m.score / m.maxScore) > 0.33 ? "#D97706" : "#DC2626",
+                background: (m.score / m.maxScore) > 0.66 ? "#F0FDF4" : (m.score / m.maxScore) > 0.33 ? "#FFFBEB" : "#FFF2F2",
+                borderRadius: 8, padding: "2px 8px", border: `1px solid ${(m.score / m.maxScore) > 0.66 ? "#BBF7D0" : (m.score / m.maxScore) > 0.33 ? "#FDE68A" : "#FECACA"}`
               }}>
                 {m.score}/{m.maxScore}
               </span>
@@ -371,6 +363,17 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                   <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, display: "inline-block" }} />
                   <span style={{ color, fontWeight: 800, fontSize: 13 }}>{data.summary.title}</span>
                 </div>
+                {(data as any).actualTotal != null && (
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#F1F5F9", borderRadius: 20, padding: "3px 12px", marginBottom: 6 }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: "#475569" }}>
+                      {(data as any).actualTotal}/{(data as any).actualMax} оноо
+                    </span>
+                    <span style={{ fontSize: 11, color: "#94A3B8" }}>·</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: color }}>
+                      {Math.round(((data as any).actualTotal / (data as any).actualMax) * 100)}%
+                    </span>
+                  </div>
+                )}
                 <p style={{ fontSize: 12, color: "#64748B", lineHeight: 1.6, margin: 0 }}>{data.summary.description}</p>
               </div>
               <Char type={heroChar} size={72} style={{ flexShrink: 0 }} />
