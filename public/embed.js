@@ -244,7 +244,25 @@
         iframe.style.height = BUTTON_HEIGHT;
       }
     }
+    if (e.data.type === "HIREMN_ANALYSIS_EXPAND") {
+      wrapper.style.width = "min(860px, 96vw)";
+      wrapper.style.height = "94vh";
+      wrapper.style.bottom = "3vh";
+      wrapper.style.right = "2vw";
+      wrapper.style.left = "auto";
+      wrapper.style.top = "auto";
+      iframe.style.width = "100%";
+      iframe.style.height = "100%";
+    }
 
+    if (e.data.type === "HIREMN_ANALYSIS_COLLAPSE") {
+      wrapper.style.width = "420px";
+      wrapper.style.height = "680px";
+      wrapper.style.bottom = "20px";
+      wrapper.style.right = "20px";
+      iframe.style.width = "420px";
+      iframe.style.height = "680px";
+    }
     if (e.data.type === "HIREMN_OPEN_URL" && e.data.url) {
       window.open(e.data.url, "_blank", "noopener,noreferrer");
     }
