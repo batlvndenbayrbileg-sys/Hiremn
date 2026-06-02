@@ -291,7 +291,10 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
   const heroChar: keyof typeof CHARS = data.healthScore >= 75 ? "ok" : data.healthScore >= 50 ? "thumbsup" : "thinking"
 
 
-  useEffect(() => { setTimeout(() => setBar(true), 300) }, [])
+  useEffect(() => {
+    const t = setTimeout(() => setBar(true), 300)
+    return () => clearTimeout(t)
+  }, [])
   useEffect(() => { setGoals(new Array(todayGoals.length).fill(false)) }, [data])
 
   const expand = () => {
