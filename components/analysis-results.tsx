@@ -210,7 +210,7 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
       <div style={{ padding: "12px 16px 8px" }}>
         {data.metrics.map((m, i) => (
           <div key={i} style={{ marginBottom: 10 }}>
-          
+
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: "#1E293B" }}>{m.label}</span>
               <span style={{
@@ -371,6 +371,17 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                     <span style={{ fontSize: 11, color: "#94A3B8" }}>·</span>
                     <span style={{ fontSize: 12, fontWeight: 700, color: color }}>
                       {Math.round(((data as any).actualTotal / (data as any).actualMax) * 100)}%
+                    </span>
+                  </div>
+                )}
+                {(data as any).actualTotal != null && (data as any).actualMax != null && (
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#F1F5F9", borderRadius: 20, padding: "3px 12px", marginBottom: 6, border: "1px solid #E2E8F0" }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: "#475569" }}>
+                      {(data as any).actualTotal}/{(data as any).actualMax} оноо
+                    </span>
+                    <span style={{ color: "#CBD5E1" }}>·</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: scoreColor(data.healthScore) }}>
+                      {data.healthScore}%
                     </span>
                   </div>
                 )}
