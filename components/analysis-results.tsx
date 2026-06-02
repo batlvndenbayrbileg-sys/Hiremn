@@ -219,6 +219,17 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
                 borderRadius: 8, padding: "2px 8px"
               }}>{m.score}/{m.maxScore}</span>
             </div>
+                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#1E293B" }}>{m.label}</span>
+              <span style={{
+                fontSize: 11, fontWeight: 800,
+                color: (m.score/m.maxScore) > 0.66 ? "#059669" : (m.score/m.maxScore) > 0.33 ? "#D97706" : "#DC2626",
+                background: (m.score/m.maxScore) > 0.66 ? "#F0FDF4" : (m.score/m.maxScore) > 0.33 ? "#FFFBEB" : "#FFF2F2",
+                borderRadius: 8, padding: "2px 8px", border: `1px solid ${(m.score/m.maxScore) > 0.66 ? "#BBF7D0" : (m.score/m.maxScore) > 0.33 ? "#FDE68A" : "#FECACA"}`
+              }}>
+                {m.score}/{m.maxScore}
+              </span>
+            </div>
             <div style={{ background: "#F1F5F9", borderRadius: 8, height: 7, overflow: "hidden" }}>
               <div style={{
                 height: "100%", borderRadius: 8,
