@@ -413,11 +413,11 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
                       <div style={{ flex: 1, minWidth: 0, paddingRight: 10 }}>
                         <p style={{ fontSize: 13, fontWeight: 700, color: "#1E293B", margin: "0 0 2px" }}>{m.label}</p>
-                         {(m as any).actualScore != null && (m as any).actualMax != null && (
-                        <p style={{ fontSize: 10, color: "#94A3B8", margin: "2px 0 0", fontWeight: 600 }}>
-                          Жинхэнэ оноо: {(m as any).actualScore}/{(m as any).actualMax}
-                        </p>
-                      )}
+                        {(m as any).actualScore != null && (m as any).actualMax != null && (
+                          <p style={{ fontSize: 10, color: "#94A3B8", margin: "2px 0 0", fontWeight: 600 }}>
+                            Авсан оноо: {(m as any).actualScore}/{(m as any).actualMax}
+                          </p>
+                        )}
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3, flexShrink: 0 }}>
                         <div style={{ background: `${mc}12`, borderRadius: 10, padding: "3px 10px", border: `1px solid ${mc}25` }}>
