@@ -151,16 +151,19 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
   const [off, setOff] = useState(circ)
 
   useEffect(() => {
-    setTimeout(() => setBar(true), 400)
+    let cancelled = false
+    const t1 = setTimeout(() => { if (!cancelled) setBar(true) }, 400)
     const end = data.healthScore, dur = 1400, st = performance.now()
     const tick = (now: number) => {
+      if (cancelled) return
       const p = Math.min((now - st) / dur, 1)
       const e = 1 - Math.pow(1 - p, 3)
       setScoreDisp(Math.round(e * end))
       setOff(circ - e * (end / 100) * circ)
       if (p < 1) requestAnimationFrame(tick)
     }
-    setTimeout(() => requestAnimationFrame(tick), 350)
+    const t2 = setTimeout(() => requestAnimationFrame(tick), 350)
+    return () => { cancelled = true; clearTimeout(t1); clearTimeout(t2) }
   }, [data.healthScore, circ])
 
   const kpi = data.kpiLabels || {}
