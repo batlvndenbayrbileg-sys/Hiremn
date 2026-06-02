@@ -232,7 +232,7 @@ export function formatAssessmentForWidget(a: Assessment, lang: 'mn' | 'en' = 'mn
     color: CATEGORY_COLORS[categoryKey] || CATEGORY_COLORS.default,
     free: isFree,
     icon: getIconUrl(a.icons),   // зургийн бүрэн URL
-    image: TEST_IMAGES[a.id],    // AI-generated test illustration
+   image: TEST_IMAGES[a.id] || '/covers/default.jpg',   // AI-generated test illustration
     category: a.category?.name || '',
     count: a.count || 0,          // хэдэн хэрэглэгч авсан (social proof)
     author: a.author || '',
