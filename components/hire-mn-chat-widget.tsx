@@ -682,7 +682,12 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
 
 // ── Bot Message ──────────────────────────────────────────────────────────────
 
-function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message; fontSize: number; userQuestion?: string; onExpandAnalysis?: (data: any, title: string) => void}) {
+function BotMessage({ message, fontSize, userQuestion = "", onExpandAnalysis }: {
+  message: Message
+  fontSize: number
+  userQuestion?: string
+  onExpandAnalysis?: (data: any, title: string) => void
+}) {
   // Parse [TEST:id] markers
   const parseTestMarkers = (text: string) => {
     const testIds: number[] = []
@@ -813,6 +818,15 @@ function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message
           }}>
             {renderFormattedText(cleanText)}
           </div>
+        </div>
+      )}      {/* Analysis Card — inline artifact */}
+      {message.analysisData && onExpandAnalysis && (
+        <div style={{ marginTop: 8 }}>
+          <AnalysisCard
+            data={message.analysisData}
+            title={message.analysisTitle || "Тест"}
+            onExpand={() => onExpandAnalysis(message.analysisData, message.analysisTitle || "Тест")}
+          />
         </div>
       )}
 
