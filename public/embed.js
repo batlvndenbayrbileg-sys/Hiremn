@@ -4,8 +4,10 @@
   if (window.__HireMnWidget) return;
   window.__HireMnWidget = true;
 
-  var scripts = document.getElementsByTagName("script");
-  var me = scripts[scripts.length - 1];
+ var me = document.currentScript || (function() {
+  var s = document.getElementsByTagName("script");
+  return s[s.length - 1];
+})();
   var ORIGIN = me.src ? me.src.replace(/\/embed\.js(\?.*)?$/, "") : "";
 
   if (!ORIGIN) {
