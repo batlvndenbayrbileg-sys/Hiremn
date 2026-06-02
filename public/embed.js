@@ -245,8 +245,9 @@
       }
     }
     if (e.data.type === "HIREMN_ANALYSIS_EXPAND") {
-      wrapper.style.width = "min(860px, 96vw)";
-      wrapper.style.height = "94vh";
+      var expandW = Math.min(860, Math.round(window.innerWidth * 0.96)) + "px";
+      wrapper.style.width = expandW;
+      wrapper.style.height = Math.round(window.innerHeight * 0.94) + "px";
       wrapper.style.bottom = "3vh";
       wrapper.style.right = "2vw";
       wrapper.style.left = "auto";
