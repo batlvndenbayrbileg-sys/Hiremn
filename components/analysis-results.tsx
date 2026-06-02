@@ -206,16 +206,34 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
       </div>
 
       {/* Metrics */}
+           {/* Metrics — ALL dimensions */}
       <div style={{ padding: "12px 16px 8px" }}>
-        {data.metrics.slice(0, 2).map((m, i) => (
-          <div key={i} style={{ marginBottom: 9 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#475569" }}>{m.label}</span>
-              <span style={{ fontSize: 10, color: "#94A3B8" }}>{m.score}/{m.maxScore}</span>
+        {data.metrics.map((m, i) => (
+          <div key={i} style={{ marginBottom: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#1E293B" }}>{m.label}</span>
+              <span style={{
+                fontSize: 11, fontWeight: 800,
+                color: m.score / m.maxScore > 0.7 ? "#059669" : m.score / m.maxScore > 0.4 ? "#D97706" : "#DC2626",
+                background: m.score / m.maxScore > 0.7 ? "#F0FDF4" : m.score / m.maxScore > 0.4 ? "#FFFBEB" : "#FFF2F2",
+                borderRadius: 8, padding: "2px 8px"
+              }}>{m.score}/{m.maxScore}</span>
             </div>
             <div style={{ background: "#F1F5F9", borderRadius: 8, height: 7, overflow: "hidden" }}>
-              <div style={{ height: "100%", borderRadius: 8, width: bar ? `${(m.score / m.maxScore) * 100}%` : "0%", background: m.score / m.maxScore > 0.6 ? "linear-gradient(90deg,#FF4444,#FF6B6B)" : m.score / m.maxScore > 0.3 ? "linear-gradient(90deg,#FF9800,#FFCC44)" : `linear-gradient(90deg,${TEAL},#00E5A0)`, transition: "width 1.1s cubic-bezier(.16,1,.3,1)" }} />
+              <div style={{
+                height: "100%", borderRadius: 8,
+                width: bar ? `${(m.score / m.maxScore) * 100}%` : "0%",
+                background: m.score / m.maxScore > 0.7
+                  ? `linear-gradient(90deg, ${TEAL}, #00E5A0)`
+                  : m.score / m.maxScore > 0.4
+                    ? "linear-gradient(90deg, #FF9800, #FFCC44)"
+                    : "linear-gradient(90deg, #FF4444, #FF6B6B)",
+                transition: `width ${1 + i * 0.1}s cubic-bezier(.16,1,.3,1)`
+              }} />
             </div>
+            {m.status && (
+              <p style={{ fontSize: 9, fontWeight: 600, margin: "3px 0 0", color: m.score / m.maxScore > 0.7 ? "#059669" : m.score / m.maxScore > 0.4 ? "#D97706" : "#DC2626" }}>{m.status}</p>
+            )}
           </div>
         ))}
       </div>
