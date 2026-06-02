@@ -49,6 +49,9 @@ interface Message {
   categories?: string[]
   teamCategories?: TeamCategory[]
   companyInfo?: boolean
+  skipFeedback?: boolean
+  analysisData?: any        // ← нэмнэ
+  analysisTitle?: string    // ← нэмнэ
 }
 
 interface InitialContext {
