@@ -24,16 +24,14 @@ const nextConfig = {
         // Allow the /embed page to be iframed (internal)
         source: "/embed",
         headers: [
-          { key: "X-Frame-Options", value: "ALLOWALL" },
-          { key: "Content-Security-Policy", value: "frame-ancestors *" },
+        { key: "Content-Security-Policy", value: "frame-ancestors *" },
         ],
       },
       {
         // Allow the /widget page to be iframed from hire.mn
         source: "/widget",
         headers: [
-          { key: "X-Frame-Options", value: "ALLOWALL" },
-          { key: "Content-Security-Policy", value: "frame-ancestors *" },
+         { key: "Content-Security-Policy", value: "frame-ancestors *" },
         ],
       },
       {
