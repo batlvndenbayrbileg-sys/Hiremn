@@ -39,6 +39,7 @@ export async function getAIAdvice(examResult: {
 
 Миний үр дүнд үндэслээд ГҮНЗГИЙ, МЭРГЭЖЛИЙН зөвлөгөө өгөөч.`
 
+    const anthropic = getAnthropic()
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 1500,
