@@ -682,7 +682,7 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
 
 // ── Bot Message ──────────────────────────────────────────────────────────────
 
-function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message; fontSize: number; userQuestion?: string }) {
+function BotMessage({ message, fontSize, userQuestion = "" }: { message: Message; fontSize: number; userQuestion?: string; onExpandAnalysis?: (data: any, title: string) => void}) {
   // Parse [TEST:id] markers
   const parseTestMarkers = (text: string) => {
     const testIds: number[] = []
