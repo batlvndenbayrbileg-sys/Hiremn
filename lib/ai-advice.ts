@@ -1,12 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk'
 
 function getAnthropic() {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEY тохируулагдаагүй')
-  }
+  if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY ТОХИРУУЛАГДААГҮЙ')
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 }
-
 export async function getAIAdvice(examResult: {
   assessmentId: string
   assessmentName: string
