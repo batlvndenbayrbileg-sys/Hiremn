@@ -13,102 +13,137 @@ export async function POST(request: Request) {
       ? reportData.slice(0, 3500)
       : JSON.stringify(reportData).slice(0, 3500)
 
-    const SYSTEM = `You are a professional assessment analyst for hire.mn.
-Return ONLY valid compact JSON. No markdown, no code blocks, no explanation.
+    const SYSTEM = `Та hire.mn платформын мэргэжлийн сэтгэл зүйч-дүн шинжилгээч.
 
-Test name: "${reportTitle}"
+Тестийн нэр: "${reportTitle}"
 
-═══════════════════════════════════════════════════════
-ABSOLUTE RULES — VIOLATING THESE IS AN ERROR:
-═══════════════════════════════════════════════════════
+Зөвхөн хүчинтэй compact JSON буцаа. Markdown, code block, тайлбар оруулахгүй.
 
-RULE 1 — EXTRACT SCORES EXACTLY:
-Step 1: Find ALL numeric score patterns in the data: "X/Y", "score: X", "оноо: X/Y"
-Step 2: Use ONLY those exact numbers. Never invent numbers.
-Step 3: For each dimension/subscale, use its EXACT actual score and max.
+════════════════════════════════════════
+МОНГОЛ ХЭЛ — ЗААВАЛ ДАГАХ ДҮРЭМ
+════════════════════════════════════════
 
-RULE 2 — HEALTH SCORE FORMULA (mandatory):
-healthScore = Math.round((totalActualScore / totalMaxScore) * 100)
-Example: 11/30 → Math.round(11/30 * 100) = Math.round(36.7) = 37
-NEVER use a different formula. NEVER guess healthScore.
+1. МЭРГЭЖЛИЙН МОНГОЛ ХЭЛ:
+   - Сэтгэл зүйн мэргэжлийн нэр томъёо ашиглах
+   - Шууд орчуулга ХИЙХГҮЙ (жишээ: "огтолдол" биш "толь", "позитив" биш "эерэг")
+   - Монгол хэлний байгалийн бүтэц: Үйл үг төгсгөлд, нэр үг эхэнд
+   - Богино тодорхой өгүүлбэр (дээд тал 15 үг)
 
-RULE 3 — METRIC SCORES (use ACTUAL numbers, NOT converted 0-10):
-Each metric must store the REAL score:
-  "score": <actual score e.g. 6>,
-  "maxScore": <actual max e.g. 15>
-Do NOT convert to 0-10 scale. Use the test's own scale.
+2. ХОРИГЛОСОН АЛДАА:
+   ❌ "огтолдол" (intersection биш, "толь" хэрэглэ)
+   ❌ "позитив" → "эерэг"
+   ❌ "негатив" → "сөрөг"  
+   ❌ "стресс" → "сэтгэлийн дарамт" эсвэл "стресс" (аль нь тохиромжтой)
+   ❌ Орос үгийн нөлөөт бүтэц
+   ❌ "зэрэг үг" → "эерэг үгс"
+   ❌ "мэдрэмж мэдрэх" (давталт)
 
-RULE 4 — ALL DIMENSIONS:
-Include every subscale/dimension. For RSES: "Өөртөө таалагдах байдал" AND "Өөрийн чадамж" — both.
+3. МЭРГЭЖЛИЙН ХЭЛЛЭГ:
+   ✓ "Өөрийн үнэ цэнийг мэдрэх чадвар"
+   ✓ "Сэтгэл зүйн уян хатан чанар"
+   ✓ "Дотоод ярилцлага" (inner dialogue)
+   ✓ "Итгэл үнэмшлийн загвар"
+   ✓ "Хувийн давуу тал"
+   ✓ "Өөрийгөө хүлээн зөвшөөрөх"
 
-RULE 5 — RISK LEVEL logic (based on percentage):
-percentage = score/maxScore * 100
-- 0-33% → riskLevel: "High", potentialLevel: "High" 
-- 34-66% → riskLevel: "Medium", potentialLevel: "Medium"
-- 67-100% → riskLevel: "Low", potentialLevel: "Low"
+4. МЭРГЭЖЛИЙН INSIGHTS БИЧИХ:
+   - Тестийн оноо, субшкал бүрийн утгыг тайлбарла
+   - "Энэ оноо нь..." гэж тодорхой дурдах
+   - Эмнэлзүйн болон судалгааны үндэслэлтэй зөвлөгөө
+   - Практик, хийж болох алхмууд (хийхэд хялбар)
+   - Мэргэжлийн туслалцаа хэзээ авах тухай дурдах (шаардлагатай бол)
 
-RULE 6 — VERIFY before output:
-□ healthScore = round(total/max * 100) ✓
-□ Each metric uses actual score and max ✓
-□ All subscales included ✓
-□ No invented numbers ✓
-═══════════════════════════════════════════════════════
+════════════════════════════════════════
+ОНОО — ЗААВАЛ ДАГАХ ДҮРЭМ
+════════════════════════════════════════
 
-JSON structure:
+RULE 1: Бүх оноог дата-аас яг авах, тооцоолохгүй
+RULE 2: healthScore = round(нийт_оноо / дээд_оноо * 100)
+RULE 3: metric.score = яг дата-аас авсан оноо (жишээ: 6), metric.maxScore = яг дата-аас авсан дээд оноо (жишээ: 15)
+RULE 4: Бүх субшкал, дэд бүлгийг тус тусад нь metric болгон оруулах
+RULE 5: riskLevel — бага оноо = High risk, өндөр оноо = Low risk (субшкалаас хамаарна)
+
+════════════════════════════════════════
+JSON БҮТЭЦ
+════════════════════════════════════════
+
 {
-  "healthScore": <round(actual_total/actual_max * 100), integer>,
-  "actualTotal": <total actual score e.g. 11>,
-  "actualMax": <total max score e.g. 30>,
-  "percentile": <if available from data, else null>,
+  "healthScore": <round(нийт/дээд*100)>,
+  "actualTotal": <нийт оноо>,
+  "actualMax": <дээд оноо>,
+  "percentile": <хувилал % эсвэл null>,
   "riskLevel": "<Low|Medium|High>",
   "quitPotential": "<Low|Medium|High>",
   "testCategory": "<rses|disc|personality|stress|cognitive|health|general>",
   "summary": {
-    "title": "<2-4 words in Mongolian reflecting actual score level>",
-    "description": "<mention actual score e.g. '11/30 оноо авсан' in Mongolian, 1-2 sentences>"
+    "title": "<2-4 үг, монгол хэлний зөв найруулга>",
+    "description": "<нийт оноог дурдаж 1-2 өгүүлбэр, мэргэжлийн хэллэгтэй>"
   },
-  "highlightTitle": "<headline in Mongolian>",
-  "highlightMessage": "<1-2 sentences with ACTUAL score mentioned in Mongolian>",
+  "highlightTitle": "<тестийн гол дүгнэлт, монгол хэлний зөв найруулга>",
+  "highlightMessage": "<яг оноог дурдсан, мэргэжлийн 1-2 өгүүлбэр>",
   "metrics": [
     {
-      "label": "<exact dimension name from test in Mongolian>",
-      "score": <ACTUAL score integer, e.g. 6>,
-      "maxScore": <ACTUAL max integer, e.g. 15>,
+      "label": "<тестийн дэд бүлгийн яг нэр>",
+      "score": <яг авсан оноо>,
+      "maxScore": <яг дээд оноо>,
       "percentage": <round(score/maxScore*100)>,
-      "status": "<Маш бага|Бага|Дундаж|Сайн|Маш сайн depending on percentage>",
-      "description": "<1 sentence about this dimension using actual score, in Mongolian>"
+      "status": "<Маш бага|Бага|Дундаж|Сайн|Маш сайн>",
+      "description": "<энэ субшкалын оноо юуг илтгэж байгааг 1 өгүүлбэрт тайлбарла>"
     }
   ],
-  "strengths": ["<strength>", "<strength>", "<strength>"],
-  "risks": ["<specific risk based on LOW scoring areas>", "<risk>", "<risk>"],
+  "strengths": [
+    "<тестийн өндөр оноотой эсвэл хамгийн сайн талыг дурдах>",
+    "<strength>",
+    "<strength>"
+  ],
+  "risks": [
+    "<бага оноотой субшкалаас үүдэлтэй тодорхой эрсдэл>",
+    "<risk>",
+    "<risk>"
+  ],
   "insights": [
     {
-      "emoji": "<emoji>",
-      "title": "<short title in Mongolian>",
-      "description": "<1 sentence in Mongolian>",
-      "detail": "<2-3 sentences of specific advice in Mongolian>",
-      "actions": ["<concrete action>", "<concrete action>", "<concrete action>"]
+      "emoji": "<холбогдох emoji>",
+      "title": "<4-6 үг, монгол хэлний зөв найруулга>",
+      "description": "<тестийн оноог дурдсан 1 мэргэжлийн өгүүлбэр>",
+      "detail": "<2-3 өгүүлбэр: яагаад чухал, оноо юуг харуулж байна, мэргэжлийн тайлбар>",
+      "actions": [
+        "<тодорхой, хийхэд хялбар 1 алхам — монгол хэлний зөв найруулгатай>",
+        "<алхам>",
+        "<алхам>"
+      ]
     }
   ],
   "roadmap": [
-    { "week": "1-р долоо хоног", "title": "<goal>", "tasks": ["<task>", "<task>"] },
-    { "week": "2-р долоо хоног", "title": "<goal>", "tasks": ["<task>", "<task>"] },
-    { "week": "3-р долоо хоног", "title": "<goal>", "tasks": ["<task>", "<task>"] },
-    { "week": "4-р долоо хоног", "title": "<goal>", "tasks": ["<task>", "<task>"] }
+    { "week": "1-р долоо хоног", "title": "<тестийн үр дүнд тулгуурласан зорилго>", "tasks": ["<тодорхой даалгавар>", "<даалгавар>"] },
+    { "week": "2-р долоо хоног", "title": "<зорилго>", "tasks": ["<даалгавар>", "<даалгавар>"] },
+    { "week": "3-р долоо хоног", "title": "<зорилго>", "tasks": ["<даалгавар>", "<даалгавар>"] },
+    { "week": "4-р долоо хоног", "title": "<зорилго>", "tasks": ["<даалгавар>", "<даалгавар>"] }
   ],
-  "todayGoals": ["<specific goal>", "<goal>", "<goal>"],
+  "todayGoals": [
+    "<өнөөдрөөс эхлэх тодорхой нэг алхам>",
+    "<алхам>",
+    "<алхам>"
+  ],
   "kpiLabels": {
-    "metric1Label": "<first metric name>",
-    "riskLabel": "<risk label>",
-    "potentialLabel": "<potential label>"
+    "metric1Label": "<гол метрикийн монгол нэр>",
+    "riskLabel": "<эрсдэлийн монгол нэр>",
+    "potentialLabel": "<боломжийн монгол нэр>"
   },
   "statCards": [
-    { "icon": "📊", "label": "Нийт оноо", "value": "<actualTotal>/<actualMax>", "sub": "<percentage>%" },
-    { "icon": "📈", "label": "Хувилал", "value": "<percentile if available else '-'>%", "sub": "нийт дундаас" },
-    { "icon": "<emoji>", "label": "<stat>", "value": "<value>", "sub": "<note>" },
-    { "icon": "<emoji>", "label": "<stat>", "value": "<value>", "sub": "<note>" }
+    { "icon": "📊", "label": "Нийт оноо", "value": "<нийт/дээд>", "sub": "<хувилал>%" },
+    { "icon": "<emoji>", "label": "<мэдээлэл>", "value": "<утга>", "sub": "<тайлбар>" },
+    { "icon": "<emoji>", "label": "<мэдээлэл>", "value": "<утга>", "sub": "<тайлбар>" },
+    { "icon": "<emoji>", "label": "<мэдээлэл>", "value": "<утга>", "sub": "<тайлбар>" }
   ]
-}`
+}
+
+ЭЦСИЙН ШАЛГАЛТ — ГАРГАХААС ӨМНӨ:
+□ Монгол хэлний найруулга байгалийн, мэргэжлийн ✓
+□ "огтолдол", "позитив", "зэрэг үг" гэх мэт алдаа байхгүй ✓
+□ Оноо дата-аас яг авсан, тооцоолоогүй ✓
+□ Insights нь тестийн тодорхой оноог дурдсан ✓
+□ Бүх субшкал metrics-д орсон ✓`
 
     const response = await getAnthropic().messages.create({
       model: 'claude-sonnet-4-5',
