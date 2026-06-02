@@ -10,102 +10,105 @@ export async function POST(request: Request) {
     const { reportData, reportTitle } = await request.json()
 
     const truncated = typeof reportData === 'string'
-      ? reportData.slice(0, 3000)
-      : JSON.stringify(reportData).slice(0, 3000)
+      ? reportData.slice(0, 3500)
+      : JSON.stringify(reportData).slice(0, 3500)
 
-    const SYSTEM = `You are a professional assessment analyst for hire.mn platform.
+    const SYSTEM = `You are a professional assessment analyst for hire.mn.
+Return ONLY valid compact JSON. No markdown, no code blocks, no explanation.
 
-Analyze the test result and return ONLY compact valid JSON (no whitespace, no markdown, no code blocks).
+Test name: "${reportTitle}"
 
-The test name is: "${reportTitle}"
+═══════════════════════════════════════════════════════
+ABSOLUTE RULES — VIOLATING THESE IS AN ERROR:
+═══════════════════════════════════════════════════════
 
-════════════════════════════════════════════════════
-CRITICAL — SCORE ACCURACY RULES (DO NOT VIOLATE):
-════════════════════════════════════════════════════
+RULE 1 — EXTRACT SCORES EXACTLY:
+Step 1: Find ALL numeric score patterns in the data: "X/Y", "score: X", "оноо: X/Y"
+Step 2: Use ONLY those exact numbers. Never invent numbers.
+Step 3: For each dimension/subscale, use its EXACT actual score and max.
 
-1. NEVER invent or guess scores. Use ONLY the actual scores from the test data.
+RULE 2 — HEALTH SCORE FORMULA (mandatory):
+healthScore = Math.round((totalActualScore / totalMaxScore) * 100)
+Example: 11/30 → Math.round(11/30 * 100) = Math.round(36.7) = 37
+NEVER use a different formula. NEVER guess healthScore.
 
-2. SCORE CONVERSION FORMULA — if the test uses a different scale:
-   - metric.score = round((actual_score / max_possible_score) * 10)
-   - healthScore = round((total_actual_score / total_max_score) * 100)
-   - Example: 14/40 → metric.score = round(14/40 * 10) = round(3.5) = 4, healthScore = round(14/40 * 100) = 35
+RULE 3 — METRIC SCORES (use ACTUAL numbers, NOT converted 0-10):
+Each metric must store the REAL score:
+  "score": <actual score e.g. 6>,
+  "maxScore": <actual max e.g. 15>
+Do NOT convert to 0-10 scale. Use the test's own scale.
 
-3. If the test has multiple dimensions with separate scores, create a separate metric for EACH dimension using its actual score.
+RULE 4 — ALL DIMENSIONS:
+Include every subscale/dimension. For RSES: "Өөртөө таалагдах байдал" AND "Өөрийн чадамж" — both.
 
-4. Do NOT round aggressively — preserve accuracy:
-   - 14/40 = 3.5 → use 4 (not 3 or 5)
-   - 7/10 = 7 → use 7 exactly
+RULE 5 — RISK LEVEL logic (based on percentage):
+percentage = score/maxScore * 100
+- 0-33% → riskLevel: "High", potentialLevel: "High" 
+- 34-66% → riskLevel: "Medium", potentialLevel: "Medium"
+- 67-100% → riskLevel: "Low", potentialLevel: "Low"
 
-5. riskLevel and quitPotential must logically match the actual scores:
-   - Low score (0-3/10) → riskLevel: "High", quitPotential: "High" (needs improvement)
-   - Mid score (4-6/10) → riskLevel: "Medium", quitPotential: "Medium"
-   - High score (7-10/10) → riskLevel: "Low", quitPotential: "Low" (already healthy)
+RULE 6 — VERIFY before output:
+□ healthScore = round(total/max * 100) ✓
+□ Each metric uses actual score and max ✓
+□ All subscales included ✓
+□ No invented numbers ✓
+═══════════════════════════════════════════════════════
 
-6. INCLUDE ALL DIMENSIONS — if the test has D, I, S, C dimensions, include all 4. Never omit any.
-
-7. healthScore must equal the overall percentage: round(total/maxTotal * 100)
-════════════════════════════════════════════════════
-
-Required JSON structure:
+JSON structure:
 {
-  "healthScore": <calculated from actual data, 0-100>,
-  "riskLevel": "<Low|Medium|High — must match actual score level>",
-  "quitPotential": "<Low|Medium|High — must match actual score level>",
-  "testCategory": "<rses|disc|personality|cognitive|leadership|stress|health|general>",
+  "healthScore": <round(actual_total/actual_max * 100), integer>,
+  "actualTotal": <total actual score e.g. 11>,
+  "actualMax": <total max score e.g. 30>,
+  "percentile": <if available from data, else null>,
+  "riskLevel": "<Low|Medium|High>",
+  "quitPotential": "<Low|Medium|High>",
+  "testCategory": "<rses|disc|personality|stress|cognitive|health|general>",
   "summary": {
-    "title": "<2-4 word summary in Mongolian based on ACTUAL score>",
-    "description": "<1-2 sentences in Mongolian referencing the ACTUAL score e.g. '14/40 оноо авсан'>"
+    "title": "<2-4 words in Mongolian reflecting actual score level>",
+    "description": "<mention actual score e.g. '11/30 оноо авсан' in Mongolian, 1-2 sentences>"
   },
-  "highlightTitle": "<headline based on actual result level in Mongolian>",
-  "highlightMessage": "<1-2 sentences mentioning the ACTUAL score/percentage in Mongolian>",
+  "highlightTitle": "<headline in Mongolian>",
+  "highlightMessage": "<1-2 sentences with ACTUAL score mentioned in Mongolian>",
   "metrics": [
     {
-      "label": "<exact dimension name from test>",
-      "actualScore": <raw score from test data e.g. 14>,
-      "actualMax": <max possible e.g. 40>,
-      "score": <converted 0-10 using formula above>,
-      "maxScore": 10,
-      "status": "<1-3 word status in Mongolian matching actual score level>",
-      "description": "<1 sentence explaining this dimension's result using actual score, in Mongolian>"
+      "label": "<exact dimension name from test in Mongolian>",
+      "score": <ACTUAL score integer, e.g. 6>,
+      "maxScore": <ACTUAL max integer, e.g. 15>,
+      "percentage": <round(score/maxScore*100)>,
+      "status": "<Маш бага|Бага|Дундаж|Сайн|Маш сайн depending on percentage>",
+      "description": "<1 sentence about this dimension using actual score, in Mongolian>"
     }
   ],
-  "strengths": ["<strength based on actual high-scoring areas>", "<strength>", "<strength>"],
-  "risks": ["<risk based on actual low-scoring areas>", "<risk>", "<risk>"],
+  "strengths": ["<strength>", "<strength>", "<strength>"],
+  "risks": ["<specific risk based on LOW scoring areas>", "<risk>", "<risk>"],
   "insights": [
     {
       "emoji": "<emoji>",
       "title": "<short title in Mongolian>",
-      "description": "<1 sentence referencing actual score in Mongolian>",
-      "detail": "<2-3 sentences with specific actionable advice in Mongolian>",
+      "description": "<1 sentence in Mongolian>",
+      "detail": "<2-3 sentences of specific advice in Mongolian>",
       "actions": ["<concrete action>", "<concrete action>", "<concrete action>"]
     }
   ],
   "roadmap": [
-    { "week": "1-р долоо хоног", "title": "<specific goal for this test>", "tasks": ["<task>", "<task>"] },
+    { "week": "1-р долоо хоног", "title": "<goal>", "tasks": ["<task>", "<task>"] },
     { "week": "2-р долоо хоног", "title": "<goal>", "tasks": ["<task>", "<task>"] },
     { "week": "3-р долоо хоног", "title": "<goal>", "tasks": ["<task>", "<task>"] },
     { "week": "4-р долоо хоног", "title": "<goal>", "tasks": ["<task>", "<task>"] }
   ],
-  "todayGoals": ["<specific goal matching actual weak areas>", "<goal>", "<goal>"],
+  "todayGoals": ["<specific goal>", "<goal>", "<goal>"],
   "kpiLabels": {
-    "metric1Label": "<primary KPI name for this test in Mongolian>",
-    "riskLabel": "<context-appropriate risk label in Mongolian>",
-    "potentialLabel": "<potential label in Mongolian>"
+    "metric1Label": "<first metric name>",
+    "riskLabel": "<risk label>",
+    "potentialLabel": "<potential label>"
   },
   "statCards": [
-    { "icon": "<emoji>", "label": "<stat>", "value": "<ACTUAL value from data>", "sub": "<note>" },
-    { "icon": "<emoji>", "label": "<stat>", "value": "<ACTUAL value>", "sub": "<note>" },
-    { "icon": "<emoji>", "label": "<stat>", "value": "<ACTUAL value>", "sub": "<note>" },
-    { "icon": "<emoji>", "label": "<stat>", "value": "<ACTUAL value>", "sub": "<note>" }
+    { "icon": "📊", "label": "Нийт оноо", "value": "<actualTotal>/<actualMax>", "sub": "<percentage>%" },
+    { "icon": "📈", "label": "Хувилал", "value": "<percentile if available else '-'>%", "sub": "нийт дундаас" },
+    { "icon": "<emoji>", "label": "<stat>", "value": "<value>", "sub": "<note>" },
+    { "icon": "<emoji>", "label": "<stat>", "value": "<value>", "sub": "<note>" }
   ]
-}
-
-FINAL CHECK before outputting:
-- Verify healthScore = round(actualTotal/maxTotal * 100)
-- Verify each metric.score = round(actualDimensionScore/maxDimensionScore * 10)
-- Verify riskLevel and quitPotential logically match the scores
-- Verify ALL test dimensions are included in metrics
-- Verify actual scores are mentioned in descriptions`
+}`
 
     const response = await getAnthropic().messages.create({
       model: 'claude-sonnet-4-5',
@@ -113,38 +116,24 @@ FINAL CHECK before outputting:
       system: SYSTEM,
       messages: [{
         role: 'user',
-        content: `Тест: ${reportTitle}\n\nТестийн дата (яг энэ дата-аас оноонуудыг ав, дураараа өөрчлөхгүй):\n${truncated}`
+        content: `Тест: ${reportTitle}\n\nТест дата (яг энэ тоонуудыг хэрэглэ, дүгнэлт хий):\n${truncated}`
       }]
     })
 
     const text = response.content[0].type === 'text' ? response.content[0].text : ''
-
-    let jsonStr = text.trim()
-      .replace(/```json\n?/g, '')
-      .replace(/```\n?/g, '')
-      .trim()
-
+    let jsonStr = text.trim().replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
     const start = jsonStr.indexOf('{')
     const end = jsonStr.lastIndexOf('}')
     if (start === -1 || end === -1) throw new Error('JSON олдсонгүй')
     jsonStr = jsonStr.slice(start, end + 1)
 
     const data = JSON.parse(jsonStr)
-
     if (data.healthScore == null || !data.summary || !data.roadmap) {
       throw new Error('JSON бүтэц дутуу')
     }
 
-    // Validate score range — prevent hallucinated impossible scores
-    if (data.healthScore < 0 || data.healthScore > 100) {
-      data.healthScore = Math.min(100, Math.max(0, data.healthScore))
-    }
-    if (Array.isArray(data.metrics)) {
-      data.metrics = data.metrics.map((m: any) => ({
-        ...m,
-        score: Math.min(m.maxScore || 10, Math.max(0, m.score)),
-      }))
-    }
+    // Hard clamp — prevent out-of-range values
+    data.healthScore = Math.min(100, Math.max(0, Math.round(data.healthScore)))
 
     return Response.json({ success: true, data })
   } catch (error) {
