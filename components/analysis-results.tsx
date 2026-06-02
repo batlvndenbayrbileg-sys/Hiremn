@@ -89,13 +89,13 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
             <stop offset="100%" stopColor={`${color}88`} />
           </linearGradient>
         </defs>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={`${color}18`} strokeWidth={size*0.07}/>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={`url(#${gradId})`}
-          strokeWidth={size*0.07} strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round"/>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={`${color}18`} strokeWidth={size * 0.07} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={`url(#${gradId})`}
+          strokeWidth={size * 0.07} strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round" />
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontSize: size*0.27, fontWeight: 900, color: "#1E293B", lineHeight: 1 }}>{disp}</span>
-        <span style={{ fontSize: size*0.1, color: "#94A3B8", fontWeight: 600 }}>/100</span>
+        <span style={{ fontSize: size * 0.27, fontWeight: 900, color: "#1E293B", lineHeight: 1 }}>{disp}</span>
+        <span style={{ fontSize: size * 0.1, color: "#94A3B8", fontWeight: 600 }}>/100</span>
       </div>
     </div>
   )
@@ -206,7 +206,7 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
       </div>
 
       {/* Metrics */}
-           {/* Metrics — ALL dimensions */}
+      {/* Metrics — ALL dimensions */}
       <div style={{ padding: "12px 16px 8px" }}>
         {data.metrics.map((m, i) => (
           <div key={i} style={{ marginBottom: 10 }}>
@@ -286,7 +286,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
   const celebChar: keyof typeof CHARS = allGoalsDone ? "celebrate" : "thumbsup"
 
   useEffect(() => { setTimeout(() => setBar(true), 300) }, [])
- useEffect(() => { setGoals(new Array(todayGoals.length).fill(false)) }, [data])
+  useEffect(() => { setGoals(new Array(todayGoals.length).fill(false)) }, [data])
 
   const expand = () => {
     const n = !expanded; setExpanded(n)
@@ -302,12 +302,12 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
     setGoals(prev => { const n = [...prev]; n[i] = !n[i]; return n })
   }, [])
   const handleAI = useCallback(() => {
-  if (!chatInput.trim()) return
-  const q = chatInput.trim()
-  setChatInput("")
-  onAskAI(q)
-  close()
-}, [chatInput, onAskAI, close])
+    if (!chatInput.trim()) return
+    const q = chatInput.trim()
+    setChatInput("")
+    onAskAI(q)
+    close()
+  }, [chatInput, onAskAI, close])
 
   const onTS = (e: React.TouchEvent) => { touchX.current = e.touches[0].clientX }
   const onTE = (e: React.TouchEvent) => {
@@ -400,22 +400,37 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             </div>
 
             {/* Metric bars */}
-            {data.metrics.map((m, i) => (
-              <div key={i} style={{ background: "#fff", borderRadius: 16, padding: "14px 16px", marginBottom: 8, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                  <div>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: "#1E293B", margin: "0 0 1px" }}>{m.label}</p>
-                    <p style={{ fontSize: 10, fontWeight: 700, color: metricColor(m.score / m.maxScore), margin: 0 }}>{m.status}</p>
+            {/* Metric bars — ALL dimensions */}
+            <div style={{ background: "#fff", borderRadius: 20, padding: "16px", marginBottom: 8, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.5px", margin: "0 0 14px" }}>
+                📊 ТЕСТИЙН ДҮН — БҮРЭН ШИНЖИЛГЭЭ
+              </p>
+              {data.metrics.map((m, i) => {
+                const pct = m.score / m.maxScore
+                const mc = metricColor(pct)
+                return (
+                  <div key={i} style={{ marginBottom: i < data.metrics.length - 1 ? 14 : 0, paddingBottom: i < data.metrics.length - 1 ? 14 : 0, borderBottom: i < data.metrics.length - 1 ? "1px solid #F1F5F9" : "none" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                      <div style={{ flex: 1, minWidth: 0, paddingRight: 10 }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: "#1E293B", margin: "0 0 2px" }}>{m.label}</p>
+                        {(m as any).description && (
+                          <p style={{ fontSize: 11, color: "#64748B", margin: 0, lineHeight: 1.5 }}>{(m as any).description}</p>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3, flexShrink: 0 }}>
+                        <div style={{ background: `${mc}12`, borderRadius: 10, padding: "3px 10px", border: `1px solid ${mc}25` }}>
+                          <span style={{ fontSize: 14, fontWeight: 900, color: mc }}>{m.score}/{m.maxScore}</span>
+                        </div>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: mc }}>{m.status}</span>
+                      </div>
+                    </div>
+                    <div style={{ background: "#F1F5F9", borderRadius: 10, height: 10, overflow: "hidden" }}>
+                      <div style={{ height: "100%", borderRadius: 10, width: bar ? `${pct * 100}%` : "0%", background: metricGrad(pct), transition: `width ${1.1 + i * 0.12}s cubic-bezier(.16,1,.3,1)` }} />
+                    </div>
                   </div>
-                  <div style={{ background: `${metricColor(m.score / m.maxScore)}12`, borderRadius: 10, padding: "4px 10px", border: `1px solid ${metricColor(m.score / m.maxScore)}25` }}>
-                    <span style={{ fontSize: 14, fontWeight: 900, color: metricColor(m.score / m.maxScore) }}>{m.score}/{m.maxScore}</span>
-                  </div>
-                </div>
-                <div style={{ background: "#F1F5F9", borderRadius: 10, height: 10, overflow: "hidden" }}>
-                  <div style={{ height: "100%", borderRadius: 10, width: bar ? `${(m.score / m.maxScore) * 100}%` : "0%", background: metricGrad(m.score / m.maxScore), transition: `width ${1.1 + i * 0.1}s cubic-bezier(.16,1,.3,1)` }} />
-                </div>
-              </div>
-            ))}
+                )
+              })}
+            </div>
 
             {/* Strengths + Risks with character */}
             <div style={{ background: "#fff", borderRadius: 18, padding: "16px 14px", marginBottom: 8, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
