@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from "react"
 import { MessageFeedback } from './message-feedback'
 import { ConversationSidebar } from './conversation-sidebar'
 import { SplineMascot } from './spline-mascot'
-import { AnalysisResults } from './analysis-results'
 import { AnalysisResults, AnalysisCard } from './analysis-results'
+
 import {
   Conversation,
   createNewConversation,
