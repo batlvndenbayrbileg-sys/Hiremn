@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
-
+const ALLOWED_API_BASES = [
+  'https://api.hire.mn',
+  'https://api.hire-test.cloud',
+  'https://hire-test.cloud',
+]
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -15,7 +19,8 @@ export async function OPTIONS() {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
-  const apiBase = searchParams.get('apiBase') || 'https://api.hire-test.cloud'
+ const rawBase = searchParams.get('apiBase') || 'https://api.hire-test.cloud'
+const apiBase = ALLOWED_API_BASES.includes(rawBase) ? rawBase : ALLOWED_API_BASES[0]
   const token = request.headers.get('authorization')
 
   if (!code) {
