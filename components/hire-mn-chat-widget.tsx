@@ -1627,6 +1627,20 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               display: "flex", flexDirection: "column",
               border: "1px solid rgba(0,0,0,0.06)",
             }}>
+                          {/* ══════════ ANALYSIS RESULTS OVERLAY ══════════ */}
+              {showAnalysis && analysisData && (
+                <AnalysisResults
+                  data={analysisData}
+                  reportTitle={analysisTitle}
+                  onClose={() => setShowAnalysis(false)}
+                  onAskAI={(question) => {
+                    setShowAnalysis(false)
+                    sendMessage(question)
+                  }}
+                />
+              )}
+
+              {/* ══════════ CLEAN HEADER ══════════ */}
 
               {/* ══════════ CLEAN HEADER ══════════ */}
               <div style={{
