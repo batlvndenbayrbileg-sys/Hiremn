@@ -158,11 +158,42 @@ JSON БҮТЭЦ
     const text = response.content[0].type === 'text' ? response.content[0].text : ''
     let jsonStr = text.trim().replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
     const start = jsonStr.indexOf('{')
-    const end = jsonStr.lastIndexOf('}')
-    if (start === -1 || end === -1) throw new Error('JSON олдсонгүй')
+    if (start === -1) throw new Error('JSON олдсонгүй')
+
+    // Find last complete closing brace
+    let end = jsonStr.lastIndexOf('}')
+    if (end === -1) throw new Error('JSON дуусаагүй')
     jsonStr = jsonStr.slice(start, end + 1)
 
-    const data = JSON.parse(jsonStr)
+    // Attempt parse — if fails, try to repair truncated JSON
+    let data: any
+    try {
+      data = JSON.parse(jsonStr)
+    } catch {
+      // Try to fix common truncation issues: unclosed arrays/objects
+      let repaired = jsonStr
+      // Count unclosed brackets
+      let opens = 0, openBraces = 0
+      for (const ch of repaired) {
+        if (ch === '[') opens++
+        else if (ch === ']') opens--
+        else if (ch === '{') openBraces++
+        else if (ch === '}') openBraces--
+      }
+      // Remove trailing comma before closing
+      repaired = repaired.replace(/,\s*$/, '')
+      repaired = repaired.replace(/,\s*([}\]])/g, '$1')
+      // Close unclosed arrays
+      while (opens > 0) { repaired += ']'; opens-- }
+      // Close unclosed objects
+      while (openBraces > 0) { repaired += '}'; openBraces-- }
+
+      try {
+        data = JSON.parse(repaired)
+      } catch {
+        throw new Error('JSON засварлах боломжгүй — дахин оролдоно уу')
+      }
+    }
     if (data.healthScore == null || !data.summary || !data.roadmap) {
       throw new Error('JSON бүтэц дутуу')
     }
