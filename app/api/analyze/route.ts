@@ -10,8 +10,8 @@ export async function POST(request: Request) {
     const { reportData, reportTitle } = await request.json()
 
     const truncated = typeof reportData === 'string'
-      ? reportData.slice(0, 3500)
-      : JSON.stringify(reportData).slice(0, 3500)
+      ? reportData.slice(0, 2500)
+      : JSON.stringify(reportData).slice(0, 2500)
 
     const SYSTEM = `Та hire.mn платформын мэргэжлийн сэтгэл зүйч-дүн шинжилгээч.
 
@@ -147,7 +147,7 @@ JSON БҮТЭЦ
 
     const response = await getAnthropic().messages.create({
       model: 'claude-sonnet-4-5',
-      max_tokens: 4000,
+      max_tokens: 6000,
       system: SYSTEM,
       messages: [{
         role: 'user',
