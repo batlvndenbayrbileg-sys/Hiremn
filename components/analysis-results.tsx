@@ -277,9 +277,12 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
     setGoals(prev => { const n = [...prev]; n[i] = !n[i]; return n })
   }, [])
   const handleAI = useCallback(() => {
-    if (!chatInput.trim()) return
-    onAskAI(chatInput.trim()); setChatInput(""); close()
-  }, [chatInput, onAskAI])
+  if (!chatInput.trim()) return
+  const q = chatInput.trim()
+  setChatInput("")
+  onAskAI(q)
+  close()
+}, [chatInput, onAskAI, close])
 
   const onTS = (e: React.TouchEvent) => { touchX.current = e.touches[0].clientX }
   const onTE = (e: React.TouchEvent) => {
