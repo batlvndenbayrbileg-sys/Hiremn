@@ -1115,7 +1115,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         setIsTyping(true)
         setMessages(prev => [...prev, {
           role: "assistant" as const,
-          content: "������� Тайлангийн үр дүнг шинжилж байна...",
+          content: "Тайлангийн үр дүнг шинжилж байна...",
         }])
 
         // Data-г API руу шууд явуулна — sendMessage ашиглахгүй (UI-д гарна)
