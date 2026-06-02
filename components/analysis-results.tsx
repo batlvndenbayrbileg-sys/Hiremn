@@ -59,36 +59,43 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
   const [off, setOff] = useState(0)
   const r = size * 0.37, circ = 2 * Math.PI * r
   const color = scoreColor(score)
+  // Unique gradient ID — multiple rings won't conflict
+  const gradId = `sg-${size}-${score}`
 
   useEffect(() => {
+    let cancelled = false
+    setOff(circ) // reset
+    setDisp(0)
     const end = Math.min(Math.max(score, 0), 100)
     const dur = 1600, st = performance.now()
     const tick = (now: number) => {
+      if (cancelled) return
       const p = Math.min((now - st) / dur, 1)
       const e = 1 - Math.pow(1 - p, 3)
       setDisp(Math.round(e * end))
       setOff(circ - e * (end / 100) * circ)
       if (p < 1) requestAnimationFrame(tick)
     }
-    setTimeout(() => requestAnimationFrame(tick), 200)
+    const t = setTimeout(() => requestAnimationFrame(tick), 200)
+    return () => { cancelled = true; clearTimeout(t) }
   }, [score, circ])
 
   return (
     <div style={{ position: "relative", width: size, height: size, margin: "0 auto" }}>
       <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
         <defs>
-          <linearGradient id="sg" x1="0" y1="0" x2="1" y2="0">
+          <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor={color} />
             <stop offset="100%" stopColor={`${color}88`} />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={`${color}18`} strokeWidth={size * 0.07} />
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="url(#sg)"
-          strokeWidth={size * 0.07} strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round" />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={`${color}18`} strokeWidth={size*0.07}/>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={`url(#${gradId})`}
+          strokeWidth={size*0.07} strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round"/>
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontSize: size * 0.27, fontWeight: 900, color: "#1E293B", lineHeight: 1 }}>{disp}</span>
-        <span style={{ fontSize: size * 0.1, color: "#94A3B8", fontWeight: 600 }}>/100</span>
+        <span style={{ fontSize: size*0.27, fontWeight: 900, color: "#1E293B", lineHeight: 1 }}>{disp}</span>
+        <span style={{ fontSize: size*0.1, color: "#94A3B8", fontWeight: 600 }}>/100</span>
       </div>
     </div>
   )
@@ -261,7 +268,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
   const celebChar: keyof typeof CHARS = allGoalsDone ? "celebrate" : "thumbsup"
 
   useEffect(() => { setTimeout(() => setBar(true), 300) }, [])
-  useEffect(() => { setGoals(new Array(todayGoals.length).fill(false)) }, [todayGoals.length])
+ useEffect(() => { setGoals(new Array(todayGoals.length).fill(false)) }, [data])
 
   const expand = () => {
     const n = !expanded; setExpanded(n)
