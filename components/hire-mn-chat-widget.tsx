@@ -977,6 +977,16 @@ function BotMessage({ message, fontSize, userQuestion = "", onExpandAnalysis }: 
           assistantMessage={message.content}
         />
       </div>
+            {/* Feedback */}
+      {!message.skipFeedback && (
+        <div style={{ marginLeft: 42, marginTop: 2 }}>
+          <MessageFeedback
+            messageId={`msg-${Date.now()}`}
+            userMessage={userQuestion}
+            assistantMessage={message.content}
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -1804,8 +1814,17 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                             animation: `hw-msg-in 0.4s cubic-bezier(.34,1.56,.64,1) ${i * 0.05}s both`,
                           }}
                         >
-                          {msg.role === "assistant"
-                            ? <BotMessage message={msg} fontSize={fontSize} userQuestion={prevUserMsg} />
+                                                    {msg.role === "assistant"
+                            ? <BotMessage
+                                message={msg}
+                                fontSize={fontSize}
+                                userQuestion={prevUserMsg}
+                                onExpandAnalysis={(data, title) => {
+                                  setAnalysisData(data)
+                                  setAnalysisTitle(title)
+                                  setShowAnalysis(true)
+                                }}
+                              />
                             : <UserMessage content={msg.content} fontSize={fontSize} />
                           }
                         </div>
