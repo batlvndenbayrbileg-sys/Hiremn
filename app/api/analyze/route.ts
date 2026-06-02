@@ -94,7 +94,7 @@ Rules:
 
     const data = JSON.parse(jsonStr)
 
-    if (!data.healthScore || !data.summary || !data.roadmap) {
+    if (data.healthScore == null || !data.summary || !data.roadmap) {
       throw new Error('JSON бүтэц дутуу')
     }
 
