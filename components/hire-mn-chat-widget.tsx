@@ -1045,6 +1045,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   }, [isHovered, isOpen])
   const [conversation, setConversation] = useState<Conversation | null>(null)
   const conversationRef = useRef<Conversation | null>(null)
+  const sendMessageRef = useRef<(text: string) => Promise<void>>(async () => {})
+useEffect(() => { sendMessageRef.current = sendMessage })
   useEffect(() => {
     conversationRef.current = conversation
   }, [conversation])
