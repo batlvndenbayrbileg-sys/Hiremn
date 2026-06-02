@@ -1057,10 +1057,11 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   }, [conversation])
   const messageCountRef = useRef(0)
   const [messages, setMessages] = useState<Message[]>(() => {
-    const initialMessages: Message[] = [
+       const initialMessages: Message[] = [
       {
         role: "assistant",
         content: "Сайн байна уу!\n\nБи бол hire.mn-ийн AI туслагч. Та надаас дараах зүйлсийг асууж болно:\n\n- **Тест санал болгох:** Танд тохирсон тестүүдийг олж өгнө\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг шинжилж, зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, ажлын байрны асуудлаар туслана",
+        skipFeedback: true,
       },
     ]
 
