@@ -1155,14 +1155,15 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       }
 
       // AI Analysis request with report data (from API or direct)
-      if (event.data.type === "HIREMN_AI_ANALYSIS" && event.data.payload) {
-        const { reportTitle, reportData, analysisResults, prompt } = event.data.payload
+            if (event.data.type === "HIREMN_AI_ANALYSIS" && event.data.payload) {
+        const { reportTitle, reportData, analysisResults } = event.data.payload
 
         setIsOpen(true)
         setIsTyping(true)
         setMessages(prev => [...prev, {
           role: "assistant" as const,
           content: "✨ Тайлангийн үр дүнг шинжилж байна...",
+          skipFeedback: true,
         }])
 
         const content = typeof analysisResults === 'string'
@@ -1183,12 +1184,20 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             if (result.success && result.data) {
               setAnalysisData(result.data)
               setAnalysisTitle(reportTitle || "Тест")
-              setShowAnalysis(true)
-              setMessages(prev => prev.slice(0, -1)) // loading хасна
+              setMessages(prev => [
+                ...prev.slice(0, -1),
+                {
+                  role: "assistant" as const,
+                  content: "",
+                  analysisData: result.data,
+                  analysisTitle: reportTitle || "Тест",
+                  skipFeedback: true,
+                }
+              ])
             } else {
               setMessages(prev => [
                 ...prev.slice(0, -1),
-                { role: "assistant" as const, content: "Шинжилгээ хийхэд алдаа гарлаа. Дахин оролдоно уу." }
+                { role: "assistant" as const, content: "Шинжилгээ хийхэд алдаа гарлаа. Дахин оролдоно уу.", skipFeedback: true }
               ])
             }
           })
@@ -1196,7 +1205,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             setIsTyping(false)
             setMessages(prev => [
               ...prev.slice(0, -1),
-              { role: "assistant" as const, content: "Алдаа гарлаа. Дахин оролдоно уу." }
+              { role: "assistant" as const, content: "Алдаа гарлаа. Дахин оролдоно уу.", skipFeedback: true }
             ])
           })
       }
