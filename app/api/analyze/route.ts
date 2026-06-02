@@ -1,9 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 
 function getAnthropic() {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEY тохируулагдаагүй')
-  }
+  if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not set')
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 }
 
@@ -15,71 +13,70 @@ export async function POST(request: Request) {
       ? reportData.slice(0, 3000)
       : JSON.stringify(reportData).slice(0, 3000)
 
-    const SYSTEM = `You are a professional health & psychology assessment analyst for hire.mn platform.
+    const SYSTEM = `You are a professional assessment analyst for hire.mn platform.
 
 Analyze the test result and return ONLY compact valid JSON (no whitespace, no markdown, no code blocks).
 
 The test name is: "${reportTitle}"
 
-Based on the test name and data, generate CONTEXTUAL and RELEVANT content. For example:
-- Nicotine/smoking tests → focus on dependency, health risks, quitting
-- Stress tests → focus on stress levels, relaxation, work-life balance  
-- Personality tests → focus on traits, strengths, interpersonal skills
-- IQ/cognitive tests → focus on cognitive abilities, learning, problem-solving
-- Leadership tests → focus on leadership style, team dynamics, career growth
-- General health tests → focus on overall wellbeing, lifestyle changes
+CRITICAL RULE — METRICS:
+You MUST include ALL dimensions/scales/categories of the test in the "metrics" array.
+Examples:
+- DISC test → 4 metrics: D (Удирдах чадвар), I (Нөлөөлөх чадвар), S (Тогтвортой байдал), C (Нийцэмжийн чадвар)
+- Big Five test → 5 metrics: Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism
+- IQ test → metrics for each cognitive area tested
+- Stress test → metrics for each stress dimension
+- NEVER omit any dimension. Include ALL of them regardless of how many there are.
 
 Required JSON structure:
 {
-  "healthScore": <0-100 integer based on results>,
+  "healthScore": <0-100 integer>,
   "riskLevel": "<Low|Medium|High>",
   "quitPotential": "<Low|Medium|High>",
-  "testCategory": "<health|personality|cognitive|leadership|stress|general>",
+  "testCategory": "<disc|personality|cognitive|leadership|stress|health|general>",
   "summary": {
-    "title": "<CONTEXTUAL 2-4 word title in Mongolian based on the test>",
-    "description": "<1-2 sentences in Mongolian relevant to THIS specific test>"
+    "title": "<2-4 word summary in Mongolian>",
+    "description": "<1-2 sentences in Mongolian>"
   },
-  "highlightTitle": "<Engaging headline in Mongolian like 'Сайн мэдээ!' or 'Анхаарал татаж байна!' based on results>",
-  "highlightMessage": "<1-2 sentences about the key finding, specific to this test type, in Mongolian>",
+  "highlightTitle": "<engaging headline in Mongolian>",
+  "highlightMessage": "<1-2 sentences about key finding in Mongolian>",
   "metrics": [
-    { "label": "<CONTEXTUAL metric name for this test in Mongolian>", "score": <0-10>, "maxScore": 10, "status": "<1-2 word status in Mongolian>" }
+    { "label": "<EXACT dimension name from test>", "score": <actual score 0-10>, "maxScore": 10, "status": "<1-3 word status in Mongolian>", "description": "<1 sentence explaining this dimension in Mongolian>" }
   ],
-  "strengths": ["<relevant strength for this test>", "<strength>", "<strength>"],
-  "risks": ["<relevant risk for this test>", "<risk>", "<risk>"],
+  "strengths": ["<strength>", "<strength>", "<strength>"],
+  "risks": ["<risk>", "<risk>", "<risk>"],
   "insights": [
-    { "emoji": "<relevant emoji>", "title": "<short title in Mongolian>", "description": "<1 sentence in Mongolian>", "detail": "<2-3 sentences in Mongolian>", "actions": ["<action>", "<action>", "<action>"] }
+    { "emoji": "<emoji>", "title": "<short>", "description": "<1 sentence in Mongolian>", "detail": "<2-3 sentences in Mongolian>", "actions": ["<action>", "<action>", "<action>"] }
   ],
   "roadmap": [
-    { "week": "1-р долоо хоног", "title": "<goal for week 1, relevant to test>", "tasks": ["<task>", "<task>"] },
+    { "week": "1-р долоо хоног", "title": "<goal>", "tasks": ["<task>", "<task>"] },
     { "week": "2-р долоо хоног", "title": "<goal>", "tasks": ["<task>", "<task>"] },
     { "week": "3-р долоо хоног", "title": "<goal>", "tasks": ["<task>", "<task>"] },
     { "week": "4-р долоо хоног", "title": "<goal>", "tasks": ["<task>", "<task>"] }
   ],
-  "todayGoals": ["<specific goal 1>", "<specific goal 2>", "<specific goal 3>"],
+  "todayGoals": ["<specific goal>", "<specific goal>", "<specific goal>"],
   "kpiLabels": {
-    "metric1Label": "<first KPI name for this test in Mongolian, e.g. 'Никотин хамаарал' or 'Стрессийн түвшин'>",
-    "riskLabel": "<risk section label, e.g. 'Эрсдэл' or 'Анхаарал'>",
-    "potentialLabel": "<potential label, e.g. 'Гарах боломж' or 'Сайжрах боломж'>"
+    "metric1Label": "<primary metric name for this test>",
+    "riskLabel": "<risk label>",
+    "potentialLabel": "<potential label>"
   },
   "statCards": [
-    { "icon": "🫁", "label": "<stat name relevant to test>", "value": "<calculated value>", "sub": "<brief note>" },
-    { "icon": "❤️", "label": "<stat name>", "value": "<value>", "sub": "<note>" },
-    { "icon": "💰", "label": "<stat name>", "value": "<value>", "sub": "<note>" },
-    { "icon": "📅", "label": "<stat name>", "value": "<value>", "sub": "<note>" }
+    { "icon": "<emoji>", "label": "<stat name>", "value": "<value>", "sub": "<note>" },
+    { "icon": "<emoji>", "label": "<stat name>", "value": "<value>", "sub": "<note>" },
+    { "icon": "<emoji>", "label": "<stat name>", "value": "<value>", "sub": "<note>" },
+    { "icon": "<emoji>", "label": "<stat name>", "value": "<value>", "sub": "<note>" }
   ]
 }
 
 Rules:
-- ALL text must be in Mongolian
-- Keep descriptions SHORT (max 15 words each)
-- metrics: exactly 3 items
+- ALL text in Mongolian
+- metrics: include EVERY dimension of the test (could be 2, 3, 4, 5 or more)
+- Each metric.score must reflect the ACTUAL score from the test data
 - insights: exactly 3 items
 - roadmap: exactly 4 weeks
-- Make EVERYTHING relevant to the specific test type
-- statCards should reflect meaningful statistics for this test`
+- statCards: exactly 4 items relevant to this test`
 
-    const anthropic = getAnthropic()
-    const response = await anthropic.messages.create({
+    const response = await getAnthropic().messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 4000,
       system: SYSTEM,
