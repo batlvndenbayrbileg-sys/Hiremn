@@ -1109,54 +1109,47 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
       // AI Analysis request with report data (from API or direct)
       if (event.data.type === "HIREMN_AI_ANALYSIS" && event.data.payload) {
-        const { reportTitle, reportData, userInfo, analysisResults, prompt } = event.data.payload
+        const { reportTitle, reportData, analysisResults, prompt } = event.data.payload
 
-        // Зөвхөн loading indicator харуулна ����� raw data огт харуулахгүй
+        setIsOpen(true)
         setIsTyping(true)
         setMessages(prev => [...prev, {
           role: "assistant" as const,
-          content: "Тайлангийн үр дүнг шинжилж байна...",
+          content: "✨ Тайлангийн үр дүнг шинжилж байна...",
         }])
 
-        // Data-г API руу шууд явуулна — sendMessage ашиглахгүй (UI-д гарна)
-        // PDF text бол string, object бол stringify — давхар quote хийхгүй
-        const resultStr = typeof analysisResults === 'string'
+        const content = typeof analysisResults === 'string'
           ? analysisResults
           : JSON.stringify(analysisResults || reportData || {})
 
-        const silentPrompt =
-          (prompt || "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж өгнө үү.") +
-          "\n\nТайлан: " + (reportTitle || "Тест") +
-          "\n\nТайлангийн агуулга:\n" + resultStr
-
-        fetch("/api/chat", {
+        fetch("/api/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            messages: [{ role: "user", content: silentPrompt }],
-            sessionId: conversationRef.current?.id,  // stale closure засвар
-            lang: lang === "МН" ? "mn" : "en",
+            reportData: content,
+            reportTitle: reportTitle || "Тест"
           }),
         })
-          .then(function (r) { return r.json() })
-          .then(function (data) {
+          .then(r => r.json())
+          .then(result => {
             setIsTyping(false)
-            setMessages(prev => [
-              ...prev.slice(0, -1), // loading message-г устгана
-              {
-                role: "assistant" as const,
-                content: data.reply || "Хариу авахад алдаа гарлаа.",
-              },
-            ])
+            if (result.success && result.data) {
+              setAnalysisData(result.data)
+              setAnalysisTitle(reportTitle || "Тест")
+              setShowAnalysis(true)
+              setMessages(prev => prev.slice(0, -1)) // loading хасна
+            } else {
+              setMessages(prev => [
+                ...prev.slice(0, -1),
+                { role: "assistant" as const, content: "Шинжилгээ хийхэд алдаа гарлаа. Дахин оролдоно уу." }
+              ])
+            }
           })
-          .catch(function () {
+          .catch(() => {
             setIsTyping(false)
             setMessages(prev => [
               ...prev.slice(0, -1),
-              {
-                role: "assistant" as const,
-                content: "Алдаа гарлаа. Дахин оролдоно уу.",
-              },
+              { role: "assistant" as const, content: "Алдаа гарлаа. Дахин оролдоно уу." }
             ])
           })
       }
