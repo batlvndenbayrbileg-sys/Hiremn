@@ -1792,10 +1792,11 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               {activeTab === 0 && (
                 <>
                   {/* Chat Messages Area */}
-                  <div className="hw-scroll" style={{
+                                    <div className="hw-scroll" style={{
                     flex: 1,
                     minHeight: 0,
                     overflowY: "auto",
+                    overflowX: "hidden",
                     padding: "20px 14px 12px",
                     display: "flex", flexDirection: "column", gap: 14,
                     background: "#F9FAFB",
