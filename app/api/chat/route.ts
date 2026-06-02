@@ -18,7 +18,12 @@ import {
 
 export const maxDuration = 60
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+function getAnthropic() {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY тохируулагдаагүй')
+  }
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+}
 
 let cachedAssessments: Assessment[] = []
 let cachedCategories: AssessmentCategoryWithTests[] = []
