@@ -1214,26 +1214,20 @@ useEffect(() => { sendMessageRef.current = sendMessage })
   }
 
   // Auto-save conversation
-  useEffect(() => {
-    if (!conversation || messages.length === 0) return
-    const timer = setTimeout(() => {
-      const userMessages = messages.filter(m => m.role === 'user').length
-      const title = messages.find(m => m.role === 'user')?.content
-        ? generateConversationTitle(messages.find(m => m.role === 'user')!.content)
-        : 'Шинэ яриа'
-
-      const updated = {
-        ...conversation,
-        messages,
-        title,
-        messageCount: userMessages,
-        updatedAt: Date.now(),
-      }
-      saveConversation(updated)
-      setConversation(updated)
-    }, 1000)
-    return () => clearTimeout(timer)
-  }, [messages, conversation])
+ useEffect(() => {
+  if (!conversationRef.current || messages.length === 0) return
+  const timer = setTimeout(() => {
+    const conv = conversationRef.current!
+    const userMessages = messages.filter(m => m.role === 'user').length
+    const title = messages.find(m => m.role === 'user')?.content
+      ? generateConversationTitle(messages.find(m => m.role === 'user')!.content)
+      : 'Шинэ яриа'
+    const updated = { ...conv, messages, title, messageCount: userMessages, updatedAt: Date.now() }
+    saveConversation(updated)
+    setConversation(updated)
+  }, 1000)
+  return () => clearTimeout(timer)
+}, [messages])   // ← conversation хасав
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
