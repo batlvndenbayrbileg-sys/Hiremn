@@ -1123,21 +1123,11 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         setIsTyping(false)
         const errorMsg: Message = {
           role: "assistant",
-          content: `**Алдаа:** ${event.data.message || "Өгөгдөл татахад алдаа гарлаа."}\n\nДахин оролдоно уу эсвэл hire.mn Х
-          Хэрэглэгчийн тусламжтай холбогдоно уу.`,
-        }
-        if (event.data.type === "HIREMN_ERROR") {
-          setIsTyping(false)
-          const errorMsg: Message = {
-            role: "assistant",
-            content: `**Алдаа:** ${event.data.message || "Өгөгдөл татахад алдаа гарлаа."}\n\nДахин оролдоно уу эсвэл hire.mn Х\n          Хэрэглэгчийн тусламжтай холбогдоно уу.`,
-            skipFeedback: true,
-          }
-          setMessages(prev => [...prev, errorMsg])
+          content: `**Алдаа:** ${event.data.message || "Өгөгдөл татахад алдаа гарлаа."}\n\nДахин оролдоно уу эсвэл hire.mn-ийн тусламжтай холбогдоно уу.`,
+          skipFeedback: true,
         }
         setMessages(prev => [...prev, errorMsg])
       }
-
       // AI Analysis request with report data (from API or direct)
       if (event.data.type === "HIREMN_AI_ANALYSIS" && event.data.payload) {
         const { reportTitle, reportData, analysisResults } = event.data.payload
