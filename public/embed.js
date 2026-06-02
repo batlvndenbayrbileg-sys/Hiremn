@@ -182,21 +182,31 @@
         });
     },
 
-    openWithAnalysis: function (data) {
-      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN);
-      setTimeout(function () {
-        iframe.contentWindow.postMessage({
-          type: "HIREMN_AI_ANALYSIS",
-          payload: {
-            reportTitle: data.reportTitle || "",
-            reportData: data.reportData || {},
-            userInfo: data.userInfo || {},
-            analysisResults: data.analysisResults || {},
-            prompt: data.prompt || "Миний тестийн үр дүнг задлан шинжилж, надад зөвлөгөө өгнө үү."
-          }
-        }, ORIGIN);
-      }, 500);
-    },
+   openWithAnalysis: function (data) {
+  iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, ORIGIN);
+  var payload = {
+    type: "HIREMN_AI_ANALYSIS",
+    payload: {
+      reportTitle: data.reportTitle || "",
+      reportData: data.reportData || {},
+      userInfo: data.userInfo || {},
+      analysisResults: data.analysisResults || {},
+      prompt: data.prompt || "Миний тестийн үр дүнг задлан шинжилж, надад зөвлөгөө өгнө үү."
+    }
+  };
+  // Wait for widget ready signal, fallback to 800ms
+  var sent = false;
+  var fallback = setTimeout(function() {
+    if (!sent) { sent = true; iframe.contentWindow.postMessage(payload, ORIGIN); }
+  }, 800);
+  var handler = function(e) {
+    if (e.origin === ORIGIN && e.data && e.data.type === "HIREMN_READY") {
+      if (!sent) { sent = true; clearTimeout(fallback); iframe.contentWindow.postMessage(payload, ORIGIN); }
+      window.removeEventListener("message", handler);
+    }
+  };
+  window.addEventListener("message", handler);
+},
 
     sendMessage: function (message) {
       iframe.contentWindow.postMessage({
