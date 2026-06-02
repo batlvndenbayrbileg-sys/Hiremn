@@ -149,8 +149,8 @@ export async function POST(req: Request) {
       const faqResult = findFAQ(lastMessage, lang, liveAssessments)
       if (faqResult) {
         let suggestedTests: typeof liveAssessments = []
-        if (faqResult.suggestCategories?.length > 0) {
-          for (const cat of faqResult.suggestCategories) {
+        if ((faqResult.suggestCategories?.length ?? 0) > 0) {
+          for (const cat of faqResult.suggestCategories!) {
             const catTests = liveAssessments
               .filter(a => a.category?.name?.toLowerCase().includes(cat.toLowerCase()))
               .slice(0, 3)
@@ -198,6 +198,7 @@ export async function POST(req: Request) {
         content: String(m.content),
       }))
 
+    const anthropic = getAnthropic()
     const [aiResponse, agentResult] = await Promise.all([
       anthropic.messages.create({
         model: 'claude-sonnet-4-5',

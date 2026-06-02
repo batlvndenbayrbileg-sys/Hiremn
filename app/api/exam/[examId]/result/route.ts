@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { examId: string } }
+  { params }: { params: Promise<{ examId: string }> }
 ) {
   try {
-    const examId = params.examId
+    const { examId } = await params
 
     // Hire.mn API-аас exam результат авах
     const resultResponse = await fetch(

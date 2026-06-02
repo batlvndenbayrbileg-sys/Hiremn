@@ -78,6 +78,7 @@ Rules:
 - Make EVERYTHING relevant to the specific test type
 - statCards should reflect meaningful statistics for this test`
 
+    const anthropic = getAnthropic()
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 4000,
