@@ -130,7 +130,157 @@ function BottomSheet({ insight, onClose }: { insight: AnalysisData["insights"][0
     </div>
   )
 }
+// ─── Compact inline card — чат дотор харагдана ─────────────────────────────
+export function AnalysisCard({
+  data,
+  title,
+  onExpand,
+}: {
+  data: AnalysisData
+  title: string
+  onExpand: () => void
+}) {
+  const [barAnimated, setBarAnimated] = useState(false)
+  useEffect(() => { setTimeout(() => setBarAnimated(true), 200) }, [])
 
+  const scoreColor = data.healthScore >= 70 ? "#34C759" : data.healthScore >= 40 ? "#FF9F0A" : "#FF3B30"
+  const riskColor = data.riskLevel === "Low" ? "#34C759" : data.riskLevel === "Medium" ? "#FF9F0A" : "#FF3B30"
+  const potColor = data.quitPotential === "High" ? "#34C759" : data.quitPotential === "Medium" ? "#FF9F0A" : "#FF3B30"
+  const circ = 2 * Math.PI * 28
+  const offset = circ - (data.healthScore / 100) * circ
+
+  return (
+    <div style={{
+      background: "#fff",
+      borderRadius: 20,
+      overflow: "hidden",
+      boxShadow: "0 4px 24px rgba(0,0,0,0.09)",
+      border: "1px solid rgba(0,0,0,0.05)",
+      animation: "fadeSlide 0.4s ease"
+    }}>
+      {/* Gradient header */}
+      <div style={{
+        background: "linear-gradient(135deg, #E8541A 0%, #FF6B3D 60%, #FF9F42 100%)",
+        padding: "18px 18px 16px",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 10, fontWeight: 700, margin: "0 0 4px", letterSpacing: "0.5px" }}>
+              🧠 AI ШИНЖИЛГЭЭ
+            </p>
+            <p style={{
+              color: "#fff", fontSize: 15, fontWeight: 800, margin: 0,
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+            }}>{title}</p>
+          </div>
+          {/* Score ring */}
+          <div style={{ position: "relative", width: 64, height: 64, flexShrink: 0, marginLeft: 12 }}>
+            <svg width="64" height="64" style={{ transform: "rotate(-90deg)" }}>
+              <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="6" />
+              <circle cx="32" cy="32" r="28" fill="none" stroke="#fff" strokeWidth="6"
+                strokeDasharray={circ}
+                strokeDashoffset={barAnimated ? offset : circ}
+                strokeLinecap="round"
+                style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1)" }} />
+            </svg>
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "#fff", fontSize: 18, fontWeight: 900, lineHeight: 1 }}>{data.healthScore}</span>
+              <span style={{ color: "rgba(255,255,255,0.65)", fontSize: 8, fontWeight: 600 }}>/100</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Summary pill */}
+        <div style={{
+          marginTop: 12,
+          background: "rgba(255,255,255,0.15)",
+          borderRadius: 10, padding: "6px 12px",
+          display: "inline-flex", alignItems: "center", gap: 6
+        }}>
+          <span style={{ color: "#fff", fontSize: 13, fontWeight: 700 }}>{data.summary.title}</span>
+        </div>
+      </div>
+
+      {/* Stats row */}
+      <div style={{ display: "flex", gap: 1, background: "#F4F4F4" }}>
+        {[
+          { label: "ХАМААРАЛ", value: data.metrics[0] ? `${data.metrics[0].score}/${data.metrics[0].maxScore}` : "—", sub: data.metrics[0]?.status, color: "#E8541A" },
+          { label: "ЭРСДЭЛ", value: data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : "Өндөр", sub: "түвшин", color: riskColor },
+          { label: "БОЛОМЖ", value: data.quitPotential === "High" ? "Өндөр" : data.quitPotential === "Medium" ? "Дунд" : "Бага", sub: "магадлал", color: potColor },
+        ].map((s, i) => (
+          <div key={i} style={{ flex: 1, background: "#fff", padding: "12px 8px", textAlign: "center" }}>
+            <p style={{ fontSize: 9, color: "#aaa", fontWeight: 700, letterSpacing: "0.4px", margin: "0 0 5px" }}>{s.label}</p>
+            <p style={{ fontSize: 17, fontWeight: 900, color: s.color, margin: "0 0 2px" }}>{s.value}</p>
+            <p style={{ fontSize: 10, color: "#bbb", margin: 0 }}>{s.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Metrics bars */}
+      <div style={{ padding: "14px 16px 4px" }}>
+        {data.metrics.slice(0, 2).map((m, i) => (
+          <div key={i} style={{ marginBottom: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#333" }}>{m.label}</span>
+              <span style={{ fontSize: 11, color: "#aaa" }}>{m.score}/{m.maxScore}</span>
+            </div>
+            <div style={{ background: "#F0F0F0", borderRadius: 6, height: 7, overflow: "hidden" }}>
+              <div style={{
+                height: "100%", borderRadius: 6,
+                width: barAnimated ? `${(m.score / m.maxScore) * 100}%` : "0%",
+                background: m.score / m.maxScore > 0.6
+                  ? "linear-gradient(90deg, #FF3B30, #FF6B6B)"
+                  : m.score / m.maxScore > 0.3
+                    ? "linear-gradient(90deg, #FF9F0A, #FFCC44)"
+                    : "linear-gradient(90deg, #34C759, #4CD964)",
+                transition: "width 1.1s cubic-bezier(.16,1,.3,1)"
+              }} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Insights preview */}
+      {data.insights?.length > 0 && (
+        <div style={{ padding: "4px 16px 12px", display: "flex", gap: 8, overflowX: "hidden" }}>
+          {data.insights.slice(0, 3).map((ins, i) => (
+            <div key={i} style={{
+              flex: 1, background: "#F8F8F8", borderRadius: 12,
+              padding: "8px 10px", minWidth: 0
+            }}>
+              <span style={{ fontSize: 16 }}>{ins.emoji}</span>
+              <p style={{
+                fontSize: 11, fontWeight: 600, color: "#333", margin: "4px 0 0",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+              }}>{ins.title}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Expand button */}
+      <div style={{ padding: "0 16px 16px" }}>
+        <button onClick={onExpand} style={{
+          width: "100%", padding: "13px 16px",
+          background: "linear-gradient(135deg, #1a1a1a 0%, #333 100%)",
+          border: "none", borderRadius: 14, cursor: "pointer",
+          color: "#fff", fontSize: 14, fontWeight: 700,
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+          transition: "all 0.2s ease",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.15)"
+        }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(0,0,0,0.2)" }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.15)" }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+          </svg>
+          Дэлгэрэнгүй шинжилгээ харах
+        </button>
+      </div>
+    </div>
+  )
+}
 export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) {
   const [screen, setScreen] = useState(0)
   const [selectedInsight, setSelectedInsight] = useState<AnalysisData["insights"][0] | null>(null)
@@ -318,13 +468,13 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               }}
                 onMouseEnter={e => {
                   (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
-                  ;(e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(232,84,26,0.12)"
-                  ;(e.currentTarget as HTMLElement).style.borderColor = `${BRAND}30`
+                    ; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(232,84,26,0.12)"
+                    ; (e.currentTarget as HTMLElement).style.borderColor = `${BRAND}30`
                 }}
                 onMouseLeave={e => {
                   (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
-                  ;(e.currentTarget as HTMLElement).style.boxShadow = "0 2px 14px rgba(0,0,0,0.06)"
-                  ;(e.currentTarget as HTMLElement).style.borderColor = "transparent"
+                    ; (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 14px rgba(0,0,0,0.06)"
+                    ; (e.currentTarget as HTMLElement).style.borderColor = "transparent"
                 }}
               >
                 <div style={{
