@@ -969,15 +969,8 @@ function BotMessage({ message, fontSize, userQuestion = "", onExpandAnalysis }: 
         </div>
       )}
 
-      {/* Feedback - response дор шууд */}
-      <div style={{ marginLeft: 42, marginTop: 2 }}>
-        <MessageFeedback
-          messageId={`msg-${Date.now()}`}
-          userMessage={userQuestion}
-          assistantMessage={message.content}
-        />
-      </div>
-            {/* Feedback */}
+
+      {/* Feedback */}
       {!message.skipFeedback && (
         <div style={{ marginLeft: 42, marginTop: 2 }}>
           <MessageFeedback
@@ -1057,7 +1050,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   }, [conversation])
   const messageCountRef = useRef(0)
   const [messages, setMessages] = useState<Message[]>(() => {
-       const initialMessages: Message[] = [
+    const initialMessages: Message[] = [
       {
         role: "assistant",
         content: "Сайн байна уу!\n\nБи бол hire.mn-ийн AI туслагч. Та надаас дараах зүйлсийг асууж болно:\n\n- **Тест санал болгох:** Танд тохирсон тестүүдийг олж өгнө\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг шинжилж, зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, ажлын байрны асуудлаар туслана",
@@ -1115,22 +1108,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         sendMessage(event.data.message)
       }
 
-      // Loading state - show when fetching from API
       if (event.data.type === "HIREMN_LOADING") {
-        const loadingMsg: Message = {
-          role: "assistant",
-          
-          content: `**${event.data.message || "Уншиж байна..."}**`,
-        }
-              if (event.data.type === "HIREMN_LOADING") {
         const loadingMsg: Message = {
           role: "assistant",
           content: `**${event.data.message || "Уншиж байна..."}**`,
           skipFeedback: true,
         }
-        setMessages(prev => [...prev, loadingMsg])
-        setIsTyping(true)
-      }
         setMessages(prev => [...prev, loadingMsg])
         setIsTyping(true)
       }
@@ -1143,20 +1126,20 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           content: `**Алдаа:** ${event.data.message || "Өгөгдөл татахад алдаа гарлаа."}\n\nДахин оролдоно уу эсвэл hire.mn Х
           Хэрэглэгчийн тусламжтай холбогдоно уу.`,
         }
-              if (event.data.type === "HIREMN_ERROR") {
-        setIsTyping(false)
-        const errorMsg: Message = {
-          role: "assistant",
-          content: `**Алдаа:** ${event.data.message || "Өгөгдөл татахад алдаа гарлаа."}\n\nДахин оролдоно уу эсвэл hire.mn Х\n          Хэрэглэгчийн тусламжтай холбогдоно уу.`,
-          skipFeedback: true,
+        if (event.data.type === "HIREMN_ERROR") {
+          setIsTyping(false)
+          const errorMsg: Message = {
+            role: "assistant",
+            content: `**Алдаа:** ${event.data.message || "Өгөгдөл татахад алдаа гарлаа."}\n\nДахин оролдоно уу эсвэл hire.mn Х\n          Хэрэглэгчийн тусламжтай холбогдоно уу.`,
+            skipFeedback: true,
+          }
+          setMessages(prev => [...prev, errorMsg])
         }
-        setMessages(prev => [...prev, errorMsg])
-      }
         setMessages(prev => [...prev, errorMsg])
       }
 
       // AI Analysis request with report data (from API or direct)
-            if (event.data.type === "HIREMN_AI_ANALYSIS" && event.data.payload) {
+      if (event.data.type === "HIREMN_AI_ANALYSIS" && event.data.payload) {
         const { reportTitle, reportData, analysisResults } = event.data.payload
 
         setIsOpen(true)
@@ -1821,7 +1804,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               {activeTab === 0 && (
                 <>
                   {/* Chat Messages Area */}
-                                    <div className="hw-scroll" style={{
+                  <div className="hw-scroll" style={{
                     flex: 1,
                     minHeight: 0,
                     overflowY: "auto",
@@ -1844,17 +1827,17 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                             animation: `hw-msg-in 0.4s cubic-bezier(.34,1.56,.64,1) ${i * 0.05}s both`,
                           }}
                         >
-                                                    {msg.role === "assistant"
+                          {msg.role === "assistant"
                             ? <BotMessage
-                                message={msg}
-                                fontSize={fontSize}
-                                userQuestion={prevUserMsg}
-                                onExpandAnalysis={(data, title) => {
-                                  setAnalysisData(data)
-                                  setAnalysisTitle(title)
-                                  setShowAnalysis(true)
-                                }}
-                              />
+                              message={msg}
+                              fontSize={fontSize}
+                              userQuestion={prevUserMsg}
+                              onExpandAnalysis={(data, title) => {
+                                setAnalysisData(data)
+                                setAnalysisTitle(title)
+                                setShowAnalysis(true)
+                              }}
+                            />
                             : <UserMessage content={msg.content} fontSize={fontSize} />
                           }
                         </div>
