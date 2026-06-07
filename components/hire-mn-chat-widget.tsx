@@ -1132,13 +1132,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         const sanitize = (s: string) =>
           (s || "").replace(/hire\.?mn/gi, "тест систем").replace(/платформ/gi, "систем")
 
+        // Compact answer summary — cap to first 20 to keep prompt short
         const answerSummary = answersPayload
+          .slice(0, 20)
           .map((a: any, i: number) => {
-            const q = a?.question?.name || `Асуулт ${i + 1}`
             const v = a?.answer?.value ?? ""
             const p = a?.point ?? a?.answer?.point ?? ""
-            const cat = a?.questionCategory?.name || ""
-            return `${i + 1}. [${cat}] ${q} → "${v}" (${p} оноо)`
+            return `${i + 1}. "${v}" (${p})`
           })
           .join("\n")
 

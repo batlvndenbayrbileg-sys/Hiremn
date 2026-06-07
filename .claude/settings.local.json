@@ -24,7 +24,8 @@
       "Bash(npx tsc *)",
       "Bash(echo \"EXITCODE=$?\")",
       "Bash(npx next *)",
-      "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Critical fix + full codebase audit cleanup *)"
+      "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Critical fix + full codebase audit cleanup *)",
+      "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Fix 504 timeout: switch report analysis to Haiku model + shorter prompt *)"
     ]
   }
 }

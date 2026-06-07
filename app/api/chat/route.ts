@@ -16,7 +16,8 @@ import {
   type AssessmentCategoryWithTests,
 } from '@/lib/hire-api'
 
-export const maxDuration = 30
+// Vercel Hobby max is 10s. Keep this conservative.
+export const maxDuration = 60
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -108,30 +109,33 @@ export async function POST(req: Request) {
       return Response.json({ error: 'empty message' }, { status: 400 })
 
     // ── FAST PATH: Report analysis requests ─────────────────────────────
-    // When the chat widget sends a report analysis prompt, bypass all the
-    // classifier/test-lookup logic and go straight to the LLM with a focused
-    // system prompt. This avoids brittle dependencies (hire-api fetches,
-    // classifier edge cases) that can cause the whole route to fail.
+    // Bypass classifier/test-lookup. Use Haiku (fast, cheap) with a tight
+    // token budget so we never exceed Vercel's serverless timeout.
     if (/^Тестийн үр дүнгийн дүн шинжилгээ хийнэ үү/i.test(lastMessage.trim())) {
       try {
         if (!process.env.ANTHROPIC_API_KEY) {
           return Response.json({ error: 'ANTHROPIC_API_KEY missing on server' }, { status: 503 })
         }
-        const analysisSystem = `Та hire.mn-ийн мэргэжлийн сэтгэл зүйч AI зөвлөх.
-Хэрэглэгчийн тестийн үр дүнг ГҮНЗГИЙ, ПРАКТИК, ЭМПАТИТЭЙ задлан шинжил.
-Хариултыг дараах бүтэцтэй өг (Markdown-аар, гарчгийг ** одоор тодруулна):
-1. **Гол дүгнэлт** — 2-3 өгүүлбэрээр үнэлгээний утга
-2. **Давуу тал** — тодорхой 2-3 зүйл
-3. **Анхаарах зүйл** — тодорхой 2-3 зүйл
-4. **Практик зөвлөмж** — bullet 4-5
-5. **Цаашдын алхам** — bullet 3-4
-Тон: эерэг, эрсдэлгүй, оношилгоо БИШ.`
+
+        // Trim huge prompts to keep latency predictable (max ~6k chars input)
+        const trimmedPrompt =
+          lastMessage.length > 6000 ? lastMessage.slice(0, 6000) + '\n...' : lastMessage
+
+        const analysisSystem =
+          'Та hire.mn-ийн сэтгэл зүйч AI зөвлөх. Тестийн үр дүнг МОНГОЛоор товч, практик задлан шинжил. ' +
+          'Бүтэц (Markdown, гарчгийг ** одоор):\n' +
+          '1. **Гол дүгнэлт** (2 өгүүлбэр)\n' +
+          '2. **Давуу тал** (2-3 bullet)\n' +
+          '3. **Анхаарах зүйл** (2-3 bullet)\n' +
+          '4. **Практик зөвлөмж** (3-4 bullet)\n' +
+          '5. **Цаашдын алхам** (2-3 bullet)\n' +
+          'Тон: эерэг, эмпатитэй, оношилгоо БИШ. Нийт 350-500 үг.'
 
         const analysisResp = await anthropic.messages.create({
-          model: 'claude-sonnet-4-5-20250929',
-          max_tokens: 2000,
+          model: 'claude-haiku-4-5',
+          max_tokens: 1200,
           system: analysisSystem,
-          messages: [{ role: 'user', content: lastMessage }],
+          messages: [{ role: 'user', content: trimmedPrompt }],
         })
         const text = analysisResp.content
           .filter((b: any) => b.type === 'text')
