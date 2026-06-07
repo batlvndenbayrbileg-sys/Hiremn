@@ -875,72 +875,169 @@ function AdviceSections({ sections }: { sections: AdviceSection[] }) {
 
 // ── Artifact View (full-screen-within-widget detail panel) ───────────────────
 
-// ── Animated Score Ring ──────────────────────────────────────────────────────
+// ── Animated counter (counts up from 0) ──────────────────────────────────────
 
-function ScoreRing({ pct, tone, size = 150 }: { pct: number; tone: { ring: string; soft: string; grad: string }; size?: number }) {
-  const stroke = 10
+function useAnimatedNumber(target: number, duration = 1400) {
+  const [value, setValue] = useState(0)
+  useEffect(() => {
+    let raf = 0
+    const start = performance.now()
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - start) / duration)
+      const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+      setValue(Math.round(target * eased))
+      if (progress < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [target, duration])
+  return value
+}
+
+// ── Semi-circle Gauge (professional dashboard style) ─────────────────────────
+
+function SemicircleGauge({ pct, tone, size = 220 }: { pct: number; tone: { ring: string; soft: string; grad: string }; size?: number }) {
+  const stroke = 16
   const radius = (size - stroke) / 2
-  const circumference = 2 * Math.PI * radius
-  const offset = circumference - (pct / 100) * circumference
+  const cx = size / 2
+  const cy = size / 2
+  // Semi-circle path: 180° arc from left to right
+  const semiCircumference = Math.PI * radius
+  const offset = semiCircumference - (pct / 100) * semiCircumference
+  const animatedPct = useAnimatedNumber(pct)
+
+  // Calculate needle position
+  const needleAngle = (pct / 100) * 180 - 180 // -180° to 0°
+  const needleX = cx + Math.cos((needleAngle * Math.PI) / 180) * (radius - 4)
+  const needleY = cy + Math.sin((needleAngle * Math.PI) / 180) * (radius - 4)
+
+  const gid = `gauge-${tone.ring.replace("#", "")}`
 
   return (
-    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }}>
+    <div style={{ position: "relative", width: size, height: size / 1.6, flexShrink: 0 }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ overflow: "visible" }}>
         <defs>
-          <linearGradient id={`ring-${tone.ring.replace("#", "")}`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={tone.ring} stopOpacity="1"/>
-            <stop offset="100%" stopColor={tone.ring} stopOpacity="0.7"/>
+          <linearGradient id={gid} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#EF4444"/>
+            <stop offset="50%" stopColor="#F59E0B"/>
+            <stop offset="100%" stopColor="#10B981"/>
           </linearGradient>
         </defs>
-        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="#F3F4F6" strokeWidth={stroke}/>
-        <circle
-          cx={size/2} cy={size/2} r={radius} fill="none"
-          stroke={`url(#ring-${tone.ring.replace("#", "")})`}
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
+        {/* Background arc */}
+        <path
+          d={`M ${stroke / 2} ${cy} A ${radius} ${radius} 0 0 1 ${size - stroke / 2} ${cy}`}
+          fill="none" stroke="#F3F4F6" strokeWidth={stroke} strokeLinecap="round"
+        />
+        {/* Filled arc */}
+        <path
+          d={`M ${stroke / 2} ${cy} A ${radius} ${radius} 0 0 1 ${size - stroke / 2} ${cy}`}
+          fill="none" stroke={`url(#${gid})`} strokeWidth={stroke} strokeLinecap="round"
+          strokeDasharray={semiCircumference}
           strokeDashoffset={offset}
           style={{
-            transition: "stroke-dashoffset 1.4s cubic-bezier(.16,1,.3,1)",
-            filter: `drop-shadow(0 4px 8px ${tone.ring}55)`,
+            transition: "stroke-dashoffset 1.6s cubic-bezier(.16,1,.3,1)",
+            filter: `drop-shadow(0 6px 12px ${tone.ring}55)`,
           }}
         />
+        {/* Needle */}
+        <line
+          x1={cx} y1={cy} x2={needleX} y2={needleY}
+          stroke="#1F2937" strokeWidth="3" strokeLinecap="round"
+          style={{ transition: "all 1.6s cubic-bezier(.16,1,.3,1)" }}
+        />
+        <circle cx={cx} cy={cy} r="8" fill="#1F2937"/>
+        <circle cx={cx} cy={cy} r="4" fill="#fff"/>
       </svg>
+
+      {/* Centered number under gauge */}
       <div style={{
-        position: "absolute", inset: 0,
-        display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
+        position: "absolute",
+        left: 0, right: 0, bottom: -6,
+        textAlign: "center",
       }}>
-        <div style={{ fontSize: size > 130 ? 42 : 32, fontWeight: 900, color: "#111827", lineHeight: 1, letterSpacing: -1 }}>
-          {pct}
+        <div style={{
+          fontSize: 44, fontWeight: 900, color: "#111827",
+          lineHeight: 1, letterSpacing: -1.5,
+          fontFeatureSettings: "'tnum'",
+        }}>
+          {animatedPct}
+          <span style={{ fontSize: 18, color: "#9CA3AF", fontWeight: 700 }}>/100</span>
         </div>
-        <div style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 600, marginTop: 2 }}>/100</div>
+      </div>
+
+      {/* Min/Max labels */}
+      <div style={{
+        position: "absolute", left: 2, bottom: 4,
+        fontSize: 9, fontWeight: 700, color: "#9CA3AF", letterSpacing: 0.5,
+      }}>0</div>
+      <div style={{
+        position: "absolute", right: 2, bottom: 4,
+        fontSize: 9, fontWeight: 700, color: "#9CA3AF", letterSpacing: 0.5,
+      }}>100</div>
+    </div>
+  )
+}
+
+// ── Big Numbered Section Header ──────────────────────────────────────────────
+
+function BigSectionHeader({ number, title, subtitle, accent = "#E8541A" }: {
+  number: number
+  title: string
+  subtitle: string
+  accent?: string
+}) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 12,
+      padding: "26px 4px 14px",
+    }}>
+      <div style={{
+        width: 44, height: 44, borderRadius: 14,
+        background: `linear-gradient(135deg, ${accent}, ${accent}cc)`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        color: "#fff", fontSize: 18, fontWeight: 900,
+        boxShadow: `0 8px 20px ${accent}40`,
+        flexShrink: 0,
+      }}>
+        {number}
+      </div>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{
+          fontSize: 9, fontWeight: 800, color: accent,
+          letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 2,
+        }}>
+          Step {number} of 3
+        </div>
+        <div style={{
+          fontSize: 18, fontWeight: 900, color: "#111827",
+          lineHeight: 1.15, letterSpacing: -0.5,
+        }}>
+          {title}
+        </div>
+        <div style={{ fontSize: 11, color: "#6B7280", fontWeight: 500, marginTop: 2 }}>
+          {subtitle}
+        </div>
       </div>
     </div>
   )
 }
 
-// ── Section Header ──────────────────────────────────────────────────────────
+// ── Section Progress Indicator (top of artifact) ─────────────────────────────
 
-function SectionHeader({ icon, label, accent = "#E8541A" }: { icon: string; label: string; accent?: string }) {
+function SectionProgress({ active, tone }: { active: 1 | 2 | 3; tone: { ring: string } }) {
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 10,
-      padding: "20px 4px 6px",
+      display: "flex", alignItems: "center", gap: 4,
+      padding: "0 0 10px",
     }}>
-      <div style={{
-        width: 28, height: 1.5, background: `linear-gradient(90deg, transparent, ${accent}44)`, flexShrink: 0,
-      }}/>
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <span style={{ fontSize: 14 }}>{icon}</span>
-        <span style={{
-          fontSize: 10, fontWeight: 800, color: accent,
-          letterSpacing: 1.5, textTransform: "uppercase",
-        }}>{label}</span>
-      </div>
-      <div style={{
-        flex: 1, height: 1.5, background: `linear-gradient(90deg, ${accent}44, transparent)`,
-      }}/>
+      {[1, 2, 3].map(n => (
+        <div key={n} style={{
+          flex: 1, height: 4, borderRadius: 4,
+          background: n <= active ? tone.ring : "#E5E7EB",
+          transition: "background 0.4s",
+          boxShadow: n <= active ? `0 2px 6px ${tone.ring}55` : "none",
+        }}/>
+      ))}
     </div>
   )
 }
@@ -1048,150 +1145,159 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
         flex: 1, overflowY: "auto",
         padding: "14px 12px 8px",
         display: "flex", flexDirection: "column", gap: 0,
+        background: "linear-gradient(180deg, #FAFBFC 0%, #FFFFFF 30%)",
       }}>
-        {/* SECTION 1: SCORE OVERVIEW (Hero) */}
+        {/* Section progress indicator */}
+        <SectionProgress active={3} tone={tone}/>
+
+        {/* ═══ SECTION 1: SCORE OVERVIEW ═══════════════════════════════════ */}
+        <BigSectionHeader
+          number={1}
+          title="Үр дүнгийн тойм"
+          subtitle="Таны оноо болон ерөнхий үнэлгээ"
+          accent={tone.ring}
+        />
+
+        {/* HERO: Gauge + Meta */}
         <div style={{
           background: "#fff",
-          borderRadius: 20,
-          padding: "20px 18px 18px",
-          border: "1px solid rgba(0,0,0,0.04)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.05)",
+          borderRadius: 24,
+          padding: "20px 18px 22px",
+          border: "1px solid rgba(0,0,0,0.05)",
+          boxShadow: "0 12px 40px rgba(0,0,0,0.06)",
           position: "relative", overflow: "hidden",
+          marginBottom: 10,
         }}>
-          {/* Decorative gradient blob */}
+          {/* Decorative orbs */}
           <div style={{
-            position: "absolute", top: -50, right: -50,
-            width: 180, height: 180, borderRadius: "50%",
-            background: `radial-gradient(circle, ${tone.ring}22 0%, transparent 70%)`,
+            position: "absolute", top: -60, right: -40,
+            width: 200, height: 200, borderRadius: "50%",
+            background: `radial-gradient(circle, ${tone.ring}1a 0%, transparent 65%)`,
+            pointerEvents: "none",
+          }}/>
+          <div style={{
+            position: "absolute", bottom: -50, left: -30,
+            width: 140, height: 140, borderRadius: "50%",
+            background: `radial-gradient(circle, ${tone.ring}11 0%, transparent 65%)`,
             pointerEvents: "none",
           }}/>
 
-          {/* Title row */}
+          {/* Test name badge */}
           <div style={{
-            display: "flex", alignItems: "center", gap: 6,
-            marginBottom: 16, position: "relative",
+            display: "flex", justifyContent: "center", marginBottom: 8, position: "relative",
           }}>
-            <span style={{
-              fontSize: 9, fontWeight: 800, color: "#6B7280",
-              letterSpacing: 1.5, textTransform: "uppercase",
-            }}>Welcome to your</span>
-            <span style={{
-              fontSize: 9, fontWeight: 800,
-              padding: "3px 8px", borderRadius: 999,
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "6px 14px", borderRadius: 999,
               background: tone.bg, color: tone.ring,
-              letterSpacing: 1, textTransform: "uppercase",
+              fontSize: 11, fontWeight: 700,
               border: `1px solid ${tone.soft}`,
-            }}>Health Score</span>
+              boxShadow: `0 4px 12px ${tone.ring}22`,
+            }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/>
+              </svg>
+              {card.testName}
+            </div>
           </div>
 
-          {/* Score Ring + breakdown */}
+          {/* Semi-circle Gauge */}
           <div style={{
-            display: "flex", alignItems: "center", gap: 18,
-            marginBottom: 18, position: "relative",
+            display: "flex", justifyContent: "center", marginTop: -10, marginBottom: 16,
+            position: "relative",
           }}>
-            <ScoreRing pct={pct} tone={tone} size={130} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontSize: 11, fontWeight: 700, color: "#9CA3AF",
-                letterSpacing: 1, textTransform: "uppercase", marginBottom: 4,
-              }}>Үр дүн</div>
-              <div style={{
-                fontSize: 18, fontWeight: 900, color: "#111827",
-                lineHeight: 1.2, marginBottom: 8,
-                whiteSpace: "normal",
-              }}>{card.resultLabel || "Тодорхойлоогүй"}</div>
-              <div style={{
-                display: "inline-flex", alignItems: "center", gap: 5,
-                padding: "5px 10px", borderRadius: 999,
-                background: tone.bg, color: tone.ring,
-                fontSize: 12, fontWeight: 700,
-                border: `1px solid ${tone.soft}`,
-              }}>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-                </svg>
-                {card.score}/{card.total} оноо
-              </div>
+            <SemicircleGauge pct={pct} tone={tone} size={Math.min(260, 260)}/>
+          </div>
+
+          {/* Result label */}
+          <div style={{
+            textAlign: "center", marginBottom: 18, position: "relative",
+          }}>
+            <div style={{
+              fontSize: 10, fontWeight: 800, color: "#9CA3AF",
+              letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4,
+            }}>
+              Үнэлгээ
+            </div>
+            <div style={{
+              fontSize: 22, fontWeight: 900, color: "#111827",
+              lineHeight: 1.2, letterSpacing: -0.5,
+            }}>
+              {card.resultLabel || "Тодорхойлоогүй"}
             </div>
           </div>
 
-          {/* Spectrum bar (visual position) */}
-          <div style={{ marginBottom: 14 }}>
-            <div style={{
-              position: "relative",
-              height: 8, borderRadius: 8,
-              background: "linear-gradient(90deg, #EF4444 0%, #F59E0B 50%, #10B981 100%)",
-              overflow: "visible",
-            }}>
-              <div style={{
-                position: "absolute",
-                top: -5, left: `calc(${pct}% - 9px)`,
-                width: 18, height: 18, borderRadius: "50%",
-                background: "#fff",
-                border: `3px solid ${tone.ring}`,
-                boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-                transition: "left 1.4s cubic-bezier(.16,1,.3,1)",
-              }}/>
-            </div>
-            <div style={{
-              display: "flex", justifyContent: "space-between",
-              marginTop: 8, fontSize: 9, color: "#9CA3AF", fontWeight: 600,
-              letterSpacing: 0.5,
-            }}>
-              <span>БАГА</span><span>ДУНД</span><span>МАШ САЙН</span>
-            </div>
-          </div>
-
-          {/* Quick stat tiles */}
+          {/* 3 metric tiles */}
           <div style={{
             display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8,
-            marginBottom: card.description ? 12 : 0,
+            marginBottom: card.description ? 14 : 0,
+            position: "relative",
           }}>
             {[
-              { label: "Оноо", value: `${card.score}/${card.total}`, accent: "#3B82F6" },
-              { label: "Хувь", value: `${pct}%`, accent: tone.ring },
-              { label: "Түвшин", value: tone.text, accent: "#8B5CF6" },
+              { label: "Оноо", value: `${card.score}`, sub: `/ ${card.total}`, icon: "🎯", color: "#3B82F6" },
+              { label: "Хувь", value: `${pct}`, sub: "%", icon: "📊", color: tone.ring },
+              { label: "Түвшин", value: tone.text, sub: "", icon: "⭐", color: "#8B5CF6" },
             ].map((s, i) => (
               <div key={i} style={{
-                padding: "10px 8px", borderRadius: 12,
-                background: "#F9FAFB", textAlign: "center",
-                border: "1px solid #F3F4F6",
+                padding: "12px 8px", borderRadius: 14,
+                background: "linear-gradient(145deg, #F9FAFB, #FFFFFF)",
+                textAlign: "center",
+                border: "1px solid rgba(0,0,0,0.04)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
               }}>
+                <div style={{ fontSize: 14, marginBottom: 4 }}>{s.icon}</div>
                 <div style={{
-                  fontSize: 8, fontWeight: 700, color: "#9CA3AF",
-                  letterSpacing: 0.6, textTransform: "uppercase", marginBottom: 4,
+                  fontSize: 8, fontWeight: 800, color: "#9CA3AF",
+                  letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 4,
                 }}>{s.label}</div>
                 <div style={{
-                  fontSize: 13, fontWeight: 800, color: s.accent,
-                  lineHeight: 1.2,
-                }}>{s.value}</div>
+                  fontSize: s.sub ? 16 : 12, fontWeight: 900, color: s.color,
+                  lineHeight: 1.1,
+                  display: "flex", justifyContent: "center", alignItems: "baseline", gap: 1,
+                }}>
+                  {s.value}
+                  {s.sub && <span style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 700 }}>{s.sub}</span>}
+                </div>
               </div>
             ))}
           </div>
 
-          {/* Description */}
+          {/* Description quote */}
           {card.description && (
             <div style={{
-              padding: "10px 12px", borderRadius: 12,
+              padding: "12px 14px", borderRadius: 14,
               background: "#F9FAFB",
-              fontSize: 11.5, lineHeight: 1.55, color: "#4B5563",
+              fontSize: 12, lineHeight: 1.6, color: "#4B5563",
               borderLeft: `3px solid ${tone.ring}`,
+              position: "relative",
             }}>
               {card.description}
             </div>
           )}
         </div>
 
-        {/* SECTION 2: TRAIT BREAKDOWN */}
+        {/* Trait breakdown (still part of section 1) */}
         {card.traits && card.traits.length > 0 && (
-          <>
-            <SectionHeader icon="📊" label="Дэлгэрэнгүй задаргаа" accent="#3B82F6"/>
+          <div style={{ marginBottom: 10 }}>
+            <div style={{
+              fontSize: 10, fontWeight: 800, color: "#6B7280",
+              letterSpacing: 1.2, textTransform: "uppercase",
+              marginBottom: 8, paddingLeft: 4,
+              display: "flex", alignItems: "center", gap: 6,
+            }}>
+              <span>📐</span> Дэлгэрэнгүй задаргаа
+            </div>
             <TraitBreakdown traits={card.traits} />
-          </>
+          </div>
         )}
 
-        {/* SECTION 3: AI ANALYSIS */}
-        <SectionHeader icon="✨" label="AI Шинжилгээ & Зөвлөгөө" accent="#E8541A"/>
+        {/* ═══ SECTION 2: AI ANALYSIS ═════════════════════════════════════ */}
+        <BigSectionHeader
+          number={2}
+          title="AI Шинжилгээ"
+          subtitle="Таны үр дүнгийн дэлгэрэнгүй шинжилгээ"
+          accent="#E8541A"
+        />
 
         {status === "loading" ? (
           <div style={{
@@ -1225,8 +1331,10 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
           </div>
         ) : (() => {
           const sections = parseAdvice(message.content)
-          if (sections.length > 0) {
-            return <AdviceSections sections={sections} />
+          // Section 2 = summary/strengths/watchouts/tips (everything except "next")
+          const analysisCards = sections.filter(s => s.key !== "next")
+          if (analysisCards.length > 0) {
+            return <AdviceSections sections={analysisCards} />
           }
           return (
             <div style={{
@@ -1239,10 +1347,130 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
           )
         })()}
 
-        {/* SECTION 4: FOLLOW-UP Q&A */}
+        {/* ═══ SECTION 3: ACTION PLAN ═════════════════════════════════════ */}
+        <BigSectionHeader
+          number={3}
+          title="Цаашдын төлөвлөгөө"
+          subtitle="Дараагийн алхмууд болон зөвлөмж"
+          accent="#8B5CF6"
+        />
+
+        {status === "done" && (() => {
+          const sections = parseAdvice(message.content)
+          const nextSection = sections.find(s => s.key === "next")
+
+          if (!nextSection || nextSection.bullets.length === 0) {
+            return (
+              <div style={{
+                background: "#fff", borderRadius: 14, padding: "16px",
+                border: "1px solid rgba(0,0,0,0.04)",
+                fontSize: 12, color: "#6B7280", textAlign: "center",
+              }}>
+                Тодорхой алхам зөвлөгдсөнгүй
+              </div>
+            )
+          }
+
+          return (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {nextSection.bullets.map((b, i) => (
+                <div key={i} style={{
+                  display: "flex", gap: 12, alignItems: "flex-start",
+                  background: "#fff",
+                  borderRadius: 14, padding: "14px 14px",
+                  border: "1.5px solid rgba(139,92,246,0.1)",
+                  boxShadow: "0 4px 12px rgba(139,92,246,0.04)",
+                  position: "relative",
+                  animation: `hw-msg-in 0.5s cubic-bezier(.16,1,.3,1) ${i * 0.08}s both`,
+                }}>
+                  {/* Vertical line connecting steps */}
+                  {i < nextSection.bullets.length - 1 && (
+                    <div style={{
+                      position: "absolute",
+                      left: 27, top: 50, bottom: -8,
+                      width: 2,
+                      background: "linear-gradient(180deg, #8B5CF6, transparent)",
+                      opacity: 0.3,
+                    }}/>
+                  )}
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 10,
+                    background: "linear-gradient(135deg, #8B5CF6, #7C3AED)",
+                    color: "#fff", fontSize: 14, fontWeight: 900,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0, zIndex: 1,
+                    boxShadow: "0 6px 14px rgba(139,92,246,0.3)",
+                  }}>{i + 1}</div>
+                  <div style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
+                    {(() => {
+                      const colonMatch = b.match(/^([^:：]+)[:：]\s*(.+)$/)
+                      if (colonMatch) {
+                        return (
+                          <>
+                            <div style={{
+                              fontSize: 13, fontWeight: 800, color: "#111827",
+                              marginBottom: 4, lineHeight: 1.3,
+                            }}>{colonMatch[1].trim()}</div>
+                            <div style={{
+                              fontSize: 12, color: "#4B5563", lineHeight: 1.55,
+                            }}>{colonMatch[2].trim()}</div>
+                          </>
+                        )
+                      }
+                      return <div style={{ fontSize: 13, color: "#1F2937", lineHeight: 1.55 }}>{b}</div>
+                    })()}
+                  </div>
+                </div>
+              ))}
+
+              {/* Achievement card */}
+              <div style={{
+                marginTop: 6,
+                background: "linear-gradient(135deg, #8B5CF6, #7C3AED)",
+                color: "#fff",
+                borderRadius: 14, padding: "14px 16px",
+                display: "flex", alignItems: "center", gap: 12,
+                boxShadow: "0 10px 28px rgba(139,92,246,0.3)",
+                position: "relative", overflow: "hidden",
+              }}>
+                <div style={{
+                  position: "absolute", top: -20, right: -10,
+                  fontSize: 70, opacity: 0.15, lineHeight: 1,
+                }}>🏆</div>
+                <div style={{ fontSize: 28, flexShrink: 0 }}>🎯</div>
+                <div style={{ flex: 1, position: "relative" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, opacity: 0.9, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 2 }}>
+                    Таны зорилт
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.4 }}>
+                    {nextSection.bullets.length} алхмыг гүйцэтгээд илүү сайн үр дүнд хүрэх боломжтой
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* ═══ FOLLOW-UP Q&A SECTION (only if any) ═══════════════════════ */}
         {followUps.length > 0 && (
           <>
-            <SectionHeader icon="💬" label="Таны асуулт & AI хариу" accent="#8B5CF6"/>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "26px 4px 12px",
+            }}>
+              <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, #E5E7EB, transparent)" }}/>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 5,
+                padding: "6px 12px", borderRadius: 999,
+                background: "#F3E8FF", color: "#7C3AED",
+                fontSize: 10, fontWeight: 800,
+                letterSpacing: 0.8, textTransform: "uppercase",
+                border: "1px solid #E9D5FF",
+              }}>
+                <span>💬</span> Чат түүх
+              </div>
+              <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, #E5E7EB, transparent)" }}/>
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {followUps.map((f, i) => f.role === "user" ? (
                 <div key={i} style={{ display: "flex", justifyContent: "flex-end" }}>
@@ -1304,7 +1532,7 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
         {/* Disclaimer footer */}
         <div style={{
           textAlign: "center", fontSize: 10, color: "#9CA3AF",
-          padding: "20px 12px 8px", fontWeight: 500, lineHeight: 1.5,
+          padding: "24px 12px 8px", fontWeight: 500, lineHeight: 1.5,
         }}>
           💡 Энэ зөвлөгөө нь чиглүүлэх зорилготой. Мэргэжлийн тусламж шаардлагатай бол сэтгэл зүйчтэй холбогдоорой.
         </div>
