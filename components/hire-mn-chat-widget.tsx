@@ -1327,51 +1327,7 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
         </div>
       </div>
 
-      {/* ── PAGE TABS (carousel nav) ───────────────────────────────────── */}
-      <div style={{
-        padding: "8px 12px 10px",
-        background: "rgba(255,255,255,0.95)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
-        borderBottom: "1px solid rgba(0,0,0,0.04)",
-        flexShrink: 0,
-        display: "flex", gap: 6,
-      }}>
-        {[
-          { n: 1 as const, label: "Тойм", icon: "📊", color: tone.ring },
-          { n: 2 as const, label: "Шинжилгээ", icon: "✨", color: "#E8541A" },
-          { n: 3 as const, label: "Төлөвлөгөө", icon: "🎯", color: "#8B5CF6" },
-        ].map(tab => {
-          const isActive = currentPage === tab.n
-          return (
-            <button
-              key={tab.n}
-              type="button"
-              onClick={() => goToPage(tab.n)}
-              style={{
-                flex: 1, padding: "8px 6px", borderRadius: 12,
-                border: "none",
-                background: isActive ? `linear-gradient(135deg, ${tab.color}, ${tab.color}cc)` : "transparent",
-                color: isActive ? "#fff" : "#6B7280",
-                fontSize: 11, fontWeight: 800, fontFamily: "inherit",
-                cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
-                boxShadow: isActive ? `0 6px 16px ${tab.color}44` : "none",
-                transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
-                position: "relative",
-              }}
-            >
-              <span style={{ fontSize: 13 }}>{tab.icon}</span>
-              <span>{tab.label}</span>
-              <span style={{
-                position: "absolute", top: 3, right: 6,
-                fontSize: 8, fontWeight: 700,
-                opacity: isActive ? 0.9 : 0.4,
-              }}>{tab.n}/3</span>
-            </button>
-          )
-        })}
-      </div>
+      {/* PAGE TABS REMOVED — single scroll layout matches mockup */}
 
       {/* ── SCROLLABLE BODY ────────────────────────────────────────────── */}
       <div
@@ -1386,23 +1342,11 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
           position: "relative",
         }}
       >
-        {/* Section progress indicator */}
-        <SectionProgress active={currentPage} tone={tone}/>
+        {/* Single-scroll layout, no carousel paging */}
+        <div style={{ animation: "hw-fade-up 0.35s cubic-bezier(.16,1,.3,1) both" }}>
 
-        {/* PAGE SLIDE WRAPPER */}
-        <div
-          key={currentPage}
-          style={{
-            animation: swipeDir === "left"
-              ? "hw-slide-left 0.35s cubic-bezier(.16,1,.3,1) both"
-              : swipeDir === "right"
-              ? "hw-slide-right 0.35s cubic-bezier(.16,1,.3,1) both"
-              : "hw-fade-up 0.35s cubic-bezier(.16,1,.3,1) both",
-          }}
-        >
-
-        {/* ═══ PAGE 1: SCORE OVERVIEW ═══════════════════════════════════ */}
-        {currentPage === 1 && (
+        {/* ═══ SECTION 1: SCORE OVERVIEW ═══════════════════════════════════ */}
+        {true && (
         <>
         <BigSectionHeader
           number={1}
@@ -1643,39 +1587,157 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
         {/* Announcement card (Сайн мэдээ! / Анхаарал!) */}
         <div style={{
           background: pct >= 75
-            ? "linear-gradient(135deg, #ECFDF5 0%, #F0FDF4 100%)"
+            ? "linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)"
             : pct >= 50
-            ? "linear-gradient(135deg, #FFFBEB 0%, #FEF9C3 100%)"
+            ? "linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)"
             : "linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%)",
           border: `1.5px solid ${tone.soft}`,
-          borderRadius: 18, padding: "14px 16px",
+          borderRadius: 20, padding: "16px 16px",
           marginBottom: 10,
-          display: "flex", alignItems: "center", gap: 12,
           position: "relative", overflow: "hidden",
           animation: "hw-fade-up 0.6s cubic-bezier(.16,1,.3,1) 0.5s both",
         }}>
-          <div style={{
-            fontSize: 36, flexShrink: 0,
-            animation: "hw-icon-bounce 2.4s ease-in-out infinite",
+          {/* Sparkle line decoration in background */}
+          <svg width="100%" height="50" viewBox="0 0 200 50" preserveAspectRatio="none" style={{
+            position: "absolute", right: 0, top: 6, width: "60%", height: 50, opacity: 0.35,
+            pointerEvents: "none",
           }}>
-            {pct >= 75 ? "🌟" : pct >= 50 ? "💡" : "🫶"}
+            <path d="M0,40 Q30,25 50,30 T100,15 T150,20 T200,5" fill="none" stroke={tone.ring} strokeWidth="2"/>
+          </svg>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, position: "relative" }}>
+            <div style={{
+              fontSize: 48, flexShrink: 0, lineHeight: 1,
+              animation: "hw-icon-bounce 2.4s ease-in-out infinite",
+              filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
+            }}>
+              {pct >= 75 ? "🫁" : pct >= 50 ? "💡" : "🫶"}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontSize: 17, fontWeight: 900, color: tone.ring,
+                marginBottom: 4, letterSpacing: -0.5,
+              }}>
+                {pct >= 75 ? "Сайн мэдээ!" : pct >= 50 ? "Зөв чиглэлд!" : "Анхаарал!"}
+              </div>
+              <div style={{
+                fontSize: 12, lineHeight: 1.55, color: "#374151",
+              }}>
+                {pct >= 75
+                  ? "Таны үр дүн маш сайн. Энэ түвшинг хадгалбал ирээдүй гэрэлтэй!"
+                  : pct >= 50
+                  ? "Та зөв замаар явж байна. Бага зэрэг хичээвэл илүү сайн үр дүнд хүрнэ."
+                  : "Үр дүнг сайжруулахад анхаарах хэрэгтэй. AI зөвлөмжийг дагаарай."}
+              </div>
+            </div>
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
+
+          {/* Дэлгэрэнгүй үзэх button */}
+          <button
+            type="button"
+            onClick={() => onAskFollowUp?.("Үр дүнгийн талаар дэлгэрэнгүй тайлбарлаач")}
+            style={{
+              background: tone.grad, color: "#fff",
+              border: "none", borderRadius: 12,
+              padding: "10px 18px", fontSize: 12, fontWeight: 800,
+              cursor: "pointer", fontFamily: "inherit",
+              display: "inline-flex", alignItems: "center", gap: 8,
+              boxShadow: `0 6px 16px ${tone.ring}55`,
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.transform = "translateY(0)"}
+          >
+            Дэлгэрэнгүй үзэх
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* "Өнөөдрийн зорилго" Daily Goals card */}
+        <div style={{
+          background: "#fff",
+          borderRadius: 20, padding: "16px",
+          border: "1px solid rgba(0,0,0,0.04)",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
+          marginBottom: 10,
+          animation: "hw-fade-up 0.6s cubic-bezier(.16,1,.3,1) 0.55s both",
+        }}>
+          {/* Header */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 8,
+            marginBottom: 12,
+          }}>
+            <div style={{ fontSize: 18 }}>🎯</div>
             <div style={{
-              fontSize: 14, fontWeight: 900, color: tone.ring,
-              marginBottom: 3, letterSpacing: -0.3,
+              fontSize: 13, fontWeight: 900, color: "#111827",
+              letterSpacing: -0.3, flex: 1,
             }}>
-              {pct >= 75 ? "Сайн мэдээ!" : pct >= 50 ? "Зөв чиглэлд!" : "Анхаарал!"}
+              Өнөөдрийн зорилго
+            </div>
+          </div>
+
+          {/* Big metric */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 12,
+            marginBottom: 12,
+          }}>
+            <div style={{
+              fontSize: 38, fontWeight: 900, color: "#E8541A", lineHeight: 1,
+              letterSpacing: -1, display: "flex", alignItems: "baseline", gap: 2,
+            }}>
+              1<span style={{ fontSize: 16, color: "#9CA3AF", fontWeight: 700 }}>/3</span>
             </div>
             <div style={{
-              fontSize: 11.5, lineHeight: 1.45, color: "#374151",
+              fontSize: 11, color: "#6B7280", fontWeight: 600,
+              flex: 1,
             }}>
-              {pct >= 75
-                ? "Та маш сайн үзүүлэлттэй байна. Энэ түвшинг хадгалбал ирээдүй гэрэлтэй!"
-                : pct >= 50
-                ? "Та зөв замаар явж байна. Бага зэрэг хичээвэл илүү сайн үр дүнд хүрнэ."
-                : "Үр дүнг сайжруулахад анхаарах хэрэгтэй. AI зөвлөмжийг дагаарай."}
+              Зорилгоо биелүүлээ! Үргэлжлүүлээрэй.
             </div>
+          </div>
+
+          {/* 3 daily goal items */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {[
+              { done: true, label: "AI шинжилгээ үзэх", progress: "Дууссан" },
+              { done: false, label: "Зөвлөмжийг уншиж дуусгах", progress: "0/1" },
+              { done: false, label: "Дараагийн алхмыг тэмдэглэх", progress: "0/3" },
+            ].map((g, i) => (
+              <div key={i} style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "8px 10px", borderRadius: 10,
+                background: g.done ? "#F0FDF4" : "#F9FAFB",
+                border: g.done ? "1px solid #BBF7D0" : "1px solid #F3F4F6",
+              }}>
+                <div style={{
+                  width: 20, height: 20, borderRadius: "50%",
+                  background: g.done ? "#10B981" : "#fff",
+                  border: g.done ? "none" : "1.5px solid #D1D5DB",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  {g.done && (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                  )}
+                </div>
+                <div style={{
+                  flex: 1, fontSize: 12, color: g.done ? "#059669" : "#374151",
+                  fontWeight: 600,
+                  textDecoration: g.done ? "line-through" : "none",
+                }}>
+                  {g.label}
+                </div>
+                <div style={{
+                  fontSize: 10, fontWeight: 800,
+                  color: g.done ? "#059669" : "#9CA3AF",
+                }}>
+                  {g.progress}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -1694,11 +1756,168 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
           </div>
         )}
 
+        {/* AI Insights — 3 navigation cards (mockup style) */}
+        <div style={{
+          background: "#fff",
+          borderRadius: 20, padding: "16px 14px",
+          border: "1px solid rgba(0,0,0,0.04)",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
+          marginBottom: 10,
+          marginTop: 6,
+        }}>
+          <div style={{
+            display: "flex", alignItems: "center", gap: 8, marginBottom: 12,
+          }}>
+            <div style={{
+              width: 24, height: 24, borderRadius: 8,
+              background: "linear-gradient(135deg, #E8541A, #F07040)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 4px 10px rgba(232,84,26,0.3)",
+            }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="#fff">
+                <path d="M12 2l1.4 4.3L17.7 8l-4.3 1.4L12 14l-1.4-4.6L6.3 8l4.3-1.7z"/>
+              </svg>
+            </div>
+            <div style={{
+              fontSize: 14, fontWeight: 900, color: "#111827",
+              letterSpacing: -0.3, flex: 1,
+            }}>AI Insights</div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {[
+              {
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 12l2 2 4-4M21 12c0 5-3.5 9-9 9s-9-4-9-9 3.5-9 9-9 9 4 9 9z"/>
+                  </svg>
+                ),
+                label: "Эрүүл мэндийн төлөв",
+                desc: pct >= 75 ? "Үзүүлэлт сайн, эрсдэл бага." : pct >= 50 ? "Сайжруулах боломжтой." : "Анхаарал хандуулах хэрэгтэй.",
+                bg: "#ECFDF5", soft: "#D1FAE5",
+              },
+              {
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2a10 10 0 0 1 10 10c0 5-4 9-10 9S2 17 2 12 7 2 12 2z"/>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>
+                  </svg>
+                ),
+                label: "Сэтгэл зүйн төлөв",
+                desc: "Стрессийг өөр аргаар зохицуулах нь амжилтын түлхүүр.",
+                bg: "#DBEAFE", soft: "#BFDBFE",
+              },
+              {
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                    <polyline points="17 6 23 6 23 12"/>
+                  </svg>
+                ),
+                label: "Амжилтын боломж",
+                desc: "Та зорилгод хүрэх боломж их байна.",
+                bg: "#EDE9FE", soft: "#DDD6FE",
+              },
+            ].map((insight, i) => (
+              <button key={i} type="button" className="hw-card-tilt" style={{
+                display: "flex", alignItems: "center", gap: 10,
+                background: "#fff",
+                border: `1px solid ${insight.soft}`,
+                borderRadius: 12, padding: "10px 12px",
+                cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                width: "100%",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.03)",
+                transition: "all 0.25s",
+              }}
+              onClick={() => onAskFollowUp?.(`${insight.label} талаар илүү дэлгэрэнгүй тайлбарлаач.`)}
+              >
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: insight.bg,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>{insight.icon}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: "#111827", lineHeight: 1.3, marginBottom: 2 }}>
+                    {insight.label}
+                  </div>
+                  <div style={{
+                    fontSize: 10.5, color: "#6B7280", lineHeight: 1.45,
+                    display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+                  }}>{insight.desc}</div>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </button>
+            ))}
+          </div>
+
+          {/* AI зөвлөгөө button */}
+          <button
+            type="button"
+            onClick={() => onAskFollowUp?.("AI-ээс илүү дэлгэрэнгүй зөвлөгөө өгөөч")}
+            style={{
+              width: "100%", marginTop: 10,
+              background: "linear-gradient(135deg, #ECFDF5, #D1FAE5)",
+              color: "#059669", border: "1px solid #BBF7D0",
+              borderRadius: 12, padding: "10px 16px",
+              fontSize: 12, fontWeight: 800, cursor: "pointer", fontFamily: "inherit",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, #D1FAE5, #A7F3D0)"}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, #ECFDF5, #D1FAE5)"}
+          >
+            ✨ AI-ээс илүү зөвлөгөө авах
+          </button>
+        </div>
+
+        {/* Health Stats 2x2 grid (Apple Health style) */}
+        <div style={{
+          display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8,
+          marginBottom: 10, marginTop: 4,
+          animation: "hw-fade-up 0.6s cubic-bezier(.16,1,.3,1) both",
+        }}>
+          {[
+            { emoji: "🫁", label: "Тестийн тойм", value: `${card.score}`, sub: `/${card.total}`, hint: card.resultLabel, color: tone.ring },
+            { emoji: "❤️", label: "Эрүүл мэндийн төлөв", value: pct >= 75 ? "Good" : pct >= 50 ? "Mid" : "Low", sub: "", hint: "Үнэлгээ", color: "#EF4444" },
+            { emoji: "💰", label: "Боломжийн утга", value: `${pct}`, sub: "%", hint: "Сайжруулах боломж", color: "#10B981" },
+            { emoji: "📅", label: "Дараагийн алхам", value: "3", sub: "", hint: "Зорилт хийх", color: "#8B5CF6" },
+          ].map((s, i) => (
+            <div key={i} style={{
+              background: "#fff",
+              borderRadius: 14, padding: "12px 12px",
+              border: "1px solid rgba(0,0,0,0.04)",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.04)",
+              display: "flex", gap: 10, alignItems: "center",
+            }}>
+              <div style={{
+                fontSize: 26, flexShrink: 0, lineHeight: 1,
+              }}>{s.emoji}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontSize: 9, fontWeight: 700, color: "#9CA3AF",
+                  letterSpacing: 0.4, textTransform: "uppercase", marginBottom: 2,
+                }}>{s.label}</div>
+                <div style={{
+                  fontSize: 18, fontWeight: 900, color: s.color, lineHeight: 1,
+                  display: "flex", alignItems: "baseline", gap: 1,
+                }}>
+                  {s.value}
+                  {s.sub && <span style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 700 }}>{s.sub}</span>}
+                </div>
+                <div style={{ fontSize: 9, color: "#6B7280", fontWeight: 600, marginTop: 2 }}>{s.hint}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
         </>
         )}
 
-        {/* ═══ PAGE 2: AI ANALYSIS ════════════════════════════════════════ */}
-        {currentPage === 2 && (
+        {/* ═══ SECTION 2: AI ANALYSIS ════════════════════════════════════════ */}
+        {true && (
         <>
         <BigSectionHeader
           number={2}
@@ -1800,8 +2019,8 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
         </>
         )}
 
-        {/* ═══ PAGE 3: ACTION PLAN ════════════════════════════════════════ */}
-        {currentPage === 3 && (
+        {/* ═══ SECTION 3: ACTION PLAN ════════════════════════════════════════ */}
+        {true && (
         <>
         <BigSectionHeader
           number={3}
