@@ -1365,12 +1365,21 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
     try {
       const history = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }))
+      console.log("[hire-mn-chat] POST /api/chat", { historyLen: history.length, lastLen: text.length, hidden: !!opts?.hidden })
+
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: history, lang: lang === "МН" ? "mn" : "en" }),
       })
-      if (!res.ok) throw new Error(await res.text())
+
+      console.log("[hire-mn-chat] /api/chat status:", res.status)
+
+      if (!res.ok) {
+        const errorBody = await res.text()
+        console.error("[hire-mn-chat] /api/chat error body:", errorBody)
+        throw new Error(`HTTP ${res.status}: ${errorBody.slice(0, 500)}`)
+      }
       const data = await res.json()
 
       setMessages(prev => [...prev, {
@@ -1381,11 +1390,18 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       }])
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
+      console.error("[hire-mn-chat] sendMessage failed:", msg)
       let friendly = "Уучлаарай, холболтын алдаа гарлаа."
       if (msg.includes("credit card") || msg.includes("AI Gateway"))
         friendly = "AI үйлчилгээ одоогоор идэвхгүй байна."
       else if (msg.includes("rate limit"))
         friendly = "Хэт олон хүсэлт. Түр хүлээгээд дахин оролдоно уу."
+      else if (msg.includes("ANTHROPIC_API_KEY") || msg.includes("api_key") || msg.includes("authentication"))
+        friendly = "AI API key тохируулагдаагүй байна (Vercel env vars шалгана уу)."
+      else if (msg.includes("HTTP 5"))
+        friendly = `Серверийн алдаа: ${msg}`
+      else if (msg.includes("HTTP 4"))
+        friendly = `Хүсэлтийн алдаа: ${msg}`
       setMessages(prev => [...prev, { role: "assistant", content: friendly }])
     } finally {
       setIsTyping(false)
