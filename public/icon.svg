@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#FFF5F0"/>
+  
+  <!-- Brain outline -->
+  <g id="brain">
+    <!-- Left hemisphere -->
+    <path d="M 180 200 Q 160 180 160 150 Q 160 110 190 90 Q 200 85 210 85 Q 230 85 245 100 L 220 140 Q 200 160 200 200 Z" fill="#E8541A" opacity="0.9"/>
+    
+    <!-- Right hemisphere -->
+    <path d="M 332 200 Q 352 180 352 150 Q 352 110 322 90 Q 312 85 302 85 Q 282 85 267 100 L 292 140 Q 312 160 312 200 Z" fill="#E8541A" opacity="0.9"/>
+    
+    <!-- Top brain lobes -->
+    <ellipse cx="220" cy="120" rx="35" ry="45" fill="#E8541A" opacity="0.85"/>
+    <ellipse cx="292" cy="120" rx="35" ry="45" fill="#E8541A" opacity="0.85"/>
+    
+    <!-- Middle section -->
+    <rect x="200" y="150" width="112" height="90" rx="20" fill="#E8541A" opacity="0.9"/>
+    
+    <!-- Bottom curves -->
+    <path d="M 200 240 Q 180 260 190 290 Q 200 310 220 315 L 220 240 Z" fill="#E8541A" opacity="0.85"/>
+    <path d="M 312 240 Q 332 260 322 290 Q 312 310 292 315 L 292 240 Z" fill="#E8541A" opacity="0.85"/>
+    
+    <!-- Bottom center -->
+    <ellipse cx="256" cy="300" rx="40" ry="50" fill="#E8541A" opacity="0.9"/>
+  </g>
+  
+  <!-- Eyes -->
+  <circle cx="230" cy="180" r="12" fill="#fff"/>
+  <circle cx="282" cy="180" r="12" fill="#fff"/>
+  <circle cx="232" cy="180" r="7" fill="#2563EB"/>
+  <circle cx="284" cy="180" r="7" fill="#2563EB"/>
+  
+  <!-- Smile -->
+  <path d="M 240 210 Q 256 225 272 210" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>
+  
+  <!-- Shine/highlight -->
+  <circle cx="220" cy="110" r="20" fill="#fff" opacity="0.4"/>
+  
+  <!-- Accent dots -->
+  <circle cx="280" cy="290" r="6" fill="#2563EB" opacity="0.6"/>
+  <circle cx="240" cy="310" r="5" fill="#2563EB" opacity="0.6"/>
+</svg>
