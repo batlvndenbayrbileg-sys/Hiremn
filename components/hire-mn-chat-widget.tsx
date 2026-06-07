@@ -49,6 +49,13 @@ interface Message {
   insightCard?: InsightCardData
   briefSummary?: string             // Short chat-bubble version
   analysisStatus?: "loading" | "done" | "error"  // Artifact button state
+  followUps?: FollowUpMessage[]     // In-artifact Q&A history
+}
+
+interface FollowUpMessage {
+  role: "user" | "assistant"
+  content: string
+  pending?: boolean
 }
 
 interface InsightSubScore {
@@ -868,36 +875,137 @@ function AdviceSections({ sections }: { sections: AdviceSection[] }) {
 
 // ── Artifact View (full-screen-within-widget detail panel) ───────────────────
 
-function ArtifactView({ message, onClose, fontSize, renderFormattedText }: {
+// ── Animated Score Ring ──────────────────────────────────────────────────────
+
+function ScoreRing({ pct, tone, size = 150 }: { pct: number; tone: { ring: string; soft: string; grad: string }; size?: number }) {
+  const stroke = 10
+  const radius = (size - stroke) / 2
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (pct / 100) * circumference
+
+  return (
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }}>
+        <defs>
+          <linearGradient id={`ring-${tone.ring.replace("#", "")}`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={tone.ring} stopOpacity="1"/>
+            <stop offset="100%" stopColor={tone.ring} stopOpacity="0.7"/>
+          </linearGradient>
+        </defs>
+        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="#F3F4F6" strokeWidth={stroke}/>
+        <circle
+          cx={size/2} cy={size/2} r={radius} fill="none"
+          stroke={`url(#ring-${tone.ring.replace("#", "")})`}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          style={{
+            transition: "stroke-dashoffset 1.4s cubic-bezier(.16,1,.3,1)",
+            filter: `drop-shadow(0 4px 8px ${tone.ring}55)`,
+          }}
+        />
+      </svg>
+      <div style={{
+        position: "absolute", inset: 0,
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+      }}>
+        <div style={{ fontSize: size > 130 ? 42 : 32, fontWeight: 900, color: "#111827", lineHeight: 1, letterSpacing: -1 }}>
+          {pct}
+        </div>
+        <div style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 600, marginTop: 2 }}>/100</div>
+      </div>
+    </div>
+  )
+}
+
+// ── Section Header ──────────────────────────────────────────────────────────
+
+function SectionHeader({ icon, label, accent = "#E8541A" }: { icon: string; label: string; accent?: string }) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 10,
+      padding: "20px 4px 6px",
+    }}>
+      <div style={{
+        width: 28, height: 1.5, background: `linear-gradient(90deg, transparent, ${accent}44)`, flexShrink: 0,
+      }}/>
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <span style={{ fontSize: 14 }}>{icon}</span>
+        <span style={{
+          fontSize: 10, fontWeight: 800, color: accent,
+          letterSpacing: 1.5, textTransform: "uppercase",
+        }}>{label}</span>
+      </div>
+      <div style={{
+        flex: 1, height: 1.5, background: `linear-gradient(90deg, ${accent}44, transparent)`,
+      }}/>
+    </div>
+  )
+}
+
+// ── Artifact View (full-screen-within-widget detail panel) ───────────────────
+
+function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFollowUp, askPending }: {
   message: Message
   onClose: () => void
   fontSize: number
   renderFormattedText: (text: string) => React.ReactNode
+  onAskFollowUp?: (question: string) => void
+  askPending?: boolean
 }) {
   const card = message.insightCard!
   const status = message.analysisStatus || "loading"
   const pct = card.total > 0 ? Math.round((card.score / card.total) * 100) : 0
   const tone =
-    pct >= 75 ? { ring: "#10B981", soft: "#D1FAE5", bg: "#ECFDF5", grad: "linear-gradient(135deg, #10B981, #059669)" }
-    : pct >= 50 ? { ring: "#F59E0B", soft: "#FEF3C7", bg: "#FFFBEB", grad: "linear-gradient(135deg, #F59E0B, #D97706)" }
-    : { ring: "#EF4444", soft: "#FEE2E2", bg: "#FEF2F2", grad: "linear-gradient(135deg, #EF4444, #DC2626)" }
+    pct >= 75 ? { ring: "#10B981", soft: "#D1FAE5", bg: "#ECFDF5", grad: "linear-gradient(135deg, #10B981, #059669)", text: "Маш сайн" }
+    : pct >= 50 ? { ring: "#F59E0B", soft: "#FEF3C7", bg: "#FFFBEB", grad: "linear-gradient(135deg, #F59E0B, #D97706)", text: "Дунд зэрэг" }
+    : { ring: "#EF4444", soft: "#FEE2E2", bg: "#FEF2F2", grad: "linear-gradient(135deg, #EF4444, #DC2626)", text: "Анхаарах" }
+
+  const [askInput, setAskInput] = useState("")
+  const followUps = message.followUps || []
+  const bodyRef = useRef<HTMLDivElement | null>(null)
+
+  // Scroll to latest follow-up when new one arrives
+  useEffect(() => {
+    if (followUps.length > 0 && bodyRef.current) {
+      bodyRef.current.scrollTop = bodyRef.current.scrollHeight
+    }
+  }, [followUps.length, askPending])
+
+  const handleAsk = () => {
+    const q = askInput.trim()
+    if (!q || askPending) return
+    onAskFollowUp?.(q)
+    setAskInput("")
+  }
+
+  // Sample suggested follow-up questions
+  const suggestedQuestions = [
+    "Энэ үр дүн ямар утгатай вэ?",
+    "Би одоо юу хийх ёстой вэ?",
+    "Дараагийн алхам юу хийх вэ?",
+  ]
 
   return (
     <div style={{
       position: "absolute", inset: 0,
-      background: "linear-gradient(180deg, #FFFAF6 0%, #FFFFFF 100%)",
+      background: "linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%)",
       zIndex: 10,
       display: "flex", flexDirection: "column",
       animation: "hw-artifact-in 0.45s cubic-bezier(.16,1,.3,1)",
     }}>
-      {/* Header */}
+      {/* ── HEADER ────────────────────────────────────────────────────────── */}
       <div style={{
-        padding: "14px 16px",
+        padding: "12px 14px",
         borderBottom: "1px solid rgba(0,0,0,0.06)",
         background: "rgba(255,255,255,0.92)",
         backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
         display: "flex", alignItems: "center", gap: 10,
         flexShrink: 0,
+        zIndex: 2,
       }}>
         <button
           onClick={onClose}
@@ -906,163 +1014,403 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText }: {
             border: "1px solid rgba(0,0,0,0.06)",
             background: "#fff", cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#374151",
-            transition: "all 0.2s",
+            color: "#374151", transition: "all 0.2s", fontFamily: "inherit",
           }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#F3F4F6"}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#fff"}
+          aria-label="Close"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
         </button>
         <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "#9CA3AF", letterSpacing: 1, textTransform: "uppercase" }}>
-            AI Дүн шинжилгээ
+          <div style={{
+            fontSize: 9, fontWeight: 800, color: tone.ring,
+            letterSpacing: 1.5, textTransform: "uppercase",
+            display: "flex", alignItems: "center", gap: 5,
+          }}>
+            <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: tone.ring, boxShadow: `0 0 8px ${tone.ring}` }}/>
+            AI Insight
           </div>
           <div style={{
-            fontSize: 14, fontWeight: 700, color: "#111827",
+            fontSize: 14, fontWeight: 800, color: "#111827",
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+            lineHeight: 1.25,
           }}>
             {card.testName}
           </div>
         </div>
       </div>
 
-      {/* Scrollable body */}
-      <div style={{
+      {/* ── SCROLLABLE BODY ────────────────────────────────────────────── */}
+      <div ref={bodyRef} style={{
         flex: 1, overflowY: "auto",
-        padding: "16px 14px 24px",
-        display: "flex", flexDirection: "column", gap: 14,
+        padding: "14px 12px 8px",
+        display: "flex", flexDirection: "column", gap: 0,
       }}>
-        {/* Hero score banner */}
+        {/* SECTION 1: SCORE OVERVIEW (Hero) */}
         <div style={{
-          background: tone.grad,
+          background: "#fff",
           borderRadius: 20,
-          padding: "20px 18px",
-          color: "#fff",
-          boxShadow: `0 10px 30px ${tone.ring}33`,
-          position: "relative",
-          overflow: "hidden",
+          padding: "20px 18px 18px",
+          border: "1px solid rgba(0,0,0,0.04)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.05)",
+          position: "relative", overflow: "hidden",
         }}>
+          {/* Decorative gradient blob */}
           <div style={{
-            position: "absolute", top: -30, right: -30,
-            width: 140, height: 140, borderRadius: "50%",
-            background: "rgba(255,255,255,0.12)",
+            position: "absolute", top: -50, right: -50,
+            width: 180, height: 180, borderRadius: "50%",
+            background: `radial-gradient(circle, ${tone.ring}22 0%, transparent 70%)`,
+            pointerEvents: "none",
           }}/>
+
+          {/* Title row */}
           <div style={{
-            position: "absolute", bottom: -40, left: -20,
-            width: 100, height: 100, borderRadius: "50%",
-            background: "rgba(255,255,255,0.08)",
-          }}/>
-          <div style={{ position: "relative" }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, opacity: 0.9, textTransform: "uppercase", marginBottom: 8 }}>
-              Таны үр дүн
-            </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
-              <div style={{ fontSize: 48, fontWeight: 900, lineHeight: 1 }}>{pct}</div>
-              <div style={{ fontSize: 16, fontWeight: 700, opacity: 0.85 }}>/ 100</div>
-            </div>
-            <div style={{ fontSize: 14, fontWeight: 600, opacity: 0.95, marginBottom: 10 }}>
-              {card.score}/{card.total} оноо · {card.resultLabel}
-            </div>
-            {card.description && (
-              <div style={{ fontSize: 12, lineHeight: 1.55, opacity: 0.92, maxWidth: 360 }}>
-                {card.description}
-              </div>
-            )}
+            display: "flex", alignItems: "center", gap: 6,
+            marginBottom: 16, position: "relative",
+          }}>
+            <span style={{
+              fontSize: 9, fontWeight: 800, color: "#6B7280",
+              letterSpacing: 1.5, textTransform: "uppercase",
+            }}>Welcome to your</span>
+            <span style={{
+              fontSize: 9, fontWeight: 800,
+              padding: "3px 8px", borderRadius: 999,
+              background: tone.bg, color: tone.ring,
+              letterSpacing: 1, textTransform: "uppercase",
+              border: `1px solid ${tone.soft}`,
+            }}>Health Score</span>
           </div>
+
+          {/* Score Ring + breakdown */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 18,
+            marginBottom: 18, position: "relative",
+          }}>
+            <ScoreRing pct={pct} tone={tone} size={130} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontSize: 11, fontWeight: 700, color: "#9CA3AF",
+                letterSpacing: 1, textTransform: "uppercase", marginBottom: 4,
+              }}>Үр дүн</div>
+              <div style={{
+                fontSize: 18, fontWeight: 900, color: "#111827",
+                lineHeight: 1.2, marginBottom: 8,
+                whiteSpace: "normal",
+              }}>{card.resultLabel || "Тодорхойлоогүй"}</div>
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                padding: "5px 10px", borderRadius: 999,
+                background: tone.bg, color: tone.ring,
+                fontSize: 12, fontWeight: 700,
+                border: `1px solid ${tone.soft}`,
+              }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                </svg>
+                {card.score}/{card.total} оноо
+              </div>
+            </div>
+          </div>
+
+          {/* Spectrum bar (visual position) */}
+          <div style={{ marginBottom: 14 }}>
+            <div style={{
+              position: "relative",
+              height: 8, borderRadius: 8,
+              background: "linear-gradient(90deg, #EF4444 0%, #F59E0B 50%, #10B981 100%)",
+              overflow: "visible",
+            }}>
+              <div style={{
+                position: "absolute",
+                top: -5, left: `calc(${pct}% - 9px)`,
+                width: 18, height: 18, borderRadius: "50%",
+                background: "#fff",
+                border: `3px solid ${tone.ring}`,
+                boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                transition: "left 1.4s cubic-bezier(.16,1,.3,1)",
+              }}/>
+            </div>
+            <div style={{
+              display: "flex", justifyContent: "space-between",
+              marginTop: 8, fontSize: 9, color: "#9CA3AF", fontWeight: 600,
+              letterSpacing: 0.5,
+            }}>
+              <span>БАГА</span><span>ДУНД</span><span>МАШ САЙН</span>
+            </div>
+          </div>
+
+          {/* Quick stat tiles */}
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8,
+            marginBottom: card.description ? 12 : 0,
+          }}>
+            {[
+              { label: "Оноо", value: `${card.score}/${card.total}`, accent: "#3B82F6" },
+              { label: "Хувь", value: `${pct}%`, accent: tone.ring },
+              { label: "Түвшин", value: tone.text, accent: "#8B5CF6" },
+            ].map((s, i) => (
+              <div key={i} style={{
+                padding: "10px 8px", borderRadius: 12,
+                background: "#F9FAFB", textAlign: "center",
+                border: "1px solid #F3F4F6",
+              }}>
+                <div style={{
+                  fontSize: 8, fontWeight: 700, color: "#9CA3AF",
+                  letterSpacing: 0.6, textTransform: "uppercase", marginBottom: 4,
+                }}>{s.label}</div>
+                <div style={{
+                  fontSize: 13, fontWeight: 800, color: s.accent,
+                  lineHeight: 1.2,
+                }}>{s.value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Description */}
+          {card.description && (
+            <div style={{
+              padding: "10px 12px", borderRadius: 12,
+              background: "#F9FAFB",
+              fontSize: 11.5, lineHeight: 1.55, color: "#4B5563",
+              borderLeft: `3px solid ${tone.ring}`,
+            }}>
+              {card.description}
+            </div>
+          )}
         </div>
 
-        {/* Trait breakdown */}
+        {/* SECTION 2: TRAIT BREAKDOWN */}
         {card.traits && card.traits.length > 0 && (
-          <div>
-            <div style={{
-              fontSize: 11, fontWeight: 700, color: "#6B7280",
-              letterSpacing: 1.2, textTransform: "uppercase",
-              marginBottom: 10, paddingLeft: 4,
-            }}>
-              Дэлгэрэнгүй задаргаа
-            </div>
+          <>
+            <SectionHeader icon="📊" label="Дэлгэрэнгүй задаргаа" accent="#3B82F6"/>
             <TraitBreakdown traits={card.traits} />
+          </>
+        )}
+
+        {/* SECTION 3: AI ANALYSIS */}
+        <SectionHeader icon="✨" label="AI Шинжилгээ & Зөвлөгөө" accent="#E8541A"/>
+
+        {status === "loading" ? (
+          <div style={{
+            background: "#fff", borderRadius: 18,
+            padding: "30px 16px",
+            border: "1px solid rgba(0,0,0,0.04)",
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
+          }}>
+            <div style={{ display: "flex", gap: 6 }}>
+              {[0, 1, 2].map(i => (
+                <div key={i} style={{
+                  width: 10, height: 10,
+                  background: "linear-gradient(135deg, #E8541A, #F07040)",
+                  borderRadius: "50%",
+                  animation: `hw-bounce 1.4s ease-in-out ${i * 0.16}s infinite`,
+                }} />
+              ))}
+            </div>
+            <div style={{ fontSize: 12, color: "#6B7280", fontWeight: 500 }}>
+              AI таны үр дүнг шинжилж байна...
+            </div>
+          </div>
+        ) : status === "error" ? (
+          <div style={{
+            background: "#FEF2F2",
+            border: "1px solid #FECACA",
+            borderRadius: 14, padding: "14px 16px",
+            fontSize: 13, color: "#DC2626",
+          }}>
+            ⚠️ {message.content || "Зөвлөгөө гаргахад алдаа гарлаа."}
+          </div>
+        ) : (() => {
+          const sections = parseAdvice(message.content)
+          if (sections.length > 0) {
+            return <AdviceSections sections={sections} />
+          }
+          return (
+            <div style={{
+              background: "#fff", borderRadius: 14, padding: "14px 16px",
+              fontSize: 13, lineHeight: 1.7, color: "#1F2937",
+              border: "1px solid rgba(0,0,0,0.04)",
+            }}>
+              {renderFormattedText(message.content)}
+            </div>
+          )
+        })()}
+
+        {/* SECTION 4: FOLLOW-UP Q&A */}
+        {followUps.length > 0 && (
+          <>
+            <SectionHeader icon="💬" label="Таны асуулт & AI хариу" accent="#8B5CF6"/>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {followUps.map((f, i) => f.role === "user" ? (
+                <div key={i} style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <div style={{
+                    maxWidth: "85%",
+                    background: "linear-gradient(135deg, #E8541A, #F07040)",
+                    color: "#fff",
+                    padding: "10px 14px",
+                    borderRadius: 16,
+                    borderBottomRightRadius: 4,
+                    fontSize: 13, lineHeight: 1.5, fontWeight: 500,
+                    boxShadow: "0 4px 12px rgba(232,84,26,0.2)",
+                  }}>
+                    {f.content}
+                  </div>
+                </div>
+              ) : (
+                <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: 10, flexShrink: 0,
+                    background: "linear-gradient(135deg, #E8541A, #F07040)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: "0 2px 8px rgba(232,84,26,0.25)",
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff">
+                      <path d="M12 2l1.4 4.3L17.7 8l-4.3 1.4L12 14l-1.4-4.6L6.3 8l4.3-1.7z"/>
+                    </svg>
+                  </div>
+                  <div style={{
+                    flex: 1, minWidth: 0,
+                    background: "#fff",
+                    padding: "10px 14px",
+                    borderRadius: 16,
+                    borderTopLeftRadius: 4,
+                    fontSize: 13, lineHeight: 1.6, color: "#1F2937",
+                    border: "1px solid rgba(0,0,0,0.04)",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                  }}>
+                    {f.pending ? (
+                      <div style={{ display: "flex", gap: 4, padding: "4px 0" }}>
+                        {[0, 1, 2].map(i => (
+                          <div key={i} style={{
+                            width: 6, height: 6,
+                            background: "#9CA3AF", borderRadius: "50%",
+                            animation: `hw-bounce 1.4s ease-in-out ${i * 0.16}s infinite`,
+                          }} />
+                        ))}
+                      </div>
+                    ) : (
+                      renderFormattedText(f.content)
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Disclaimer footer */}
+        <div style={{
+          textAlign: "center", fontSize: 10, color: "#9CA3AF",
+          padding: "20px 12px 8px", fontWeight: 500, lineHeight: 1.5,
+        }}>
+          💡 Энэ зөвлөгөө нь чиглүүлэх зорилготой. Мэргэжлийн тусламж шаардлагатай бол сэтгэл зүйчтэй холбогдоорой.
+        </div>
+      </div>
+
+      {/* ── BOTTOM CHAT INPUT ───────────────────────────────────────────── */}
+      <div style={{
+        flexShrink: 0,
+        padding: "10px 12px 12px",
+        background: "rgba(255,255,255,0.95)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        borderTop: "1px solid rgba(0,0,0,0.06)",
+      }}>
+        {/* Suggested chips (only when no follow-ups yet) */}
+        {status === "done" && followUps.length === 0 && (
+          <div style={{
+            display: "flex", gap: 6, overflowX: "auto",
+            paddingBottom: 8, marginBottom: 4,
+            scrollbarWidth: "none",
+          }}>
+            {suggestedQuestions.map((q, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => { setAskInput(q); setTimeout(() => onAskFollowUp?.(q), 0); setAskInput("") }}
+                style={{
+                  flexShrink: 0,
+                  background: "#fff",
+                  border: "1px solid #E5E7EB",
+                  color: "#374151",
+                  padding: "6px 12px", borderRadius: 999,
+                  fontSize: 11, fontWeight: 600,
+                  cursor: "pointer", fontFamily: "inherit",
+                  transition: "all 0.2s",
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={e => {
+                  ;(e.currentTarget as HTMLElement).style.background = "#E8541A"
+                  ;(e.currentTarget as HTMLElement).style.color = "#fff"
+                  ;(e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
+                }}
+                onMouseLeave={e => {
+                  ;(e.currentTarget as HTMLElement).style.background = "#fff"
+                  ;(e.currentTarget as HTMLElement).style.color = "#374151"
+                  ;(e.currentTarget as HTMLElement).style.borderColor = "#E5E7EB"
+                }}
+              >
+                {q}
+              </button>
+            ))}
           </div>
         )}
 
-        {/* AI Advice section */}
+        {/* Input row */}
         <div style={{
+          display: "flex", alignItems: "center", gap: 8,
           background: "#fff",
-          borderRadius: 18,
-          padding: "16px 18px",
-          border: "1.5px solid rgba(0,0,0,0.04)",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+          border: "1.5px solid #E5E7EB",
+          borderRadius: 14, padding: "4px 4px 4px 14px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+          transition: "border-color 0.2s",
         }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 8, marginBottom: 12,
-          }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 10,
-              background: "linear-gradient(135deg, #E8541A, #F07040)",
+          <input
+            type="text"
+            value={askInput}
+            onChange={e => setAskInput(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleAsk() } }}
+            placeholder="Үр дүнгийн талаар асуу..."
+            disabled={status !== "done" || askPending}
+            style={{
+              flex: 1, minWidth: 0,
+              border: "none", outline: "none", background: "transparent",
+              fontSize: 13, fontWeight: 500, color: "#1F2937",
+              fontFamily: "inherit",
+              padding: "8px 0",
+            }}
+            onFocus={e => ((e.currentTarget.parentElement as HTMLElement).style.borderColor = "#E8541A")}
+            onBlur={e => ((e.currentTarget.parentElement as HTMLElement).style.borderColor = "#E5E7EB")}
+          />
+          <button
+            type="button"
+            onClick={handleAsk}
+            disabled={!askInput.trim() || status !== "done" || askPending}
+            style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: askInput.trim() && !askPending
+                ? "linear-gradient(135deg, #E8541A, #F07040)"
+                : "#E5E7EB",
+              border: "none", cursor: askInput.trim() && !askPending ? "pointer" : "not-allowed",
               display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: "0 4px 12px rgba(232,84,26,0.3)",
-            }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
-                <path d="M12 2l1.4 4.3L17.7 8l-4.3 1.4L12 14l-1.4-4.6L6.3 8l4.3-1.7z"/>
-                <path d="M19 12l.7 2L22 15l-2.3.6L19 18l-.7-2.4L16 15l2.3-1z"/>
+              color: "#fff", flexShrink: 0,
+              boxShadow: askInput.trim() && !askPending ? "0 4px 12px rgba(232,84,26,0.3)" : "none",
+              transition: "all 0.2s", fontFamily: "inherit",
+            }}
+            aria-label="Send"
+          >
+            {askPending ? (
+              <div style={{ width: 14, height: 14, border: "2px solid #fff", borderTopColor: "transparent", borderRadius: "50%", animation: "hw-spin 0.8s linear infinite" }}/>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2" fill="currentColor" stroke="none"/>
               </svg>
-            </div>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: "#111827", lineHeight: 1.2 }}>
-                AI Зөвлөгөө
-              </div>
-              <div style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500 }}>
-                Таны үр дүнд үндэслэсэн
-              </div>
-            </div>
-          </div>
-
-          {status === "loading" ? (
-            <div style={{
-              display: "flex", flexDirection: "column", alignItems: "center",
-              padding: "30px 10px", gap: 12,
-            }}>
-              <div style={{ display: "flex", gap: 6 }}>
-                {[0, 1, 2].map(i => (
-                  <div key={i} style={{
-                    width: 10, height: 10,
-                    background: "linear-gradient(135deg, #E8541A, #F07040)",
-                    borderRadius: "50%",
-                    animation: `hw-bounce 1.4s ease-in-out ${i * 0.16}s infinite`,
-                  }} />
-                ))}
-              </div>
-              <div style={{ fontSize: 12, color: "#6B7280", fontWeight: 500 }}>
-                Дэлгэрэнгүй зөвлөгөө гаргаж байна...
-              </div>
-            </div>
-          ) : status === "error" ? (
-            <div style={{ fontSize: 13, color: "#DC2626", padding: "12px 0" }}>
-              ⚠️ {message.content || "Зөвлөгөө гаргахад алдаа гарлаа."}
-            </div>
-          ) : (() => {
-            const sections = parseAdvice(message.content)
-            if (sections.length > 0) {
-              return <AdviceSections sections={sections} />
-            }
-            // Fallback: plain text rendering when parser found nothing
-            return (
-              <div style={{ fontSize: 13, lineHeight: 1.7, color: "#1F2937" }}>
-                {renderFormattedText(message.content)}
-              </div>
-            )
-          })()}
-        </div>
-
-        {/* Footer note */}
-        <div style={{
-          textAlign: "center", fontSize: 10, color: "#9CA3AF",
-          padding: "8px 0", fontWeight: 500,
-        }}>
-          💡 Энэхүү зөвлөгөө нь зөвхөн чиглүүлэх зорилготой. Мэргэжлийн тусламж хэрэгтэй бол сэтгэл зүйчтэй холбогдоорой.
+            )}
+          </button>
         </div>
       </div>
     </div>
@@ -1943,6 +2291,76 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   // Track the index of the in-flight analysis message so the LLM response
   // can be merged into the same artifact (instead of becoming a new bubble).
   const pendingAnalysisIdxRef = useRef<number | null>(null)
+  // Pending follow-up question state (per artifact)
+  const [followUpPending, setFollowUpPending] = useState(false)
+
+  // Send a follow-up question from inside the artifact, append Q&A to that message
+  const askArtifactFollowUp = async (question: string) => {
+    if (artifactMessageIdx === null) return
+    const target = messages[artifactMessageIdx]
+    if (!target || !target.insightCard) return
+
+    // 1. Append the user question + assistant placeholder
+    setMessages(prev => prev.map((m, i) => {
+      if (i !== artifactMessageIdx) return m
+      const existing = m.followUps || []
+      return {
+        ...m,
+        followUps: [
+          ...existing,
+          { role: "user" as const, content: question },
+          { role: "assistant" as const, content: "", pending: true },
+        ],
+      }
+    }))
+    setFollowUpPending(true)
+
+    try {
+      // 2. Build contextual prompt with test info
+      const card = target.insightCard
+      const contextLine =
+        `Тестийн контекст — нэр: ${card.testName}, оноо: ${card.score}/${card.total} ` +
+        `(${card.total > 0 ? Math.round((card.score / card.total) * 100) : 0}%), үнэлгээ: ${card.resultLabel}. ` +
+        `Дэлгэрэнгүй задаргаа: ${(card.traits || []).map(t => `${t.label} ${t.score}/${t.total}`).join("; ") || "—"}.`
+      const fullPrompt = `${contextLine}\n\nХэрэглэгчийн асуулт: ${question}`
+
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [
+            { role: "user", content: fullPrompt },
+          ],
+          lang: lang === "МН" ? "mn" : "en",
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      const reply = (data?.reply || data?.error || "Уучлаарай, хариу авч чадсангүй.") as string
+
+      // 3. Replace placeholder with real reply
+      setMessages(prev => prev.map((m, i) => {
+        if (i !== artifactMessageIdx) return m
+        const fu = [...(m.followUps || [])]
+        const lastIdx = fu.length - 1
+        if (lastIdx >= 0 && fu[lastIdx].role === "assistant") {
+          fu[lastIdx] = { role: "assistant", content: reply, pending: false }
+        }
+        return { ...m, followUps: fu }
+      }))
+    } catch (err: any) {
+      setMessages(prev => prev.map((m, i) => {
+        if (i !== artifactMessageIdx) return m
+        const fu = [...(m.followUps || [])]
+        const lastIdx = fu.length - 1
+        if (lastIdx >= 0 && fu[lastIdx].role === "assistant") {
+          fu[lastIdx] = { role: "assistant", content: "Уучлаарай, алдаа гарлаа. Дахин оролдоно уу.", pending: false }
+        }
+        return { ...m, followUps: fu }
+      }))
+    } finally {
+      setFollowUpPending(false)
+    }
+  }
   // Initialize conversation on mount
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -3404,6 +3822,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 <ArtifactView
                   message={messages[artifactMessageIdx]}
                   onClose={() => setArtifactMessageIdx(null)}
+                  onAskFollowUp={askArtifactFollowUp}
+                  askPending={followUpPending}
                   fontSize={fontSize}
                   renderFormattedText={(text: string) => {
                     // Lightweight markdown renderer for the artifact

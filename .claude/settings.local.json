@@ -29,7 +29,8 @@
       "Bash(echo \"EXIT=$?\")",
       "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Add Apple Health-style Insight Card for test result analysis *)",
       "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Add full-width Trait Breakdown cards for multi-dimension tests \\(DISC, Big5, etc.\\) *)",
-      "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Add Artifact pattern UX: brief in-chat preview + expandable full-detail panel *)"
+      "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Add Artifact pattern UX: brief in-chat preview + expandable full-detail panel *)",
+      "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Next-level Apple Health-style artifact: hero + analysis + Q&A + chat input *)"
     ]
   }
 }
