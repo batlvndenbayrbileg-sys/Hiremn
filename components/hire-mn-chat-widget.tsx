@@ -1530,6 +1530,155 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
           )}
         </div>
 
+        {/* Mini stat dashboard (2x2 grid like the mockup) */}
+        <div style={{
+          display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8,
+          marginBottom: 10,
+          animation: "hw-fade-up 0.6s cubic-bezier(.16,1,.3,1) 0.2s both",
+        }}>
+          {(() => {
+            const riskLvl = pct >= 75 ? "Low" : pct >= 50 ? "Mid" : "High"
+            const riskColor = pct >= 75 ? "#10B981" : pct >= 50 ? "#F59E0B" : "#EF4444"
+            const oppLvl = pct >= 75 ? "Low" : pct >= 50 ? "Mid" : "High"
+            const oppColor = "#10B981" // opportunity is always shown positively
+            const tiles = [
+              {
+                emoji: "🎯",
+                title: "Үр дүнгийн оноо",
+                value: `${card.score}`, sub: `/${card.total}`,
+                desc: card.resultLabel,
+                color: tone.ring, bg: tone.bg, soft: tone.soft,
+                showBar: true,
+              },
+              {
+                emoji: "🛡️",
+                title: "Эрсдэл (Risk)",
+                value: riskLvl, sub: "",
+                desc: pct >= 75 ? "Эрсдэл бага" : pct >= 50 ? "Дунд зэрэг" : "Анхаарал хандуул",
+                color: riskColor, bg: `${riskColor}15`, soft: `${riskColor}30`,
+                showBar: false,
+                showLine: true,
+              },
+              {
+                emoji: "🚀",
+                title: "Гарах боломж",
+                value: oppLvl, sub: "",
+                desc: "Амжилтын боломж өндөр",
+                color: oppColor, bg: `${oppColor}15`, soft: `${oppColor}30`,
+                showBar: false,
+                showBars: true,
+              },
+              {
+                emoji: "🎁",
+                title: "Өнөөдрийн зорилго",
+                value: `1`, sub: "/3",
+                desc: "Зорилгоо биелүүлээ!",
+                color: "#8B5CF6", bg: "#F3E8FF", soft: "#E9D5FF",
+                showBar: false,
+                showCheck: true,
+              },
+            ]
+            return tiles.map((t, i) => (
+              <div key={i} className="hw-card-tilt" style={{
+                background: "#fff",
+                borderRadius: 16, padding: "12px 12px",
+                border: `1px solid ${t.soft}`,
+                boxShadow: "0 4px 14px rgba(0,0,0,0.04)",
+                position: "relative", overflow: "hidden",
+                animation: `hw-fade-up 0.5s cubic-bezier(.16,1,.3,1) ${0.25 + i * 0.06}s both`,
+              }}>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 6, marginBottom: 6,
+                }}>
+                  <span style={{ fontSize: 14 }}>{t.emoji}</span>
+                  <span style={{ fontSize: 9, fontWeight: 800, color: "#6B7280", letterSpacing: 0.5, textTransform: "uppercase" }}>
+                    {t.title}
+                  </span>
+                </div>
+                <div style={{
+                  fontSize: 22, fontWeight: 900, color: t.color, lineHeight: 1,
+                  letterSpacing: -0.5, display: "flex", alignItems: "baseline", gap: 2,
+                }}>
+                  {t.value}
+                  {t.sub && <span style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 700 }}>{t.sub}</span>}
+                </div>
+                <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 500, marginTop: 4, lineHeight: 1.3 }}>
+                  {t.desc}
+                </div>
+                {t.showBar && (
+                  <div style={{ height: 5, background: t.bg, borderRadius: 5, overflow: "hidden", marginTop: 8 }}>
+                    <div style={{ width: `${pct}%`, height: "100%", background: t.color, borderRadius: 5 }}/>
+                  </div>
+                )}
+                {t.showLine && (
+                  <svg width="100%" height="22" viewBox="0 0 100 22" preserveAspectRatio="none" style={{ marginTop: 6 }}>
+                    <path d="M0,18 Q15,12 25,15 T50,8 T75,12 T100,4" fill="none" stroke={t.color} strokeWidth="2" strokeLinecap="round" />
+                    <path d="M0,18 Q15,12 25,15 T50,8 T75,12 T100,4 L100,22 L0,22 Z" fill={`${t.color}22`}/>
+                  </svg>
+                )}
+                {t.showBars && (
+                  <div style={{ display: "flex", gap: 3, alignItems: "flex-end", marginTop: 6, height: 22 }}>
+                    {[40, 65, 50, 80, 95].map((h, j) => (
+                      <div key={j} style={{
+                        flex: 1, height: `${h}%`,
+                        background: `linear-gradient(180deg, ${t.color}, ${t.color}88)`,
+                        borderRadius: 2,
+                      }}/>
+                    ))}
+                  </div>
+                )}
+                {t.showCheck && (
+                  <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 4 }}>
+                    <div style={{ width: 14, height: 14, borderRadius: "50%", background: t.color, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                    </div>
+                    <div style={{ fontSize: 9, color: t.color, fontWeight: 700 }}>1/3 алхам</div>
+                  </div>
+                )}
+              </div>
+            ))
+          })()}
+        </div>
+
+        {/* Announcement card (Сайн мэдээ! / Анхаарал!) */}
+        <div style={{
+          background: pct >= 75
+            ? "linear-gradient(135deg, #ECFDF5 0%, #F0FDF4 100%)"
+            : pct >= 50
+            ? "linear-gradient(135deg, #FFFBEB 0%, #FEF9C3 100%)"
+            : "linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%)",
+          border: `1.5px solid ${tone.soft}`,
+          borderRadius: 18, padding: "14px 16px",
+          marginBottom: 10,
+          display: "flex", alignItems: "center", gap: 12,
+          position: "relative", overflow: "hidden",
+          animation: "hw-fade-up 0.6s cubic-bezier(.16,1,.3,1) 0.5s both",
+        }}>
+          <div style={{
+            fontSize: 36, flexShrink: 0,
+            animation: "hw-icon-bounce 2.4s ease-in-out infinite",
+          }}>
+            {pct >= 75 ? "🌟" : pct >= 50 ? "💡" : "🫶"}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontSize: 14, fontWeight: 900, color: tone.ring,
+              marginBottom: 3, letterSpacing: -0.3,
+            }}>
+              {pct >= 75 ? "Сайн мэдээ!" : pct >= 50 ? "Зөв чиглэлд!" : "Анхаарал!"}
+            </div>
+            <div style={{
+              fontSize: 11.5, lineHeight: 1.45, color: "#374151",
+            }}>
+              {pct >= 75
+                ? "Та маш сайн үзүүлэлттэй байна. Энэ түвшинг хадгалбал ирээдүй гэрэлтэй!"
+                : pct >= 50
+                ? "Та зөв замаар явж байна. Бага зэрэг хичээвэл илүү сайн үр дүнд хүрнэ."
+                : "Үр дүнг сайжруулахад анхаарах хэрэгтэй. AI зөвлөмжийг дагаарай."}
+            </div>
+          </div>
+        </div>
+
         {/* Trait breakdown (still part of section 1) */}
         {card.traits && card.traits.length > 0 && (
           <div style={{ marginBottom: 10 }}>
@@ -1783,7 +1932,17 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
                 )}
               </div>
 
-              {/* TODO checklist */}
+              {/* Weekly plan title */}
+              <div style={{
+                fontSize: 11, fontWeight: 800, color: "#6B7280",
+                letterSpacing: 1, textTransform: "uppercase",
+                marginTop: 4, marginBottom: -2, paddingLeft: 4,
+                display: "flex", alignItems: "center", gap: 6,
+              }}>
+                <span>📅</span> Долоо хоногийн төлөвлөгөө
+              </div>
+
+              {/* TODO checklist as weekly timeline */}
               {nextSection.bullets.map((b, i) => {
                 const isDone = completed.has(i)
                 const colonMatch = b.match(/^([^:：]+)[:：]\s*(.+)$/)
@@ -1826,29 +1985,43 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
                         : "0 4px 12px rgba(139,92,246,0.05)"
                     }}
                   >
-                    {/* Checkbox */}
-                    <div style={{
-                      width: 28, height: 28, borderRadius: 9,
-                      background: isDone
-                        ? "linear-gradient(135deg, #10B981, #059669)"
-                        : "#fff",
-                      border: isDone ? "none" : "2px solid #D1D5DB",
-                      color: "#fff", flexShrink: 0,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      boxShadow: isDone
-                        ? "0 4px 10px rgba(16,185,129,0.35)"
-                        : "0 2px 4px rgba(0,0,0,0.04)",
-                      transition: "all 0.25s",
-                    }}>
-                      {isDone && (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "hw-pop 0.35s cubic-bezier(.34,1.56,.64,1)" }}>
-                          <path d="M20 6L9 17l-5-5"/>
-                        </svg>
-                      )}
-                    </div>
+                    {/* Weekly colored icon */}
+                    {(() => {
+                      const weekPalettes = [
+                        { grad: "linear-gradient(135deg, #3B82F6, #2563EB)", color: "#3B82F6", icon: "📋" },
+                        { grad: "linear-gradient(135deg, #8B5CF6, #7C3AED)", color: "#8B5CF6", icon: "🎯" },
+                        { grad: "linear-gradient(135deg, #F59E0B, #D97706)", color: "#F59E0B", icon: "💪" },
+                        { grad: "linear-gradient(135deg, #10B981, #059669)", color: "#10B981", icon: "🏆" },
+                      ]
+                      const wp = weekPalettes[i % 4]
+                      return (
+                        <div style={{
+                          width: 40, height: 40, borderRadius: 12,
+                          background: isDone
+                            ? "linear-gradient(135deg, #10B981, #059669)"
+                            : wp.grad,
+                          color: "#fff", flexShrink: 0,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 18,
+                          boxShadow: isDone
+                            ? "0 4px 10px rgba(16,185,129,0.35)"
+                            : `0 6px 14px ${wp.color}40`,
+                          transition: "all 0.25s",
+                          position: "relative",
+                        }}>
+                          {isDone ? (
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "hw-pop 0.35s cubic-bezier(.34,1.56,.64,1)" }}>
+                              <path d="M20 6L9 17l-5-5"/>
+                            </svg>
+                          ) : (
+                            <span>{wp.icon}</span>
+                          )}
+                        </div>
+                      )
+                    })()}
 
                     <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
-                      {/* Step number chip */}
+                      {/* Week label chip */}
                       <div style={{
                         display: "flex", alignItems: "center", gap: 6,
                         marginBottom: stepTitle ? 4 : 0,
@@ -1860,7 +2033,7 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
                           color: isDone ? "#059669" : "#7C3AED",
                           letterSpacing: 0.5,
                         }}>
-                          АЛХАМ {i + 1}
+                          {i + 1}-Р ДОЛОО ХОНОГ
                         </span>
                         {isDone && (
                           <span style={{
