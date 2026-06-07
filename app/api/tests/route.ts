@@ -1,6 +1,7 @@
 // Fetch all tests from hire.mn API
 import { getAllAssessments, formatAssessmentForWidget } from '@/lib/hire-api'
 
+export const dynamic = 'force-dynamic'
 export const revalidate = 300 // Cache for 5 minutes
 
 export async function GET(req: Request) {

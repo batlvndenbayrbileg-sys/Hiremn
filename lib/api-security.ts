@@ -10,8 +10,8 @@ export async function checkRateLimit(ip: string): Promise<boolean> {
   return remaining >= 0
 }
 
-export function getClientIP(): string {
-  const headersList = headers()
+export async function getClientIP(): Promise<string> {
+  const headersList = await headers()
   return (
     headersList.get('x-forwarded-for')?.split(',')[0] ||
     headersList.get('x-real-ip') ||
@@ -28,8 +28,8 @@ export function validateAPIKey(apiKey: string): boolean {
   return apiKey === validKey
 }
 
-export function getAuthToken(): string | null {
-  const headersList = headers()
+export async function getAuthToken(): Promise<string | null> {
+  const headersList = await headers()
   const auth = headersList.get('authorization')
   if (!auth || !auth.startsWith('Bearer ')) return null
   return auth.slice(7)

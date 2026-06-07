@@ -12,11 +12,11 @@ export function generateCSRFToken(): string {
 
 export async function getCSRFToken(): Promise<string> {
   const cookieStore = await cookies()
-  let token = cookieStore.get(CSRF_TOKEN_NAME)?.value
+  let token = cookieStore.get(CSRF_COOKIE_NAME)?.value
 
   if (!token) {
     token = generateCSRFToken()
-    cookieStore.set(CSRF_TOKEN_NAME, token, {
+    cookieStore.set(CSRF_COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -30,7 +30,7 @@ export async function getCSRFToken(): Promise<string> {
 
 export async function validateCSRFToken(token: string): Promise<boolean> {
   const cookieStore = await cookies()
-  const storedToken = cookieStore.get(CSRF_TOKEN_NAME)?.value
+  const storedToken = cookieStore.get(CSRF_COOKIE_NAME)?.value
 
   if (!storedToken || !token) {
     return false
@@ -47,7 +47,7 @@ export async function setCSRFCookie(): Promise<void> {
   const token = await getCSRFToken()
   const cookieStore = await cookies()
   
-  cookieStore.set(CSRF_TOKEN_NAME, token, {
+  cookieStore.set(CSRF_COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',

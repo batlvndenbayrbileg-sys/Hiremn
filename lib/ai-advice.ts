@@ -46,7 +46,6 @@ export async function getAIAdvice(examResult: {
         }
       ],
       temperature: 0.7,
-      maxTokens: 1500,
     })
 
     return {

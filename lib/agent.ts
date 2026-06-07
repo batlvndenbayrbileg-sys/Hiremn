@@ -157,7 +157,7 @@ export function executeTool(
       
       return `
 ТЕСТ: ${testKnowledge.name} [TEST:${testKnowledge.id}]
-Бүтэн нэр: ${testKnowledge.fullName || testKnowledge.name}
+Бүтэн нэр: ${(testKnowledge as any).fullName || testKnowledge.name}
 Зохиогч: ${testKnowledge.author}
 Зохиогчийн тухай: ${testKnowledge.authorBio}
 Арга зүй: ${testKnowledge.methodology}

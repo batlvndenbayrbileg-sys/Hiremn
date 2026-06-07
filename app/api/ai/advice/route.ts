@@ -7,7 +7,7 @@ import { validateCSRFToken } from '@/lib/csrf-protection'
 export async function POST(request: NextRequest) {
   try {
     // 1. Rate limiting
-    const ip = getClientIP()
+    const ip = await getClientIP()
     const allowed = await checkRateLimit(ip)
     if (!allowed) {
       return NextResponse.json(
@@ -68,7 +68,15 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Generate AI advice with sanitized data
-    const advice = await getAIAdvice(sanitizedResult)
+    const advice = await getAIAdvice({
+      assessmentId: String(sanitizedResult.assessmentId ?? ''),
+      assessmentName: sanitizedResult.assessmentName,
+      score: Number(sanitizedResult.score) || 0,
+      scoreRange: { min: 0, max: Number(sanitizedResult.maxScore) || 0 },
+      interpretation: sanitizedResult.interpretation,
+      userResponses: (examResult?.userResponses as any[]) ?? [],
+      timestamp: new Date().toISOString(),
+    })
 
     if (!advice.success) {
       return NextResponse.json(
