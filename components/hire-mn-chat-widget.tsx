@@ -56,6 +56,14 @@ interface InsightSubScore {
   bar?: number // 0-100
 }
 
+interface InsightTrait {
+  label: string         // "Удирдах чадвар (D)"
+  levelLabel: string    // "Сайн" / "Маш сайн" / "Дундаж"
+  score: number
+  total: number
+  level: "low" | "mid" | "high" | "excellent"
+}
+
 interface InsightCardData {
   testName: string
   resultLabel: string
@@ -63,6 +71,7 @@ interface InsightCardData {
   total: number
   description?: string
   subScores?: InsightSubScore[]
+  traits?: InsightTrait[]  // Full-width trait breakdown cards
 }
 
 interface InitialContext {
@@ -331,7 +340,7 @@ function InsightCard({ data }: { data: InsightCardData }) {
         </div>
       )}
 
-      {/* Sub-scores */}
+      {/* Sub-scores (compact 3-column glance) */}
       {data.subScores && data.subScores.length > 0 && (
         <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(data.subScores.length, 3)}, 1fr)`, gap: 8 }}>
           {data.subScores.map((s, i) => {
@@ -370,6 +379,103 @@ function InsightCard({ data }: { data: InsightCardData }) {
           })}
         </div>
       )}
+    </div>
+  )
+}
+
+// ── Trait Breakdown Cards (full-width per-dimension scoring) ──────────────────
+
+function TraitBreakdown({ traits }: { traits: InsightTrait[] }) {
+  const palette = (lvl: InsightTrait["level"]) => {
+    switch (lvl) {
+      case "excellent": return { color: "#10B981", soft: "#D1FAE5", bg: "#ECFDF5", text: "Маш сайн" }
+      case "high":      return { color: "#EF4444", soft: "#FECACA", bg: "#FEF2F2", text: "Сайн" }
+      case "mid":       return { color: "#F59E0B", soft: "#FDE68A", bg: "#FFFBEB", text: "Дундаж" }
+      default:          return { color: "#F97316", soft: "#FFEDD5", bg: "#FFF7ED", text: "Бага" }
+    }
+  }
+
+  return (
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      gap: 10,
+      marginTop: 10,
+    }}>
+      <div style={{
+        fontSize: 11, fontWeight: 700, color: "#6B7280",
+        letterSpacing: 1, textTransform: "uppercase",
+        paddingLeft: 4,
+      }}>
+        Дэлгэрэнгүй задаргаа
+      </div>
+      {traits.map((t, i) => {
+        const pct = t.total > 0 ? Math.round((t.score / t.total) * 100) : 0
+        const c = palette(t.level)
+        return (
+          <div key={i} style={{
+            background: "#fff",
+            borderRadius: 16,
+            padding: "14px 16px",
+            border: "1.5px solid rgba(0,0,0,0.04)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+            animation: `hw-msg-in 0.5s cubic-bezier(.16,1,.3,1) ${i * 0.08}s both`,
+          }}>
+            {/* Header row */}
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              gap: 12,
+              marginBottom: 12,
+            }}>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{
+                  fontSize: 15, fontWeight: 700, color: "#111827",
+                  marginBottom: 4, lineHeight: 1.25,
+                }}>
+                  {t.label}
+                </div>
+                <div style={{
+                  fontSize: 13, fontWeight: 600, color: c.color,
+                }}>
+                  {t.levelLabel || c.text}
+                </div>
+              </div>
+              <div style={{
+                background: c.bg,
+                color: c.color,
+                padding: "6px 12px",
+                borderRadius: 999,
+                fontSize: 14,
+                fontWeight: 800,
+                border: `1px solid ${c.soft}`,
+                whiteSpace: "nowrap",
+                flexShrink: 0,
+              }}>
+                {t.score}/{t.total}
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div style={{
+              height: 8,
+              background: "#F3F4F6",
+              borderRadius: 8,
+              overflow: "hidden",
+            }}>
+              <div style={{
+                width: `${pct}%`,
+                height: "100%",
+                background: `linear-gradient(90deg, ${c.color}, ${c.color}cc)`,
+                borderRadius: 8,
+                transition: "width 1s cubic-bezier(.16,1,.3,1)",
+                boxShadow: `0 0 8px ${c.color}55`,
+              }}/>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -979,6 +1085,9 @@ function BotMessage({ message, fontSize, userQuestion = "", showAvatar = true }:
           <div style={{ width: 40, flexShrink: 0 }} aria-hidden="true" />
           <div style={{ flex: 1, minWidth: 0 }}>
             <InsightCard data={message.insightCard} />
+            {message.insightCard.traits && message.insightCard.traits.length > 0 && (
+              <TraitBreakdown traits={message.insightCard.traits} />
+            )}
           </div>
         </div>
       )}
@@ -1306,7 +1415,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           examPayload.total ?? examPayload.assessment?.totalPoint ?? ""
         const description: string = examPayload.assessment?.description || ""
 
-        // Build sub-scores from question categories (group by category, sum points)
+        // Group answers by question category (works for DISC, Big5, etc.)
         const subScoreMap = new Map<string, { sum: number; max: number; count: number }>()
         for (const a of answersPayload) {
           const catName: string = a?.questionCategory?.name || ""
@@ -1320,6 +1429,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           subScoreMap.set(catName, cur)
         }
 
+        // Compact 3-up sub-scores (top-of-card glance)
         const subScores: InsightSubScore[] = Array.from(subScoreMap.entries())
           .slice(0, 3)
           .map(([label, v]) => {
@@ -1334,6 +1444,31 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             }
           })
 
+        // Full-width trait breakdown — only if 2+ categories with maxima
+        const traitLevelLabel = (pct: number) =>
+          pct >= 85 ? "Маш сайн"
+          : pct >= 65 ? "Сайн"
+          : pct >= 40 ? "Дундаж"
+          : "Бага түвшин"
+        const traitLevel = (pct: number): InsightTrait["level"] =>
+          pct >= 85 ? "excellent"
+          : pct >= 65 ? "high"
+          : pct >= 40 ? "mid"
+          : "low"
+
+        const traits: InsightTrait[] = Array.from(subScoreMap.entries())
+          .filter(([, v]) => v.max > 0)
+          .map(([label, v]) => {
+            const pct = v.max > 0 ? (v.sum / v.max) * 100 : 0
+            return {
+              label,
+              levelLabel: traitLevelLabel(pct),
+              score: v.sum,
+              total: v.max,
+              level: traitLevel(pct),
+            }
+          })
+
         const numericScore = Number(score) || 0
         const numericTotal = Number(totalScore) || 0
 
@@ -1344,6 +1479,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           total: numericTotal,
           description: description ? description.slice(0, 200) : undefined,
           subScores: subScores.length > 0 ? subScores : undefined,
+          traits: traits.length >= 2 ? traits : undefined,
         }
 
         // Render the rich Insight Card as an assistant message
