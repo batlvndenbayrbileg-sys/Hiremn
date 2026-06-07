@@ -202,7 +202,9 @@
       var fetchOpts = {
         method: "GET",
         headers: Object.assign({ "Content-Type": "application/json" }, headers),
-        credentials: "include"
+        // credentials omitted intentionally — API returns Access-Control-Allow-Origin: *
+        // which is incompatible with credentials: "include". Auth uses Bearer token instead.
+        credentials: options.credentials || "omit"
       };
 
       // Fetch exam metadata + user answers in parallel
