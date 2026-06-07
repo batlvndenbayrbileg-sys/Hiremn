@@ -50,6 +50,7 @@ interface Message {
   briefSummary?: string             // Short chat-bubble version
   analysisStatus?: "loading" | "done" | "error"  // Artifact button state
   followUps?: FollowUpMessage[]     // In-artifact Q&A history
+  completedSteps?: number[]         // Indices of action plan items checked off
 }
 
 interface FollowUpMessage {
@@ -1044,13 +1045,14 @@ function SectionProgress({ active, tone }: { active: 1 | 2 | 3; tone: { ring: st
 
 // ── Artifact View (full-screen-within-widget detail panel) ───────────────────
 
-function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFollowUp, askPending }: {
+function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFollowUp, askPending, onToggleStep }: {
   message: Message
   onClose: () => void
   fontSize: number
   renderFormattedText: (text: string) => React.ReactNode
   onAskFollowUp?: (question: string) => void
   askPending?: boolean
+  onToggleStep?: (stepIdx: number) => void
 }) {
   const card = message.insightCard!
   const status = message.analysisStatus || "loading"
@@ -1371,82 +1373,214 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
             )
           }
 
-          return (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {nextSection.bullets.map((b, i) => (
-                <div key={i} style={{
-                  display: "flex", gap: 12, alignItems: "flex-start",
-                  background: "#fff",
-                  borderRadius: 14, padding: "14px 14px",
-                  border: "1.5px solid rgba(139,92,246,0.1)",
-                  boxShadow: "0 4px 12px rgba(139,92,246,0.04)",
-                  position: "relative",
-                  animation: `hw-msg-in 0.5s cubic-bezier(.16,1,.3,1) ${i * 0.08}s both`,
-                }}>
-                  {/* Vertical line connecting steps */}
-                  {i < nextSection.bullets.length - 1 && (
-                    <div style={{
-                      position: "absolute",
-                      left: 27, top: 50, bottom: -8,
-                      width: 2,
-                      background: "linear-gradient(180deg, #8B5CF6, transparent)",
-                      opacity: 0.3,
-                    }}/>
-                  )}
-                  <div style={{
-                    width: 32, height: 32, borderRadius: 10,
-                    background: "linear-gradient(135deg, #8B5CF6, #7C3AED)",
-                    color: "#fff", fontSize: 14, fontWeight: 900,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0, zIndex: 1,
-                    boxShadow: "0 6px 14px rgba(139,92,246,0.3)",
-                  }}>{i + 1}</div>
-                  <div style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
-                    {(() => {
-                      const colonMatch = b.match(/^([^:：]+)[:：]\s*(.+)$/)
-                      if (colonMatch) {
-                        return (
-                          <>
-                            <div style={{
-                              fontSize: 13, fontWeight: 800, color: "#111827",
-                              marginBottom: 4, lineHeight: 1.3,
-                            }}>{colonMatch[1].trim()}</div>
-                            <div style={{
-                              fontSize: 12, color: "#4B5563", lineHeight: 1.55,
-                            }}>{colonMatch[2].trim()}</div>
-                          </>
-                        )
-                      }
-                      return <div style={{ fontSize: 13, color: "#1F2937", lineHeight: 1.55 }}>{b}</div>
-                    })()}
-                  </div>
-                </div>
-              ))}
+          const completed = new Set(message.completedSteps || [])
+          const totalSteps = nextSection.bullets.length
+          const completedCount = nextSection.bullets.reduce((acc, _, i) => acc + (completed.has(i) ? 1 : 0), 0)
+          const progressPct = totalSteps > 0 ? Math.round((completedCount / totalSteps) * 100) : 0
+          const allDone = completedCount === totalSteps && totalSteps > 0
 
-              {/* Achievement card */}
+          return (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {/* Progress tracker card */}
               <div style={{
-                marginTop: 6,
-                background: "linear-gradient(135deg, #8B5CF6, #7C3AED)",
-                color: "#fff",
-                borderRadius: 14, padding: "14px 16px",
-                display: "flex", alignItems: "center", gap: 12,
-                boxShadow: "0 10px 28px rgba(139,92,246,0.3)",
+                background: allDone
+                  ? "linear-gradient(135deg, #10B981, #059669)"
+                  : "linear-gradient(135deg, #fff 0%, #FAF5FF 100%)",
+                color: allDone ? "#fff" : "#1F2937",
+                borderRadius: 16,
+                padding: "14px 16px",
+                border: allDone ? "none" : "1.5px solid rgba(139,92,246,0.15)",
+                boxShadow: allDone
+                  ? "0 8px 24px rgba(16,185,129,0.3)"
+                  : "0 4px 14px rgba(139,92,246,0.08)",
                 position: "relative", overflow: "hidden",
+                transition: "all 0.5s cubic-bezier(.16,1,.3,1)",
               }}>
                 <div style={{
                   position: "absolute", top: -20, right: -10,
-                  fontSize: 70, opacity: 0.15, lineHeight: 1,
-                }}>🏆</div>
-                <div style={{ fontSize: 28, flexShrink: 0 }}>🎯</div>
-                <div style={{ flex: 1, position: "relative" }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, opacity: 0.9, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 2 }}>
-                    Таны зорилт
+                  fontSize: 60, opacity: allDone ? 0.2 : 0.08, lineHeight: 1,
+                }}>{allDone ? "🎉" : "🎯"}</div>
+
+                <div style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  marginBottom: 10, position: "relative",
+                }}>
+                  <div>
+                    <div style={{
+                      fontSize: 10, fontWeight: 800,
+                      color: allDone ? "rgba(255,255,255,0.9)" : "#7C3AED",
+                      letterSpacing: 1, textTransform: "uppercase", marginBottom: 3,
+                    }}>
+                      {allDone ? "🎉 Дууссан!" : "Гүйцэтгэл"}
+                    </div>
+                    <div style={{
+                      fontSize: 18, fontWeight: 900,
+                      color: allDone ? "#fff" : "#111827",
+                      lineHeight: 1.1, letterSpacing: -0.5,
+                    }}>
+                      {completedCount}/{totalSteps} алхам
+                    </div>
                   </div>
-                  <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.4 }}>
-                    {nextSection.bullets.length} алхмыг гүйцэтгээд илүү сайн үр дүнд хүрэх боломжтой
+                  <div style={{
+                    fontSize: 26, fontWeight: 900,
+                    color: allDone ? "#fff" : "#7C3AED",
+                    letterSpacing: -1,
+                  }}>
+                    {progressPct}%
                   </div>
                 </div>
+
+                {/* Progress bar */}
+                <div style={{
+                  height: 8, borderRadius: 8,
+                  background: allDone ? "rgba(255,255,255,0.25)" : "#F3E8FF",
+                  overflow: "hidden", position: "relative",
+                }}>
+                  <div style={{
+                    width: `${progressPct}%`, height: "100%",
+                    background: allDone
+                      ? "rgba(255,255,255,0.9)"
+                      : "linear-gradient(90deg, #8B5CF6, #7C3AED)",
+                    borderRadius: 8,
+                    transition: "width 0.6s cubic-bezier(.16,1,.3,1)",
+                    boxShadow: allDone ? "none" : "0 0 8px rgba(139,92,246,0.5)",
+                  }}/>
+                </div>
+
+                {allDone && (
+                  <div style={{
+                    fontSize: 12, fontWeight: 600, marginTop: 8,
+                    opacity: 0.95, lineHeight: 1.4, position: "relative",
+                  }}>
+                    Маш сайн! Та бүх зорилтыг гүйцэтгэлээ. 🌟
+                  </div>
+                )}
               </div>
+
+              {/* TODO checklist */}
+              {nextSection.bullets.map((b, i) => {
+                const isDone = completed.has(i)
+                const colonMatch = b.match(/^([^:：]+)[:：]\s*(.+)$/)
+                const stepTitle = colonMatch ? colonMatch[1].trim() : null
+                const stepBody = colonMatch ? colonMatch[2].trim() : b
+
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => onToggleStep?.(i)}
+                    style={{
+                      display: "flex", gap: 12, alignItems: "flex-start",
+                      background: isDone ? "#F0FDF4" : "#fff",
+                      borderRadius: 14,
+                      padding: "14px 14px",
+                      border: isDone
+                        ? "1.5px solid rgba(16,185,129,0.3)"
+                        : "1.5px solid rgba(139,92,246,0.12)",
+                      boxShadow: isDone
+                        ? "0 2px 8px rgba(16,185,129,0.08)"
+                        : "0 4px 12px rgba(139,92,246,0.05)",
+                      position: "relative",
+                      animation: `hw-msg-in 0.5s cubic-bezier(.16,1,.3,1) ${i * 0.08}s both`,
+                      cursor: "pointer",
+                      width: "100%", textAlign: "left",
+                      fontFamily: "inherit",
+                      transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
+                    }}
+                    onMouseEnter={e => {
+                      if (!isDone) {
+                        ;(e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
+                        ;(e.currentTarget as HTMLElement).style.boxShadow = "0 8px 20px rgba(139,92,246,0.12)"
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      ;(e.currentTarget as HTMLElement).style.transform = "translateY(0)"
+                      ;(e.currentTarget as HTMLElement).style.boxShadow = isDone
+                        ? "0 2px 8px rgba(16,185,129,0.08)"
+                        : "0 4px 12px rgba(139,92,246,0.05)"
+                    }}
+                  >
+                    {/* Checkbox */}
+                    <div style={{
+                      width: 28, height: 28, borderRadius: 9,
+                      background: isDone
+                        ? "linear-gradient(135deg, #10B981, #059669)"
+                        : "#fff",
+                      border: isDone ? "none" : "2px solid #D1D5DB",
+                      color: "#fff", flexShrink: 0,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      boxShadow: isDone
+                        ? "0 4px 10px rgba(16,185,129,0.35)"
+                        : "0 2px 4px rgba(0,0,0,0.04)",
+                      transition: "all 0.25s",
+                    }}>
+                      {isDone && (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "hw-pop 0.35s cubic-bezier(.34,1.56,.64,1)" }}>
+                          <path d="M20 6L9 17l-5-5"/>
+                        </svg>
+                      )}
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
+                      {/* Step number chip */}
+                      <div style={{
+                        display: "flex", alignItems: "center", gap: 6,
+                        marginBottom: stepTitle ? 4 : 0,
+                      }}>
+                        <span style={{
+                          fontSize: 9, fontWeight: 800,
+                          padding: "2px 7px", borderRadius: 999,
+                          background: isDone ? "#D1FAE5" : "#F3E8FF",
+                          color: isDone ? "#059669" : "#7C3AED",
+                          letterSpacing: 0.5,
+                        }}>
+                          АЛХАМ {i + 1}
+                        </span>
+                        {isDone && (
+                          <span style={{
+                            fontSize: 9, fontWeight: 700, color: "#059669",
+                            letterSpacing: 0.5, textTransform: "uppercase",
+                          }}>
+                            ✓ Гүйцэтгэсэн
+                          </span>
+                        )}
+                      </div>
+                      {stepTitle ? (
+                        <>
+                          <div style={{
+                            fontSize: 13, fontWeight: 800,
+                            color: isDone ? "#059669" : "#111827",
+                            marginBottom: 3, lineHeight: 1.3,
+                            textDecoration: isDone ? "line-through" : "none",
+                            textDecorationColor: "#10B98180",
+                          }}>
+                            {stepTitle}
+                          </div>
+                          <div style={{
+                            fontSize: 12,
+                            color: isDone ? "#6B7280" : "#4B5563",
+                            lineHeight: 1.55,
+                            opacity: isDone ? 0.7 : 1,
+                          }}>
+                            {stepBody}
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{
+                          fontSize: 13,
+                          color: isDone ? "#6B7280" : "#1F2937",
+                          lineHeight: 1.55,
+                          textDecoration: isDone ? "line-through" : "none",
+                          textDecorationColor: "#10B98180",
+                          opacity: isDone ? 0.75 : 1,
+                        }}>
+                          {stepBody}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           )
         })()}
@@ -2521,6 +2655,18 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const pendingAnalysisIdxRef = useRef<number | null>(null)
   // Pending follow-up question state (per artifact)
   const [followUpPending, setFollowUpPending] = useState(false)
+
+  // Toggle a checkable action step inside the artifact (TODO behavior)
+  const toggleArtifactStep = (stepIdx: number) => {
+    if (artifactMessageIdx === null) return
+    setMessages(prev => prev.map((m, i) => {
+      if (i !== artifactMessageIdx) return m
+      const completed = new Set(m.completedSteps || [])
+      if (completed.has(stepIdx)) completed.delete(stepIdx)
+      else completed.add(stepIdx)
+      return { ...m, completedSteps: Array.from(completed) }
+    }))
+  }
 
   // Send a follow-up question from inside the artifact, append Q&A to that message
   const askArtifactFollowUp = async (question: string) => {
@@ -4052,6 +4198,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   onClose={() => setArtifactMessageIdx(null)}
                   onAskFollowUp={askArtifactFollowUp}
                   askPending={followUpPending}
+                  onToggleStep={toggleArtifactStep}
                   fontSize={fontSize}
                   renderFormattedText={(text: string) => {
                     // Lightweight markdown renderer for the artifact
