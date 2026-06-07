@@ -819,7 +819,7 @@ function AdviceSections({ sections }: { sections: AdviceSection[] }) {
           )
         }
 
-        // STRENGTHS / WATCHOUTS / TIPS: icon-led card list
+        // STRENGTHS / WATCHOUTS / TIPS: visual stat-card style
         return (
           <div key={idx} style={{
             animation: `hw-msg-in 0.5s cubic-bezier(.16,1,.3,1) ${idx * 0.08}s both`,
@@ -833,52 +833,75 @@ function AdviceSections({ sections }: { sections: AdviceSection[] }) {
                 {s.title}
               </span>
               <span style={{
-                background: t.soft, color: t.color,
-                fontSize: 10, fontWeight: 700,
-                padding: "2px 8px", borderRadius: 999, marginLeft: 4,
+                background: t.bg, color: t.color,
+                fontSize: 10, fontWeight: 800,
+                padding: "3px 9px", borderRadius: 999, marginLeft: 4,
+                boxShadow: `0 2px 6px ${t.color}33`,
               }}>
                 {s.bullets.length}
               </span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {s.bullets.map((b, i) => {
-                // Bullets often have "**Title:** body" — split for emphasis
                 const splitMatch = b.match(/^([^:：]+)[:：]\s*(.+)$/)
                 const title = splitMatch ? splitMatch[1].trim() : null
                 const body = splitMatch ? splitMatch[2].trim() : b
                 return (
-                  <div key={i} style={{
-                    display: "flex", gap: 10, alignItems: "flex-start",
+                  <div key={i} className="hw-card-tilt" style={{
+                    display: "flex", gap: 10, alignItems: "stretch",
                     background: "#fff",
-                    borderRadius: 14, padding: "12px 14px",
+                    borderRadius: 14, padding: "10px 12px 10px 0",
                     border: `1.5px solid ${t.soft}`,
                     boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                    overflow: "hidden",
+                    position: "relative",
+                    cursor: "default",
                   }}>
+                    {/* Left numbered bar — vertical accent */}
                     <div style={{
-                      width: 24, height: 24, borderRadius: 8,
+                      width: 40, flexShrink: 0,
                       background: t.bg,
-                      color: t.text,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0,
-                      boxShadow: `0 3px 8px ${t.color}33`,
+                      display: "flex", flexDirection: "column",
+                      alignItems: "center", justifyContent: "center",
+                      gap: 2,
+                      borderRight: `1px solid ${t.soft}`,
                     }}>
-                      {s.key === "strengths" && (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                      )}
-                      {s.key === "watchouts" && (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86l-8.18 14.14a2 2 0 001.71 3h16.36a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-                      )}
-                      {s.key === "tips" && (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 00-4 12.7V17a2 2 0 002 2h4a2 2 0 002-2v-2.3A7 7 0 0012 2zM10 21a2 2 0 004 0H10z"/></svg>
-                      )}
+                      <div style={{
+                        width: 22, height: 22, borderRadius: 7,
+                        background: t.bg as string,
+                        color: t.color,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        boxShadow: `0 2px 6px ${t.color}22`,
+                      }}>
+                        {s.key === "strengths" && (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                        )}
+                        {s.key === "watchouts" && (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86l-8.18 14.14a2 2 0 001.71 3h16.36a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                        )}
+                        {s.key === "tips" && (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 00-4 12.7V17a2 2 0 002 2h4a2 2 0 002-2v-2.3A7 7 0 0012 2z"/></svg>
+                        )}
+                      </div>
+                      <div style={{
+                        fontSize: 9, fontWeight: 900, color: t.color,
+                        letterSpacing: 0.5,
+                      }}>#{i + 1}</div>
                     </div>
-                    <div style={{ minWidth: 0, flex: 1 }}>
+
+                    <div style={{ minWidth: 0, flex: 1, paddingTop: 4, paddingBottom: 4 }}>
                       {title && (
-                        <div style={{ fontSize: 12, fontWeight: 700, color: "#111827", marginBottom: 3, lineHeight: 1.3 }}>
+                        <div style={{
+                          fontSize: 12.5, fontWeight: 800, color: "#111827",
+                          marginBottom: 3, lineHeight: 1.3,
+                        }}>
                           {title}
                         </div>
                       )}
-                      <div style={{ fontSize: 12, lineHeight: 1.55, color: title ? "#4B5563" : "#1F2937" }}>
+                      <div style={{
+                        fontSize: 11.5, lineHeight: 1.5,
+                        color: title ? "#4B5563" : "#1F2937",
+                      }}>
                         {body}
                       </div>
                     </div>
@@ -1396,8 +1419,50 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
           const sections = parseAdvice(message.content)
           // Section 2 = summary/strengths/watchouts/tips (everything except "next")
           const analysisCards = sections.filter(s => s.key !== "next")
+
           if (analysisCards.length > 0) {
-            return <AdviceSections sections={analysisCards} />
+            const strengthsCount = sections.find(s => s.key === "strengths")?.bullets.length || 0
+            const watchoutsCount = sections.find(s => s.key === "watchouts")?.bullets.length || 0
+            const tipsCount = sections.find(s => s.key === "tips")?.bullets.length || 0
+            return (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {/* Quick Stats Dashboard widget */}
+                <div style={{
+                  display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8,
+                  animation: "hw-fade-up 0.6s cubic-bezier(.16,1,.3,1) 0.05s both",
+                }}>
+                  {[
+                    { label: "Давуу", count: strengthsCount, emoji: "✨", color: "#10B981", bg: "#ECFDF5", soft: "#D1FAE5" },
+                    { label: "Анхаарал", count: watchoutsCount, emoji: "⚠️", color: "#F59E0B", bg: "#FFFBEB", soft: "#FEF3C7" },
+                    { label: "Зөвлөмж", count: tipsCount, emoji: "💡", color: "#E8541A", bg: "#FFF7ED", soft: "#FFEDD5" },
+                  ].map((s, i) => (
+                    <div key={i} className="hw-card-tilt" style={{
+                      background: `linear-gradient(145deg, ${s.bg}, #fff)`,
+                      borderRadius: 14, padding: "12px 10px",
+                      border: `1.5px solid ${s.soft}`,
+                      textAlign: "center", position: "relative", overflow: "hidden",
+                    }}>
+                      <div style={{
+                        fontSize: 20, marginBottom: 2,
+                        animation: "hw-icon-bounce 2.4s ease-in-out infinite",
+                        animationDelay: `${i * 0.2}s`,
+                      }}>{s.emoji}</div>
+                      <div style={{
+                        fontSize: 28, fontWeight: 900, color: s.color,
+                        lineHeight: 1, letterSpacing: -1,
+                      }}>{s.count}</div>
+                      <div style={{
+                        fontSize: 9, fontWeight: 800, color: "#6B7280",
+                        letterSpacing: 0.6, textTransform: "uppercase", marginTop: 3,
+                      }}>{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Then the parsed advice cards */}
+                <AdviceSections sections={analysisCards} />
+              </div>
+            )
           }
           return (
             <div style={{
@@ -1420,16 +1485,25 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
 
         {status === "done" && (() => {
           const sections = parseAdvice(message.content)
-          const nextSection = sections.find(s => s.key === "next")
-
+          // Fallback chain: next steps → tips → watchouts (we always want actionable items)
+          let nextSection = sections.find(s => s.key === "next")
+          if (!nextSection || nextSection.bullets.length === 0) {
+            const tips = sections.find(s => s.key === "tips")
+            if (tips && tips.bullets.length > 0) {
+              nextSection = { ...tips, key: "next" as const, title: "Үйл ажиллагааны төлөвлөгөө", emoji: "🚀" }
+            }
+          }
           if (!nextSection || nextSection.bullets.length === 0) {
             return (
               <div style={{
-                background: "#fff", borderRadius: 14, padding: "16px",
-                border: "1px solid rgba(0,0,0,0.04)",
-                fontSize: 12, color: "#6B7280", textAlign: "center",
+                background: "linear-gradient(135deg, #FAF5FF, #fff)",
+                borderRadius: 16, padding: "20px 16px",
+                border: "1.5px dashed rgba(139,92,246,0.25)",
+                fontSize: 12, color: "#7C3AED", textAlign: "center",
+                fontWeight: 600,
               }}>
-                Тодорхой алхам зөвлөгдсөнгүй
+                <div style={{ fontSize: 24, marginBottom: 6 }}>📝</div>
+                Алхамууд бэлдэгдэж байна...
               </div>
             )
           }

@@ -31,7 +31,8 @@
       "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Add full-width Trait Breakdown cards for multi-dimension tests \\(DISC, Big5, etc.\\) *)",
       "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Add Artifact pattern UX: brief in-chat preview + expandable full-detail panel *)",
       "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Next-level Apple Health-style artifact: hero + analysis + Q&A + chat input *)",
-      "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Action plan -> interactive TODO checklist with progress tracking *)"
+      "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Action plan -> interactive TODO checklist with progress tracking *)",
+      "Bash(git -c user.email=bimbuk0329@gmail.com -c user.name=batlvndenbayrbileg commit -m 'Make Section 2 stat-dashboard heavy + force action plan to exist *)"
     ]
   }
 }
