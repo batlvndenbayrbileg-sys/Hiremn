@@ -1221,15 +1221,17 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   }, [messages, isTyping])
 
   const sendMessage = async (text: string, opts?: { hidden?: boolean; skipStaticRouting?: boolean }) => {
-    // Check if user is locked - popup will show automatically
-    if (!canSendMessage()) {
-      return
-    }
+    // ── TEMP: Daily message limit disabled ────────────────────────────
+    // // Check if user is locked - popup will show automatically
+    // if (!canSendMessage()) {
+    //   return
+    // }
 
     if (!text.trim() || isTyping) return
 
-    // Increment daily count
-    incrementDailyCount()
+    // ── TEMP: Daily message limit disabled ────────────────────────────
+    // // Increment daily count
+    // incrementDailyCount()
 
     setShowQuickReplies(false)
     // Only add a visible user bubble when not hidden (analysis requests are hidden)
@@ -2323,7 +2325,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   </button>
                 </div>
 
-                {/* Warning - shows when 10 or less remaining */}
+                {/* TEMP: Daily limit warning hidden ─────────────────────────
                 {getRemainingMessages() <= 10 && getRemainingMessages() > 0 && (
                   <div style={{
                     display: "flex",
@@ -2359,6 +2361,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     </span>
                   </div>
                 )}
+                ─────────────────────────────────────────────────────────── */}
 
                 <div style={{ textAlign: "center", marginTop: 10, fontSize: 10, color: "#aaa", fontWeight: 500 }}>
                   hire.mn AI
@@ -2366,8 +2369,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               </div>
               )}
 
-              {/* Usage Limit Popup */}
-              {isUserLocked() && <UsageLimitPopup />}
+              {/* TEMP: Usage Limit Popup disabled ───────────────────────── */}
+              {/* {isUserLocked() && <UsageLimitPopup />} */}
 
               {/* Sidebar Overlay */}
               {showSidebar && (
