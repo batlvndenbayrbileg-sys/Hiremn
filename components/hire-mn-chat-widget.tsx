@@ -46,6 +46,23 @@ interface Message {
   categories?: string[]
   teamCategories?: TeamCategory[]
   companyInfo?: boolean
+  insightCard?: InsightCardData
+}
+
+interface InsightSubScore {
+  label: string
+  value: string
+  level: "low" | "mid" | "high"
+  bar?: number // 0-100
+}
+
+interface InsightCardData {
+  testName: string
+  resultLabel: string
+  score: number
+  total: number
+  description?: string
+  subScores?: InsightSubScore[]
 }
 
 interface InitialContext {
@@ -190,6 +207,170 @@ function MascotRobot({ size = 58, white = false, waving = false }: { size?: numb
         <animate attributeName="opacity" values="0.15;0.4;0.15" dur="3s" repeatCount="indefinite" />
       </path>
     </svg>
+  )
+}
+
+// ── Insight Card (Apple Health-style result visualization) ────────────────────
+
+function InsightCard({ data }: { data: InsightCardData }) {
+  const pct = data.total > 0 ? Math.round((data.score / data.total) * 100) : 0
+  const radius = 38
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (pct / 100) * circumference
+
+  // Colour scheme based on percentage
+  const tone =
+    pct >= 75 ? { ring: "#10B981", soft: "#D1FAE5", bg: "#ECFDF5" }
+    : pct >= 50 ? { ring: "#F59E0B", soft: "#FEF3C7", bg: "#FFFBEB" }
+    : { ring: "#EF4444", soft: "#FEE2E2", bg: "#FEF2F2" }
+
+  const levelColour = (lvl: InsightSubScore["level"]) =>
+    lvl === "low" ? { color: "#10B981", bg: "#ECFDF5", label: "Бага" }
+    : lvl === "high" ? { color: "#EF4444", bg: "#FEF2F2", label: "Их" }
+    : { color: "#F59E0B", bg: "#FFFBEB", label: "Дунд" }
+
+  return (
+    <div style={{
+      background: "linear-gradient(145deg, #fff 0%, #FFFCFA 100%)",
+      borderRadius: 20,
+      padding: 18,
+      border: "1.5px solid rgba(232,84,26,0.08)",
+      boxShadow: "0 8px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+      maxWidth: "100%",
+    }}>
+      {/* Header */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 8, marginBottom: 14,
+        fontSize: 11, fontWeight: 700, letterSpacing: 1.2, color: "#3B82F6",
+        textTransform: "uppercase",
+      }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#3B82F6">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+        Health Score
+      </div>
+
+      {/* Test name pill */}
+      <div style={{
+        display: "inline-block",
+        background: tone.bg,
+        color: tone.ring,
+        padding: "6px 12px",
+        borderRadius: 999,
+        fontSize: 13,
+        fontWeight: 600,
+        marginBottom: 14,
+        border: `1px solid ${tone.soft}`,
+      }}>
+        {data.testName}
+      </div>
+
+      {/* Score row */}
+      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 14 }}>
+        {/* Circular progress */}
+        <div style={{ position: "relative", flexShrink: 0 }}>
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <circle cx="48" cy="48" r={radius} fill="none" stroke={tone.soft} strokeWidth="8"/>
+            <circle
+              cx="48" cy="48" r={radius} fill="none"
+              stroke={tone.ring} strokeWidth="8" strokeLinecap="round"
+              strokeDasharray={circumference} strokeDashoffset={offset}
+              transform="rotate(-90 48 48)"
+              style={{ transition: "stroke-dashoffset 1s cubic-bezier(.16,1,.3,1)" }}
+            />
+          </svg>
+          <div style={{
+            position: "absolute", inset: 0,
+            display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+          }}>
+            <div style={{ fontSize: 24, fontWeight: 800, color: "#1F2937", lineHeight: 1 }}>{pct}</div>
+            <div style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 600 }}>/100</div>
+          </div>
+        </div>
+
+        {/* Right side: score breakdown */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            background: "#F9FAFB",
+            borderRadius: 12,
+            padding: "10px 12px",
+            marginBottom: 8,
+            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
+          }}>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "#1F2937" }}>
+                {data.score}/{data.total}
+              </div>
+              <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 500 }}>оноо</div>
+            </div>
+            <div style={{
+              background: tone.bg, color: tone.ring,
+              padding: "4px 10px", borderRadius: 999,
+              fontSize: 12, fontWeight: 700,
+            }}>
+              {pct}%
+            </div>
+          </div>
+          <div style={{
+            fontSize: 13, fontWeight: 600, color: tone.ring, marginBottom: 2,
+          }}>
+            {data.resultLabel}
+          </div>
+        </div>
+      </div>
+
+      {/* Description */}
+      {data.description && (
+        <div style={{
+          fontSize: 12, lineHeight: 1.55, color: "#4B5563",
+          padding: "10px 12px", background: "#F9FAFB", borderRadius: 12,
+          marginBottom: data.subScores && data.subScores.length > 0 ? 14 : 0,
+        }}>
+          {data.description}
+        </div>
+      )}
+
+      {/* Sub-scores */}
+      {data.subScores && data.subScores.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(data.subScores.length, 3)}, 1fr)`, gap: 8 }}>
+          {data.subScores.map((s, i) => {
+            const lvl = levelColour(s.level)
+            return (
+              <div key={i} style={{
+                background: "#fff", borderRadius: 12, padding: 10,
+                border: "1px solid #F3F4F6",
+              }}>
+                <div style={{
+                  fontSize: 9, fontWeight: 700, color: "#9CA3AF",
+                  textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4,
+                  lineHeight: 1.3,
+                }}>
+                  {s.label}
+                </div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: lvl.color, marginBottom: 4 }}>
+                  {s.value}
+                </div>
+                {typeof s.bar === "number" && (
+                  <div style={{ height: 4, background: "#F3F4F6", borderRadius: 2, overflow: "hidden", marginBottom: 4 }}>
+                    <div style={{
+                      width: `${Math.max(0, Math.min(100, s.bar))}%`,
+                      height: "100%",
+                      background: lvl.color,
+                      borderRadius: 2,
+                      transition: "width 0.8s cubic-bezier(.16,1,.3,1)",
+                    }}/>
+                  </div>
+                )}
+                <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 500 }}>
+                  {lvl.label}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -792,6 +973,16 @@ function BotMessage({ message, fontSize, userQuestion = "", showAvatar = true }:
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {/* Insight Card (test result visualization) */}
+      {message.insightCard && (
+        <div style={{ display: "flex", gap: 10, alignItems: "flex-end", animation: "hw-msg-in 0.4s cubic-bezier(.16,1,.3,1)" }}>
+          <div style={{ width: 40, flexShrink: 0 }} aria-hidden="true" />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <InsightCard data={message.insightCard} />
+          </div>
+        </div>
+      )}
+
       {cleanText && (
         <div style={{ display: "flex", gap: 10, alignItems: "flex-end", animation: "hw-msg-in 0.4s cubic-bezier(.16,1,.3,1)" }}>
           {showAvatar ? (
@@ -1115,15 +1306,52 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           examPayload.total ?? examPayload.assessment?.totalPoint ?? ""
         const description: string = examPayload.assessment?.description || ""
 
-        // Build a short user-facing summary (NO raw JSON)
-        let summary = `**📊 Тайлангийн дүн шинжилгээ**\n\n`
-        summary += `**Тест:** ${testName}\n`
-        if (resultLabel) summary += `**Үнэлгээ:** ${resultLabel}\n`
-        if (score !== "" && totalScore !== "") summary += `**Оноо:** ${score} / ${totalScore}\n`
-        else if (score !== "") summary += `**Оноо:** ${score}\n`
-        summary += `\n_Таны үр дүнг задлан шинжилж байна..._`
+        // Build sub-scores from question categories (group by category, sum points)
+        const subScoreMap = new Map<string, { sum: number; max: number; count: number }>()
+        for (const a of answersPayload) {
+          const catName: string = a?.questionCategory?.name || ""
+          if (!catName) continue
+          const p = parseFloat(a?.point ?? a?.answer?.point ?? "0") || 0
+          const maxP = parseFloat(a?.question?.point ?? a?.question?.maxValue ?? "0") || 0
+          const cur = subScoreMap.get(catName) || { sum: 0, max: 0, count: 0 }
+          cur.sum += p
+          cur.max += maxP
+          cur.count += 1
+          subScoreMap.set(catName, cur)
+        }
 
-        const contextMsg: Message = { role: "assistant", content: summary }
+        const subScores: InsightSubScore[] = Array.from(subScoreMap.entries())
+          .slice(0, 3)
+          .map(([label, v]) => {
+            const pct = v.max > 0 ? (v.sum / v.max) * 100 : 0
+            const level: InsightSubScore["level"] =
+              pct >= 66 ? "high" : pct >= 33 ? "mid" : "low"
+            return {
+              label,
+              value: v.max > 0 ? `${v.sum}/${v.max}` : `${v.sum}`,
+              level,
+              bar: Math.round(pct),
+            }
+          })
+
+        const numericScore = Number(score) || 0
+        const numericTotal = Number(totalScore) || 0
+
+        const insightCard: InsightCardData = {
+          testName,
+          resultLabel: resultLabel || "Үр дүн",
+          score: numericScore,
+          total: numericTotal,
+          description: description ? description.slice(0, 200) : undefined,
+          subScores: subScores.length > 0 ? subScores : undefined,
+        }
+
+        // Render the rich Insight Card as an assistant message
+        const contextMsg: Message = {
+          role: "assistant",
+          content: "_Таны үр дүнг задлан шинжилж байна..._",
+          insightCard,
+        }
         setMessages(prev => [...prev, contextMsg])
 
         // ── Build a clean structured prompt for the LLM ───────────────────
