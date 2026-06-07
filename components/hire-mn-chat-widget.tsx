@@ -606,6 +606,266 @@ function ArtifactPreview({ message, onOpen, fontSize }: {
   )
 }
 
+// ── Parse AI advice into structured sections ─────────────────────────────────
+
+interface AdviceSection {
+  key: "summary" | "strengths" | "watchouts" | "tips" | "next"
+  title: string
+  emoji: string
+  bullets: string[]
+  intro?: string // For summary: prose text
+}
+
+function parseAdvice(text: string): AdviceSection[] {
+  if (!text || !text.trim()) return []
+
+  // Section title → key mapping
+  const sectionMap: Array<{ patterns: RegExp[]; key: AdviceSection["key"]; title: string; emoji: string }> = [
+    { patterns: [/гол\s*дүгнэлт/i, /key\s*insight/i, /summary/i],     key: "summary",   title: "Гол дүгнэлт",      emoji: "🎯" },
+    { patterns: [/давуу\s*тал/i, /strength/i],                          key: "strengths", title: "Давуу тал",        emoji: "✨" },
+    { patterns: [/анхаарах\s*зүйл/i, /watch.?out/i, /сул\s*тал/i],     key: "watchouts", title: "Анхаарах зүйл",    emoji: "⚠️" },
+    { patterns: [/практик\s*зөвлөмж/i, /зөвлөмж/i, /tip/i, /advice/i], key: "tips",      title: "Практик зөвлөмж",  emoji: "💡" },
+    { patterns: [/цаашдын\s*алхам/i, /next\s*step/i, /цаашид/i],       key: "next",      title: "Цаашдын алхам",    emoji: "🚀" },
+  ]
+
+  // Split by lines, find header rows like "**Гол дүгнэлт**" or "1. **Гол дүгнэлт**"
+  const lines = text.split("\n").map(l => l.trim())
+  const sections: AdviceSection[] = []
+  let current: AdviceSection | null = null
+  let introBuffer: string[] = []
+
+  const matchHeader = (line: string): { key: AdviceSection["key"]; title: string; emoji: string } | null => {
+    // Strip markdown bold + leading numbers
+    const stripped = line
+      .replace(/^[#\-•\s]*/, "")
+      .replace(/^\d+[.)]\s*/, "")
+      .replace(/^\*+/, "")
+      .replace(/\*+$/, "")
+      .replace(/[:：—–-]+\s*$/, "")
+      .trim()
+    if (!stripped) return null
+    for (const s of sectionMap) {
+      if (s.patterns.some(p => p.test(stripped))) {
+        // Must be short (header-like)
+        if (stripped.length < 40) return { key: s.key, title: s.title, emoji: s.emoji }
+      }
+    }
+    return null
+  }
+
+  for (const raw of lines) {
+    if (!raw) continue
+    if (/^[-=─━]{2,}$/.test(raw)) continue // divider
+
+    const header = matchHeader(raw)
+    if (header) {
+      if (current) sections.push(current)
+      current = { key: header.key, title: header.title, emoji: header.emoji, bullets: [] }
+      continue
+    }
+
+    if (!current) {
+      // Pre-section text → keep as intro for summary
+      introBuffer.push(raw.replace(/\*\*/g, ""))
+      continue
+    }
+
+    // Bullet: "•" or "-" or "*"
+    const bulletMatch = raw.match(/^[•\-*]\s+(.+)$/)
+    if (bulletMatch) {
+      current.bullets.push(bulletMatch[1].trim())
+      continue
+    }
+    // Plain text — append to last bullet if there's one, else as prose
+    if (current.bullets.length > 0) {
+      current.bullets[current.bullets.length - 1] += " " + raw
+    } else {
+      // Treat as the section's main prose (for summary section)
+      current.intro = (current.intro ? current.intro + " " : "") + raw.replace(/\*\*/g, "")
+    }
+  }
+  if (current) sections.push(current)
+
+  // Attach floating intro to summary section if present
+  if (introBuffer.length > 0) {
+    const summary = sections.find(s => s.key === "summary")
+    if (summary) {
+      summary.intro = (introBuffer.join(" ") + (summary.intro ? " " + summary.intro : "")).trim()
+    }
+  }
+
+  // Clean up: remove ** markers from every bullet
+  sections.forEach(s => {
+    s.bullets = s.bullets.map(b => b.replace(/\*\*/g, "").trim()).filter(Boolean)
+    if (s.intro) s.intro = s.intro.replace(/\*\*/g, "").trim()
+  })
+
+  return sections.filter(s => s.bullets.length > 0 || s.intro)
+}
+
+// ── Advice Section Cards (visual rendering of parsed sections) ───────────────
+
+function AdviceSections({ sections }: { sections: AdviceSection[] }) {
+  const theme = (key: AdviceSection["key"]) => {
+    switch (key) {
+      case "summary":   return { bg: "linear-gradient(135deg, #3B82F6, #2563EB)",  soft: "#DBEAFE", color: "#2563EB", text: "#fff" }
+      case "strengths": return { bg: "linear-gradient(135deg, #10B981, #059669)",  soft: "#D1FAE5", color: "#059669", text: "#fff" }
+      case "watchouts": return { bg: "linear-gradient(135deg, #F59E0B, #D97706)",  soft: "#FEF3C7", color: "#D97706", text: "#fff" }
+      case "tips":      return { bg: "linear-gradient(135deg, #E8541A, #F07040)",  soft: "#FFEDD5", color: "#E8541A", text: "#fff" }
+      case "next":      return { bg: "linear-gradient(135deg, #8B5CF6, #7C3AED)",  soft: "#EDE9FE", color: "#7C3AED", text: "#fff" }
+    }
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {sections.map((s, idx) => {
+        const t = theme(s.key)
+
+        // SUMMARY: hero quote card
+        if (s.key === "summary") {
+          return (
+            <div key={idx} style={{
+              background: t.bg,
+              borderRadius: 18,
+              padding: "16px 18px",
+              color: t.text,
+              boxShadow: "0 8px 24px rgba(59,130,246,0.25)",
+              position: "relative",
+              overflow: "hidden",
+              animation: `hw-msg-in 0.5s cubic-bezier(.16,1,.3,1) ${idx * 0.08}s both`,
+            }}>
+              <div style={{
+                position: "absolute", top: -20, right: -10,
+                fontSize: 80, opacity: 0.15, lineHeight: 1,
+              }}>{s.emoji}</div>
+              <div style={{
+                fontSize: 10, fontWeight: 700, letterSpacing: 1.5,
+                opacity: 0.9, textTransform: "uppercase", marginBottom: 8,
+                display: "flex", alignItems: "center", gap: 6,
+              }}>
+                <span style={{ fontSize: 14 }}>{s.emoji}</span> {s.title}
+              </div>
+              <div style={{ fontSize: 13, lineHeight: 1.65, fontWeight: 500 }}>
+                {s.intro || s.bullets.join(" ")}
+              </div>
+            </div>
+          )
+        }
+
+        // NEXT STEPS: numbered timeline
+        if (s.key === "next") {
+          return (
+            <div key={idx} style={{
+              animation: `hw-msg-in 0.5s cubic-bezier(.16,1,.3,1) ${idx * 0.08}s both`,
+            }}>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 8,
+                marginBottom: 10, paddingLeft: 4,
+              }}>
+                <span style={{ fontSize: 16 }}>{s.emoji}</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: t.color, letterSpacing: 0.6, textTransform: "uppercase" }}>
+                  {s.title}
+                </span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {s.bullets.map((b, i) => (
+                  <div key={i} style={{
+                    display: "flex", gap: 12, alignItems: "flex-start",
+                    background: "#fff",
+                    borderRadius: 14, padding: "12px 14px",
+                    border: "1.5px solid rgba(139,92,246,0.1)",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                  }}>
+                    <div style={{
+                      width: 28, height: 28, borderRadius: "50%",
+                      background: t.bg,
+                      color: t.text, fontSize: 13, fontWeight: 800,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0,
+                      boxShadow: "0 4px 10px rgba(139,92,246,0.25)",
+                    }}>{i + 1}</div>
+                    <div style={{ fontSize: 13, lineHeight: 1.55, color: "#1F2937", paddingTop: 4 }}>{b}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        }
+
+        // STRENGTHS / WATCHOUTS / TIPS: icon-led card list
+        return (
+          <div key={idx} style={{
+            animation: `hw-msg-in 0.5s cubic-bezier(.16,1,.3,1) ${idx * 0.08}s both`,
+          }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              marginBottom: 10, paddingLeft: 4,
+            }}>
+              <span style={{ fontSize: 16 }}>{s.emoji}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: t.color, letterSpacing: 0.6, textTransform: "uppercase" }}>
+                {s.title}
+              </span>
+              <span style={{
+                background: t.soft, color: t.color,
+                fontSize: 10, fontWeight: 700,
+                padding: "2px 8px", borderRadius: 999, marginLeft: 4,
+              }}>
+                {s.bullets.length}
+              </span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {s.bullets.map((b, i) => {
+                // Bullets often have "**Title:** body" — split for emphasis
+                const splitMatch = b.match(/^([^:：]+)[:：]\s*(.+)$/)
+                const title = splitMatch ? splitMatch[1].trim() : null
+                const body = splitMatch ? splitMatch[2].trim() : b
+                return (
+                  <div key={i} style={{
+                    display: "flex", gap: 10, alignItems: "flex-start",
+                    background: "#fff",
+                    borderRadius: 14, padding: "12px 14px",
+                    border: `1.5px solid ${t.soft}`,
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                  }}>
+                    <div style={{
+                      width: 24, height: 24, borderRadius: 8,
+                      background: t.bg,
+                      color: t.text,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0,
+                      boxShadow: `0 3px 8px ${t.color}33`,
+                    }}>
+                      {s.key === "strengths" && (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                      )}
+                      {s.key === "watchouts" && (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86l-8.18 14.14a2 2 0 001.71 3h16.36a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                      )}
+                      {s.key === "tips" && (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 00-4 12.7V17a2 2 0 002 2h4a2 2 0 002-2v-2.3A7 7 0 0012 2zM10 21a2 2 0 004 0H10z"/></svg>
+                      )}
+                    </div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      {title && (
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#111827", marginBottom: 3, lineHeight: 1.3 }}>
+                          {title}
+                        </div>
+                      )}
+                      <div style={{ fontSize: 12, lineHeight: 1.55, color: title ? "#4B5563" : "#1F2937" }}>
+                        {body}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 // ── Artifact View (full-screen-within-widget detail panel) ───────────────────
 
 function ArtifactView({ message, onClose, fontSize, renderFormattedText }: {
@@ -783,13 +1043,18 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText }: {
             <div style={{ fontSize: 13, color: "#DC2626", padding: "12px 0" }}>
               ⚠️ {message.content || "Зөвлөгөө гаргахад алдаа гарлаа."}
             </div>
-          ) : (
-            <div style={{
-              fontSize: 13, lineHeight: 1.7, color: "#1F2937",
-            }}>
-              {renderFormattedText(message.content)}
-            </div>
-          )}
+          ) : (() => {
+            const sections = parseAdvice(message.content)
+            if (sections.length > 0) {
+              return <AdviceSections sections={sections} />
+            }
+            // Fallback: plain text rendering when parser found nothing
+            return (
+              <div style={{ fontSize: 13, lineHeight: 1.7, color: "#1F2937" }}>
+                {renderFormattedText(message.content)}
+              </div>
+            )
+          })()}
         </div>
 
         {/* Footer note */}
