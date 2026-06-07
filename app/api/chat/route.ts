@@ -107,6 +107,45 @@ export async function POST(req: Request) {
     if (!lastMessage.trim())
       return Response.json({ error: 'empty message' }, { status: 400 })
 
+    // ── FAST PATH: Report analysis requests ─────────────────────────────
+    // When the chat widget sends a report analysis prompt, bypass all the
+    // classifier/test-lookup logic and go straight to the LLM with a focused
+    // system prompt. This avoids brittle dependencies (hire-api fetches,
+    // classifier edge cases) that can cause the whole route to fail.
+    if (/^Тестийн үр дүнгийн дүн шинжилгээ хийнэ үү/i.test(lastMessage.trim())) {
+      try {
+        if (!process.env.ANTHROPIC_API_KEY) {
+          return Response.json({ error: 'ANTHROPIC_API_KEY missing on server' }, { status: 503 })
+        }
+        const analysisSystem = `Та hire.mn-ийн мэргэжлийн сэтгэл зүйч AI зөвлөх.
+Хэрэглэгчийн тестийн үр дүнг ГҮНЗГИЙ, ПРАКТИК, ЭМПАТИТЭЙ задлан шинжил.
+Хариултыг дараах бүтэцтэй өг (Markdown-аар, гарчгийг ** одоор тодруулна):
+1. **Гол дүгнэлт** — 2-3 өгүүлбэрээр үнэлгээний утга
+2. **Давуу тал** — тодорхой 2-3 зүйл
+3. **Анхаарах зүйл** — тодорхой 2-3 зүйл
+4. **Практик зөвлөмж** — bullet 4-5
+5. **Цаашдын алхам** — bullet 3-4
+Тон: эерэг, эрсдэлгүй, оношилгоо БИШ.`
+
+        const analysisResp = await anthropic.messages.create({
+          model: 'claude-sonnet-4-5-20250929',
+          max_tokens: 2000,
+          system: analysisSystem,
+          messages: [{ role: 'user', content: lastMessage }],
+        })
+        const text = analysisResp.content
+          .filter((b: any) => b.type === 'text')
+          .map((b: any) => b.text)
+          .join('\n')
+          .trim()
+        return Response.json({ reply: text || 'Шинжилгээ хийж чадсангүй.' })
+      } catch (analysisErr: any) {
+        const m = analysisErr?.message || String(analysisErr)
+        console.error('[chat/route] analysis fast-path failed:', m)
+        return Response.json({ error: `Analysis failed: ${m}` }, { status: 500 })
+      }
+    }
+
     // Intent + хэл тодорхойлох
     const { intent, useLLM, detectedLang, priceFilter, category: detectedCategoryFromClassifier } = classify(lastMessage)
     const lang: 'mn' | 'en' = forcedLang === 'mn' || forcedLang === 'en' ? forcedLang : detectedLang
