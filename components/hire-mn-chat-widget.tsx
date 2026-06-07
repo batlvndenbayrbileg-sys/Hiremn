@@ -732,7 +732,10 @@ function parseAdvice(text: string): AdviceSection[] {
 
 // ── Advice Section Cards (visual rendering of parsed sections) ───────────────
 
-function AdviceSections({ sections }: { sections: AdviceSection[] }) {
+function AdviceSections({ sections, onTapInsight }: {
+  sections: AdviceSection[]
+  onTapInsight?: (data: { title: string; body: string; sectionKey: AdviceSection["key"]; index: number }) => void
+}) {
   const theme = (key: AdviceSection["key"]) => {
     switch (key) {
       case "summary":   return { bg: "linear-gradient(135deg, #3B82F6, #2563EB)",  soft: "#DBEAFE", color: "#2563EB", text: "#fff" }
@@ -841,71 +844,137 @@ function AdviceSections({ sections }: { sections: AdviceSection[] }) {
                 {s.bullets.length}
               </span>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {s.bullets.map((b, i) => {
                 const splitMatch = b.match(/^([^:：]+)[:：]\s*(.+)$/)
                 const title = splitMatch ? splitMatch[1].trim() : null
                 const body = splitMatch ? splitMatch[2].trim() : b
+                // Impact level: bullet #1 = highest priority (90%), then decreases
+                const impactPct = Math.max(40, 95 - i * 22)
+                const impactLabel = i === 0 ? "Өндөр" : i === 1 ? "Дунд" : "Бага"
                 return (
-                  <div key={i} className="hw-card-tilt" style={{
-                    display: "flex", gap: 10, alignItems: "stretch",
-                    background: "#fff",
-                    borderRadius: 14, padding: "10px 12px 10px 0",
-                    border: `1.5px solid ${t.soft}`,
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
-                    overflow: "hidden",
-                    position: "relative",
-                    cursor: "default",
-                  }}>
-                    {/* Left numbered bar — vertical accent */}
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => onTapInsight?.({ title: title || `#${i + 1}`, body, sectionKey: s.key, index: i })}
+                    className="hw-card-tilt"
+                    style={{
+                      display: "flex", gap: 10, alignItems: "stretch",
+                      background: "#fff",
+                      borderRadius: 14, padding: "0 0 0 0",
+                      border: `1.5px solid ${t.soft}`,
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                      overflow: "hidden",
+                      position: "relative",
+                      cursor: "pointer",
+                      width: "100%", textAlign: "left",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    {/* Left numbered rail */}
                     <div style={{
-                      width: 40, flexShrink: 0,
-                      background: t.bg,
+                      width: 44, flexShrink: 0,
+                      background: `linear-gradient(180deg, ${t.bg}, ${t.soft})`,
                       display: "flex", flexDirection: "column",
                       alignItems: "center", justifyContent: "center",
-                      gap: 2,
-                      borderRight: `1px solid ${t.soft}`,
+                      gap: 3, padding: "10px 0",
                     }}>
                       <div style={{
-                        width: 22, height: 22, borderRadius: 7,
-                        background: t.bg as string,
-                        color: t.color,
+                        width: 26, height: 26, borderRadius: 8,
+                        background: `linear-gradient(135deg, ${t.color}, ${t.color}cc)`,
+                        color: "#fff",
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        boxShadow: `0 2px 6px ${t.color}22`,
+                        boxShadow: `0 3px 8px ${t.color}55`,
                       }}>
                         {s.key === "strengths" && (
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
                         )}
                         {s.key === "watchouts" && (
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86l-8.18 14.14a2 2 0 001.71 3h16.36a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86l-8.18 14.14a2 2 0 001.71 3h16.36a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
                         )}
                         {s.key === "tips" && (
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 00-4 12.7V17a2 2 0 002 2h4a2 2 0 002-2v-2.3A7 7 0 0012 2z"/></svg>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 00-4 12.7V17a2 2 0 002 2h4a2 2 0 002-2v-2.3A7 7 0 0012 2z"/></svg>
                         )}
                       </div>
-                      <div style={{
-                        fontSize: 9, fontWeight: 900, color: t.color,
-                        letterSpacing: 0.5,
-                      }}>#{i + 1}</div>
+                      <div style={{ fontSize: 10, fontWeight: 900, color: t.color, letterSpacing: 0.5 }}>#{i + 1}</div>
                     </div>
 
-                    <div style={{ minWidth: 0, flex: 1, paddingTop: 4, paddingBottom: 4 }}>
-                      {title && (
+                    <div style={{ minWidth: 0, flex: 1, padding: "10px 12px 10px 0" }}>
+                      {/* Impact pill */}
+                      <div style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        marginBottom: 6, gap: 6,
+                      }}>
+                        {title && (
+                          <div style={{
+                            fontSize: 12.5, fontWeight: 800, color: "#111827",
+                            lineHeight: 1.25, flex: 1,
+                            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                          }}>
+                            {title}
+                          </div>
+                        )}
                         <div style={{
-                          fontSize: 12.5, fontWeight: 800, color: "#111827",
-                          marginBottom: 3, lineHeight: 1.3,
+                          padding: "2px 7px", borderRadius: 999,
+                          background: t.bg, color: t.color,
+                          fontSize: 9, fontWeight: 800,
+                          letterSpacing: 0.4, textTransform: "uppercase",
+                          border: `1px solid ${t.soft}`,
+                          flexShrink: 0,
                         }}>
-                          {title}
+                          {impactLabel}
                         </div>
-                      )}
+                      </div>
+
                       <div style={{
                         fontSize: 11.5, lineHeight: 1.5,
                         color: title ? "#4B5563" : "#1F2937",
+                        marginBottom: 8,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
                       }}>
                         {body}
                       </div>
+
+                      {/* Impact progress bar */}
+                      <div style={{
+                        height: 6, borderRadius: 6,
+                        background: "#F3F4F6",
+                        overflow: "hidden", position: "relative",
+                      }}>
+                        <div style={{
+                          width: `${impactPct}%`, height: "100%",
+                          background: `linear-gradient(90deg, ${t.color}, ${t.color}cc)`,
+                          borderRadius: 6,
+                          transition: "width 1.2s cubic-bezier(.16,1,.3,1)",
+                          boxShadow: `0 0 8px ${t.color}66`,
+                          position: "relative", overflow: "hidden",
+                        }}>
+                          <div className="hw-shimmer-bar" style={{ position: "absolute", inset: 0 }}/>
+                        </div>
+                      </div>
+
+                      <div style={{
+                        display: "flex", justifyContent: "space-between",
+                        marginTop: 4,
+                        fontSize: 9, fontWeight: 700, color: "#9CA3AF",
+                      }}>
+                        <span>НӨЛӨӨЛӨЛ</span>
+                        <span style={{ color: t.color }}>{impactPct}%</span>
+                      </div>
                     </div>
-                  </div>
+
+                    {/* Chevron */}
+                    <div style={{
+                      display: "flex", alignItems: "center", paddingRight: 10, color: "#9CA3AF", flexShrink: 0,
+                    }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 18l6-6-6-6"/>
+                      </svg>
+                    </div>
+                  </button>
                 )
               })}
             </div>
@@ -1149,12 +1218,45 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
   const followUps = message.followUps || []
   const bodyRef = useRef<HTMLDivElement | null>(null)
 
+  // ── CAROUSEL / PAGE NAVIGATION ─────────────────────────────────────
+  const [currentPage, setCurrentPage] = useState<1 | 2 | 3>(1)
+  const [swipeDir, setSwipeDir] = useState<"left" | "right" | null>(null)
+  // Tap-to-expand selected insight
+  const [expandedInsight, setExpandedInsight] = useState<null | {
+    title: string
+    body: string
+    sectionKey: AdviceSection["key"]
+    index: number
+  }>(null)
+
+  // Swipe handling
+  const touchStartX = useRef(0)
+  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current
+    if (Math.abs(dx) < 50) return
+    if (dx < 0 && currentPage < 3) goToPage((currentPage + 1) as 1 | 2 | 3)
+    else if (dx > 0 && currentPage > 1) goToPage((currentPage - 1) as 1 | 2 | 3)
+  }
+
+  const goToPage = (p: 1 | 2 | 3) => {
+    if (p === currentPage) return
+    setSwipeDir(p > currentPage ? "left" : "right")
+    setCurrentPage(p)
+    setExpandedInsight(null)
+    // Scroll to top when page changes
+    setTimeout(() => { if (bodyRef.current) bodyRef.current.scrollTop = 0 }, 50)
+  }
+
   // Scroll to latest follow-up when new one arrives
   useEffect(() => {
     if (followUps.length > 0 && bodyRef.current) {
       bodyRef.current.scrollTop = bodyRef.current.scrollHeight
     }
   }, [followUps.length, askPending])
+
+  // Reset expanded view when changing page
+  useEffect(() => { setExpandedInsight(null) }, [currentPage])
 
   const handleAsk = () => {
     const q = askInput.trim()
@@ -1225,17 +1327,83 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
         </div>
       </div>
 
-      {/* ── SCROLLABLE BODY ────────────────────────────────────────────── */}
-      <div ref={bodyRef} style={{
-        flex: 1, overflowY: "auto",
-        padding: "14px 12px 8px",
-        display: "flex", flexDirection: "column", gap: 0,
-        background: "linear-gradient(180deg, #FAFBFC 0%, #FFFFFF 30%)",
+      {/* ── PAGE TABS (carousel nav) ───────────────────────────────────── */}
+      <div style={{
+        padding: "8px 12px 10px",
+        background: "rgba(255,255,255,0.95)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        borderBottom: "1px solid rgba(0,0,0,0.04)",
+        flexShrink: 0,
+        display: "flex", gap: 6,
       }}>
-        {/* Section progress indicator */}
-        <SectionProgress active={3} tone={tone}/>
+        {[
+          { n: 1 as const, label: "Тойм", icon: "📊", color: tone.ring },
+          { n: 2 as const, label: "Шинжилгээ", icon: "✨", color: "#E8541A" },
+          { n: 3 as const, label: "Төлөвлөгөө", icon: "🎯", color: "#8B5CF6" },
+        ].map(tab => {
+          const isActive = currentPage === tab.n
+          return (
+            <button
+              key={tab.n}
+              type="button"
+              onClick={() => goToPage(tab.n)}
+              style={{
+                flex: 1, padding: "8px 6px", borderRadius: 12,
+                border: "none",
+                background: isActive ? `linear-gradient(135deg, ${tab.color}, ${tab.color}cc)` : "transparent",
+                color: isActive ? "#fff" : "#6B7280",
+                fontSize: 11, fontWeight: 800, fontFamily: "inherit",
+                cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+                boxShadow: isActive ? `0 6px 16px ${tab.color}44` : "none",
+                transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
+                position: "relative",
+              }}
+            >
+              <span style={{ fontSize: 13 }}>{tab.icon}</span>
+              <span>{tab.label}</span>
+              <span style={{
+                position: "absolute", top: 3, right: 6,
+                fontSize: 8, fontWeight: 700,
+                opacity: isActive ? 0.9 : 0.4,
+              }}>{tab.n}/3</span>
+            </button>
+          )
+        })}
+      </div>
 
-        {/* ═══ SECTION 1: SCORE OVERVIEW ═══════════════════════════════════ */}
+      {/* ── SCROLLABLE BODY ────────────────────────────────────────────── */}
+      <div
+        ref={bodyRef}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        style={{
+          flex: 1, overflowY: "auto",
+          padding: "14px 12px 8px",
+          display: "flex", flexDirection: "column", gap: 0,
+          background: "linear-gradient(180deg, #FAFBFC 0%, #FFFFFF 30%)",
+          position: "relative",
+        }}
+      >
+        {/* Section progress indicator */}
+        <SectionProgress active={currentPage} tone={tone}/>
+
+        {/* PAGE SLIDE WRAPPER */}
+        <div
+          key={currentPage}
+          style={{
+            animation: swipeDir === "left"
+              ? "hw-slide-left 0.35s cubic-bezier(.16,1,.3,1) both"
+              : swipeDir === "right"
+              ? "hw-slide-right 0.35s cubic-bezier(.16,1,.3,1) both"
+              : "hw-fade-up 0.35s cubic-bezier(.16,1,.3,1) both",
+          }}
+        >
+
+        {/* ═══ PAGE 1: SCORE OVERVIEW ═══════════════════════════════════ */}
+        {currentPage === 1 && (
+        <>
         <BigSectionHeader
           number={1}
           title="Үр дүнгийн тойм"
@@ -1377,7 +1545,12 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
           </div>
         )}
 
-        {/* ═══ SECTION 2: AI ANALYSIS ═════════════════════════════════════ */}
+        </>
+        )}
+
+        {/* ═══ PAGE 2: AI ANALYSIS ════════════════════════════════════════ */}
+        {currentPage === 2 && (
+        <>
         <BigSectionHeader
           number={2}
           title="AI Шинжилгээ"
@@ -1460,7 +1633,7 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
                 </div>
 
                 {/* Then the parsed advice cards */}
-                <AdviceSections sections={analysisCards} />
+                <AdviceSections sections={analysisCards} onTapInsight={setExpandedInsight} />
               </div>
             )
           }
@@ -1475,7 +1648,12 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
           )
         })()}
 
-        {/* ═══ SECTION 3: ACTION PLAN ═════════════════════════════════════ */}
+        </>
+        )}
+
+        {/* ═══ PAGE 3: ACTION PLAN ════════════════════════════════════════ */}
+        {currentPage === 3 && (
+        <>
         <BigSectionHeader
           number={3}
           title="Цаашдын төлөвлөгөө"
@@ -1733,6 +1911,11 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
           )
         })()}
 
+        </>
+        )}
+
+        </div>{/* end PAGE SLIDE WRAPPER */}
+
         {/* ═══ FOLLOW-UP Q&A SECTION (only if any) ═══════════════════════ */}
         {followUps.length > 0 && (
           <>
@@ -1819,6 +2002,168 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
           💡 Энэ зөвлөгөө нь чиглүүлэх зорилготой. Мэргэжлийн тусламж шаардлагатай бол сэтгэл зүйчтэй холбогдоорой.
         </div>
       </div>
+
+      {/* ── TAP-TO-EXPAND DETAIL SHEET ─────────────────────────────────── */}
+      {expandedInsight && (() => {
+        const sk = expandedInsight.sectionKey
+        const palette = sk === "strengths"
+          ? { color: "#10B981", grad: "linear-gradient(135deg, #10B981, #059669)", bg: "#ECFDF5", soft: "#D1FAE5", emoji: "✨", label: "Давуу тал" }
+          : sk === "watchouts"
+          ? { color: "#F59E0B", grad: "linear-gradient(135deg, #F59E0B, #D97706)", bg: "#FFFBEB", soft: "#FEF3C7", emoji: "⚠️", label: "Анхаарах зүйл" }
+          : sk === "tips"
+          ? { color: "#E8541A", grad: "linear-gradient(135deg, #E8541A, #F07040)", bg: "#FFF7ED", soft: "#FFEDD5", emoji: "💡", label: "Практик зөвлөмж" }
+          : { color: "#3B82F6", grad: "linear-gradient(135deg, #3B82F6, #2563EB)", bg: "#DBEAFE", soft: "#BFDBFE", emoji: "🎯", label: "Гол дүгнэлт" }
+
+        const impactPct = Math.max(40, 95 - expandedInsight.index * 22)
+        const impactLabel = expandedInsight.index === 0 ? "Өндөр" : expandedInsight.index === 1 ? "Дунд" : "Бага"
+
+        return (
+          <div
+            onClick={() => setExpandedInsight(null)}
+            style={{
+              position: "absolute", inset: 0,
+              background: "rgba(15,23,42,0.55)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              zIndex: 20,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              padding: 16,
+              animation: "hw-msg-in 0.25s ease-out",
+            }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: "#fff",
+                borderRadius: 22,
+                width: "100%", maxWidth: 380,
+                maxHeight: "92%",
+                overflow: "hidden",
+                boxShadow: "0 30px 80px rgba(0,0,0,0.35)",
+                display: "flex", flexDirection: "column",
+                animation: "hw-modal-in 0.35s cubic-bezier(.16,1,.3,1)",
+              }}
+            >
+              {/* Header */}
+              <div style={{
+                background: palette.grad,
+                padding: "16px 18px",
+                color: "#fff",
+                position: "relative", overflow: "hidden",
+              }}>
+                <div style={{
+                  position: "absolute", top: -30, right: -10,
+                  fontSize: 100, opacity: 0.18, lineHeight: 1,
+                }}>{palette.emoji}</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, position: "relative" }}>
+                  <div style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    padding: "4px 10px", borderRadius: 999,
+                    background: "rgba(255,255,255,0.22)",
+                    fontSize: 10, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase",
+                  }}>
+                    {palette.emoji} {palette.label} · #{expandedInsight.index + 1}
+                  </div>
+                  <button
+                    onClick={() => setExpandedInsight(null)}
+                    style={{
+                      width: 30, height: 30, borderRadius: 10,
+                      border: "none", background: "rgba(255,255,255,0.22)",
+                      color: "#fff", cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+                <div style={{
+                  fontSize: 20, fontWeight: 900, lineHeight: 1.25, letterSpacing: -0.4,
+                  position: "relative",
+                }}>
+                  {expandedInsight.title}
+                </div>
+              </div>
+
+              {/* Body */}
+              <div style={{ overflowY: "auto", padding: "16px 18px" }}>
+                {/* Impact widget */}
+                <div style={{
+                  background: palette.bg, border: `1px solid ${palette.soft}`,
+                  borderRadius: 14, padding: "12px 14px", marginBottom: 14,
+                }}>
+                  <div style={{
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    marginBottom: 8,
+                  }}>
+                    <div style={{
+                      fontSize: 10, fontWeight: 800, color: palette.color,
+                      letterSpacing: 1, textTransform: "uppercase",
+                    }}>Нөлөөллийн түвшин</div>
+                    <div style={{
+                      fontSize: 14, fontWeight: 900, color: palette.color,
+                    }}>{impactLabel} · {impactPct}%</div>
+                  </div>
+                  <div style={{ height: 8, background: "#fff", borderRadius: 8, overflow: "hidden" }}>
+                    <div style={{
+                      width: `${impactPct}%`, height: "100%",
+                      background: palette.grad, borderRadius: 8,
+                      boxShadow: `0 0 8px ${palette.color}55`,
+                      position: "relative", overflow: "hidden",
+                    }}>
+                      <div className="hw-shimmer-bar" style={{ position: "absolute", inset: 0 }}/>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Full description */}
+                <div style={{
+                  fontSize: 11, fontWeight: 800, color: "#6B7280",
+                  letterSpacing: 1, textTransform: "uppercase", marginBottom: 6,
+                }}>
+                  Тайлбар
+                </div>
+                <div style={{
+                  fontSize: 14, lineHeight: 1.65, color: "#1F2937",
+                  padding: "12px 14px", background: "#F9FAFB",
+                  borderRadius: 12, borderLeft: `3px solid ${palette.color}`,
+                  marginBottom: 14,
+                }}>
+                  {expandedInsight.body}
+                </div>
+
+                {/* Ask AI for more */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    onAskFollowUp?.(`"${expandedInsight.title}" гэдгийг илүү дэлгэрэнгүй тайлбарлаж, надад яаж хэрэгжүүлэхийг хэлээч.`)
+                    setExpandedInsight(null)
+                  }}
+                  style={{
+                    width: "100%", padding: "12px 14px",
+                    background: palette.grad,
+                    color: "#fff", border: "none", borderRadius: 12,
+                    fontSize: 13, fontWeight: 800, cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    boxShadow: `0 8px 20px ${palette.color}44`,
+                    fontFamily: "inherit",
+                  }}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l1.4 4.3L17.7 8l-4.3 1.4L12 14l-1.4-4.6L6.3 8l4.3-1.7z"/>
+                  </svg>
+                  AI-аас илүү дэлгэрэнгүй
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M13 5l7 7-7 7"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* ── BOTTOM CHAT INPUT ───────────────────────────────────────────── */}
       <div style={{
@@ -3417,6 +3762,18 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           0%, 100% { transform: translateY(0) rotate(0); }
           25%      { transform: translateY(-3px) rotate(-5deg); }
           75%      { transform: translateY(-2px) rotate(5deg); }
+        }
+        @keyframes hw-slide-left {
+          from { transform: translateX(40px); opacity: 0; }
+          to   { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes hw-slide-right {
+          from { transform: translateX(-40px); opacity: 0; }
+          to   { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes hw-modal-in {
+          from { transform: scale(0.9) translateY(20px); opacity: 0; }
+          to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         .hw-shimmer-bar {
           background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
