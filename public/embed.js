@@ -209,15 +209,41 @@
       var examUrl = API_BASE + "/api/v1/exam/exam/" + encodeURIComponent(code);
       var answerUrl = API_BASE + "/api/v1/userAnswer/code/code/" + encodeURIComponent(code);
 
+      console.log("[HireMnChat] Fetching:", { examUrl: examUrl, answerUrl: answerUrl, hasToken: !!options.token });
+
+      function fetchWithDiagnostics(url, label) {
+        return fetch(url, fetchOpts).then(function(r) {
+          console.log("[HireMnChat] " + label + " status:", r.status);
+          if (!r.ok) {
+            return r.text().then(function(text) {
+              console.error("[HireMnChat] " + label + " error body:", text);
+              return { __error: true, status: r.status, body: text, label: label };
+            });
+          }
+          return r.json().catch(function(e) {
+            console.error("[HireMnChat] " + label + " JSON parse failed:", e);
+            return { __error: true, status: r.status, body: "Invalid JSON", label: label };
+          });
+        }).catch(function(err) {
+          console.error("[HireMnChat] " + label + " network error:", err);
+          return { __error: true, status: 0, body: String(err && err.message || err), label: label };
+        });
+      }
+
       return Promise.all([
-        fetch(examUrl, fetchOpts).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }),
-        fetch(answerUrl, fetchOpts).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; })
+        fetchWithDiagnostics(examUrl, "exam"),
+        fetchWithDiagnostics(answerUrl, "userAnswer")
       ]).then(function(results) {
-        var examData = results[0];
-        var answerData = results[1];
+        var examRes = results[0];
+        var answerRes = results[1];
+        var examData = (examRes && !examRes.__error) ? examRes : null;
+        var answerData = (answerRes && !answerRes.__error) ? answerRes : null;
 
         if (!examData && !answerData) {
-          throw new Error("Тайлангийн өгөгдөл олдсонгүй");
+          var details = [];
+          if (examRes && examRes.__error) details.push("exam: HTTP " + examRes.status);
+          if (answerRes && answerRes.__error) details.push("userAnswer: HTTP " + answerRes.status);
+          throw new Error("Тайлангийн өгөгдөл олдсонгүй (" + details.join(", ") + ")");
         }
 
         var testName = (examData && (examData.name || examData.title || examData.testName)) ||
