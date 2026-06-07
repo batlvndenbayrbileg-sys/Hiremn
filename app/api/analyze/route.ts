@@ -7,24 +7,21 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 export async function POST(request: Request) {
   try {
     const { reportData, reportTitle } = await request.json()
-    // Trim aggressively: more input = slower output
+    // Aggressive truncation for speed
     const truncated = typeof reportData === 'string'
-      ? reportData.slice(0, 1500)
-      : JSON.stringify(reportData).slice(0, 1500)
+      ? reportData.slice(0, 800)
+      : JSON.stringify(reportData).slice(0, 800)
 
-    // Compact prompt for speed. Haiku 4.5 + small max_tokens = ~3-6s response.
-    const SYSTEM = `Та hire.mn-ийн тест шинжээч. Тест: "${reportTitle}".
-Зөвхөн valid JSON буцаа (markdown/code block үгүй, бүх text монголоор).
-Тест нэрнээс хамаараад агуулга тохируул (никотин→хамаарал, стресс→тайвшрал, leadership→манлайлал).
-Бүтэц:
-{"healthScore":<0-100>,"riskLevel":"Low|Medium|High","quitPotential":"Low|Medium|High","testCategory":"<төрөл>","summary":{"title":"<2-4 үг>","description":"<1 өгүүлбэр>"},"highlightTitle":"<гарчиг>","highlightMessage":"<1 өгүүлбэр>","metrics":[{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<төлөв>"},{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<төлөв>"},{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<төлөв>"}],"strengths":["<сайн1>","<сайн2>","<сайн3>"],"risks":["<эрсдэл1>","<эрсдэл2>","<эрсдэл3>"],"insights":[{"emoji":"<emoji>","title":"<гарчиг>","description":"<товч>","detail":"<2 өгүүлбэр>","actions":["<алхам1>","<алхам2>","<алхам3>"]},{"emoji":"<emoji>","title":"<гарчиг>","description":"<товч>","detail":"<2 өгүүлбэр>","actions":["<алхам1>","<алхам2>","<алхам3>"]},{"emoji":"<emoji>","title":"<гарчиг>","description":"<товч>","detail":"<2 өгүүлбэр>","actions":["<алхам1>","<алхам2>","<алхам3>"]}],"roadmap":[{"week":"1-р долоо хоног","title":"<зорилго>","tasks":["<даалгавар1>","<даалгавар2>"]},{"week":"2-р долоо хоног","title":"<зорилго>","tasks":["<даалгавар1>","<даалгавар2>"]},{"week":"3-р долоо хоног","title":"<зорилго>","tasks":["<даалгавар1>","<даалгавар2>"]},{"week":"4-р долоо хоног","title":"<зорилго>","tasks":["<даалгавар1>","<даалгавар2>"]}],"todayGoals":["<зорилго1>","<зорилго2>","<зорилго3>"],"kpiLabels":{"metric1Label":"<KPI>","riskLabel":"Эрсдэл","potentialLabel":"Боломж"},"statCards":[{"icon":"🫁","label":"<нэр>","value":"<утга>","sub":"<тэмдэглэл>"},{"icon":"❤️","label":"<нэр>","value":"<утга>","sub":"<тэмдэглэл>"},{"icon":"💰","label":"<нэр>","value":"<утга>","sub":"<тэмдэглэл>"},{"icon":"📅","label":"<нэр>","value":"<утга>","sub":"<тэмдэглэл>"}]}
-Дүрэм: тайлбар бүгд богино (≤12 үг), үг үсэг зөв байх.`
+    // Ultra-compact prompt. Aim for <8s total.
+    const SYSTEM = `Та hire.mn тест шинжээч. Тест нэр: "${reportTitle}".
+Дараах JSON бүтцийг ЯГ ингэж буцаа (markdown үгүй, монголоор, тайлбар ≤10 үг):
+{"healthScore":<0-100>,"riskLevel":"Low"|"Medium"|"High","quitPotential":"Low"|"Medium"|"High","summary":{"title":"<2-3 үг>","description":"<1 өгүүлбэр>"},"highlightTitle":"<гарчиг>","highlightMessage":"<1 өгүүлбэр>","metrics":[{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"},{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"}],"strengths":["<сайн1>","<сайн2>"],"risks":["<эрсдэл1>","<эрсдэл2>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<товч>","detail":"<1-2 өгүүлбэр>","actions":["<алхам1>","<алхам2>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<товч>","detail":"<1-2 өгүүлбэр>","actions":["<алхам1>","<алхам2>"]}],"roadmap":[{"week":"1-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"2-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"3-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"4-р долоо хоног","title":"<товч>","tasks":["<товч>"]}],"todayGoals":["<товч1>","<товч2>","<товч3>"],"kpiLabels":{"metric1Label":"<KPI нэр>","riskLabel":"Эрсдэл","potentialLabel":"Боломж"},"statCards":[{"icon":"🎯","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"📊","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"⭐","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"🚀","label":"<нэр>","value":"<утга>","sub":"<товч>"}]}`
 
     const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 2400,
+      max_tokens: 1500,
       system: SYSTEM,
-      messages: [{ role: 'user', content: `Тест: ${reportTitle}\nДата:\n${truncated}` }]
+      messages: [{ role: 'user', content: `Дата: ${truncated}` }]
     })
 
     const text = response.content[0].type === 'text' ? response.content[0].text : ''

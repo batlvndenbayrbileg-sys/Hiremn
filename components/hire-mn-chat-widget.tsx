@@ -3704,26 +3704,24 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           reportTitle ||
           "Тест"
 
-        // 1. Push a loading placeholder message
-        const placeholderIdx = (() => {
-          let idx = -1
-          setMessages(prev => {
-            idx = prev.length
-            return [...prev, {
-              role: "assistant",
-              content: `**🔍 ${testName}**\n\nAI таны үр дүнг шинжилж байна...`,
-              analysisStatus: "loading",
-              analysisTitle: testName,
-            }]
-          })
-          return idx
-        })()
+        // Use a unique marker so we can find the message after state updates
+        // (relying on array index is unsafe — setState updaters are async)
+        const analysisId = `analysis-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+        console.log("[analyze] starting:", testName, "id:", analysisId)
+
+        // 1. Push a loading placeholder message tagged with our id
+        setMessages(prev => [...prev, {
+          role: "assistant",
+          content: `**🔍 ${testName}**\n\nAI таны үр дүнг шинжилж байна...`,
+          analysisStatus: "loading",
+          analysisTitle: testName,
+          analysisId,
+        } as any])
 
         // 2. Call /api/analyze for structured analysis (45s client timeout)
         const ctrl = new AbortController()
         const timer = setTimeout(() => ctrl.abort(), 45000)
         const startedAt = Date.now()
-        console.log("[analyze] starting:", testName)
 
         fetch("/api/analyze", {
           method: "POST",
@@ -3733,36 +3731,39 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         })
           .then(async res => {
             clearTimeout(timer)
-            console.log(`[analyze] response in ${Date.now() - startedAt}ms, status ${res.status}`)
+            const ms = Date.now() - startedAt
+            console.log(`[analyze] response in ${ms}ms, status ${res.status}`)
             const json = await res.json().catch(() => ({}))
+            console.log("[analyze] body:", json)
             if (!res.ok || !json.success || !json.data) {
               throw new Error(json.error || `HTTP ${res.status}`)
             }
-            setMessages(prev => prev.map((m, i) =>
-              i === placeholderIdx
+            setMessages(prev => prev.map(m =>
+              (m as any).analysisId === analysisId
                 ? {
                     ...m,
                     content: "",
                     analysisData: json.data,
                     analysisTitle: testName,
-                    analysisStatus: "done",
+                    analysisStatus: "done" as const,
                   }
                 : m
             ))
+            console.log("[analyze] message updated for id", analysisId)
           })
           .catch(err => {
             clearTimeout(timer)
             const elapsed = Date.now() - startedAt
             const isTimeout = err?.name === "AbortError" || elapsed > 40000
             console.error(`[analyze] failed after ${elapsed}ms:`, err)
-            setMessages(prev => prev.map((m, i) =>
-              i === placeholderIdx
+            setMessages(prev => prev.map(m =>
+              (m as any).analysisId === analysisId
                 ? {
                     ...m,
                     content: isTimeout
                       ? "Шинжилгээ удаан хариу өгөв. Дахин оролдоно уу."
                       : `Шинжилгээ хийхэд алдаа гарлаа: ${err?.message || err}`,
-                    analysisStatus: "error",
+                    analysisStatus: "error" as const,
                   }
                 : m
             ))
