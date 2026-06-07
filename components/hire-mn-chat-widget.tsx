@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { MessageFeedback } from './message-feedback'
 import { ConversationSidebar } from './conversation-sidebar'
 import { SplineMascot } from './spline-mascot'
@@ -467,21 +467,39 @@ function TraitBreakdown({ traits }: { traits: InsightTrait[] }) {
               </div>
             </div>
 
-            {/* Progress bar */}
+            {/* Progress bar with shimmer */}
             <div style={{
-              height: 8,
+              height: 10,
               background: "#F3F4F6",
-              borderRadius: 8,
+              borderRadius: 10,
               overflow: "hidden",
+              position: "relative",
             }}>
               <div style={{
                 width: `${pct}%`,
                 height: "100%",
                 background: `linear-gradient(90deg, ${c.color}, ${c.color}cc)`,
-                borderRadius: 8,
-                transition: "width 1s cubic-bezier(.16,1,.3,1)",
-                boxShadow: `0 0 8px ${c.color}55`,
-              }}/>
+                borderRadius: 10,
+                transition: "width 1.4s cubic-bezier(.16,1,.3,1)",
+                boxShadow: `0 0 12px ${c.color}66`,
+                position: "relative",
+                overflow: "hidden",
+              }}>
+                <div className="hw-shimmer-bar" style={{
+                  position: "absolute", inset: 0,
+                }}/>
+              </div>
+            </div>
+            {/* Percentage hint */}
+            <div style={{
+              marginTop: 6,
+              display: "flex", justifyContent: "space-between",
+              fontSize: 9, fontWeight: 700, color: "#9CA3AF",
+              letterSpacing: 0.3,
+            }}>
+              <span>0</span>
+              <span style={{ color: c.color }}>{pct}%</span>
+              <span>100</span>
             </div>
           </div>
         )
@@ -577,6 +595,7 @@ function ArtifactPreview({ message, onOpen, fontSize }: {
           boxShadow: status === "loading" ? "none" : "0 6px 18px rgba(232,84,26,0.3)",
           transition: "all 0.25s cubic-bezier(.16,1,.3,1)",
           fontFamily: "inherit",
+          animation: status === "done" ? "hw-glow-pulse 2.4s ease-in-out infinite" : undefined,
         }}
         onMouseEnter={e => {
           if (status !== "loading") {
@@ -598,7 +617,7 @@ function ArtifactPreview({ message, onOpen, fontSize }: {
           </>
         ) : (
           <>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "hw-icon-bounce 2.4s ease-in-out infinite" }}>
               <path d="M12 2l1.4 4.3L17.7 8l-4.3 1.4L12 14l-1.4-4.6L6.3 8l4.3-1.7z" fill="currentColor"/>
               <path d="M19 12l.7 2L22 15l-2.3.6L19 18l-.7-2.4L16 15l2.3-1z" fill="currentColor"/>
               <path d="M5 16l.5 1.5L7 18l-1.5.5L5 20l-.5-1.5L3 18l1.5-.5z" fill="currentColor"/>
@@ -991,6 +1010,7 @@ function BigSectionHeader({ number, title, subtitle, accent = "#E8541A" }: {
     <div style={{
       display: "flex", alignItems: "center", gap: 12,
       padding: "26px 4px 14px",
+      animation: `hw-fade-up 0.5s cubic-bezier(.16,1,.3,1) ${number * 0.05}s both`,
     }}>
       <div style={{
         width: 44, height: 44, borderRadius: 14,
@@ -999,8 +1019,15 @@ function BigSectionHeader({ number, title, subtitle, accent = "#E8541A" }: {
         color: "#fff", fontSize: 18, fontWeight: 900,
         boxShadow: `0 8px 20px ${accent}40`,
         flexShrink: 0,
+        position: "relative",
       }}>
         {number}
+        {/* Ping ring effect */}
+        <div style={{
+          position: "absolute", inset: 0, borderRadius: 14,
+          border: `2px solid ${accent}`, opacity: 0.4,
+          animation: "hw-glow-pulse 2.4s ease-in-out infinite",
+        }}/>
       </div>
       <div style={{ minWidth: 0, flex: 1 }}>
         <div style={{
@@ -1024,6 +1051,39 @@ function BigSectionHeader({ number, title, subtitle, accent = "#E8541A" }: {
 }
 
 // ── Section Progress Indicator (top of artifact) ─────────────────────────────
+
+// Confetti burst — pure CSS, no deps
+function ConfettiBurst() {
+  const pieces = useMemo(() => {
+    return Array.from({ length: 18 }).map((_, i) => ({
+      key: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 0.3,
+      duration: 1.2 + Math.random() * 1,
+      color: ["#10B981", "#F59E0B", "#3B82F6", "#E8541A", "#8B5CF6", "#EC4899"][i % 6],
+      size: 6 + Math.random() * 4,
+    }))
+  }, [])
+
+  return (
+    <div style={{
+      position: "absolute", inset: 0, pointerEvents: "none",
+      overflow: "visible",
+    }}>
+      {pieces.map(p => (
+        <div key={p.key} style={{
+          position: "absolute",
+          top: 0,
+          left: `${p.left}%`,
+          width: p.size, height: p.size,
+          background: p.color,
+          borderRadius: p.key % 2 === 0 ? 2 : "50%",
+          animation: `hw-confetti ${p.duration}s cubic-bezier(.34,1.56,.64,1) ${p.delay}s both`,
+        }}/>
+      ))}
+    </div>
+  )
+}
 
 function SectionProgress({ active, tone }: { active: 1 | 2 | 3; tone: { ring: string } }) {
   return (
@@ -1161,7 +1221,7 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
         />
 
         {/* HERO: Gauge + Meta */}
-        <div style={{
+        <div className="hw-card-tilt" style={{
           background: "#fff",
           borderRadius: 24,
           padding: "20px 18px 22px",
@@ -1169,6 +1229,7 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
           boxShadow: "0 12px 40px rgba(0,0,0,0.06)",
           position: "relative", overflow: "hidden",
           marginBottom: 10,
+          animation: "hw-fade-up 0.6s cubic-bezier(.16,1,.3,1) 0.1s both",
         }}>
           {/* Decorative orbs */}
           <div style={{
@@ -1391,14 +1452,17 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
                 padding: "14px 16px",
                 border: allDone ? "none" : "1.5px solid rgba(139,92,246,0.15)",
                 boxShadow: allDone
-                  ? "0 8px 24px rgba(16,185,129,0.3)"
+                  ? "0 8px 28px rgba(16,185,129,0.35)"
                   : "0 4px 14px rgba(139,92,246,0.08)",
                 position: "relative", overflow: "hidden",
                 transition: "all 0.5s cubic-bezier(.16,1,.3,1)",
+                animation: allDone ? "hw-step-complete 0.6s cubic-bezier(.34,1.56,.64,1)" : undefined,
               }}>
+                {allDone && <ConfettiBurst />}
                 <div style={{
                   position: "absolute", top: -20, right: -10,
                   fontSize: 60, opacity: allDone ? 0.2 : 0.08, lineHeight: 1,
+                  animation: allDone ? "hw-icon-bounce 2s ease-in-out infinite" : undefined,
                 }}>{allDone ? "🎉" : "🎯"}</div>
 
                 <div style={{
@@ -1430,21 +1494,31 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
                   </div>
                 </div>
 
-                {/* Progress bar */}
+                {/* Progress bar with animated stripes */}
                 <div style={{
-                  height: 8, borderRadius: 8,
+                  height: 10, borderRadius: 10,
                   background: allDone ? "rgba(255,255,255,0.25)" : "#F3E8FF",
                   overflow: "hidden", position: "relative",
                 }}>
                   <div style={{
                     width: `${progressPct}%`, height: "100%",
                     background: allDone
-                      ? "rgba(255,255,255,0.9)"
+                      ? "rgba(255,255,255,0.95)"
                       : "linear-gradient(90deg, #8B5CF6, #7C3AED)",
-                    borderRadius: 8,
-                    transition: "width 0.6s cubic-bezier(.16,1,.3,1)",
-                    boxShadow: allDone ? "none" : "0 0 8px rgba(139,92,246,0.5)",
-                  }}/>
+                    borderRadius: 10,
+                    transition: "width 0.8s cubic-bezier(.16,1,.3,1)",
+                    boxShadow: allDone ? "none" : "0 0 12px rgba(139,92,246,0.6)",
+                    position: "relative", overflow: "hidden",
+                  }}>
+                    {!allDone && progressPct > 0 && (
+                      <div style={{
+                        position: "absolute", inset: 0,
+                        background: "linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent)",
+                        backgroundSize: "20px 20px",
+                        animation: "hw-progress-shimmer 1s linear infinite",
+                      }}/>
+                    )}
+                  </div>
                 </div>
 
                 {allDone && (
@@ -3231,6 +3305,55 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         @keyframes hw-artifact-in {
           from { transform: translateY(100%); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes hw-shimmer {
+          0%   { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        @keyframes hw-glow-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(232,84,26,0.4); }
+          50%      { box-shadow: 0 0 0 12px rgba(232,84,26,0); }
+        }
+        @keyframes hw-confetti {
+          0%   { transform: translateY(0) rotate(0); opacity: 1; }
+          100% { transform: translateY(140px) rotate(720deg); opacity: 0; }
+        }
+        @keyframes hw-checkmark-draw {
+          to { stroke-dashoffset: 0; }
+        }
+        @keyframes hw-step-complete {
+          0%   { transform: scale(1); }
+          40%  { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+        @keyframes hw-needle-swing {
+          0%   { transform: rotate(-20deg); }
+          60%  { transform: rotate(8deg); }
+          100% { transform: rotate(0deg); }
+        }
+        @keyframes hw-fade-up {
+          from { transform: translateY(20px); opacity: 0; }
+          to   { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes hw-progress-shimmer {
+          0%   { background-position: 0 0; }
+          100% { background-position: 40px 0; }
+        }
+        @keyframes hw-icon-bounce {
+          0%, 100% { transform: translateY(0) rotate(0); }
+          25%      { transform: translateY(-3px) rotate(-5deg); }
+          75%      { transform: translateY(-2px) rotate(5deg); }
+        }
+        .hw-shimmer-bar {
+          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+          background-size: 200% 100%;
+          animation: hw-shimmer 2.4s linear infinite;
+        }
+        .hw-card-tilt {
+          transition: transform 0.3s cubic-bezier(.16,1,.3,1), box-shadow 0.3s ease;
+        }
+        .hw-card-tilt:hover {
+          transform: translateY(-3px) scale(1.005);
         }
         @keyframes hw-float {
           0%, 100% { transform: translateY(0) rotate(0deg); }
