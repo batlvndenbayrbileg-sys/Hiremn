@@ -1096,55 +1096,72 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       // AI Analysis request with report data (from API or direct)
       if (event.data.type === "HIREMN_AI_ANALYSIS" && event.data.payload) {
         const { reportTitle, reportData, userInfo, analysisResults, prompt } = event.data.payload
-        
-        // Build a comprehensive context message for the AI
-        let analysisContext = `**AI Тайлан Дүн Шинжилгээ**\n\n`
-        
-        if (reportTitle) {
-          analysisContext += `**Тайлангийн нэр:** ${reportTitle}\n\n`
-        }
-        
-        if (userInfo && Object.keys(userInfo).length > 0) {
-          analysisContext += `**Хэрэглэгчийн мэдээлэл:**\n`
-          if (userInfo.name) analysisContext += `- Нэр: ${userInfo.name}\n`
-          if (userInfo.email) analysisContext += `- Имэйл: ${userInfo.email}\n`
-          analysisContext += `\n`
-        }
-        
-        if (analysisResults && Object.keys(analysisResults).length > 0) {
-          analysisContext += `**Үр дүн:**\n`
-          Object.entries(analysisResults).forEach(([key, value]) => {
-            analysisContext += `- ${key}: ${value}\n`
-          })
-          analysisContext += `\n`
-        }
-        
-        if (reportData && Object.keys(reportData).length > 0) {
-          analysisContext += `**Тайлангийн дата:**\n\`\`\`json\n${JSON.stringify(reportData, null, 2)}\n\`\`\`\n\n`
-        }
-        
-        // Add the AI analysis request message first (as system context)
-        const contextMsg: Message = {
-          role: "assistant",
-          content: analysisContext + `\n---\n\n**Тайлбар хүсэлт хүлээн авлаа.** Одоо таны үр дүнг задлан шинжилж байна...`,
-        }
-        
-        // Then trigger the actual AI analysis
-        const userPrompt = prompt || "Миний тестийн үр дүнг задлан шинжилж, надад зөвлөгөө өгнө үү."
-        
-        // Add context message and then send user prompt
+
+        // ── Extract clean fields from the nested API response ─────────────
+        // hire.mn API wraps real data in payload.payload
+        const examPayload: any =
+          (reportData as any)?.exam?.payload ?? (reportData as any)?.exam ?? {}
+        const answersPayload: any[] =
+          (reportData as any)?.answers?.payload ?? (reportData as any)?.answers ?? []
+
+        const testName: string =
+          examPayload.assessmentName ||
+          examPayload.assessment?.name ||
+          reportTitle ||
+          "Тест"
+        const resultLabel: string = examPayload.result || ""
+        const score: string | number = examPayload.point ?? examPayload.value ?? ""
+        const totalScore: string | number =
+          examPayload.total ?? examPayload.assessment?.totalPoint ?? ""
+        const description: string = examPayload.assessment?.description || ""
+
+        // Build a short user-facing summary (NO raw JSON)
+        let summary = `**📊 Тайлангийн дүн шинжилгээ**\n\n`
+        summary += `**Тест:** ${testName}\n`
+        if (resultLabel) summary += `**Үнэлгээ:** ${resultLabel}\n`
+        if (score !== "" && totalScore !== "") summary += `**Оноо:** ${score} / ${totalScore}\n`
+        else if (score !== "") summary += `**Оноо:** ${score}\n`
+        summary += `\n_Таны үр дүнг задлан шинжилж байна..._`
+
+        const contextMsg: Message = { role: "assistant", content: summary }
         setMessages(prev => [...prev, contextMsg])
-        
-        // Small delay then send the actual analysis request
+
+        // ── Build a clean structured prompt for the LLM ───────────────────
+        // Strip "Hire.mn" / "hire.mn" / "платформ" tokens from text we send,
+        // so the keyword router in sendMessage doesn't hijack it.
+        const sanitize = (s: string) =>
+          (s || "").replace(/hire\.?mn/gi, "тест систем").replace(/платформ/gi, "систем")
+
+        const answerSummary = answersPayload
+          .map((a: any, i: number) => {
+            const q = a?.question?.name || `Асуулт ${i + 1}`
+            const v = a?.answer?.value ?? ""
+            const p = a?.point ?? a?.answer?.point ?? ""
+            const cat = a?.questionCategory?.name || ""
+            return `${i + 1}. [${cat}] ${q} → "${v}" (${p} оноо)`
+          })
+          .join("\n")
+
+        const userPrompt = sanitize(
+          prompt ||
+            "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж: 1) Гол дүгнэлт, 2) Давуу/сул тал, 3) Практик зөвлөмж, 4) Цаашид сайжруулах алхмууд гарган гаргаж өгнө үү."
+        )
+
+        const fullPrompt =
+          `Тестийн үр дүнгийн дүн шинжилгээ хийнэ үү.\n\n` +
+          `Тестийн нэр: ${sanitize(testName)}\n` +
+          (description ? `Тестийн тайлбар: ${sanitize(description)}\n` : "") +
+          (resultLabel ? `Үнэлгээ: ${resultLabel}\n` : "") +
+          (score !== "" ? `Авсан оноо: ${score}${totalScore !== "" ? ` / ${totalScore}` : ""}\n` : "") +
+          (answerSummary ? `\nАсуулт бүрийн хариулт:\n${answerSummary}\n` : "") +
+          `\nХэрэглэгчийн хүсэлт: ${userPrompt}`
+
+        // Send the prompt to the LLM but hide it from the chat UI.
+        // Also bypass the static keyword router so we don't get the
+        // "About hire.mn" or "Test info" canned responses.
         setTimeout(() => {
-          // Create a special analysis prompt that includes all the data
-          const fullPrompt = `Дараах тайлангийн үр дүнг задлан шинжилж, практик зөвлөгөө өгнө үү:\n\n` +
-            `Тайлан: ${reportTitle || 'Тест'}\n` +
-            `Үр дүн: ${JSON.stringify(analysisResults || reportData || {})}\n\n` +
-            `Хэрэглэгчийн хүсэлт: ${userPrompt}`
-          
-          sendMessage(fullPrompt)
-        }, 1000)
+          sendMessage(fullPrompt, { hidden: true, skipStaticRouting: true })
+        }, 800)
       }
     }
     
@@ -1203,7 +1220,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, isTyping])
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = async (text: string, opts?: { hidden?: boolean; skipStaticRouting?: boolean }) => {
     // Check if user is locked - popup will show automatically
     if (!canSendMessage()) {
       return
@@ -1215,8 +1232,11 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     incrementDailyCount()
 
     setShowQuickReplies(false)
-    const userMsg: Message = { role: "user", content: text }
-    setMessages(prev => [...prev, userMsg])
+    // Only add a visible user bubble when not hidden (analysis requests are hidden)
+    if (!opts?.hidden) {
+      const userMsg: Message = { role: "user", content: text }
+      setMessages(prev => [...prev, userMsg])
+    }
     setInput("")
     setIsTyping(true)
 
@@ -1245,7 +1265,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     ]
     const matchedMember = teamMemberNames.find(m => m.pattern.test(text))
 
-    if (isAboutHire || isAboutTeam || isFreeTest || isPaidTest || isFounderQuery || matchedMember) {
+    if (!opts?.skipStaticRouting && (isAboutHire || isAboutTeam || isFreeTest || isPaidTest || isFounderQuery || matchedMember)) {
       // Import static data
       const { COMPANY_INFO, getAllTeamCategories, TEAM_MEMBERS } = await import("@/lib/company-data")
 
