@@ -3719,13 +3719,21 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           return idx
         })()
 
-        // 2. Call /api/analyze for structured analysis
+        // 2. Call /api/analyze for structured analysis (45s client timeout)
+        const ctrl = new AbortController()
+        const timer = setTimeout(() => ctrl.abort(), 45000)
+        const startedAt = Date.now()
+        console.log("[analyze] starting:", testName)
+
         fetch("/api/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ reportData, reportTitle: testName }),
+          signal: ctrl.signal,
         })
           .then(async res => {
+            clearTimeout(timer)
+            console.log(`[analyze] response in ${Date.now() - startedAt}ms, status ${res.status}`)
             const json = await res.json().catch(() => ({}))
             if (!res.ok || !json.success || !json.data) {
               throw new Error(json.error || `HTTP ${res.status}`)
@@ -3743,12 +3751,17 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             ))
           })
           .catch(err => {
-            console.error("[analyze] failed:", err)
+            clearTimeout(timer)
+            const elapsed = Date.now() - startedAt
+            const isTimeout = err?.name === "AbortError" || elapsed > 40000
+            console.error(`[analyze] failed after ${elapsed}ms:`, err)
             setMessages(prev => prev.map((m, i) =>
               i === placeholderIdx
                 ? {
                     ...m,
-                    content: `Уучлаарай, шинжилгээ хийхэд алдаа гарлаа.\n\n${err?.message || err}`,
+                    content: isTimeout
+                      ? "Шинжилгээ удаан хариу өгөв. Дахин оролдоно уу."
+                      : `Шинжилгээ хийхэд алдаа гарлаа: ${err?.message || err}`,
                     analysisStatus: "error",
                   }
                 : m
