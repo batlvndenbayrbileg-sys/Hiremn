@@ -109,31 +109,38 @@ export async function POST(req: Request) {
       return Response.json({ error: 'empty message' }, { status: 400 })
 
     // ── FAST PATH: Report analysis requests ─────────────────────────────
-    // Bypass classifier/test-lookup. Use Haiku (fast, cheap) with a tight
-    // token budget so we never exceed Vercel's serverless timeout.
+    // Bypass classifier/test-lookup. Use Sonnet for high-quality Mongolian
+    // (Haiku produces awkward/made-up words). Keep token budget tight so we
+    // stay under Vercel's serverless timeout.
     if (/^Тестийн үр дүнгийн дүн шинжилгээ хийнэ үү/i.test(lastMessage.trim())) {
       try {
         if (!process.env.ANTHROPIC_API_KEY) {
           return Response.json({ error: 'ANTHROPIC_API_KEY missing on server' }, { status: 503 })
         }
 
-        // Trim huge prompts to keep latency predictable (max ~6k chars input)
+        // Trim huge prompts to keep latency predictable (max ~5k chars input)
         const trimmedPrompt =
-          lastMessage.length > 6000 ? lastMessage.slice(0, 6000) + '\n...' : lastMessage
+          lastMessage.length > 5000 ? lastMessage.slice(0, 5000) + '\n...' : lastMessage
 
         const analysisSystem =
-          'Та hire.mn-ийн сэтгэл зүйч AI зөвлөх. Тестийн үр дүнг МОНГОЛоор товч, практик задлан шинжил. ' +
-          'Бүтэц (Markdown, гарчгийг ** одоор):\n' +
-          '1. **Гол дүгнэлт** (2 өгүүлбэр)\n' +
-          '2. **Давуу тал** (2-3 bullet)\n' +
-          '3. **Анхаарах зүйл** (2-3 bullet)\n' +
-          '4. **Практик зөвлөмж** (3-4 bullet)\n' +
-          '5. **Цаашдын алхам** (2-3 bullet)\n' +
-          'Тон: эерэг, эмпатитэй, оношилгоо БИШ. Нийт 350-500 үг.'
+          'Та hire.mn-ийн сэтгэл зүйч AI зөвлөх. Тестийн үр дүнг ЗӨВ, БАЙГАЛИЙН монгол хэлээр товч задлан шинжил.\n\n' +
+          'ХЭЛНИЙ ШААРДЛАГА (маш чухал):\n' +
+          '- Зөвхөн жирийн, өдөр тутмын монгол үг ашигла. Зохиомол, ховор, эртний үг бичихгүй.\n' +
+          '- Дүрэм журам, цэг таслал, нийлбэр үг зөв байх ёстой.\n' +
+          '- Үг үсгийн алдаагүй бичих ёстой (жишээ нь "сэвших" биш "сэргэх", "хүүхэл" биш "сэргээлт").\n' +
+          '- Англи үгийг монголоор бичих гэж бүү оролдоорой; шаардлагатай бол монгол үг сонго.\n' +
+          '- Хэт төвөгтэй найруулга биш, ярианы хэлэнд ойр товч өгүүлбэр.\n\n' +
+          'БҮТЭЦ (Markdown, гарчгийг ** одоор тодруулна):\n' +
+          '**Гол дүгнэлт**\n2 өгүүлбэрээр гол утга.\n\n' +
+          '**Давуу тал**\n• Гарчиг: тайлбар\n• Гарчиг: тайлбар\n\n' +
+          '**Анхаарах зүйл**\n• Гарчиг: тайлбар\n• Гарчиг: тайлбар\n\n' +
+          '**Практик зөвлөмж**\n• Гарчиг: тайлбар\n• Гарчиг: тайлбар\n• Гарчиг: тайлбар\n\n' +
+          '**Цаашдын алхам**\n• Алхам\n• Алхам\n\n' +
+          'Тон: эерэг, эмпатитэй, оношилгоо БИШ. Нийт 300-450 үг.'
 
         const analysisResp = await anthropic.messages.create({
-          model: 'claude-haiku-4-5',
-          max_tokens: 1200,
+          model: 'claude-sonnet-4-5-20250929',
+          max_tokens: 900,
           system: analysisSystem,
           messages: [{ role: 'user', content: trimmedPrompt }],
         })

@@ -1689,7 +1689,9 @@ function BotMessage({ message, fontSize, userQuestion = "", showAvatar = true, o
         </div>
       )}
 
-      {cleanText && (
+      {/* Skip plain-text bubble when this message is an artifact preview
+          (the full AI advice lives inside the artifact panel, NOT the chat) */}
+      {cleanText && !(message.insightCard && message.briefSummary) && (
         <div style={{ display: "flex", gap: 10, alignItems: "flex-end", animation: "hw-msg-in 0.4s cubic-bezier(.16,1,.3,1)" }}>
           {showAvatar ? (
             <BrainAvatar />
