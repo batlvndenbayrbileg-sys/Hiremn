@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react"
 import { MessageFeedback } from './message-feedback'
 import { ConversationSidebar } from './conversation-sidebar'
 import { SplineMascot } from './spline-mascot'
+import { AnalysisCard, AnalysisResults } from './analysis-results'
 import {
   Conversation,
   createNewConversation,
@@ -51,6 +52,8 @@ interface Message {
   analysisStatus?: "loading" | "done" | "error"  // Artifact button state
   followUps?: FollowUpMessage[]     // In-artifact Q&A history
   completedSteps?: number[]         // Indices of action plan items checked off
+  analysisData?: any                // New /api/analyze response shape
+  analysisTitle?: string            // Test name for analysis card
 }
 
 interface FollowUpMessage {
@@ -3263,6 +3266,20 @@ function BotMessage({ message, fontSize, userQuestion = "", showAvatar = true, o
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {/* NEW: Analysis Card (from /api/analyze) */}
+      {message.analysisData && (
+        <div style={{ display: "flex", gap: 10, alignItems: "flex-end", animation: "hw-msg-in 0.4s cubic-bezier(.16,1,.3,1)" }}>
+          {showAvatar ? <BrainAvatar /> : <div style={{ width: 40, flexShrink: 0 }} aria-hidden="true" />}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <AnalysisCard
+              data={message.analysisData}
+              title={message.analysisTitle || "Тест"}
+              onExpand={() => onOpenArtifact?.(message)}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Artifact preview button (when message has insightCard + briefSummary) */}
       {message.insightCard && message.briefSummary && (
         <div style={{ display: "flex", gap: 10, alignItems: "flex-end", animation: "hw-msg-in 0.4s cubic-bezier(.16,1,.3,1)" }}>
@@ -3677,10 +3694,74 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       
       // AI Analysis request with report data (from API or direct)
       if (event.data.type === "HIREMN_AI_ANALYSIS" && event.data.payload) {
+        const { reportTitle, reportData } = event.data.payload
+
+        const examPayload: any =
+          (reportData as any)?.exam?.payload ?? (reportData as any)?.exam ?? {}
+        const testName: string =
+          examPayload.assessmentName ||
+          examPayload.assessment?.name ||
+          reportTitle ||
+          "Тест"
+
+        // 1. Push a loading placeholder message
+        const placeholderIdx = (() => {
+          let idx = -1
+          setMessages(prev => {
+            idx = prev.length
+            return [...prev, {
+              role: "assistant",
+              content: `**🔍 ${testName}**\n\nAI таны үр дүнг шинжилж байна...`,
+              analysisStatus: "loading",
+              analysisTitle: testName,
+            }]
+          })
+          return idx
+        })()
+
+        // 2. Call /api/analyze for structured analysis
+        fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reportData, reportTitle: testName }),
+        })
+          .then(async res => {
+            const json = await res.json().catch(() => ({}))
+            if (!res.ok || !json.success || !json.data) {
+              throw new Error(json.error || `HTTP ${res.status}`)
+            }
+            setMessages(prev => prev.map((m, i) =>
+              i === placeholderIdx
+                ? {
+                    ...m,
+                    content: "",
+                    analysisData: json.data,
+                    analysisTitle: testName,
+                    analysisStatus: "done",
+                  }
+                : m
+            ))
+          })
+          .catch(err => {
+            console.error("[analyze] failed:", err)
+            setMessages(prev => prev.map((m, i) =>
+              i === placeholderIdx
+                ? {
+                    ...m,
+                    content: `Уучлаарай, шинжилгээ хийхэд алдаа гарлаа.\n\n${err?.message || err}`,
+                    analysisStatus: "error",
+                  }
+                : m
+            ))
+          })
+
+        return // Skip the legacy InsightCard flow
+      }
+
+      // ─── LEGACY (kept for backward compat, not reached) ──────────────
+      if (false && event.data.type === "HIREMN_AI_ANALYSIS_LEGACY" && event.data.payload) {
         const { reportTitle, reportData, userInfo, analysisResults, prompt } = event.data.payload
 
-        // ── Extract clean fields from the nested API response ─────────────
-        // hire.mn API wraps real data in payload.payload
         const examPayload: any =
           (reportData as any)?.exam?.payload ?? (reportData as any)?.exam ?? {}
         const answersPayload: any[] =
@@ -5137,8 +5218,21 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 />
               )}
 
-              {/* Artifact Overlay - full insight detail view */}
-              {artifactMessageIdx !== null && messages[artifactMessageIdx]?.insightCard && (
+              {/* NEW: AnalysisResults full dashboard (priority over legacy ArtifactView) */}
+              {artifactMessageIdx !== null && messages[artifactMessageIdx]?.analysisData && (
+                <AnalysisResults
+                  data={messages[artifactMessageIdx].analysisData}
+                  reportTitle={messages[artifactMessageIdx].analysisTitle || "Тест"}
+                  onClose={() => setArtifactMessageIdx(null)}
+                  onAskAI={(question) => {
+                    setArtifactMessageIdx(null)
+                    sendMessage(question)
+                  }}
+                />
+              )}
+
+              {/* Legacy Artifact Overlay - kept for backward compat */}
+              {artifactMessageIdx !== null && !messages[artifactMessageIdx]?.analysisData && messages[artifactMessageIdx]?.insightCard && (
                 <ArtifactView
                   message={messages[artifactMessageIdx]}
                   onClose={() => setArtifactMessageIdx(null)}
