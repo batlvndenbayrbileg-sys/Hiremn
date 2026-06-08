@@ -607,26 +607,26 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               </button>
             </div>
 
-            {/* Carousel container with arrows */}
-            <div
-              style={{ position: "relative", marginBottom: 8 }}
-              onTouchStart={onCarouselTS}
-              onTouchEnd={onCarouselTE}
-            >
+            {/* Horizontal-scroll container with 3 cards visible (snap to each) */}
+            <div style={{ position: "relative", marginBottom: 8 }}>
               {/* Left arrow */}
               {insCarousel > 0 && (
                 <button
-                  onClick={() => goCard(insCarousel - 1)}
+                  onClick={() => {
+                    goCard(insCarousel - 1)
+                    const el = document.getElementById("ai-ins-scroll")
+                    if (el) el.scrollTo({ left: (insCarousel - 1) * el.clientWidth * 0.92, behavior: "smooth" })
+                  }}
                   style={{
-                    position: "absolute", left: -6, top: "50%", transform: "translateY(-50%)",
-                    zIndex: 5, width: 32, height: 32, borderRadius: "50%",
+                    position: "absolute", left: -8, top: "45%", transform: "translateY(-50%)",
+                    zIndex: 5, width: 36, height: 36, borderRadius: "50%",
                     background: "#fff", border: "1.5px solid #E2E8F0",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     cursor: "pointer", color: "#64748B",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
                     fontFamily: "inherit",
                   }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M15 18l-6-6 6-6"/>
                   </svg>
                 </button>
@@ -634,113 +634,148 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               {/* Right arrow */}
               {insCarousel < cards.length - 1 && (
                 <button
-                  onClick={() => goCard(insCarousel + 1)}
+                  onClick={() => {
+                    goCard(insCarousel + 1)
+                    const el = document.getElementById("ai-ins-scroll")
+                    if (el) el.scrollTo({ left: (insCarousel + 1) * el.clientWidth * 0.92, behavior: "smooth" })
+                  }}
                   style={{
-                    position: "absolute", right: -6, top: "50%", transform: "translateY(-50%)",
-                    zIndex: 5, width: 32, height: 32, borderRadius: "50%",
+                    position: "absolute", right: -8, top: "45%", transform: "translateY(-50%)",
+                    zIndex: 5, width: 36, height: 36, borderRadius: "50%",
                     background: "#fff", border: "1.5px solid #E2E8F0",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     cursor: "pointer", color: "#64748B",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
                     fontFamily: "inherit",
                   }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 18l6-6-6-6"/>
                   </svg>
                 </button>
               )}
 
-              {/* Active card */}
+              {/* Scroll container: shows all 3 cards horizontally, snap to each */}
               <div
-                key={current.key}
+                id="ai-ins-scroll"
+                onScroll={(e) => {
+                  const el = e.currentTarget
+                  const cardWidth = el.clientWidth * 0.92
+                  const idx = Math.round(el.scrollLeft / cardWidth)
+                  if (idx !== insCarousel) setInsCarousel(Math.max(0, Math.min(cards.length - 1, idx)))
+                }}
                 style={{
-                  background: current.bg,
-                  borderRadius: 20, padding: "18px 16px 14px",
-                  border: `1.5px solid ${current.border}`,
-                  boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
-                  minHeight: 280,
-                  display: "flex", flexDirection: "column",
-                  animation: "card-pop 0.35s cubic-bezier(.34,1.56,.64,1)",
+                  display: "flex", gap: 10,
+                  overflowX: "auto",
+                  scrollSnapType: "x mandatory",
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                  WebkitOverflowScrolling: "touch",
+                  paddingBottom: 4,
+                  margin: "0 -4px",
+                  padding: "0 4px 4px",
                 }}
               >
-                {/* Big 3D-ish icon */}
-                <div style={{
-                  width: 76, height: 76, borderRadius: 24,
-                  background: current.iconBg,
-                  margin: "0 auto 12px",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  boxShadow: current.iconShadow,
-                  position: "relative", overflow: "hidden",
-                }}>
-                  {/* Shine */}
-                  <div style={{
-                    position: "absolute", top: 0, left: 0, right: 0, height: "45%",
-                    background: "linear-gradient(180deg, rgba(255,255,255,0.4), transparent)",
-                  }}/>
-                  <div style={{ position: "relative" }}>{current.icon}</div>
-                </div>
-
-                {/* Title */}
-                <p style={{
-                  fontSize: 18, fontWeight: 900, color: current.titleColor,
-                  textAlign: "center", margin: "0 0 14px", letterSpacing: -0.3,
-                }}>
-                  {current.title}
-                </p>
-
-                {/* Items */}
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
-                  {current.items.map((item, i) => (
-                    <div key={i} style={{
-                      display: "flex", gap: 8, alignItems: "flex-start",
-                      animation: `ci 0.35s ease ${i * 0.08}s both`,
+                {cards.map((c) => (
+                  <div
+                    key={c.key}
+                    style={{
+                      flex: "0 0 88%",
+                      minWidth: 230,
+                      maxWidth: 320,
+                      scrollSnapAlign: "center",
+                      background: c.bg,
+                      borderRadius: 20, padding: "18px 16px 14px",
+                      border: `1.5px solid ${c.border}`,
+                      boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
+                      display: "flex", flexDirection: "column",
+                    }}
+                  >
+                    {/* Big 3D icon */}
+                    <div style={{
+                      width: 76, height: 76, borderRadius: 24,
+                      background: c.iconBg,
+                      margin: "0 auto 12px",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      boxShadow: c.iconShadow,
+                      position: "relative", overflow: "hidden",
                     }}>
                       <div style={{
-                        width: 18, height: 18, borderRadius: "50%",
-                        background: "rgba(255,255,255,0.9)",
-                        border: `2px solid ${current.itemDot}`,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        flexShrink: 0, marginTop: 1,
-                      }}>
-                        <div style={{ width: 6, height: 6, borderRadius: "50%", background: current.itemDot }}/>
-                      </div>
-                      <span style={{
-                        fontSize: 12, color: "#374151", lineHeight: 1.5,
-                        display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden",
-                      }}>{item}</span>
+                        position: "absolute", top: 0, left: 0, right: 0, height: "45%",
+                        background: "linear-gradient(180deg, rgba(255,255,255,0.4), transparent)",
+                      }}/>
+                      <div style={{ position: "relative" }}>{c.icon}</div>
                     </div>
-                  ))}
-                </div>
 
-                {/* CTA pill */}
-                <button onClick={() => {
-                  if (current.key === "tips" && data.insights[0]) setInsDetail(data.insights[0])
-                  else if (current.key !== "tips") goCard((insCarousel + 1) % cards.length)
-                }} style={{
-                  background: current.ctaBg,
-                  border: "none", borderRadius: 999,
-                  padding: "10px 18px", color: "#fff",
-                  fontSize: 12, fontWeight: 800, cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                  boxShadow: `0 6px 16px ${current.titleColor}44`,
-                  fontFamily: "inherit",
-                }}>
-                  {current.ctaLabel}
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 18l6-6-6-6"/>
-                  </svg>
-                </button>
+                    {/* Title */}
+                    <p style={{
+                      fontSize: 17, fontWeight: 900, color: c.titleColor,
+                      textAlign: "center", margin: "0 0 14px", letterSpacing: -0.3,
+                    }}>
+                      {c.title}
+                    </p>
+
+                    {/* Items */}
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
+                      {c.items.map((item, i) => (
+                        <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                          <div style={{
+                            width: 18, height: 18, borderRadius: "50%",
+                            background: "rgba(255,255,255,0.9)",
+                            border: `2px solid ${c.itemDot}`,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            flexShrink: 0, marginTop: 1,
+                          }}>
+                            <div style={{ width: 6, height: 6, borderRadius: "50%", background: c.itemDot }}/>
+                          </div>
+                          <span style={{
+                            fontSize: 12, color: "#374151", lineHeight: 1.5,
+                            display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden",
+                          }}>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* CTA pill */}
+                    <button onClick={() => {
+                      if (c.key === "tips" && data.insights[0]) setInsDetail(data.insights[0])
+                      else if (c.key === "strengths") onAskAI("Миний давуу талуудын тухай илүү дэлгэрэнгүй тайлбарлаач")
+                      else if (c.key === "risks") onAskAI("Анхаарах эрсдэлүүдийн тухай илүү дэлгэрэнгүй тайлбарлаач")
+                    }} style={{
+                      background: c.ctaBg,
+                      border: "none", borderRadius: 999,
+                      padding: "10px 18px", color: "#fff",
+                      fontSize: 12, fontWeight: 800, cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      boxShadow: `0 6px 16px ${c.titleColor}44`,
+                      fontFamily: "inherit",
+                    }}>
+                      {c.ctaLabel}
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 18l6-6-6-6"/>
+                      </svg>
+                    </button>
+                  </div>
+                ))}
               </div>
+
+              {/* Hide scrollbar */}
+              <style>{`
+                #ai-ins-scroll::-webkit-scrollbar { display: none; }
+              `}</style>
 
               {/* Pagination dots */}
               <div style={{
-                display: "flex", justifyContent: "center", gap: 6, marginTop: 12,
+                display: "flex", justifyContent: "center", gap: 6, marginTop: 14,
               }}>
                 {cards.map((_, i) => (
-                  <button key={i} onClick={() => goCard(i)} style={{
+                  <button key={i} onClick={() => {
+                    goCard(i)
+                    const el = document.getElementById("ai-ins-scroll")
+                    if (el) el.scrollTo({ left: i * el.clientWidth * 0.92, behavior: "smooth" })
+                  }} style={{
                     width: i === insCarousel ? 22 : 7, height: 7, borderRadius: 4,
                     background: i === insCarousel
-                      ? (current.titleColor === "#EA580C" ? "#EA580C" : "#10B981")
+                      ? (cards[insCarousel].titleColor === "#EA580C" ? "#EA580C" : "#10B981")
                       : "#E2E8F0",
                     border: "none", cursor: "pointer", padding: 0,
                     transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
