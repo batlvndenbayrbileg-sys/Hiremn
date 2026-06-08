@@ -478,6 +478,147 @@ function Sheet({ insight, onClose, onAskAI }: {
   )
 }
 
+// ── Loading card (animated progress while AI analyzes) ─────────────────────
+export function AnalysisLoadingCard({ title }: { title: string }) {
+  const [step, setStep] = useState(0)
+  const [progress, setProgress] = useState(8)
+
+  const steps = [
+    { label: "Тестийн өгөгдөл боловсруулж байна", emoji: "📊" },
+    { label: "AI шинжилгээ хийж байна", emoji: "🧠" },
+    { label: "Зөвлөмж бэлдэж байна", emoji: "✨" },
+    { label: "Тайланг эмхэтгэж байна", emoji: "📋" },
+  ]
+
+  useEffect(() => {
+    const stepTimer = setInterval(() => {
+      setStep(s => Math.min(s + 1, steps.length - 1))
+    }, 2500)
+    const progTimer = setInterval(() => {
+      // Asymptotic toward 92% so the bar never falsely completes
+      setProgress(p => Math.min(92, p + (92 - p) * 0.06))
+    }, 200)
+    return () => { clearInterval(stepTimer); clearInterval(progTimer) }
+  }, [])
+
+  return (
+    <div style={{
+      background: "#fff",
+      borderRadius: 20, padding: "18px 16px",
+      boxShadow: "0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,196,140,0.15)",
+      maxWidth: "100%",
+      position: "relative", overflow: "hidden",
+    }}>
+      {/* Top: AI badge + title */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+        <div style={{
+          width: 38, height: 38, borderRadius: 12,
+          background: `linear-gradient(135deg, ${TEAL}, #00A876)`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          boxShadow: `0 4px 12px ${TEAL}55`, flexShrink: 0,
+          position: "relative", overflow: "hidden",
+        }}>
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(180deg, rgba(255,255,255,0.3), transparent)",
+          }}/>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" style={{ position: "relative", animation: "ar-spin 2s linear infinite" }}>
+            <path d="M12 2l1.4 4.3L17.7 8l-4.3 1.4L12 14l-1.4-4.6L6.3 8l4.3-1.7z"/>
+          </svg>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: TEAL, boxShadow: `0 0 6px ${TEAL}`, animation: "ar-pulse 1.6s ease-in-out infinite" }}/>
+            <span style={{ fontSize: 9, fontWeight: 800, color: TEAL, letterSpacing: 0.6 }}>AI ШИНЖИЛЖ БАЙНА</span>
+          </div>
+          <p style={{ fontSize: 13, fontWeight: 800, color: "#1E293B", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {title}
+          </p>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{
+          background: "#F1F5F9", borderRadius: 8, height: 8, overflow: "hidden",
+          position: "relative",
+        }}>
+          <div style={{
+            height: "100%", borderRadius: 8,
+            width: `${progress}%`,
+            background: `linear-gradient(90deg, ${TEAL}, #00E5A0)`,
+            transition: "width 0.4s ease",
+            boxShadow: `0 0 10px ${TEAL}66`,
+            position: "relative", overflow: "hidden",
+          }}>
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)",
+              backgroundSize: "200% 100%",
+              animation: "ar-shimmer 1.6s linear infinite",
+            }}/>
+          </div>
+        </div>
+        <div style={{
+          display: "flex", justifyContent: "space-between",
+          marginTop: 5, fontSize: 9, color: "#94A3B8", fontWeight: 700,
+        }}>
+          <span>Шинжилгээ үргэлжилж байна...</span>
+          <span style={{ color: TEAL }}>{Math.round(progress)}%</span>
+        </div>
+      </div>
+
+      {/* Step list */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {steps.map((s, i) => {
+          const isDone = i < step
+          const isActive = i === step
+          return (
+            <div key={i} style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "6px 10px",
+              background: isActive ? "#F0FDF4" : "transparent",
+              borderRadius: 10, transition: "all 0.3s",
+              opacity: isDone || isActive ? 1 : 0.4,
+            }}>
+              <div style={{
+                width: 20, height: 20, borderRadius: "50%",
+                background: isDone ? TEAL : isActive ? "#fff" : "#F1F5F9",
+                border: isActive ? `2px solid ${TEAL}` : "none",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0,
+                boxShadow: isActive ? `0 0 0 4px ${TEAL}22` : "none",
+                animation: isActive ? "ar-pulse 1.6s ease-in-out infinite" : undefined,
+              }}>
+                {isDone ? (
+                  <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 8l4 4 6-7"/>
+                  </svg>
+                ) : isActive ? (
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: TEAL }}/>
+                ) : null}
+              </div>
+              <span style={{
+                fontSize: 11.5, fontWeight: isActive ? 700 : 600,
+                color: isDone ? "#059669" : isActive ? "#1E293B" : "#94A3B8",
+                flex: 1,
+              }}>
+                <span style={{ marginRight: 4 }}>{s.emoji}</span>{s.label}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+
+      <style>{`
+        @keyframes ar-spin { to { transform: rotate(360deg) } }
+        @keyframes ar-pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.5 } }
+        @keyframes ar-shimmer { 0% { background-position: -200% 0 } 100% { background-position: 200% 0 } }
+      `}</style>
+    </div>
+  )
+}
+
 // ── Compact card ─────────────────────────────────────────────────────────────
 export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; title: string; onExpand: () => void }) {
   const [hov, setHov] = useState(false)

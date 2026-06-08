@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react"
 import { MessageFeedback } from './message-feedback'
 import { ConversationSidebar } from './conversation-sidebar'
 import { SplineMascot } from './spline-mascot'
-import { AnalysisCard, AnalysisResults } from './analysis-results'
+import { AnalysisCard, AnalysisResults, AnalysisLoadingCard } from './analysis-results'
 import {
   Conversation,
   createNewConversation,
@@ -3267,6 +3267,16 @@ function BotMessage({ message, fontSize, userQuestion = "", showAvatar = true, o
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {/* NEW: Analysis loading progress (before data arrives) */}
+      {!message.analysisData && message.analysisStatus === "loading" && (
+        <div style={{ display: "flex", gap: 10, alignItems: "flex-end", animation: "hw-msg-in 0.4s cubic-bezier(.16,1,.3,1)" }}>
+          {showAvatar ? <BrainAvatar /> : <div style={{ width: 40, flexShrink: 0 }} aria-hidden="true" />}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <AnalysisLoadingCard title={message.analysisTitle || "Тест"} />
+          </div>
+        </div>
+      )}
+
       {/* NEW: Analysis Card (from /api/analyze) */}
       {message.analysisData && (
         <div style={{ display: "flex", gap: 10, alignItems: "flex-end", animation: "hw-msg-in 0.4s cubic-bezier(.16,1,.3,1)" }}>
@@ -3709,14 +3719,16 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           "Тест"
 
         // Use a unique marker so we can find the message after state updates
-        // (relying on array index is unsafe — setState updaters are async)
         const analysisId = `analysis-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
         console.log("[analyze] starting:", testName, "id:", analysisId)
+
+        // Stop the global "typing" indicator — we have our own progress UI inside the card
+        setIsTyping(false)
 
         // 1. Push a loading placeholder message tagged with our id
         setMessages(prev => [...prev, {
           role: "assistant",
-          content: `**🔍 ${testName}**\n\nAI таны үр дүнг шинжилж байна...`,
+          content: "",
           analysisStatus: "loading",
           analysisTitle: testName,
           analysisId,
@@ -3746,13 +3758,15 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               (m as any).analysisId === analysisId
                 ? {
                     ...m,
-                    content: "",
+                    content: "Шинжилгээ амжилттай.",
                     analysisData: json.data,
                     analysisTitle: testName,
                     analysisStatus: "done" as const,
+                    fromLLM: true,
                   }
                 : m
             ))
+            setIsTyping(false)
             console.log("[analyze] message updated for id", analysisId)
           })
           .catch(err => {
@@ -3771,6 +3785,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   }
                 : m
             ))
+            setIsTyping(false)
           })
 
         return // Skip the legacy InsightCard flow
