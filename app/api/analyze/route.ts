@@ -58,29 +58,76 @@ function closeOpenBrackets(s: string): string {
 export async function POST(request: Request) {
   try {
     const { reportData, reportTitle } = await request.json()
-    const truncated = typeof reportData === 'string'
-      ? reportData.slice(0, 1200)
-      : JSON.stringify(reportData).slice(0, 1200)
+    // ── Extract REAL test result values (DO NOT let the AI invent these) ──
+    // hire.mn API wraps payload in payload.payload
+    const examPayload: any =
+      (reportData as any)?.exam?.payload ?? (reportData as any)?.exam ?? {}
+    const answersPayload: any[] =
+      (reportData as any)?.answers?.payload ?? (reportData as any)?.answers ?? []
+
+    const actualResultLabel: string = examPayload.result || ""
+    const actualScore: number = Number(examPayload.point ?? examPayload.value ?? 0) || 0
+    const actualMaxScore: number = Number(examPayload.total ?? examPayload.assessment?.totalPoint ?? 0) || 0
+    const actualDescription: string = examPayload.assessment?.description || ""
+    const actualUsage: string = examPayload.assessment?.usage || ""
+
+    // Derive healthScore: percentage of points achieved
+    const actualPct = actualMaxScore > 0
+      ? Math.round((actualScore / actualMaxScore) * 100)
+      : 50
+
+    // Map result label / pct to risk levels
+    const lowerLabel = actualResultLabel.toLowerCase()
+    let actualRiskLevel: "Low" | "Medium" | "High" = "Medium"
+    if (lowerLabel.includes("бага") || lowerLabel.includes("сул") || actualPct <= 33) actualRiskLevel = "Low"
+    else if (lowerLabel.includes("их") || lowerLabel.includes("өндөр") || lowerLabel.includes("хүнд") || actualPct >= 67) actualRiskLevel = "High"
+
+    // Compact answers summary for context (no need to flood prompt)
+    const answersSummary = answersPayload.slice(0, 12).map((a: any, i: number) => {
+      const v = a?.answer?.value ?? ""
+      const p = a?.point ?? a?.answer?.point ?? "0"
+      return `${i + 1}.${v}(${p})`
+    }).join("; ")
+
+    const truncated = `Тестийн нэр: ${reportTitle}
+БОДИТ үр дүн (АНТЫ ӨӨРЧИЛБӨЛ БУРУУ!): ${actualResultLabel || "тодорхойгүй"}
+БОДИТ оноо: ${actualScore}/${actualMaxScore} (${actualPct}%)
+Эрсдэлийн түвшин (тооцоологдсон): ${actualRiskLevel}
+Тестийн тайлбар: ${(actualDescription || "").slice(0, 300)}
+Зориулалт: ${(actualUsage || "").slice(0, 200)}
+Хариултууд: ${answersSummary}`
 
     const SYSTEM = `Та hire.mn-ийн сэтгэл зүйч мэргэжилтэн AI. Тест: "${reportTitle}".
 
-КРИТИК ДҮРМҮҮД (ӨӨРИЙГӨӨ ШАЛГАХ):
+╔══════════════════════════════════════════════════════════╗
+║  ХАМГИЙН ЧУХАЛ — БОДИТ ӨГӨГДӨЛИЙГ ҮЛ ЗӨРЧИХ:             ║
+╠══════════════════════════════════════════════════════════╣
+║ Хэрэглэгчийн message-д өгсөн БОДИТ оноог ЯГ ашиглах:     ║
+║   - healthScore = ӨГСӨН хувь (% утга)                    ║
+║   - riskLevel = ӨГСӨН эрсдэлийн түвшин                   ║
+║   - summary.title = ӨГСӨН үр дүнгийн нэр (е.г. "Бага    ║
+║     зэргийн хамааралтай")                                ║
+║   - metrics[0].score = ӨГСӨН score утга                  ║
+║   - metrics[0].maxScore = ӨГСӨН max утга                 ║
+║ ЗОХИОХГҮЙ. БУРУУШААХГҮЙ. ЯГ ТЭР УТГЫГ АШИГЛА.            ║
+╚══════════════════════════════════════════════════════════╝
+
+КРИТИК ДҮРМҮҮД:
 1. Зөвхөн БОДИТОЙ монгол үг ашигла. Үг зохиож БҮҮ бич.
-2. Хэрэв үг үнэн эсэхэд эргэлзвэл, ӨӨР энгийн үг сонго.
-3. Дараах үгсийг АШИГЛАХГҮЙ (зохиомол): "эмдээлэл", "эмдлүүлэх", "сэвших", "хүүхэл", "сугалах", "сэвших", "цэнгэлэг", "амандуу".
-4. Үнэн үгсийн жишээ: "хамаарал, эрсдэл, дадал, зуршил, тогтвортой, чадвар, сэтгэл, стресс, тайвшрах, эмчилгээ, эмч, эмнэлэг, тусламж, дэмжлэг, найз, гэр бүл, удирдах, бууруулах, нэмэгдүүлэх, хэрэглэх, татах".
-5. Англи үгсийг латин үсгээр үлдээ: "stress" ✅ биш "стрэс"; харин "стресс" гэдэг үгийг ашиглаж болно.
-6. Үг үсгийн алдаагүй. Тийрэх биш цицрах, эмгэг биш өвчин.
-7. Эерэг, эмпатитэй, мэргэжлийн өнгө. Оношилгоо БИШ — "...магадгүй", "...байж болзошгүй".
-8. Тест төрөлд тохирох: никотин→хамаарал/гарах арга, стресс→тайвшрах, IQ→чадвар, leadership→манлайлал.
-9. Бүх text ≤15 үг богино тодорхой өгүүлбэрээр.
+2. Хориглосон зохиомол үгс: "эмдээлэл", "эмдлүүлэх", "сэвших", "хүүхэл", "сугалах", "цэнгэлэг", "амандуу", "дүүрэлт".
+3. Зөв үгсийг ашигла: хамаарал, эрсдэл, дадал, зуршил, тогтвортой, чадвар, сэтгэл, стресс, тайвшрах, эмчилгээ, эмч, эмнэлэг, тусламж, дэмжлэг, найз, гэр бүл, удирдах, бууруулах, нэмэгдүүлэх, хэрэглэх, татах, сэргэх.
+4. Үг үсгийн алдаагүй (сэргэх✅ биш сэвших❌).
+5. Эерэг, эмпатитэй мэргэжлийн өнгө. Оношилгоо БИШ — "...магадгүй", "...болзошгүй".
+6. Тест төрөлд тохирох контекст.
+7. Бүх text ≤15 үг богино.
 
-ХЭЛБЭР: ЯГ дараах JSON буцаа (markdown ҮГҮЙ):
-- strengths/risks: ЯГ 4 зүйл, "Богино гарчиг: тайлбар" (≤12 үг бүх зүйл)
-- insights: 3 зүйл, detail 2 өгүүлбэр, actions 3 зүйл (≤8 үг алхам бүр)
-- roadmap: 4 долоо хоног, tasks тус бүр 1
+ХЭЛБЭР: JSON буцаа (markdown ҮГҮЙ):
+- strengths/risks: ЯГ 4 зүйл, "Богино гарчиг: тайлбар" (≤12 үг)
+- insights: 3 зүйл, detail 2 өгүүлбэр, actions 3 зүйл
+- roadmap: 4 долоо хоног, tasks 1 зүйл тус бүр
+- summary.title нь ӨГӨГДСӨН үр дүнгийн нэртэй яг ТААРУУЛНА
 
-{"healthScore":<0-100>,"riskLevel":"Low"|"Medium"|"High","quitPotential":"Low"|"Medium"|"High","summary":{"title":"<2-3 үг>","description":"<1 өгүүлбэр>"},"highlightTitle":"<сэтгэл хөдөлгөм гарчиг>","highlightMessage":"<1 өгүүлбэр>","metrics":[{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"},{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"}],"strengths":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"risks":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр мэргэжлийн>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]}],"roadmap":[{"week":"1-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"2-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"3-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"4-р долоо хоног","title":"<товч>","tasks":["<товч>"]}],"todayGoals":["<товч>","<товч>","<товч>"],"kpiLabels":{"metric1Label":"<KPI>","riskLabel":"Эрсдэл","potentialLabel":"Боломж"},"statCards":[{"icon":"🎯","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"📊","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"⭐","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"🚀","label":"<нэр>","value":"<утга>","sub":"<товч>"}]}`
+{"healthScore":<өгсөн % утга>,"riskLevel":"<өгсөн>","quitPotential":"Low"|"Medium"|"High","summary":{"title":"<өгсөн үр дүнгийн нэр>","description":"<1 өгүүлбэр>"},"highlightTitle":"<сэтгэл хөдөлгөм гарчиг>","highlightMessage":"<1 өгүүлбэр>","metrics":[{"label":"<нэр>","score":<өгсөн оноо>,"maxScore":<өгсөн max>,"status":"<өгсөн үр дүнгийн нэр>"},{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"}],"strengths":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"risks":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]}],"roadmap":[{"week":"1-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"2-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"3-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"4-р долоо хоног","title":"<товч>","tasks":["<товч>"]}],"todayGoals":["<товч>","<товч>","<товч>"],"kpiLabels":{"metric1Label":"<KPI>","riskLabel":"Эрсдэл","potentialLabel":"Боломж"},"statCards":[{"icon":"🎯","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"📊","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"⭐","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"🚀","label":"<нэр>","value":"<утга>","sub":"<товч>"}]}`
 
     // Prefill assistant with `{` to force pure JSON output (no preamble)
     const response = await anthropic.messages.create({
@@ -129,12 +176,30 @@ export async function POST(request: Request) {
       }
     }
 
-    // Validate + fill in sensible defaults for missing/truncated fields
-    // (closeOpenBrackets may have trimmed trailing sections)
-    if (data.healthScore == null) {
+    // ─── HARD OVERRIDE: use REAL test values, ignore anything AI invented ───
+    // This is the single source of truth — never let AI hallucinate scores.
+    if (actualMaxScore > 0) {
+      data.healthScore = actualPct
+      data.riskLevel = actualRiskLevel
+      data.summary = {
+        title: actualResultLabel || data.summary?.title || "Дүн шинжилгээ",
+        description: data.summary?.description || (actualDescription || "").slice(0, 200) || "Үр дүн боловсруулагдсан.",
+      }
+      // Force the first metric to match the real test score
+      if (!Array.isArray(data.metrics) || data.metrics.length === 0) {
+        data.metrics = []
+      }
+      data.metrics[0] = {
+        label: data.metrics[0]?.label || reportTitle.slice(0, 30) || "Үр дүн",
+        score: actualScore,
+        maxScore: actualMaxScore,
+        status: actualResultLabel || data.metrics[0]?.status || "—",
+      }
+    } else if (data.healthScore == null) {
       console.error('[analyze] missing healthScore. Keys:', Object.keys(data))
       throw new Error('JSON бүтэц дутуу — healthScore байхгүй')
     }
+
     if (!data.summary) {
       data.summary = { title: "Дүн шинжилгээ", description: "Үр дүн боловсруулагдсан." }
     }
