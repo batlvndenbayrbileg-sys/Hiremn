@@ -3490,6 +3490,178 @@ function BotMessage({ message, fontSize, userQuestion = "", showAvatar = true, o
   )
 }
 
+// ── Consent Modal (shown before sending test data to AI) ─────────────────────
+
+function ConsentModal({
+  testName,
+  onConfirm,
+  onCancel,
+}: {
+  testName: string
+  onConfirm: (remember: boolean) => void
+  onCancel: () => void
+}) {
+  const [remember, setRemember] = useState(true)
+  const [vis, setVis] = useState(false)
+  useEffect(() => { setTimeout(() => setVis(true), 10) }, [])
+
+  return (
+    <div
+      onClick={onCancel}
+      style={{
+        position: "absolute", inset: 0,
+        background: `rgba(15,23,42,${vis ? 0.55 : 0})`,
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        zIndex: 100,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 18,
+        transition: "background 0.28s ease",
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: "#fff",
+          borderRadius: 24,
+          width: "100%", maxWidth: 360,
+          overflow: "hidden",
+          boxShadow: "0 30px 80px rgba(0,0,0,0.35)",
+          transform: vis ? "scale(1) translateY(0)" : "scale(0.92) translateY(20px)",
+          opacity: vis ? 1 : 0,
+          transition: "all 0.35s cubic-bezier(.16,1,.3,1)",
+        }}
+      >
+        {/* Hero */}
+        <div style={{
+          background: "linear-gradient(135deg, #FFF5F0 0%, #FFEDE0 100%)",
+          padding: "20px 22px 16px",
+          textAlign: "center",
+          position: "relative", overflow: "hidden",
+        }}>
+          <div style={{
+            position: "absolute", top: -20, right: -20,
+            width: 100, height: 100, borderRadius: "50%",
+            background: "rgba(232,84,26,0.08)", pointerEvents: "none",
+          }}/>
+          <div style={{
+            width: 64, height: 64, borderRadius: 20,
+            background: "linear-gradient(135deg, #E8541A, #F07040)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            margin: "0 auto 12px",
+            boxShadow: "0 8px 20px rgba(232,84,26,0.35)",
+            position: "relative",
+          }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s-8-4.5-8-11.8A5.2 5.2 0 0 1 12 5.5a5.2 5.2 0 0 1 8 4.7c0 7.3-8 11.8-8 11.8z"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+          </div>
+          <h3 style={{
+            fontSize: 17, fontWeight: 900, color: "#1F2937",
+            margin: "0 0 4px", letterSpacing: -0.3,
+          }}>
+            Өгөгдлийн зөвшөөрөл
+          </h3>
+          <p style={{
+            fontSize: 12, color: "#6B7280", margin: 0, lineHeight: 1.5,
+          }}>
+            Та <b style={{ color: "#E8541A" }}>{testName}</b> тестийн үр дүнг<br/>
+            AI шинжээч рүү илгээх гэж байна.
+          </p>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: "16px 22px 4px" }}>
+          {[
+            { icon: "🛡️", title: "Аюулгүй холболт", body: "Өгөгдөл шифрлэгдсэн HTTPS-ээр дамжина." },
+            { icon: "🤖", title: "Зөвхөн AI боловсруулна", body: "Хэн ч хүн биш, зөвхөн AI таны хариуг үзнэ." },
+            { icon: "🗑️", title: "Хадгалахгүй", body: "Шинжилгээ дууссаны дараа өгөгдөл устгагдана." },
+          ].map((p, i) => (
+            <div key={i} style={{
+              display: "flex", gap: 10, alignItems: "flex-start",
+              marginBottom: 12, padding: "10px 12px",
+              background: "#F9FAFB", borderRadius: 12,
+              border: "1px solid #F1F5F9",
+              animation: `hw-msg-in 0.35s ease ${i * 0.06}s both`,
+            }}>
+              <div style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }}>{p.icon}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#1F2937", marginBottom: 1 }}>{p.title}</div>
+                <div style={{ fontSize: 11, color: "#6B7280", lineHeight: 1.5 }}>{p.body}</div>
+              </div>
+            </div>
+          ))}
+
+          {/* Remember checkbox */}
+          <label style={{
+            display: "flex", alignItems: "center", gap: 8,
+            padding: "10px 4px", cursor: "pointer", userSelect: "none",
+          }}>
+            <div
+              onClick={() => setRemember(r => !r)}
+              style={{
+                width: 20, height: 20, borderRadius: 6,
+                background: remember ? "linear-gradient(135deg, #E8541A, #F07040)" : "#fff",
+                border: remember ? "none" : "1.5px solid #D1D5DB",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all 0.2s", flexShrink: 0,
+                boxShadow: remember ? "0 4px 10px rgba(232,84,26,0.3)" : "none",
+              }}
+            >
+              {remember && (
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 8l4 4 6-7"/>
+                </svg>
+              )}
+            </div>
+            <span style={{ fontSize: 11, color: "#475569", fontWeight: 600 }} onClick={() => setRemember(r => !r)}>
+              Энэ нэг сесст дахин асуухгүй
+            </span>
+          </label>
+        </div>
+
+        {/* Actions */}
+        <div style={{
+          padding: "8px 22px 22px",
+          display: "flex", gap: 8,
+        }}>
+          <button
+            onClick={onCancel}
+            style={{
+              flex: 1, padding: "13px",
+              background: "#F1F5F9", color: "#64748B",
+              border: "none", borderRadius: 14,
+              fontSize: 13, fontWeight: 700, cursor: "pointer",
+              fontFamily: "inherit", transition: "all 0.2s",
+            }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#E2E8F0"}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#F1F5F9"}
+          >
+            Цуцлах
+          </button>
+          <button
+            onClick={() => onConfirm(remember)}
+            style={{
+              flex: 2, padding: "13px",
+              background: "linear-gradient(135deg, #E8541A, #F07040)",
+              color: "#fff", border: "none", borderRadius: 14,
+              fontSize: 13, fontWeight: 800, cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              boxShadow: "0 8px 20px rgba(232,84,26,0.4)",
+              fontFamily: "inherit", transition: "transform 0.15s ease",
+            }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.transform = "translateY(0)"}
+          >
+            ✨ Зөвшөөрөх ба эхлүүлэх
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── User Message ──────────────────────────────────────────────────────────────
 
 function UserMessage({ content, fontSize }: { content: string; fontSize: number }) {
@@ -3570,6 +3742,10 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const pendingAnalysisIdxRef = useRef<number | null>(null)
   // Pending follow-up question state (per artifact)
   const [followUpPending, setFollowUpPending] = useState(false)
+  // Consent modal — shown before any data is sent to /api/analyze
+  const [consentPayload, setConsentPayload] = useState<null | { reportData: any; testName: string }>(null)
+  // Remember user's consent for this session so we don't ask twice
+  const consentGrantedRef = useRef(false)
 
   // Toggle a checkable action step inside the artifact (TODO behavior)
   const toggleArtifactStep = (stepIdx: number) => {
@@ -3664,9 +3840,76 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   // ══════════════════════════════════════════════════════════════════════════
   // EXTERNAL API HANDLER - Listen for messages from parent window (hire.mn)
   // ══════════════════════════════════════════════════════════════════════════
+  // Extracted analysis flow — runs after consent (or directly if already granted)
+  const startAnalysisFlow = (reportData: any, testName: string) => {
+    const analysisId = `analysis-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    console.log("[analyze] starting:", testName, "id:", analysisId)
+    setIsTyping(false)
+
+    // Push loading placeholder
+    setMessages(prev => [...prev, {
+      role: "assistant",
+      content: "",
+      analysisStatus: "loading",
+      analysisTitle: testName,
+      analysisId,
+    } as any])
+
+    const ctrl = new AbortController()
+    const timer = setTimeout(() => ctrl.abort(), 60000)
+    const startedAt = Date.now()
+
+    fetch("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reportData, reportTitle: testName }),
+      signal: ctrl.signal,
+    })
+      .then(async res => {
+        clearTimeout(timer)
+        const ms = Date.now() - startedAt
+        console.log(`[analyze] response in ${ms}ms, status ${res.status}`)
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok || !json.success || !json.data) {
+          throw new Error(json.error || `HTTP ${res.status}`)
+        }
+        setMessages(prev => prev.map(m =>
+          (m as any).analysisId === analysisId
+            ? {
+                ...m,
+                content: "",
+                analysisData: json.data,
+                analysisTitle: testName,
+                analysisStatus: "done" as const,
+                fromLLM: true,
+              }
+            : m
+        ))
+        setIsTyping(false)
+      })
+      .catch(err => {
+        clearTimeout(timer)
+        const elapsed = Date.now() - startedAt
+        const isTimeout = err?.name === "AbortError" || elapsed > 40000
+        console.error(`[analyze] failed after ${elapsed}ms:`, err)
+        setMessages(prev => prev.map(m =>
+          (m as any).analysisId === analysisId
+            ? {
+                ...m,
+                content: isTimeout
+                  ? "Шинжилгээ удаан хариу өгөв. Дахин оролдоно уу."
+                  : `Шинжилгээ хийхэд алдаа гарлаа: ${err?.message || err}`,
+                analysisStatus: "error" as const,
+              }
+            : m
+        ))
+        setIsTyping(false)
+      })
+  }
+
   useEffect(() => {
     if (typeof window === 'undefined') return
-    
+
     const handleExternalMessage = (event: MessageEvent) => {
       if (!event.data || !event.data.type) return
       
@@ -3717,77 +3960,14 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           reportTitle ||
           "Тест"
 
-        // Use a unique marker so we can find the message after state updates
-        const analysisId = `analysis-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-        console.log("[analyze] starting:", testName, "id:", analysisId)
-
-        // Stop the global "typing" indicator — we have our own progress UI inside the card
+        // Show consent modal first (or skip if user already approved this session)
         setIsTyping(false)
-
-        // 1. Push a loading placeholder message tagged with our id
-        setMessages(prev => [...prev, {
-          role: "assistant",
-          content: "",
-          analysisStatus: "loading",
-          analysisTitle: testName,
-          analysisId,
-        } as any])
-
-        // 2. Call /api/analyze for structured analysis (60s client timeout)
-        const ctrl = new AbortController()
-        const timer = setTimeout(() => ctrl.abort(), 60000)
-        const startedAt = Date.now()
-
-        fetch("/api/analyze", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reportData, reportTitle: testName }),
-          signal: ctrl.signal,
-        })
-          .then(async res => {
-            clearTimeout(timer)
-            const ms = Date.now() - startedAt
-            console.log(`[analyze] response in ${ms}ms, status ${res.status}`)
-            const json = await res.json().catch(() => ({}))
-            console.log("[analyze] body:", json)
-            if (!res.ok || !json.success || !json.data) {
-              throw new Error(json.error || `HTTP ${res.status}`)
-            }
-            setMessages(prev => prev.map(m =>
-              (m as any).analysisId === analysisId
-                ? {
-                    ...m,
-                    content: "",
-                    analysisData: json.data,
-                    analysisTitle: testName,
-                    analysisStatus: "done" as const,
-                    fromLLM: true,
-                  }
-                : m
-            ))
-            setIsTyping(false)
-            console.log("[analyze] message updated for id", analysisId)
-          })
-          .catch(err => {
-            clearTimeout(timer)
-            const elapsed = Date.now() - startedAt
-            const isTimeout = err?.name === "AbortError" || elapsed > 40000
-            console.error(`[analyze] failed after ${elapsed}ms:`, err)
-            setMessages(prev => prev.map(m =>
-              (m as any).analysisId === analysisId
-                ? {
-                    ...m,
-                    content: isTimeout
-                      ? "Шинжилгээ удаан хариу өгөв. Дахин оролдоно уу."
-                      : `Шинжилгээ хийхэд алдаа гарлаа: ${err?.message || err}`,
-                    analysisStatus: "error" as const,
-                  }
-                : m
-            ))
-            setIsTyping(false)
-          })
-
-        return // Skip the legacy InsightCard flow
+        if (!consentGrantedRef.current) {
+          setConsentPayload({ reportData, testName })
+        } else {
+          startAnalysisFlow(reportData, testName)
+        }
+        return
       }
 
       // ─── LEGACY (kept for backward compat, not reached) ──────────────
@@ -5248,6 +5428,20 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   onNewConversation={handleNewConversation}
                   onClose={() => setShowSidebar(false)}
                   isVisible={showSidebar}
+                />
+              )}
+
+              {/* Consent modal — shown before sending test data to AI */}
+              {consentPayload && (
+                <ConsentModal
+                  testName={consentPayload.testName}
+                  onConfirm={(remember) => {
+                    if (remember) consentGrantedRef.current = true
+                    const p = consentPayload
+                    setConsentPayload(null)
+                    startAnalysisFlow(p.reportData, p.testName)
+                  }}
+                  onCancel={() => setConsentPayload(null)}
                 />
               )}
 
