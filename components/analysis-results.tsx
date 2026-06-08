@@ -91,40 +91,387 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
   )
 }
 
-// Bottom Sheet
-function Sheet({ insight, onClose }: { insight: AnalysisData["insights"][0] | null; onClose: () => void }) {
+// ── Premium List-Detail Sheet (all strengths/risks/tips) ────────────────────
+
+function ListDetailSheet({
+  data,
+  onClose,
+  onAskAI,
+}: {
+  data: null | { kind: string; title: string; items: string[]; color: string; bg: string; soft: string; grad: string; emoji: string }
+  onClose: () => void
+  onAskAI: (q: string) => void
+}) {
   const [vis, setVis] = useState(false)
-  useEffect(() => { if (insight) setTimeout(() => setVis(true), 10); else setVis(false) }, [insight])
-  if (!insight) return null
+  useEffect(() => { if (data) setTimeout(() => setVis(true), 10); else setVis(false) }, [data])
+  if (!data) return null
   return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: `rgba(0,0,0,${vis ? 0.45 : 0})`, zIndex: 200, display: "flex", alignItems: "flex-end", transition: "background 0.25s", backdropFilter: "blur(4px)" }}>
-      <div onClick={e => e.stopPropagation()} style={{ width: "100%", background: "#fff", borderRadius: "24px 24px 0 0", transform: vis ? "translateY(0)" : "translateY(100%)", transition: "transform 0.38s cubic-bezier(.16,1,.3,1)", maxHeight: "80vh", overflowY: "auto" }}>
-        <div style={{ padding: "14px 0 0", display: "flex", justifyContent: "center" }}>
-          <div style={{ width: 36, height: 4, background: "#E2E8F0", borderRadius: 2 }} />
+    <div onClick={onClose} style={{
+      position: "fixed", inset: 0,
+      background: `rgba(15,23,42,${vis ? 0.55 : 0})`,
+      zIndex: 250, display: "flex", alignItems: "flex-end",
+      transition: "background 0.28s",
+      backdropFilter: "blur(6px)",
+      WebkitBackdropFilter: "blur(6px)",
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        width: "100%", background: "#fff",
+        borderRadius: "28px 28px 0 0",
+        transform: vis ? "translateY(0)" : "translateY(100%)",
+        transition: "transform 0.42s cubic-bezier(.16,1,.3,1)",
+        maxHeight: "88vh", overflowY: "auto",
+        display: "flex", flexDirection: "column",
+      }}>
+        {/* Drag handle */}
+        <div style={{ padding: "10px 0 0", display: "flex", justifyContent: "center", flexShrink: 0 }}>
+          <div style={{ width: 42, height: 5, background: "#CBD5E1", borderRadius: 3 }}/>
         </div>
-        <div style={{ padding: "16px 20px 36px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
-            <div style={{ width: 52, height: 52, borderRadius: 16, background: "#F0FDF4", fontSize: 26, display: "flex", alignItems: "center", justifyContent: "center", border: "1.5px solid #BBF7D0", flexShrink: 0 }}>{insight.emoji}</div>
-            <h3 style={{ fontSize: 18, fontWeight: 800, color: "#1E293B", margin: 0 }}>{insight.title}</h3>
+
+        {/* Gradient hero header */}
+        <div style={{
+          background: data.bg,
+          padding: "20px 22px 18px",
+          position: "relative", overflow: "hidden",
+          flexShrink: 0,
+        }}>
+          <div style={{
+            position: "absolute", top: -20, right: -20,
+            fontSize: 120, opacity: 0.18, lineHeight: 1,
+          }}>{data.emoji}</div>
+          <div style={{ position: "relative" }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              background: "#fff", color: data.color,
+              padding: "4px 12px", borderRadius: 999,
+              fontSize: 9, fontWeight: 800, letterSpacing: 0.8,
+              textTransform: "uppercase", marginBottom: 10,
+              border: `1px solid ${data.soft}`,
+              boxShadow: `0 4px 10px ${data.color}22`,
+            }}>
+              <span style={{ fontSize: 12 }}>{data.emoji}</span>
+              {data.items.length} зүйл
+            </div>
+            <h2 style={{
+              fontSize: 24, fontWeight: 900, color: "#0F172A",
+              margin: "0 0 6px", letterSpacing: -0.5, lineHeight: 1.15,
+            }}>{data.title}</h2>
+            <p style={{
+              fontSize: 12, color: "#475569", lineHeight: 1.5, margin: 0,
+            }}>
+              {data.kind === "strengths"
+                ? "Танд илрэх давуу талуудыг ашиглан үр дүнгээ улам сайжруулна уу."
+                : data.kind === "risks"
+                ? "Эдгээрийг анхаарч, эрсдэлийг бууруулах арга хэмжээ авна уу."
+                : "Эдгээр зөвлөмжийг өдөр тутамдаа хэрэгжүүлээрэй."}
+            </p>
           </div>
-          <div style={{ background: "#F8FAFF", borderRadius: 14, padding: "14px", marginBottom: 14, border: "1px solid #E2E8F0" }}>
-            <p style={{ fontSize: 10, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.6px", margin: "0 0 8px" }}>ЯАГААД ЧУХАЛ ВЭ</p>
-            <p style={{ fontSize: 14, color: "#475569", lineHeight: 1.7, margin: 0 }}>{insight.detail}</p>
-          </div>
-          {insight.actions?.length > 0 && (
-            <>
-              <p style={{ fontSize: 10, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.6px", margin: "0 0 10px" }}>ХИЙЖ БОЛОХ АЛХМУУД</p>
-              {insight.actions.map((a, i) => (
-                <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, padding: "11px 14px", background: "#F0FDF4", borderRadius: 12, border: "1px solid #BBF7D0" }}>
-                  <div style={{ width: 22, height: 22, borderRadius: "50%", background: TEAL, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ color: "#fff", fontSize: 11, fontWeight: 800 }}>✓</span>
+        </div>
+
+        {/* Items list (with title:detail parsing) */}
+        <div style={{ padding: "16px 18px 14px", flex: 1 }}>
+          {data.items.map((rawItem, i) => {
+            const item = String(rawItem || "")
+            const split = item.match(/^([^:：]+)[:：]\s*(.+)$/)
+            const itemTitle = split ? split[1].trim() : null
+            const itemBody = split ? split[2].trim() : item
+            return (
+              <div key={i} style={{
+                background: "#fff",
+                border: `1.5px solid ${data.soft}`,
+                borderRadius: 16, padding: "14px 16px",
+                marginBottom: 10,
+                position: "relative",
+                animation: `ci 0.35s cubic-bezier(.16,1,.3,1) ${i * 0.06}s both`,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+              }}>
+                <div style={{
+                  display: "flex", alignItems: "flex-start", gap: 12,
+                }}>
+                  {/* Numbered badge */}
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 10,
+                    background: data.grad,
+                    color: "#fff", fontSize: 13, fontWeight: 900,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
+                    boxShadow: `0 4px 10px ${data.color}33`,
+                  }}>{i + 1}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {itemTitle && (
+                      <div style={{
+                        fontSize: 13, fontWeight: 800, color: "#0F172A",
+                        marginBottom: 4, lineHeight: 1.3,
+                      }}>{itemTitle}</div>
+                    )}
+                    <div style={{
+                      fontSize: 12.5, color: itemTitle ? "#475569" : "#1F2937",
+                      lineHeight: 1.6,
+                    }}>{itemBody}</div>
                   </div>
-                  <span style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>{a}</span>
                 </div>
-              ))}
-            </>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* CTA footer */}
+        <div style={{
+          padding: "8px 18px 24px", flexShrink: 0,
+          borderTop: "1px solid #F1F5F9",
+          background: "#fff",
+        }}>
+          <button onClick={() => {
+            onAskAI(`"${data.title}" хэсгийн талаар илүү дэлгэрэнгүй мэргэжлийн тайлбар өгөөч`)
+            onClose()
+          }} style={{
+            width: "100%", padding: "13px",
+            background: data.grad, color: "#fff",
+            border: "none", borderRadius: 14,
+            fontSize: 13, fontWeight: 800, cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            boxShadow: `0 6px 18px ${data.color}44`,
+            fontFamily: "inherit",
+            marginTop: 10,
+          }}>
+            ✨ AI-аас илүү дэлгэрэнгүй авах
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Bottom Sheet — premium insight detail (AI-generated professional explanation)
+function Sheet({ insight, onClose, onAskAI }: {
+  insight: AnalysisData["insights"][0] | null
+  onClose: () => void
+  onAskAI?: (q: string) => void
+}) {
+  const [vis, setVis] = useState(false)
+  const [checkedActions, setCheckedActions] = useState<Set<number>>(new Set())
+  useEffect(() => {
+    if (insight) { setTimeout(() => setVis(true), 10); setCheckedActions(new Set()) }
+    else setVis(false)
+  }, [insight])
+  if (!insight) return null
+
+  const toggleAction = (i: number) => {
+    setCheckedActions(prev => {
+      const n = new Set(prev)
+      if (n.has(i)) n.delete(i)
+      else n.add(i)
+      return n
+    })
+  }
+  const doneCount = checkedActions.size
+  const totalActions = insight.actions?.length || 0
+  const progressPct = totalActions > 0 ? (doneCount / totalActions) * 100 : 0
+
+  return (
+    <div onClick={onClose} style={{
+      position: "fixed", inset: 0,
+      background: `rgba(15,23,42,${vis ? 0.55 : 0})`,
+      zIndex: 200, display: "flex", alignItems: "flex-end",
+      transition: "background 0.28s",
+      backdropFilter: "blur(6px)",
+      WebkitBackdropFilter: "blur(6px)",
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        width: "100%", background: "#fff",
+        borderRadius: "28px 28px 0 0",
+        transform: vis ? "translateY(0)" : "translateY(100%)",
+        transition: "transform 0.42s cubic-bezier(.16,1,.3,1)",
+        maxHeight: "88vh", overflowY: "auto",
+        display: "flex", flexDirection: "column",
+      }}>
+        {/* Drag handle */}
+        <div style={{ padding: "10px 0 0", display: "flex", justifyContent: "center", flexShrink: 0 }}>
+          <div style={{ width: 42, height: 5, background: "#CBD5E1", borderRadius: 3 }}/>
+        </div>
+
+        {/* Gradient hero */}
+        <div style={{
+          background: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)",
+          padding: "20px 22px 18px",
+          position: "relative", overflow: "hidden",
+          flexShrink: 0,
+        }}>
+          <div style={{
+            position: "absolute", top: -10, right: -10,
+            fontSize: 100, opacity: 0.2, lineHeight: 1,
+          }}>{insight.emoji}</div>
+          <div style={{ position: "relative" }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              background: "#fff", color: TEAL,
+              padding: "4px 12px", borderRadius: 999,
+              fontSize: 9, fontWeight: 800, letterSpacing: 0.8,
+              textTransform: "uppercase", marginBottom: 10,
+              border: "1px solid #BBF7D0",
+              boxShadow: "0 4px 10px rgba(0,196,140,0.15)",
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: TEAL, boxShadow: `0 0 8px ${TEAL}` }}/>
+              AI Insight
+            </div>
+            <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+              <div style={{
+                width: 56, height: 56, borderRadius: 18,
+                background: "#fff", fontSize: 28,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                border: "1.5px solid #BBF7D0", flexShrink: 0,
+                boxShadow: "0 6px 16px rgba(0,196,140,0.2)",
+              }}>{insight.emoji}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h3 style={{
+                  fontSize: 19, fontWeight: 900, color: "#064E3B",
+                  margin: "0 0 4px", lineHeight: 1.25, letterSpacing: -0.3,
+                }}>{insight.title}</h3>
+                <p style={{
+                  fontSize: 12, color: "#065F46", margin: 0, lineHeight: 1.5,
+                }}>{insight.description}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Why important */}
+        <div style={{ padding: "16px 20px 0" }}>
+          <div style={{
+            background: "linear-gradient(135deg, #F8FAFF, #FFFFFF)",
+            borderRadius: 16, padding: "16px",
+            border: "1.5px solid #E2E8F0",
+            marginBottom: 16,
+            position: "relative",
+          }}>
+            <div style={{
+              position: "absolute", top: -10, left: 14,
+              background: "#fff",
+              padding: "2px 10px", borderRadius: 999,
+              border: "1.5px solid #E2E8F0",
+              display: "flex", alignItems: "center", gap: 5,
+            }}>
+              <span style={{ fontSize: 11 }}>💡</span>
+              <span style={{ fontSize: 9, fontWeight: 800, color: "#475569", letterSpacing: 0.6, textTransform: "uppercase" }}>
+                Яагаад чухал вэ
+              </span>
+            </div>
+            <p style={{
+              fontSize: 13.5, color: "#334155", lineHeight: 1.7,
+              margin: "6px 0 0", fontWeight: 500,
+            }}>{insight.detail}</p>
+          </div>
+
+          {/* Progress bar (if actions exist) */}
+          {totalActions > 0 && (
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              marginBottom: 8, padding: "0 2px",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 14 }}>📋</span>
+                <span style={{ fontSize: 11, fontWeight: 800, color: "#475569", letterSpacing: 0.6, textTransform: "uppercase" }}>
+                  Хийж болох алхмууд
+                </span>
+              </div>
+              <div style={{
+                background: doneCount > 0 ? "#F0FDF4" : "#F1F5F9",
+                color: doneCount > 0 ? TEAL : "#94A3B8",
+                fontSize: 10, fontWeight: 800,
+                padding: "3px 10px", borderRadius: 999,
+                border: `1px solid ${doneCount > 0 ? "#BBF7D0" : "#E2E8F0"}`,
+              }}>{doneCount}/{totalActions}</div>
+            </div>
           )}
-          <button onClick={onClose} style={{ width: "100%", marginTop: 12, padding: "13px", background: `linear-gradient(135deg, ${TEAL}, #00A876)`, border: "none", borderRadius: 14, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Хаах</button>
+
+          {/* Progress bar visual */}
+          {totalActions > 0 && (
+            <div style={{
+              background: "#F1F5F9", borderRadius: 8, height: 5,
+              marginBottom: 10, overflow: "hidden",
+            }}>
+              <div style={{
+                height: "100%", borderRadius: 8,
+                width: `${progressPct}%`,
+                background: `linear-gradient(90deg, ${TEAL}, #00E5A0)`,
+                transition: "width 0.4s ease",
+                boxShadow: doneCount > 0 ? `0 0 8px ${TEAL}55` : "none",
+              }}/>
+            </div>
+          )}
+
+          {/* Action checklist */}
+          {insight.actions?.map((a, i) => {
+            const isDone = checkedActions.has(i)
+            return (
+              <div key={i} onClick={() => toggleAction(i)} style={{
+                display: "flex", gap: 12, marginBottom: 8,
+                padding: "12px 14px",
+                background: isDone ? "#F0FDF4" : "#fff",
+                border: `1.5px solid ${isDone ? TEAL + "40" : "#E2E8F0"}`,
+                borderRadius: 14, cursor: "pointer",
+                alignItems: "flex-start",
+                transition: "all 0.2s",
+                animation: `ci 0.3s ease ${i * 0.05}s both`,
+                userSelect: "none",
+              }}>
+                <div style={{
+                  width: 22, height: 22, borderRadius: "50%",
+                  background: isDone ? TEAL : "#fff",
+                  border: `2px solid ${isDone ? TEAL : "#CBD5E1"}`,
+                  flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
+                  marginTop: 1,
+                  transition: "all 0.2s",
+                }}>
+                  {isDone && (
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 8l4 4 6-7"/>
+                    </svg>
+                  )}
+                </div>
+                <span style={{
+                  fontSize: 13, color: isDone ? "#059669" : "#374151",
+                  lineHeight: 1.6, fontWeight: isDone ? 600 : 500,
+                  textDecoration: isDone ? "line-through" : "none",
+                  flex: 1,
+                  opacity: isDone ? 0.85 : 1,
+                  transition: "all 0.2s",
+                }}>{a}</span>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Footer CTA */}
+        <div style={{
+          padding: "10px 20px 24px", flexShrink: 0,
+          borderTop: "1px solid #F1F5F9",
+          marginTop: 12,
+          display: "flex", gap: 8,
+        }}>
+          <button onClick={onClose} style={{
+            flex: 1, padding: "13px",
+            background: "#F1F5F9", color: "#475569",
+            border: "none", borderRadius: 14,
+            fontSize: 13, fontWeight: 700, cursor: "pointer",
+            fontFamily: "inherit",
+          }}>Хаах</button>
+          <button onClick={() => {
+            onAskAI?.(`"${insight.title}" талаар илүү гүн мэргэжлийн зөвлөгөө өгөөч`)
+            onClose()
+          }} style={{
+            flex: 2, padding: "13px",
+            background: `linear-gradient(135deg, ${TEAL}, #00A876)`,
+            color: "#fff", border: "none", borderRadius: 14,
+            fontSize: 13, fontWeight: 800, cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+            boxShadow: `0 6px 18px ${TEAL}44`,
+            fontFamily: "inherit",
+          }}>
+            ✨ AI-аас илүү асуу
+          </button>
         </div>
       </div>
     </div>
@@ -237,6 +584,17 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
   // AI Insights carousel index: 0=Strengths, 1=Risks, 2=Tips
   const [insCarousel, setInsCarousel] = useState(0)
   const insCarouselTouchX = useRef(0)
+  // List-detail modal for "see all" (strengths/risks list)
+  const [listDetail, setListDetail] = useState<null | {
+    kind: "strengths" | "risks" | "tips"
+    title: string
+    items: string[]
+    color: string
+    bg: string
+    soft: string
+    grad: string
+    emoji: string
+  }>(null)
   const PAGES = ["Тоймлол", "AI Дүн", "30 Хоног"]
   const kpi = data.kpiLabels || {}
   const todayGoals = data.todayGoals || data.roadmap[0]?.tasks.slice(0, 3) || []
@@ -714,32 +1072,68 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                       {c.title}
                     </p>
 
-                    {/* Items */}
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
-                      {c.items.map((item, i) => (
-                        <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                          <div style={{
-                            width: 18, height: 18, borderRadius: "50%",
-                            background: "rgba(255,255,255,0.9)",
-                            border: `2px solid ${c.itemDot}`,
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            flexShrink: 0, marginTop: 1,
+                    {/* Items (Title: detail split, show top 3 with truncation) */}
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 9, marginBottom: 14 }}>
+                      {c.items.slice(0, 3).map((rawItem, i) => {
+                        const item = String(rawItem || "")
+                        const split = item.match(/^([^:：]+)[:：]\s*(.+)$/)
+                        const itemTitle = split ? split[1].trim() : null
+                        const itemBody = split ? split[2].trim() : item
+                        return (
+                          <div key={i} style={{
+                            display: "flex", gap: 8, alignItems: "flex-start",
+                            background: "rgba(255,255,255,0.55)",
+                            borderRadius: 10, padding: "8px 10px",
+                            border: `1px solid ${c.border}66`,
                           }}>
-                            <div style={{ width: 6, height: 6, borderRadius: "50%", background: c.itemDot }}/>
+                            <div style={{
+                              width: 18, height: 18, borderRadius: "50%",
+                              background: c.itemDot,
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              flexShrink: 0, marginTop: 1,
+                              boxShadow: `0 2px 6px ${c.itemDot}55`,
+                            }}>
+                              {c.key === "strengths" && (
+                                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                              )}
+                              {c.key === "risks" && (
+                                <span style={{ color: "#fff", fontSize: 10, fontWeight: 900, lineHeight: 1 }}>!</span>
+                              )}
+                              {c.key === "tips" && (
+                                <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#fff" }}/>
+                              )}
+                            </div>
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              {itemTitle && (
+                                <div style={{
+                                  fontSize: 11, fontWeight: 800, color: "#1F2937",
+                                  marginBottom: 2, lineHeight: 1.3,
+                                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                                }}>{itemTitle}</div>
+                              )}
+                              <div style={{
+                                fontSize: 10.5, color: itemTitle ? "#475569" : "#374151",
+                                lineHeight: 1.45,
+                                display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+                              }}>{itemBody}</div>
+                            </div>
                           </div>
-                          <span style={{
-                            fontSize: 12, color: "#374151", lineHeight: 1.5,
-                            display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden",
-                          }}>{item}</span>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
 
-                    {/* CTA pill */}
+                    {/* CTA pill — opens list-detail modal */}
                     <button onClick={() => {
-                      if (c.key === "tips" && data.insights[0]) setInsDetail(data.insights[0])
-                      else if (c.key === "strengths") onAskAI("Миний давуу талуудын тухай илүү дэлгэрэнгүй тайлбарлаач")
-                      else if (c.key === "risks") onAskAI("Анхаарах эрсдэлүүдийн тухай илүү дэлгэрэнгүй тайлбарлаач")
+                      setListDetail({
+                        kind: c.key as any,
+                        title: c.title,
+                        items: c.items,
+                        color: c.titleColor,
+                        bg: c.bg as string,
+                        soft: c.border as string,
+                        grad: c.ctaBg as string,
+                        emoji: c.key === "strengths" ? "💪" : c.key === "risks" ? "⚠️" : "💡",
+                      })
                     }} style={{
                       background: c.ctaBg,
                       border: "none", borderRadius: 999,
@@ -1206,7 +1600,8 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
         ))}
       </div>
 
-      <Sheet insight={insDetail} onClose={() => setInsDetail(null)} />
+      <Sheet insight={insDetail} onClose={() => setInsDetail(null)} onAskAI={onAskAI} />
+      <ListDetailSheet data={listDetail} onClose={() => setListDetail(null)} onAskAI={onAskAI} />
 
       <style>{`
         @keyframes ar-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }

@@ -58,20 +58,25 @@ function closeOpenBrackets(s: string): string {
 export async function POST(request: Request) {
   try {
     const { reportData, reportTitle } = await request.json()
-    // Aggressive truncation for speed
     const truncated = typeof reportData === 'string'
-      ? reportData.slice(0, 800)
-      : JSON.stringify(reportData).slice(0, 800)
+      ? reportData.slice(0, 1200)
+      : JSON.stringify(reportData).slice(0, 1200)
 
-    // Ultra-compact prompt. Aim for <8s total.
-    const SYSTEM = `Та hire.mn тест шинжээч. Тест нэр: "${reportTitle}".
-Дараах JSON бүтцийг ЯГ ингэж буцаа (markdown үгүй, монголоор, тайлбар ≤10 үг):
-{"healthScore":<0-100>,"riskLevel":"Low"|"Medium"|"High","quitPotential":"Low"|"Medium"|"High","summary":{"title":"<2-3 үг>","description":"<1 өгүүлбэр>"},"highlightTitle":"<гарчиг>","highlightMessage":"<1 өгүүлбэр>","metrics":[{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"},{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"}],"strengths":["<сайн1>","<сайн2>"],"risks":["<эрсдэл1>","<эрсдэл2>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<товч>","detail":"<1-2 өгүүлбэр>","actions":["<алхам1>","<алхам2>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<товч>","detail":"<1-2 өгүүлбэр>","actions":["<алхам1>","<алхам2>"]}],"roadmap":[{"week":"1-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"2-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"3-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"4-р долоо хоног","title":"<товч>","tasks":["<товч>"]}],"todayGoals":["<товч1>","<товч2>","<товч3>"],"kpiLabels":{"metric1Label":"<KPI нэр>","riskLabel":"Эрсдэл","potentialLabel":"Боломж"},"statCards":[{"icon":"🎯","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"📊","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"⭐","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"🚀","label":"<нэр>","value":"<утга>","sub":"<товч>"}]}`
+    const SYSTEM = `Та hire.mn-ийн мэргэжлийн тест шинжээч. Тест: "${reportTitle}".
+Дараах JSON-г ЯГ буцаа (markdown үгүй, бүх text монгол, мэргэжлийн ярианы хэлээр).
+
+ЧУХАЛ:
+- strengths болон risks: 4-5 ширхэг, ХЭЛБЭР: "Богино гарчиг: тодорхой тайлбар" (макс 18 үг)
+- insights: 3 ширхэг, detail-д 2-3 өгүүлбэрээр мэргэжлийн тайлбар, actions 4-5 ширхэг
+- todayGoals: 3 ширхэг, тодорхой үйлдэл
+
+JSON:
+{"healthScore":<0-100>,"riskLevel":"Low"|"Medium"|"High","quitPotential":"Low"|"Medium"|"High","summary":{"title":"<2-3 үг>","description":"<1 өгүүлбэр>"},"highlightTitle":"<гарчиг>","highlightMessage":"<1 өгүүлбэр>","metrics":[{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"},{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"},{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"}],"strengths":["<Гарчиг: дэлгэрэнгүй тайлбар 1>","<Гарчиг: тайлбар 2>","<Гарчиг: тайлбар 3>","<Гарчиг: тайлбар 4>","<Гарчиг: тайлбар 5>"],"risks":["<Гарчиг: тайлбар 1>","<Гарчиг: тайлбар 2>","<Гарчиг: тайлбар 3>","<Гарчиг: тайлбар 4>","<Гарчиг: тайлбар 5>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2-3 өгүүлбэрийн мэргэжлийн тайлбар>","actions":["<алхам1>","<алхам2>","<алхам3>","<алхам4>","<алхам5>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2-3 өгүүлбэр>","actions":["<алхам1>","<алхам2>","<алхам3>","<алхам4>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2-3 өгүүлбэр>","actions":["<алхам1>","<алхам2>","<алхам3>","<алхам4>"]}],"roadmap":[{"week":"1-р долоо хоног","title":"<товч>","tasks":["<товч>","<товч>"]},{"week":"2-р долоо хоног","title":"<товч>","tasks":["<товч>","<товч>"]},{"week":"3-р долоо хоног","title":"<товч>","tasks":["<товч>","<товч>"]},{"week":"4-р долоо хоног","title":"<товч>","tasks":["<товч>","<товч>"]}],"todayGoals":["<товч1>","<товч2>","<товч3>"],"kpiLabels":{"metric1Label":"<KPI нэр>","riskLabel":"Эрсдэл","potentialLabel":"Боломж"},"statCards":[{"icon":"🎯","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"📊","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"⭐","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"🚀","label":"<нэр>","value":"<утга>","sub":"<товч>"}]}`
 
     // Prefill assistant with `{` to force pure JSON output (no preamble)
     const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 2200,
+      max_tokens: 3200,
       system: SYSTEM,
       messages: [
         { role: 'user', content: `Дата: ${truncated}` },
