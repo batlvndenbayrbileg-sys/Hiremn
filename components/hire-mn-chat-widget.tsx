@@ -54,6 +54,7 @@ interface Message {
   completedSteps?: number[]         // Indices of action plan items checked off
   analysisData?: any                // New /api/analyze response shape
   analysisTitle?: string            // Test name for analysis card
+  fromLLM?: boolean                 // True only for genuine LLM replies (controls feedback widget)
 }
 
 interface FollowUpMessage {
@@ -3465,14 +3466,17 @@ function BotMessage({ message, fontSize, userQuestion = "", showAvatar = true, o
         </div>
       )}
 
-      {/* Feedback - response дор шууд */}
-      <div style={{ marginLeft: 42, marginTop: 2 }}>
-        <MessageFeedback
-          messageId={`msg-${Date.now()}`}
-          userMessage={userQuestion}
-          assistantMessage={message.content}
-        />
-      </div>
+      {/* Feedback widget — only for genuine LLM responses (not static greetings,
+          loading placeholders, error messages, analysis cards, etc.) */}
+      {message.fromLLM && message.content && (
+        <div style={{ marginLeft: 42, marginTop: 2 }}>
+          <MessageFeedback
+            messageId={`msg-${Date.now()}`}
+            userMessage={userQuestion}
+            assistantMessage={message.content}
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -4157,6 +4161,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           content: replyText,
           tests: data.tests || [],
           categories: data.categories || [],
+          fromLLM: true,
         }])
       }
     } catch (err) {

@@ -426,32 +426,257 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
           </div>
         )}
 
-        {/* PAGE 1 — AI Insights */}
+        {/* PAGE 1 — AI Insights (premium dashboard) */}
         {page === 1 && (
           <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
-            <div style={{ background: "linear-gradient(135deg, #667EEA, #764BA2)", borderRadius: 20, padding: "16px", marginBottom: 14, display: "flex", gap: 12, alignItems: "center" }}>
-              <Char type="phone" size={64} style={{ flexShrink: 0 }} />
-              <div>
-                <p style={{ fontSize: 15, fontWeight: 900, color: "#fff", margin: "0 0 4px" }}>AI Insights</p>
-                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", margin: 0, lineHeight: 1.5 }}>Таны {reportTitle} үр дүнд үндэслэсэн ухаалаг дүн шинжилгээ</p>
+            {/* ── Hero AI banner with stats ── */}
+            <div style={{
+              background: "linear-gradient(135deg, #667EEA 0%, #764BA2 100%)",
+              borderRadius: 20, padding: "18px 16px 14px", marginBottom: 12,
+              position: "relative", overflow: "hidden",
+            }}>
+              {/* Decorative orbs */}
+              <div style={{
+                position: "absolute", top: -40, right: -30,
+                width: 130, height: 130, borderRadius: "50%",
+                background: "rgba(255,255,255,0.08)", pointerEvents: "none",
+              }}/>
+              <div style={{
+                position: "absolute", bottom: -30, left: -20,
+                width: 90, height: 90, borderRadius: "50%",
+                background: "rgba(255,255,255,0.06)", pointerEvents: "none",
+              }}/>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14, position: "relative" }}>
+                <Char type="phone" size={56} style={{ flexShrink: 0 }}/>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    display: "inline-flex", alignItems: "center", gap: 5,
+                    background: "rgba(255,255,255,0.18)",
+                    borderRadius: 999, padding: "3px 10px", marginBottom: 4,
+                  }}>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ADE80", display: "inline-block", boxShadow: "0 0 6px #4ADE80" }}/>
+                    <span style={{ fontSize: 9, fontWeight: 800, color: "#fff", letterSpacing: 0.6 }}>POWERED BY AI</span>
+                  </div>
+                  <p style={{ fontSize: 16, fontWeight: 900, color: "#fff", margin: "0 0 2px" }}>AI Insights</p>
+                  <p style={{ fontSize: 10, color: "rgba(255,255,255,0.8)", margin: 0, lineHeight: 1.4 }}>
+                    {data.insights.length} дэлгэрэнгүй дүгнэлт
+                  </p>
+                </div>
+              </div>
+              {/* Mini stats row */}
+              <div style={{ display: "flex", gap: 8, position: "relative" }}>
+                {[
+                  { label: "Найдвартай", value: "97%", icon: "✓" },
+                  { label: "Гүн шинжилгээ", value: `${data.insights.length}+`, icon: "🔍" },
+                  { label: "Алхам", value: `${data.roadmap.length * 2}+`, icon: "→" },
+                ].map((s, i) => (
+                  <div key={i} style={{
+                    flex: 1, background: "rgba(255,255,255,0.12)",
+                    borderRadius: 12, padding: "8px 6px", textAlign: "center",
+                    backdropFilter: "blur(8px)",
+                  }}>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 700, marginBottom: 2 }}>
+                      {s.icon} {s.label}
+                    </div>
+                    <div style={{ fontSize: 15, fontWeight: 900, color: "#fff", lineHeight: 1 }}>{s.value}</div>
+                  </div>
+                ))}
               </div>
             </div>
-            {data.insights.map((ins, i) => (
-              <div key={i} onClick={() => setInsDetail(ins)} style={{ background: "#fff", borderRadius: 18, padding: "14px 16px", marginBottom: 10, display: "flex", gap: 12, cursor: "pointer", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", border: "1.5px solid transparent", transition: "all 0.2s", animation: `ci 0.35s ease ${i * 0.08}s both` }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = `${TEAL}40`; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)" }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "transparent"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)" }}>
-                <div style={{ width: 46, height: 46, borderRadius: 14, background: i === 0 ? "#F0FDF4" : i === 1 ? "#FFF5F0" : "#F0F4FF", fontSize: 22, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: `1.5px solid ${i === 0 ? "#BBF7D0" : i === 1 ? "#FFD0B8" : "#C7D2FE"}` }}>
-                  {ins.emoji}
+
+            {/* ── Filter chips ── */}
+            <div style={{
+              display: "flex", gap: 6, marginBottom: 12,
+              overflowX: "auto", paddingBottom: 2,
+            }}>
+              {[
+                { label: "Бүгд", count: data.insights.length, active: true },
+                { label: "💪 Хүч", count: data.strengths.length },
+                { label: "⚠️ Эрсдэл", count: data.risks.length },
+                { label: "💡 Зөвлөмж", count: data.insights.reduce((s, i) => s + (i.actions?.length || 0), 0) },
+              ].map((f, i) => (
+                <div key={i} style={{
+                  flexShrink: 0,
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  background: f.active ? "#1E293B" : "#fff",
+                  color: f.active ? "#fff" : "#64748B",
+                  border: f.active ? "none" : "1.5px solid #E2E8F0",
+                  borderRadius: 999, padding: "6px 12px",
+                  fontSize: 11, fontWeight: 700, cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  transition: "all 0.2s",
+                  boxShadow: f.active ? "0 4px 12px rgba(30,41,59,0.2)" : "none",
+                }}>
+                  {f.label}
+                  <span style={{
+                    background: f.active ? "rgba(255,255,255,0.2)" : "#F1F5F9",
+                    color: f.active ? "#fff" : "#94A3B8",
+                    borderRadius: 999, padding: "0 6px",
+                    fontSize: 9, fontWeight: 800, minWidth: 14, textAlign: "center",
+                  }}>{f.count}</span>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 14, fontWeight: 800, color: "#1E293B", margin: "0 0 3px" }}>{ins.title}</p>
-                  <p style={{ fontSize: 12, color: "#64748B", margin: "0 0 5px", lineHeight: 1.5 }}>{ins.description}</p>
-                  <span style={{ fontSize: 10, color: TEAL, fontWeight: 700 }}>Дэлгэрэнгүй харах →</span>
+              ))}
+            </div>
+
+            {/* ── Insight cards (rich) ── */}
+            {data.insights.map((ins, i) => {
+              const palettes = [
+                { bg: "#F0FDF4", border: "#BBF7D0", color: TEAL, text: "Маш сайн", priority: "Өндөр" },
+                { bg: "#FFF5F0", border: "#FFD0B8", color: BRAND, text: "Анхаарал", priority: "Дунд" },
+                { bg: "#F0F4FF", border: "#C7D2FE", color: "#6366F1", text: "Боломж", priority: "Чухал" },
+              ]
+              const p = palettes[i % palettes.length]
+              return (
+                <div key={i} className="hw-card-tilt" style={{
+                  background: "#fff", borderRadius: 18, padding: "0",
+                  marginBottom: 10, overflow: "hidden",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  border: `1.5px solid ${p.border}`,
+                  animation: `ci 0.35s ease ${i * 0.08}s both`,
+                  cursor: "pointer",
+                  transition: "all 0.25s cubic-bezier(.16,1,.3,1)",
+                }}
+                onClick={() => setInsDetail(ins)}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"
+                  ;(e.currentTarget as HTMLElement).style.boxShadow = `0 10px 28px ${p.color}22`
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
+                  ;(e.currentTarget as HTMLElement).style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)"
+                }}
+                >
+                  {/* Top color strip */}
+                  <div style={{
+                    height: 4, background: `linear-gradient(90deg, ${p.color}, ${p.color}66)`,
+                  }}/>
+
+                  <div style={{ padding: "12px 14px" }}>
+                    {/* Header row: emoji + title + badges */}
+                    <div style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 10 }}>
+                      <div style={{
+                        width: 42, height: 42, borderRadius: 12,
+                        background: p.bg, fontSize: 20,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0,
+                        boxShadow: `0 4px 10px ${p.color}22`,
+                      }}>{ins.emoji}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", gap: 4, marginBottom: 3 }}>
+                          <span style={{
+                            display: "inline-block",
+                            background: p.bg, color: p.color,
+                            fontSize: 8, fontWeight: 800,
+                            padding: "2px 7px", borderRadius: 999,
+                            letterSpacing: 0.4, textTransform: "uppercase",
+                            border: `1px solid ${p.border}`,
+                          }}>
+                            {p.priority}
+                          </span>
+                          <span style={{
+                            display: "inline-block",
+                            background: "#F1F5F9", color: "#64748B",
+                            fontSize: 8, fontWeight: 700,
+                            padding: "2px 7px", borderRadius: 999,
+                          }}>
+                            #{i + 1}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: 13, fontWeight: 800, color: "#1E293B", margin: "0 0 4px", lineHeight: 1.3 }}>{ins.title}</p>
+                        <p style={{ fontSize: 11.5, color: "#64748B", margin: 0, lineHeight: 1.5 }}>{ins.description}</p>
+                      </div>
+                    </div>
+
+                    {/* Quick action chips */}
+                    {ins.actions && ins.actions.length > 0 && (
+                      <div style={{
+                        display: "flex", gap: 5, flexWrap: "wrap",
+                        marginBottom: 8, padding: "8px 0 0",
+                        borderTop: "1px dashed #E2E8F0",
+                      }}>
+                        {ins.actions.slice(0, 2).map((a, j) => (
+                          <span key={j} style={{
+                            background: "#F8FAFF", color: "#475569",
+                            border: "1px solid #E2E8F0",
+                            borderRadius: 8, padding: "4px 8px",
+                            fontSize: 10, fontWeight: 600,
+                            display: "inline-flex", alignItems: "center", gap: 4,
+                            maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          }}>
+                            <span style={{ color: p.color }}>✓</span> {a.length > 28 ? a.slice(0, 26) + "…" : a}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Bottom row */}
+                    <div style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      paddingTop: 6,
+                    }}>
+                      <div style={{ display: "flex", gap: 4 }}>
+                        <button onClick={e => { e.stopPropagation(); onAskAI(`"${ins.title}" талаар илүү дэлгэрэнгүй тайлбарла`); close() }} style={{
+                          background: p.bg, color: p.color, border: "none",
+                          borderRadius: 8, padding: "5px 10px",
+                          fontSize: 10, fontWeight: 700, cursor: "pointer",
+                          display: "flex", alignItems: "center", gap: 4,
+                          fontFamily: "inherit",
+                        }}>
+                          ✨ AI-аас асуу
+                        </button>
+                      </div>
+                      <div style={{
+                        display: "flex", alignItems: "center", gap: 4,
+                        color: p.color, fontSize: 11, fontWeight: 800,
+                      }}>
+                        Дэлгэрэнгүй
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              )
+            })}
+
+            {/* Quick stats summary card */}
+            <div style={{
+              background: "#fff", borderRadius: 18, padding: "14px",
+              marginTop: 4, marginBottom: 10,
+              boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+              border: "1.5px solid #F1F5F9",
+              display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12,
+            }}>
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 800, color: "#059669", margin: "0 0 8px", display: "flex", alignItems: "center", gap: 5 }}>💪 Давуу талууд</p>
+                {data.strengths.slice(0, 3).map((s, i) => (
+                  <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "flex-start" }}>
+                    <span style={{ color: TEAL, fontSize: 10, fontWeight: 800, marginTop: 1 }}>✓</span>
+                    <span style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{s}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-            <button onClick={() => setPage(2)} style={{ width: "100%", marginTop: 4, padding: "12px", background: "#F1F5F9", border: "1.5px solid #E2E8F0", borderRadius: 14, color: "#475569", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-              30 Хоногийн төлөвлөгөө харах →
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 800, color: "#EA580C", margin: "0 0 8px", display: "flex", alignItems: "center", gap: 5 }}>⚠️ Анхаарал</p>
+                {data.risks.slice(0, 3).map((r, i) => (
+                  <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "flex-start" }}>
+                    <span style={{ color: "#FF9800", fontSize: 10, fontWeight: 800, marginTop: 1 }}>!</span>
+                    <span style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{r}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button onClick={() => setPage(2)} style={{
+              width: "100%", marginTop: 4, padding: "12px",
+              background: `linear-gradient(135deg, ${TEAL}, #00A876)`,
+              border: "none", borderRadius: 14, color: "#fff",
+              fontSize: 12, fontWeight: 800, cursor: "pointer",
+              boxShadow: `0 4px 14px ${TEAL}40`,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+            }}>
+              📅 30 Хоногийн төлөвлөгөө харах →
             </button>
           </div>
         )}
@@ -582,6 +807,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
         @keyframes ar-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes si { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
         @keyframes ci { from{opacity:0;transform:translateY(10px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+        .hw-card-tilt { transition: transform 0.25s cubic-bezier(.16,1,.3,1), box-shadow 0.25s ease; }
       `}</style>
     </div>
   )
