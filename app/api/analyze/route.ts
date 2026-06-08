@@ -62,16 +62,14 @@ export async function POST(request: Request) {
       ? reportData.slice(0, 1200)
       : JSON.stringify(reportData).slice(0, 1200)
 
-    const SYSTEM = `Та hire.mn-ийн мэргэжлийн тест шинжээч. Тест: "${reportTitle}".
-Дараах JSON-г ЯГ буцаа (markdown үгүй, бүх text монгол, мэргэжлийн ярианы хэлээр).
+    const SYSTEM = `Та hire.mn тест шинжээч. Тест: "${reportTitle}". JSON буцаа (markdown үгүй, монгол).
 
-ЧУХАЛ:
-- strengths болон risks: 4-5 ширхэг, ХЭЛБЭР: "Богино гарчиг: тодорхой тайлбар" (макс 18 үг)
-- insights: 3 ширхэг, detail-д 2-3 өгүүлбэрээр мэргэжлийн тайлбар, actions 4-5 ширхэг
-- todayGoals: 3 ширхэг, тодорхой үйлдэл
+Дүрэм:
+- strengths/risks: 4 зүйл, "Гарчиг: тайлбар" (≤15 үг)
+- insights: 3 зүйл, detail 2 өгүүлбэр, actions 3 зүйл
+- roadmap: 4 долоо хоног, tasks 1 зүйл тус бүр
 
-JSON:
-{"healthScore":<0-100>,"riskLevel":"Low"|"Medium"|"High","quitPotential":"Low"|"Medium"|"High","summary":{"title":"<2-3 үг>","description":"<1 өгүүлбэр>"},"highlightTitle":"<гарчиг>","highlightMessage":"<1 өгүүлбэр>","metrics":[{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"},{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"},{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"}],"strengths":["<Гарчиг: дэлгэрэнгүй тайлбар 1>","<Гарчиг: тайлбар 2>","<Гарчиг: тайлбар 3>","<Гарчиг: тайлбар 4>","<Гарчиг: тайлбар 5>"],"risks":["<Гарчиг: тайлбар 1>","<Гарчиг: тайлбар 2>","<Гарчиг: тайлбар 3>","<Гарчиг: тайлбар 4>","<Гарчиг: тайлбар 5>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2-3 өгүүлбэрийн мэргэжлийн тайлбар>","actions":["<алхам1>","<алхам2>","<алхам3>","<алхам4>","<алхам5>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2-3 өгүүлбэр>","actions":["<алхам1>","<алхам2>","<алхам3>","<алхам4>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2-3 өгүүлбэр>","actions":["<алхам1>","<алхам2>","<алхам3>","<алхам4>"]}],"roadmap":[{"week":"1-р долоо хоног","title":"<товч>","tasks":["<товч>","<товч>"]},{"week":"2-р долоо хоног","title":"<товч>","tasks":["<товч>","<товч>"]},{"week":"3-р долоо хоног","title":"<товч>","tasks":["<товч>","<товч>"]},{"week":"4-р долоо хоног","title":"<товч>","tasks":["<товч>","<товч>"]}],"todayGoals":["<товч1>","<товч2>","<товч3>"],"kpiLabels":{"metric1Label":"<KPI нэр>","riskLabel":"Эрсдэл","potentialLabel":"Боломж"},"statCards":[{"icon":"🎯","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"📊","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"⭐","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"🚀","label":"<нэр>","value":"<утга>","sub":"<товч>"}]}`
+{"healthScore":<0-100>,"riskLevel":"Low"|"Medium"|"High","quitPotential":"Low"|"Medium"|"High","summary":{"title":"<2-3 үг>","description":"<1 өгүүлбэр>"},"highlightTitle":"<гарчиг>","highlightMessage":"<1 өгүүлбэр>","metrics":[{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"},{"label":"<нэр>","score":<0-10>,"maxScore":10,"status":"<1-2 үг>"}],"strengths":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"risks":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]}],"roadmap":[{"week":"1-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"2-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"3-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"4-р долоо хоног","title":"<товч>","tasks":["<товч>"]}],"todayGoals":["<товч>","<товч>","<товч>"],"kpiLabels":{"metric1Label":"<KPI>","riskLabel":"Эрсдэл","potentialLabel":"Боломж"},"statCards":[{"icon":"🎯","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"📊","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"⭐","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"🚀","label":"<нэр>","value":"<утга>","sub":"<товч>"}]}`
 
     // Prefill assistant with `{` to force pure JSON output (no preamble)
     const response = await anthropic.messages.create({
@@ -120,9 +118,31 @@ JSON:
       }
     }
 
-    if (!data.healthScore || !data.summary || !data.roadmap) {
-      throw new Error('JSON бүтэц дутуу')
+    // Validate + fill in sensible defaults for missing/truncated fields
+    // (closeOpenBrackets may have trimmed trailing sections)
+    if (data.healthScore == null) {
+      console.error('[analyze] missing healthScore. Keys:', Object.keys(data))
+      throw new Error('JSON бүтэц дутуу — healthScore байхгүй')
     }
+    if (!data.summary) {
+      data.summary = { title: "Дүн шинжилгээ", description: "Үр дүн боловсруулагдсан." }
+    }
+    if (!Array.isArray(data.metrics) || data.metrics.length === 0) {
+      data.metrics = [{ label: "Ерөнхий оноо", score: Math.round((data.healthScore || 50) / 10), maxScore: 10, status: "—" }]
+    }
+    if (!Array.isArray(data.strengths)) data.strengths = []
+    if (!Array.isArray(data.risks)) data.risks = []
+    if (!Array.isArray(data.insights)) data.insights = []
+    if (!Array.isArray(data.roadmap) || data.roadmap.length === 0) {
+      data.roadmap = [
+        { week: "1-р долоо хоног", title: "Эхлэлийн алхам", tasks: ["Үр дүнгээ үзэх", "Зорилго тодорхойлох"] },
+        { week: "2-р долоо хоног", title: "Дадал хэвшүүлэх", tasks: ["Шинэ зуршил эхлүүлэх"] },
+        { week: "3-р долоо хоног", title: "Тогтворжуулах", tasks: ["Үргэлжлүүлэх"] },
+        { week: "4-р долоо хоног", title: "Үр дүн", tasks: ["Шинжлэх"] },
+      ]
+    }
+    if (!data.riskLevel) data.riskLevel = "Medium"
+    if (!data.quitPotential) data.quitPotential = "Medium"
 
     return Response.json({ success: true, data })
   } catch (error) {
