@@ -88,7 +88,7 @@ export async function POST(request: Request) {
 
     // Prefill assistant with `{` to force pure JSON output (no preamble)
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-haiku-4-5',
       max_tokens: 2500,
       system: SYSTEM,
       messages: [
