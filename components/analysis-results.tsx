@@ -1015,77 +1015,122 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
 
           return (
           <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
-            {/* ─── HERO: Progress Streak Banner ────────────────────────── */}
-            <div style={{
-              background: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 50%, #BBF7D0 100%)",
-              borderRadius: 24, padding: "18px 16px 14px", marginBottom: 14,
-              border: "1.5px solid #BBF7D0",
-              boxShadow: "0 4px 16px rgba(34,197,94,0.12)",
-              position: "relative", overflow: "hidden",
-            }}>
-              {/* Decorative leaves illustration (CSS only, no image needed) */}
+            {/* ─── HERO: Score-themed Banner (color shifts based on score) ─── */}
+            {(() => {
+              const s = data.healthScore
+              // 3-tier theme: green (good) / amber (mid) / red (low)
+              const theme = s >= 70
+                ? {
+                    bg: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 50%, #BBF7D0 100%)",
+                    border: "#BBF7D0", shadow: "rgba(34,197,94,0.12)",
+                    label: "#059669", num: "#064E3B", body: "#065F46",
+                    chip: "💚", decor: ["#86EFAC", "#4ADE80", "#22C55E"],
+                    progressLabel: "Маш сайн ахиц",
+                  }
+                : s >= 40
+                ? {
+                    bg: "linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 50%, #FDE68A 100%)",
+                    border: "#FDE68A", shadow: "rgba(245,158,11,0.12)",
+                    label: "#B45309", num: "#78350F", body: "#92400E",
+                    chip: "⚠️", decor: ["#FCD34D", "#FBBF24", "#F59E0B"],
+                    progressLabel: "Анхаарал хандуул",
+                  }
+                : {
+                    bg: "linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 50%, #FECACA 100%)",
+                    border: "#FECACA", shadow: "rgba(239,68,68,0.12)",
+                    label: "#B91C1C", num: "#7F1D1D", body: "#991B1B",
+                    chip: "🔴", decor: ["#FCA5A5", "#F87171", "#EF4444"],
+                    progressLabel: "Шуурхай арга хэмжээ",
+                  }
+              return (
               <div style={{
-                position: "absolute", top: -10, right: -20,
-                width: 130, height: 130, pointerEvents: "none",
-                opacity: 0.5,
+                background: theme.bg,
+                borderRadius: 24, padding: "18px 16px 14px", marginBottom: 14,
+                border: `1.5px solid ${theme.border}`,
+                boxShadow: `0 4px 16px ${theme.shadow}`,
+                position: "relative", overflow: "hidden",
               }}>
-                <svg width="130" height="130" viewBox="0 0 100 100" fill="none">
-                  <ellipse cx="55" cy="40" rx="14" ry="22" fill="#86EFAC" transform="rotate(30 55 40)"/>
-                  <ellipse cx="70" cy="55" rx="13" ry="20" fill="#4ADE80" transform="rotate(60 70 55)"/>
-                  <ellipse cx="60" cy="65" rx="11" ry="18" fill="#22C55E" transform="rotate(-20 60 65)"/>
-                  <ellipse cx="75" cy="30" rx="9" ry="14" fill="#86EFAC" transform="rotate(45 75 30)"/>
-                </svg>
-              </div>
-
-              {/* Top: Score ring + main metric */}
-              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12, position: "relative" }}>
-                <div style={{ flexShrink: 0 }}>
-                  <ScoreRing score={data.healthScore} size={106} />
+                {/* Decorative shapes themed to score */}
+                <div style={{
+                  position: "absolute", top: -10, right: -20,
+                  width: 130, height: 130, pointerEvents: "none",
+                  opacity: 0.5,
+                }}>
+                  <svg width="130" height="130" viewBox="0 0 100 100" fill="none">
+                    <ellipse cx="55" cy="40" rx="14" ry="22" fill={theme.decor[0]} transform="rotate(30 55 40)"/>
+                    <ellipse cx="70" cy="55" rx="13" ry="20" fill={theme.decor[1]} transform="rotate(60 70 55)"/>
+                    <ellipse cx="60" cy="65" rx="11" ry="18" fill={theme.decor[2]} transform="rotate(-20 60 65)"/>
+                    <ellipse cx="75" cy="30" rx="9" ry="14" fill={theme.decor[0]} transform="rotate(45 75 30)"/>
+                  </svg>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: "#059669" }}>Таны ахиц</span>
-                    <span style={{ fontSize: 13 }}>📈</span>
+
+                {/* Top: Score ring + main metric */}
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12, position: "relative" }}>
+                  <div style={{ flexShrink: 0 }}>
+                    <ScoreRing score={data.healthScore} size={106} />
                   </div>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 3 }}>
-                    <span style={{ fontSize: 28, fontWeight: 900, color: "#064E3B", lineHeight: 1 }}>{data.healthScore}</span>
-                    <span style={{ fontSize: 13, color: "#065F46", fontWeight: 700 }}>/100 оноо</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: theme.label }}>{theme.progressLabel}</span>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={theme.label} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                        <polyline points="17 6 23 6 23 12"/>
+                      </svg>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 3 }}>
+                      <span style={{ fontSize: 28, fontWeight: 900, color: theme.num, lineHeight: 1 }}>{data.healthScore}</span>
+                      <span style={{ fontSize: 13, color: theme.body, fontWeight: 700 }}>/100 оноо</span>
+                    </div>
+                    <p style={{ fontSize: 11, color: theme.body, lineHeight: 1.4, margin: 0, fontWeight: 600 }}>
+                      {data.summary.title}
+                    </p>
                   </div>
-                  <p style={{ fontSize: 11, color: "#065F46", lineHeight: 1.4, margin: 0, fontWeight: 600 }}>
-                    {data.summary.title} <span style={{ fontSize: 13 }}>💚</span>
-                  </p>
+                </div>
+
+                {/* Bottom: 4 stat pills with SVG icons */}
+                <div style={{
+                  background: "rgba(255,255,255,0.7)",
+                  backdropFilter: "blur(8px)",
+                  borderRadius: 16, padding: "10px 8px",
+                  display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6,
+                  position: "relative",
+                  border: "1px solid rgba(255,255,255,0.8)",
+                }}>
+                  {heroStats.map((stat, i) => {
+                    // Map index -> icon + color
+                    const icons = [
+                      { color: "#E8541A", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#E8541A" opacity="0.18"/><circle cx="12" cy="12" r="6" fill="none" stroke="#E8541A" strokeWidth="2"/><circle cx="12" cy="12" r="2.5" fill="#E8541A"/></svg> },
+                      { color: "#3B82F6", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="13" width="4" height="8" rx="1" fill="#3B82F6" opacity="0.5"/><rect x="10" y="8" width="4" height="13" rx="1" fill="#3B82F6" opacity="0.75"/><rect x="17" y="4" width="4" height="17" rx="1" fill="#3B82F6"/></svg> },
+                      { color: "#F59E0B", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="#F59E0B"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> },
+                      { color: "#8B5CF6", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#8B5CF6" opacity="0.18"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="12" r="3" fill="#8B5CF6"/></svg> },
+                    ]
+                    const ic = icons[i] || icons[0]
+                    return (
+                      <div key={i} style={{
+                        textAlign: "center", padding: "4px 2px",
+                        display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+                      }}>
+                        {ic.svg}
+                        <div style={{
+                          fontSize: 8, fontWeight: 800, color: "#64748B",
+                          letterSpacing: 0.3, textTransform: "uppercase",
+                          lineHeight: 1.2, marginTop: 1,
+                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          maxWidth: "100%",
+                        }}>{stat.label}</div>
+                        <div style={{
+                          fontSize: 11, fontWeight: 900, color: ic.color,
+                          lineHeight: 1,
+                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          maxWidth: "100%",
+                        }}>{stat.value}</div>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
-
-              {/* Bottom: 4 stat pills */}
-              <div style={{
-                background: "rgba(255,255,255,0.7)",
-                backdropFilter: "blur(8px)",
-                borderRadius: 16, padding: "10px 8px",
-                display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6,
-                position: "relative",
-                border: "1px solid rgba(255,255,255,0.8)",
-              }}>
-                {heroStats.map((s, i) => (
-                  <div key={i} style={{
-                    textAlign: "center", padding: "4px 2px",
-                  }}>
-                    <div style={{ fontSize: 18, marginBottom: 2 }}>{s.icon}</div>
-                    <div style={{
-                      fontSize: 8, fontWeight: 800, color: "#64748B",
-                      letterSpacing: 0.3, textTransform: "uppercase",
-                      lineHeight: 1.2, marginBottom: 2,
-                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                    }}>{s.label}</div>
-                    <div style={{
-                      fontSize: 11, fontWeight: 900, color: "#1E293B",
-                      lineHeight: 1,
-                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                    }}>{s.value}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+              )
+            })()}
 
             {/* ─── AI INSIGHTS CAROUSEL ────────────────────────────────── */}
             <div style={{
