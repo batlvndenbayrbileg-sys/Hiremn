@@ -3476,14 +3476,13 @@ function BotMessage({ message, fontSize, userQuestion = "", showAvatar = true, o
         </div>
       )}
 
-      {/* Feedback widget — only for genuine LLM responses (not static greetings,
-          loading placeholders, error messages, analysis cards, etc.) */}
-      {message.fromLLM && message.content && (
+      {/* Feedback widget — only for genuine LLM responses (text replies or analysis cards) */}
+      {message.fromLLM && (message.content || message.analysisData) && (
         <div style={{ marginLeft: 42, marginTop: 2 }}>
           <MessageFeedback
             messageId={`msg-${Date.now()}`}
             userMessage={userQuestion}
-            assistantMessage={message.content}
+            assistantMessage={message.content || message.analysisTitle || "Шинжилгээ"}
           />
         </div>
       )}
@@ -3734,9 +3733,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           analysisId,
         } as any])
 
-        // 2. Call /api/analyze for structured analysis (45s client timeout)
+        // 2. Call /api/analyze for structured analysis (60s client timeout)
         const ctrl = new AbortController()
-        const timer = setTimeout(() => ctrl.abort(), 45000)
+        const timer = setTimeout(() => ctrl.abort(), 60000)
         const startedAt = Date.now()
 
         fetch("/api/analyze", {
@@ -3758,7 +3757,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               (m as any).analysisId === analysisId
                 ? {
                     ...m,
-                    content: "Шинжилгээ амжилттай.",
+                    content: "",
                     analysisData: json.data,
                     analysisTitle: testName,
                     analysisStatus: "done" as const,
