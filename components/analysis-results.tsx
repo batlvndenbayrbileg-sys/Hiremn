@@ -234,6 +234,9 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
   const [bar, setBar] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const touchX = useRef(0)
+  // AI Insights carousel index: 0=Strengths, 1=Risks, 2=Tips
+  const [insCarousel, setInsCarousel] = useState(0)
+  const insCarouselTouchX = useRef(0)
   const PAGES = ["Тоймлол", "AI Дүн", "30 Хоног"]
   const kpi = data.kpiLabels || {}
   const todayGoals = data.todayGoals || data.roadmap[0]?.tasks.slice(0, 3) || []
@@ -426,8 +429,375 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
           </div>
         )}
 
-        {/* PAGE 1 — AI Insights (premium dashboard) */}
-        {page === 1 && (
+        {/* PAGE 1 — AI Insights (carousel design) */}
+        {page === 1 && (() => {
+          // Stats pills derived from statCards or computed
+          const heroStats = (data.statCards && data.statCards.length >= 4)
+            ? data.statCards.slice(0, 4)
+            : [
+                { icon: "🔥", label: "Хадгалсан", value: `${data.healthScore}%`, sub: "" },
+                { icon: "❤️", label: "Эрүүл мэнд", value: `+${Math.round(data.healthScore / 5)}%`, sub: "" },
+                { icon: "🫁", label: "Чадвар", value: `+${Math.round(data.healthScore / 4)}%`, sub: "" },
+                { icon: "⚡", label: "Эрч хүч", value: `+${Math.round(data.healthScore / 3)}%`, sub: "" },
+              ]
+
+          // 3 carousel cards data
+          const cards = [
+            {
+              key: "strengths",
+              title: "Давуу талууд",
+              titleColor: "#059669",
+              bg: "linear-gradient(135deg, #F0FDF4, #DCFCE7)",
+              border: "#BBF7D0",
+              iconBg: "linear-gradient(135deg, #4ADE80, #16A34A)",
+              iconShadow: "0 8px 20px rgba(34,197,94,0.35)",
+              icon: (
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L4 6v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V6l-8-4z" fill="#fff" stroke="#22C55E" strokeWidth="1.5"/>
+                  <path d="M9 12l2 2 4-5" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ),
+              items: data.strengths.slice(0, 3),
+              itemDot: "#22C55E",
+              ctaLabel: `${data.strengths.length} давуу тал`,
+              ctaBg: "linear-gradient(135deg, #22C55E, #16A34A)",
+            },
+            {
+              key: "risks",
+              title: "Анхаарах зүйлс",
+              titleColor: "#EA580C",
+              bg: "linear-gradient(135deg, #FFF7ED, #FFEDD5)",
+              border: "#FED7AA",
+              iconBg: "linear-gradient(135deg, #FB923C, #EA580C)",
+              iconShadow: "0 8px 20px rgba(234,88,12,0.35)",
+              icon: (
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L1 21h22L12 2z" fill="#FB923C" stroke="#EA580C" strokeWidth="1.5"/>
+                  <path d="M12 9v5M12 17h.01" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
+                </svg>
+              ),
+              items: data.risks.slice(0, 3),
+              itemDot: "#FB923C",
+              ctaLabel: `${data.risks.length} анхаарах зүйл`,
+              ctaBg: "linear-gradient(135deg, #FB923C, #EA580C)",
+            },
+            {
+              key: "tips",
+              title: "Зөвлөмж",
+              titleColor: "#059669",
+              bg: "linear-gradient(135deg, #ECFDF5, #D1FAE5)",
+              border: "#A7F3D0",
+              iconBg: "linear-gradient(135deg, #4ADE80, #10B981)",
+              iconShadow: "0 8px 20px rgba(16,185,129,0.35)",
+              icon: (
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 9h18v12H3z" fill="#10B981" stroke="#059669" strokeWidth="1.5"/>
+                  <path d="M3 9v3h18V9M12 21V9" stroke="#059669" strokeWidth="1.5"/>
+                  <path d="M12 9c-3-3-6-1-6 1 0 2 3 2 6 0zM12 9c3-3 6-1 6 1 0 2-3 2-6 0z" fill="#fff" stroke="#059669" strokeWidth="1.5"/>
+                </svg>
+              ),
+              items: (data.insights[0]?.actions || data.insights.map(i => i.description)).slice(0, 3),
+              itemDot: "#10B981",
+              ctaLabel: "Дэлгэрэнгүй",
+              ctaBg: "linear-gradient(135deg, #10B981, #059669)",
+            },
+          ]
+
+          const goCard = (i: number) => setInsCarousel(Math.max(0, Math.min(cards.length - 1, i)))
+          const onCarouselTS = (e: React.TouchEvent) => { insCarouselTouchX.current = e.touches[0].clientX }
+          const onCarouselTE = (e: React.TouchEvent) => {
+            const d = insCarouselTouchX.current - e.changedTouches[0].clientX
+            if (Math.abs(d) > 40) {
+              if (d > 0) goCard(insCarousel + 1)
+              else goCard(insCarousel - 1)
+            }
+          }
+          const current = cards[insCarousel]
+
+          return (
+          <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
+            {/* ─── HERO: Progress Streak Banner ────────────────────────── */}
+            <div style={{
+              background: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 50%, #BBF7D0 100%)",
+              borderRadius: 24, padding: "18px 16px 14px", marginBottom: 14,
+              border: "1.5px solid #BBF7D0",
+              boxShadow: "0 4px 16px rgba(34,197,94,0.12)",
+              position: "relative", overflow: "hidden",
+            }}>
+              {/* Decorative leaves illustration (CSS only, no image needed) */}
+              <div style={{
+                position: "absolute", top: -10, right: -20,
+                width: 130, height: 130, pointerEvents: "none",
+                opacity: 0.5,
+              }}>
+                <svg width="130" height="130" viewBox="0 0 100 100" fill="none">
+                  <ellipse cx="55" cy="40" rx="14" ry="22" fill="#86EFAC" transform="rotate(30 55 40)"/>
+                  <ellipse cx="70" cy="55" rx="13" ry="20" fill="#4ADE80" transform="rotate(60 70 55)"/>
+                  <ellipse cx="60" cy="65" rx="11" ry="18" fill="#22C55E" transform="rotate(-20 60 65)"/>
+                  <ellipse cx="75" cy="30" rx="9" ry="14" fill="#86EFAC" transform="rotate(45 75 30)"/>
+                </svg>
+              </div>
+
+              {/* Top: Score ring + main metric */}
+              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12, position: "relative" }}>
+                <div style={{ flexShrink: 0 }}>
+                  <ScoreRing score={data.healthScore} size={106} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "#059669" }}>Таны ахиц</span>
+                    <span style={{ fontSize: 13 }}>📈</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 3 }}>
+                    <span style={{ fontSize: 28, fontWeight: 900, color: "#064E3B", lineHeight: 1 }}>{data.healthScore}</span>
+                    <span style={{ fontSize: 13, color: "#065F46", fontWeight: 700 }}>/100 оноо</span>
+                  </div>
+                  <p style={{ fontSize: 11, color: "#065F46", lineHeight: 1.4, margin: 0, fontWeight: 600 }}>
+                    {data.summary.title} <span style={{ fontSize: 13 }}>💚</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Bottom: 4 stat pills */}
+              <div style={{
+                background: "rgba(255,255,255,0.7)",
+                backdropFilter: "blur(8px)",
+                borderRadius: 16, padding: "10px 8px",
+                display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6,
+                position: "relative",
+                border: "1px solid rgba(255,255,255,0.8)",
+              }}>
+                {heroStats.map((s, i) => (
+                  <div key={i} style={{
+                    textAlign: "center", padding: "4px 2px",
+                  }}>
+                    <div style={{ fontSize: 18, marginBottom: 2 }}>{s.icon}</div>
+                    <div style={{
+                      fontSize: 8, fontWeight: 800, color: "#64748B",
+                      letterSpacing: 0.3, textTransform: "uppercase",
+                      lineHeight: 1.2, marginBottom: 2,
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>{s.label}</div>
+                    <div style={{
+                      fontSize: 11, fontWeight: 900, color: "#1E293B",
+                      lineHeight: 1,
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>{s.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ─── AI INSIGHTS CAROUSEL ────────────────────────────────── */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "0 4px", marginBottom: 10,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 18 }}>✨</span>
+                <span style={{ fontSize: 14, fontWeight: 800, color: "#1E293B" }}>AI-ийн дүгнэлт</span>
+              </div>
+              <button onClick={() => current.key === "tips" && data.insights[0] && setInsDetail(data.insights[0])} style={{
+                background: "none", border: "none",
+                fontSize: 11, fontWeight: 700, color: "#059669",
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 3,
+                fontFamily: "inherit",
+              }}>
+                Дэлгэрэнгүй →
+              </button>
+            </div>
+
+            {/* Carousel container with arrows */}
+            <div
+              style={{ position: "relative", marginBottom: 8 }}
+              onTouchStart={onCarouselTS}
+              onTouchEnd={onCarouselTE}
+            >
+              {/* Left arrow */}
+              {insCarousel > 0 && (
+                <button
+                  onClick={() => goCard(insCarousel - 1)}
+                  style={{
+                    position: "absolute", left: -6, top: "50%", transform: "translateY(-50%)",
+                    zIndex: 5, width: 32, height: 32, borderRadius: "50%",
+                    background: "#fff", border: "1.5px solid #E2E8F0",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: "pointer", color: "#64748B",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    fontFamily: "inherit",
+                  }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 18l-6-6 6-6"/>
+                  </svg>
+                </button>
+              )}
+              {/* Right arrow */}
+              {insCarousel < cards.length - 1 && (
+                <button
+                  onClick={() => goCard(insCarousel + 1)}
+                  style={{
+                    position: "absolute", right: -6, top: "50%", transform: "translateY(-50%)",
+                    zIndex: 5, width: 32, height: 32, borderRadius: "50%",
+                    background: "#fff", border: "1.5px solid #E2E8F0",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: "pointer", color: "#64748B",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    fontFamily: "inherit",
+                  }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
+                </button>
+              )}
+
+              {/* Active card */}
+              <div
+                key={current.key}
+                style={{
+                  background: current.bg,
+                  borderRadius: 20, padding: "18px 16px 14px",
+                  border: `1.5px solid ${current.border}`,
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
+                  minHeight: 280,
+                  display: "flex", flexDirection: "column",
+                  animation: "card-pop 0.35s cubic-bezier(.34,1.56,.64,1)",
+                }}
+              >
+                {/* Big 3D-ish icon */}
+                <div style={{
+                  width: 76, height: 76, borderRadius: 24,
+                  background: current.iconBg,
+                  margin: "0 auto 12px",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: current.iconShadow,
+                  position: "relative", overflow: "hidden",
+                }}>
+                  {/* Shine */}
+                  <div style={{
+                    position: "absolute", top: 0, left: 0, right: 0, height: "45%",
+                    background: "linear-gradient(180deg, rgba(255,255,255,0.4), transparent)",
+                  }}/>
+                  <div style={{ position: "relative" }}>{current.icon}</div>
+                </div>
+
+                {/* Title */}
+                <p style={{
+                  fontSize: 18, fontWeight: 900, color: current.titleColor,
+                  textAlign: "center", margin: "0 0 14px", letterSpacing: -0.3,
+                }}>
+                  {current.title}
+                </p>
+
+                {/* Items */}
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
+                  {current.items.map((item, i) => (
+                    <div key={i} style={{
+                      display: "flex", gap: 8, alignItems: "flex-start",
+                      animation: `ci 0.35s ease ${i * 0.08}s both`,
+                    }}>
+                      <div style={{
+                        width: 18, height: 18, borderRadius: "50%",
+                        background: "rgba(255,255,255,0.9)",
+                        border: `2px solid ${current.itemDot}`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0, marginTop: 1,
+                      }}>
+                        <div style={{ width: 6, height: 6, borderRadius: "50%", background: current.itemDot }}/>
+                      </div>
+                      <span style={{
+                        fontSize: 12, color: "#374151", lineHeight: 1.5,
+                        display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden",
+                      }}>{item}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA pill */}
+                <button onClick={() => {
+                  if (current.key === "tips" && data.insights[0]) setInsDetail(data.insights[0])
+                  else if (current.key !== "tips") goCard((insCarousel + 1) % cards.length)
+                }} style={{
+                  background: current.ctaBg,
+                  border: "none", borderRadius: 999,
+                  padding: "10px 18px", color: "#fff",
+                  fontSize: 12, fontWeight: 800, cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  boxShadow: `0 6px 16px ${current.titleColor}44`,
+                  fontFamily: "inherit",
+                }}>
+                  {current.ctaLabel}
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
+                </button>
+              </div>
+
+              {/* Pagination dots */}
+              <div style={{
+                display: "flex", justifyContent: "center", gap: 6, marginTop: 12,
+              }}>
+                {cards.map((_, i) => (
+                  <button key={i} onClick={() => goCard(i)} style={{
+                    width: i === insCarousel ? 22 : 7, height: 7, borderRadius: 4,
+                    background: i === insCarousel
+                      ? (current.titleColor === "#EA580C" ? "#EA580C" : "#10B981")
+                      : "#E2E8F0",
+                    border: "none", cursor: "pointer", padding: 0,
+                    transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
+                    fontFamily: "inherit",
+                  }}/>
+                ))}
+              </div>
+            </div>
+
+            {/* ─── 30-DAY PLAN CTA BANNER ──────────────────────────────── */}
+            <div style={{
+              background: "linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)",
+              borderRadius: 24, padding: "16px",
+              border: "1.5px solid #FED7AA",
+              boxShadow: "0 4px 16px rgba(251,146,60,0.12)",
+              display: "flex", alignItems: "center", gap: 12,
+              position: "relative", overflow: "hidden",
+              marginTop: 10,
+            }}>
+              <div style={{ fontSize: 44, flexShrink: 0, lineHeight: 1 }}>📅</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 900, color: "#7C2D12", margin: "0 0 3px", lineHeight: 1.3 }}>
+                  30 хоногийн төлөвлөгөө эхлүүлэх үү?
+                </p>
+                <p style={{ fontSize: 10, color: "#9A3412", margin: "0 0 8px", lineHeight: 1.4 }}>
+                  Алхам алхмаар хамтдаа урагшилцгаая! 🚀
+                </p>
+                <button onClick={() => setPage(2)} style={{
+                  background: "linear-gradient(135deg, #F97316, #EA580C)",
+                  border: "none", borderRadius: 999,
+                  padding: "7px 16px", color: "#fff",
+                  fontSize: 11, fontWeight: 800, cursor: "pointer",
+                  display: "inline-flex", alignItems: "center", gap: 5,
+                  boxShadow: "0 6px 16px rgba(234,88,12,0.4)",
+                  fontFamily: "inherit",
+                }}>
+                  Эхлүүлэх →
+                </button>
+              </div>
+              {/* Target illustration */}
+              <div style={{ flexShrink: 0 }}>
+                <svg width="56" height="56" viewBox="0 0 60 60" fill="none">
+                  <circle cx="30" cy="30" r="26" fill="#FED7AA" stroke="#FB923C" strokeWidth="2"/>
+                  <circle cx="30" cy="30" r="18" fill="#FFEDD5" stroke="#FB923C" strokeWidth="1.5"/>
+                  <circle cx="30" cy="30" r="10" fill="#FB923C"/>
+                  <circle cx="30" cy="30" r="4" fill="#fff"/>
+                  <path d="M40 8 L36 12 L42 18 L46 14 Z" fill="#FBBF24" stroke="#F59E0B" strokeWidth="1"/>
+                  <line x1="38" y1="14" x2="32" y2="20" stroke="#92400E" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          )
+        })()}
+
+        {/* PAGE 1 — OLD CONTENT (unreachable, kept for reference) */}
+        {false && page === 1 && (
           <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
             {/* ── Hero AI banner with stats ── */}
             <div style={{
@@ -807,6 +1177,11 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
         @keyframes ar-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes si { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
         @keyframes ci { from{opacity:0;transform:translateY(10px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+        @keyframes card-pop {
+          0%   { opacity: 0; transform: scale(0.92) translateY(8px); }
+          60%  { transform: scale(1.02) translateY(-3px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
         .hw-card-tilt { transition: transform 0.25s cubic-bezier(.16,1,.3,1), box-shadow 0.25s ease; }
       `}</style>
     </div>
