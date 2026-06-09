@@ -3490,7 +3490,7 @@ function BotMessage({ message, fontSize, userQuestion = "", showAvatar = true, o
   )
 }
 
-// ── Consent Modal (shown before sending test data to AI) ─────────────────────
+// ── Consent Modal (matches hire.mn exam-instructions style) ────────────────
 
 function ConsentModal({
   testName,
@@ -3501,7 +3501,7 @@ function ConsentModal({
   onConfirm: (remember: boolean) => void
   onCancel: () => void
 }) {
-  const [remember, setRemember] = useState(true)
+  const [understood, setUnderstood] = useState(false)
   const [vis, setVis] = useState(false)
   useEffect(() => { setTimeout(() => setVis(true), 10) }, [])
 
@@ -3510,151 +3510,191 @@ function ConsentModal({
       onClick={onCancel}
       style={{
         position: "absolute", inset: 0,
-        background: `rgba(15,23,42,${vis ? 0.55 : 0})`,
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
+        background: `rgba(15,23,42,${vis ? 0.45 : 0})`,
+        backdropFilter: "blur(4px)",
+        WebkitBackdropFilter: "blur(4px)",
         zIndex: 100,
         display: "flex", alignItems: "center", justifyContent: "center",
-        padding: 18,
-        transition: "background 0.28s ease",
+        padding: 16,
+        transition: "background 0.25s ease",
       }}
     >
       <div
         onClick={e => e.stopPropagation()}
         style={{
           background: "#fff",
-          borderRadius: 24,
-          width: "100%", maxWidth: 360,
+          borderRadius: 16,
+          width: "100%", maxWidth: 380,
           overflow: "hidden",
-          boxShadow: "0 30px 80px rgba(0,0,0,0.35)",
-          transform: vis ? "scale(1) translateY(0)" : "scale(0.92) translateY(20px)",
+          boxShadow: "0 25px 70px rgba(0,0,0,0.25)",
+          transform: vis ? "scale(1) translateY(0)" : "scale(0.95) translateY(12px)",
           opacity: vis ? 1 : 0,
-          transition: "all 0.35s cubic-bezier(.16,1,.3,1)",
+          transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
+          fontFamily: "'Inter', -apple-system, sans-serif",
         }}
       >
-        {/* Hero */}
+        {/* HEADER ROW */}
         <div style={{
-          background: "linear-gradient(135deg, #FFF5F0 0%, #FFEDE0 100%)",
-          padding: "20px 22px 16px",
-          textAlign: "center",
-          position: "relative", overflow: "hidden",
+          display: "flex", alignItems: "center",
+          padding: "16px 18px 14px",
+          borderBottom: "1px solid #F1F5F9",
+          gap: 10,
         }}>
+          {/* Info icon (orange circle with !) */}
           <div style={{
-            position: "absolute", top: -20, right: -20,
-            width: 100, height: 100, borderRadius: "50%",
-            background: "rgba(232,84,26,0.08)", pointerEvents: "none",
-          }}/>
-          <div style={{
-            width: 64, height: 64, borderRadius: 20,
-            background: "linear-gradient(135deg, #E8541A, #F07040)",
+            width: 26, height: 26, borderRadius: "50%",
+            background: "#F97316",
             display: "flex", alignItems: "center", justifyContent: "center",
-            margin: "0 auto 12px",
-            boxShadow: "0 8px 20px rgba(232,84,26,0.35)",
-            position: "relative",
+            flexShrink: 0,
+            boxShadow: "0 2px 6px rgba(249,115,22,0.3)",
           }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s-8-4.5-8-11.8A5.2 5.2 0 0 1 12 5.5a5.2 5.2 0 0 1 8 4.7c0 7.3-8 11.8-8 11.8z"/>
-              <path d="M9 12l2 2 4-4"/>
-            </svg>
+            <span style={{ color: "#fff", fontSize: 15, fontWeight: 900, lineHeight: 1 }}>!</span>
           </div>
           <h3 style={{
-            fontSize: 17, fontWeight: 900, color: "#1F2937",
-            margin: "0 0 4px", letterSpacing: -0.3,
+            flex: 1, fontSize: 15, fontWeight: 800, color: "#1E293B",
+            margin: 0, letterSpacing: -0.2,
           }}>
-            Өгөгдлийн зөвшөөрөл
+            AI шинжилгээний зөвшөөрөл
           </h3>
-          <p style={{
-            fontSize: 12, color: "#6B7280", margin: 0, lineHeight: 1.5,
-          }}>
-            Та <b style={{ color: "#E8541A" }}>{testName}</b> тестийн үр дүнг<br/>
-            AI шинжээч рүү илгээх гэж байна.
-          </p>
+          {/* Close X */}
+          <button
+            onClick={onCancel}
+            style={{
+              width: 28, height: 28, borderRadius: "50%",
+              background: "transparent", border: "none",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", color: "#94A3B8", flexShrink: 0,
+              fontFamily: "inherit",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.background = "#F1F5F9"
+              ;(e.currentTarget as HTMLElement).style.color = "#475569"
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.background = "transparent"
+              ;(e.currentTarget as HTMLElement).style.color = "#94A3B8"
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
 
-        {/* Body */}
-        <div style={{ padding: "16px 22px 4px" }}>
-          {[
-            { icon: "🛡️", title: "Аюулгүй холболт", body: "Өгөгдөл шифрлэгдсэн HTTPS-ээр дамжина." },
-            { icon: "🤖", title: "Зөвхөн AI боловсруулна", body: "Хэн ч хүн биш, зөвхөн AI таны хариуг үзнэ." },
-            { icon: "🗑️", title: "Хадгалахгүй", body: "Шинжилгээ дууссаны дараа өгөгдөл устгагдана." },
-          ].map((p, i) => (
-            <div key={i} style={{
-              display: "flex", gap: 10, alignItems: "flex-start",
-              marginBottom: 12, padding: "10px 12px",
-              background: "#F9FAFB", borderRadius: 12,
-              border: "1px solid #F1F5F9",
-              animation: `hw-msg-in 0.35s ease ${i * 0.06}s both`,
+        {/* BODY */}
+        <div style={{ padding: "16px 18px 0" }}>
+          {/* Warning banner */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 8,
+            background: "#FFFBEB",
+            border: "1px solid #FEF3C7",
+            borderRadius: 10, padding: "10px 12px",
+            marginBottom: 14,
+          }}>
+            <div style={{
+              width: 18, height: 18, borderRadius: "50%",
+              background: "#F59E0B",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0,
             }}>
-              <div style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }}>{p.icon}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#1F2937", marginBottom: 1 }}>{p.title}</div>
-                <div style={{ fontSize: 11, color: "#6B7280", lineHeight: 1.5 }}>{p.body}</div>
-              </div>
+              <span style={{ color: "#fff", fontSize: 11, fontWeight: 900, lineHeight: 1 }}>!</span>
             </div>
-          ))}
+            <span style={{ fontSize: 12, color: "#78350F", fontWeight: 600, lineHeight: 1.4 }}>
+              AI шинжилгээ эхлэхээс өмнө зөвшөөрлийг өгнө үү.
+            </span>
+          </div>
 
-          {/* Remember checkbox */}
+          {/* Info panel */}
+          <div style={{
+            background: "#F8FAFC",
+            border: "1px solid #E2E8F0",
+            borderRadius: 10,
+            padding: "14px 16px",
+            marginBottom: 14,
+          }}>
+            <p style={{
+              fontSize: 12.5, color: "#334155", lineHeight: 1.65,
+              margin: 0, fontWeight: 500,
+            }}>
+              Та <b style={{ color: "#E8541A" }}>{testName}</b> тестийн үр дүнг гадны
+              <b> AI шинжээч</b> рүү илгээх гэж байна. Танай өгөгдөл нь зөвхөн шинжилгээний
+              зорилгоор шифрлэгдсэн холболтоор дамжин боловсруулагдах ба үр дүн гарсны
+              дараа автоматаар устгагдана. Хувийн мэдээлэл (нэр, имэйл) илгээгдэхгүй,
+              зөвхөн тестийн хариултууд явна. Зөвшөөрөл өгснөөр та энэхүү боловсруулалттай
+              танилцсан гэж үзнэ.
+            </p>
+          </div>
+
+          {/* Checkbox */}
           <label style={{
             display: "flex", alignItems: "center", gap: 8,
-            padding: "10px 4px", cursor: "pointer", userSelect: "none",
+            padding: "6px 2px 14px", cursor: "pointer", userSelect: "none",
           }}>
             <div
-              onClick={() => setRemember(r => !r)}
+              onClick={() => setUnderstood(u => !u)}
               style={{
-                width: 20, height: 20, borderRadius: 6,
-                background: remember ? "linear-gradient(135deg, #E8541A, #F07040)" : "#fff",
-                border: remember ? "none" : "1.5px solid #D1D5DB",
+                width: 18, height: 18, borderRadius: 4,
+                background: understood ? "#E8541A" : "#fff",
+                border: understood ? "none" : "1.5px solid #CBD5E1",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "all 0.2s", flexShrink: 0,
-                boxShadow: remember ? "0 4px 10px rgba(232,84,26,0.3)" : "none",
+                transition: "all 0.15s", flexShrink: 0,
               }}
             >
-              {remember && (
+              {understood && (
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 8l4 4 6-7"/>
                 </svg>
               )}
             </div>
-            <span style={{ fontSize: 11, color: "#475569", fontWeight: 600 }} onClick={() => setRemember(r => !r)}>
-              Энэ нэг сесст дахин асуухгүй
+            <span
+              onClick={() => setUnderstood(u => !u)}
+              style={{ fontSize: 12.5, color: "#475569", fontWeight: 600 }}
+            >
+              Ойлголоо
             </span>
           </label>
         </div>
 
-        {/* Actions */}
+        {/* FOOTER */}
         <div style={{
-          padding: "8px 22px 22px",
-          display: "flex", gap: 8,
+          padding: "12px 18px 16px",
+          borderTop: "1px solid #F1F5F9",
+          background: "#FAFBFC",
+          display: "flex", justifyContent: "flex-end", gap: 8,
         }}>
           <button
             onClick={onCancel}
             style={{
-              flex: 1, padding: "13px",
-              background: "#F1F5F9", color: "#64748B",
-              border: "none", borderRadius: 14,
-              fontSize: 13, fontWeight: 700, cursor: "pointer",
-              fontFamily: "inherit", transition: "all 0.2s",
+              padding: "9px 22px",
+              background: "#fff", color: "#475569",
+              border: "1px solid #E2E8F0", borderRadius: 8,
+              fontSize: 12.5, fontWeight: 700, cursor: "pointer",
+              fontFamily: "inherit", transition: "all 0.15s",
             }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#E2E8F0"}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#F1F5F9"}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#F1F5F9"}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#fff"}
           >
-            Цуцлах
+            Буцах
           </button>
           <button
-            onClick={() => onConfirm(remember)}
+            onClick={() => understood && onConfirm(true)}
+            disabled={!understood}
             style={{
-              flex: 2, padding: "13px",
-              background: "linear-gradient(135deg, #E8541A, #F07040)",
-              color: "#fff", border: "none", borderRadius: 14,
-              fontSize: 13, fontWeight: 800, cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-              boxShadow: "0 8px 20px rgba(232,84,26,0.4)",
-              fontFamily: "inherit", transition: "transform 0.15s ease",
+              padding: "9px 22px",
+              background: understood ? "#E8541A" : "#E2E8F0",
+              color: understood ? "#fff" : "#94A3B8",
+              border: "none", borderRadius: 8,
+              fontSize: 12.5, fontWeight: 700,
+              cursor: understood ? "pointer" : "not-allowed",
+              fontFamily: "inherit",
+              boxShadow: understood ? "0 4px 10px rgba(232,84,26,0.3)" : "none",
+              transition: "all 0.15s",
             }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.transform = "translateY(0)"}
+            onMouseEnter={e => { if (understood) (e.currentTarget as HTMLElement).style.background = "#D9460F" }}
+            onMouseLeave={e => { if (understood) (e.currentTarget as HTMLElement).style.background = "#E8541A" }}
           >
-            ✨ Зөвшөөрөх ба эхлүүлэх
+            Эхлүүлэх
           </button>
         </div>
       </div>
