@@ -180,6 +180,9 @@ export async function POST(request: Request) {
     // This is the single source of truth — never let AI hallucinate scores.
     if (actualMaxScore > 0) {
       data.healthScore = actualPct
+      data.displayScore = actualScore
+      data.displayMaxScore = actualMaxScore
+      data.displayLabel = actualResultLabel
       data.riskLevel = actualRiskLevel
       data.summary = {
         title: actualResultLabel || data.summary?.title || "Дүн шинжилгээ",
@@ -195,6 +198,8 @@ export async function POST(request: Request) {
         maxScore: actualMaxScore,
         status: actualResultLabel || data.metrics[0]?.status || "—",
       }
+      // Strip any extra AI-invented sub-metrics — only the real one is truth
+      data.metrics = data.metrics.slice(0, 1)
     } else if (data.healthScore == null) {
       console.error('[analyze] missing healthScore. Keys:', Object.keys(data))
       throw new Error('JSON бүтэц дутуу — healthScore байхгүй')

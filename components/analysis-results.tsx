@@ -3,7 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 
 interface AnalysisData {
-  healthScore: number
+  healthScore: number               // 0-100 percentage (used for ring fill / colour tier)
+  displayScore?: number             // Raw test score (e.g. 5)
+  displayMaxScore?: number          // Raw test max (e.g. 10)
+  displayLabel?: string             // Verbatim label from test report
   riskLevel: string
   quitPotential: string
   testCategory?: string
@@ -52,24 +55,36 @@ function Char({ type, size = 80, style }: { type: keyof typeof CHARS; size?: num
   )
 }
 
-// Score Ring
-function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
+// Score Ring — defaults to /100 percentage, override with `display` to show raw score (5/10)
+function ScoreRing({
+  score,
+  size = 120,
+  display,
+}: {
+  score: number
+  size?: number
+  display?: { score: number; max: number }
+}) {
+  const targetNum = display ? display.score : Math.min(Math.max(score, 0), 100)
+  const targetDen = display ? display.max : 100
   const [disp, setDisp] = useState(0)
   const [off, setOff] = useState(0)
   const r = size * 0.37, circ = 2 * Math.PI * r
   const color = scoreColor(score)
   useEffect(() => {
-    const end = Math.min(Math.max(score, 0), 100)
     const dur = 1600, st = performance.now()
     const tick = (now: number) => {
       const p = Math.min((now - st) / dur, 1)
       const e = 1 - Math.pow(1 - p, 3)
-      setDisp(Math.round(e * end))
-      setOff(circ - e * (end / 100) * circ)
+      setDisp(Math.round(e * targetNum))
+      setOff(circ - e * (Math.min(score, 100) / 100) * circ)
       if (p < 1) requestAnimationFrame(tick)
     }
     setTimeout(() => requestAnimationFrame(tick), 200)
-  }, [score, circ])
+  }, [score, targetNum, circ])
+  // Adjust number size based on digit count
+  const numStr = String(disp)
+  const numSize = size * (numStr.length >= 3 ? 0.24 : 0.3)
   return (
     <div style={{ position: "relative", width: size, height: size, margin: "0 auto" }}>
       <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
@@ -84,8 +99,8 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
           strokeWidth={size * 0.07} strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round" />
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontSize: size * 0.27, fontWeight: 900, color: "#1E293B", lineHeight: 1 }}>{disp}</span>
-        <span style={{ fontSize: size * 0.1, color: "#94A3B8", fontWeight: 600 }}>/100</span>
+        <span style={{ fontSize: numSize, fontWeight: 900, color: "#1E293B", lineHeight: 1 }}>{disp}</span>
+        <span style={{ fontSize: size * 0.1, color: "#94A3B8", fontWeight: 600 }}>/{targetDen}</span>
       </div>
     </div>
   )
@@ -627,18 +642,21 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
   const color = scoreColor(data.healthScore)
   const circ = 2 * Math.PI * 28
   const [off, setOff] = useState(circ)
+  // Use raw display score if available (e.g. 5 of 10), else fallback to percentage
+  const displayTarget = data.displayScore != null ? data.displayScore : data.healthScore
+  const displayMax = data.displayMaxScore || 100
   useEffect(() => {
     setTimeout(() => setBar(true), 400)
-    const end = data.healthScore, dur = 1400, st = performance.now()
+    const end = displayTarget, dur = 1400, st = performance.now()
     const tick = (now: number) => {
       const p = Math.min((now - st) / dur, 1)
       const e = 1 - Math.pow(1 - p, 3)
       setScoreDisp(Math.round(e * end))
-      setOff(circ - e * (end / 100) * circ)
+      setOff(circ - e * (Math.min(data.healthScore, 100) / 100) * circ)
       if (p < 1) requestAnimationFrame(tick)
     }
     setTimeout(() => requestAnimationFrame(tick), 350)
-  }, [data.healthScore, circ])
+  }, [data.healthScore, displayTarget, circ])
   const kpi = data.kpiLabels || {}
   const charType: keyof typeof CHARS = data.healthScore >= 75 ? "ok" : data.healthScore >= 50 ? "thumbsup" : "thinking"
   return (
@@ -652,7 +670,7 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
           </svg>
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
             <span style={{ fontSize: 20, fontWeight: 900, color: "#1E293B", lineHeight: 1 }}>{scoreDisp}</span>
-            <span style={{ fontSize: 8, color: "#94A3B8" }}>/100</span>
+            <span style={{ fontSize: 8, color: "#94A3B8" }}>/{displayMax}</span>
           </div>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -808,7 +826,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             {/* Score + character */}
             <div style={{ background: "#fff", borderRadius: 20, padding: "18px 16px", marginBottom: 12, boxShadow: "0 2px 14px rgba(0,0,0,0.07)", display: "flex", alignItems: "center", gap: 14 }}>
               <div>
-                <ScoreRing score={data.healthScore} size={100} />
+                <ScoreRing score={data.healthScore} size={100} display={data.displayScore != null && data.displayMaxScore ? { score: data.displayScore, max: data.displayMaxScore } : undefined} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
@@ -1078,8 +1096,12 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                       </svg>
                     </div>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 3 }}>
-                      <span style={{ fontSize: 28, fontWeight: 900, color: theme.num, lineHeight: 1 }}>{data.healthScore}</span>
-                      <span style={{ fontSize: 13, color: theme.body, fontWeight: 700 }}>/100 оноо</span>
+                      <span style={{ fontSize: 28, fontWeight: 900, color: theme.num, lineHeight: 1 }}>
+                        {data.displayScore != null ? data.displayScore : data.healthScore}
+                      </span>
+                      <span style={{ fontSize: 13, color: theme.body, fontWeight: 700 }}>
+                        /{data.displayMaxScore || 100} оноо
+                      </span>
                     </div>
                     <p style={{ fontSize: 11, color: theme.body, lineHeight: 1.4, margin: 0, fontWeight: 600 }}>
                       {data.summary.title}
