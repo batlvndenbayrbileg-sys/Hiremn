@@ -7,6 +7,7 @@ interface AnalysisData {
   displayScore?: number             // Raw test score (e.g. 5)
   displayMaxScore?: number          // Raw test max (e.g. 10)
   displayLabel?: string             // Verbatim label from test report
+  dimensions?: Array<{ label: string; score: number; maxScore: number; pct: number }>  // Multi-dim tests (DISC etc.)
   riskLevel: string
   quitPotential: string
   testCategory?: string
@@ -876,8 +877,119 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               <Char type={data.healthScore >= 70 ? "ok" : "thinking"} size={80} style={{ flexShrink: 0 }} />
             </div>
 
-            {/* Metric bars */}
-            {data.metrics.map((m, i) => (
+            {/* ─── DIMENSIONS BREAKDOWN (DISC, Big5 etc.) — only if 2+ real dims ─── */}
+            {data.dimensions && data.dimensions.length >= 2 && (
+              <div style={{
+                background: "#fff", borderRadius: 18, padding: "16px",
+                marginBottom: 10, boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+                border: "1px solid #F1F5F9",
+              }}>
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  marginBottom: 14,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{
+                      width: 28, height: 28, borderRadius: 9,
+                      background: "linear-gradient(135deg, #6C63FF, #4F46E5)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      boxShadow: "0 4px 10px rgba(108,99,255,0.3)",
+                    }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="13" width="4" height="8" rx="1"/>
+                        <rect x="10" y="8" width="4" height="13" rx="1"/>
+                        <rect x="17" y="4" width="4" height="17" rx="1"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 13, fontWeight: 800, color: "#1E293B", margin: "0 0 1px" }}>
+                        Хэмжээсүүдийн задаргаа
+                      </p>
+                      <p style={{ fontSize: 9, color: "#94A3B8", margin: 0, letterSpacing: 0.3 }}>
+                        {data.dimensions.length} хэмжээс • Бодит тестээс
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{
+                    background: "#EEF2FF", color: "#4F46E5",
+                    fontSize: 10, fontWeight: 800,
+                    padding: "4px 10px", borderRadius: 999,
+                    border: "1px solid #C7D2FE",
+                  }}>
+                    {data.dimensions.length}/Х
+                  </div>
+                </div>
+
+                {data.dimensions.map((d, i) => {
+                  const pct = d.maxScore > 0 ? (d.score / d.maxScore) * 100 : 0
+                  const c = metricColor(d.score / d.maxScore)
+                  const g = metricGrad(d.score / d.maxScore)
+                  // Try to find single-letter code in label like "Давамгайлагч (D)"
+                  const codeMatch = d.label.match(/\(([A-ZА-ЯӨҮЁ])\)/i)
+                  const code = codeMatch ? codeMatch[1].toUpperCase() : (i + 1).toString()
+                  return (
+                    <div key={i} style={{
+                      display: "flex", alignItems: "center", gap: 12,
+                      padding: "10px 0",
+                      borderBottom: i < data.dimensions!.length - 1 ? "1px solid #F1F5F9" : "none",
+                      animation: `ci 0.4s ease ${i * 0.07}s both`,
+                    }}>
+                      {/* Letter badge */}
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 10,
+                        background: g,
+                        color: "#fff", fontSize: 14, fontWeight: 900,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0,
+                        boxShadow: `0 4px 10px ${c}33`,
+                      }}>{code}</div>
+
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                          marginBottom: 4, gap: 6,
+                        }}>
+                          <span style={{
+                            fontSize: 12, fontWeight: 700, color: "#1E293B",
+                            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                            flex: 1, minWidth: 0,
+                          }}>{d.label.replace(/\s*\([A-ZА-ЯӨҮЁ]\)\s*/i, "")}</span>
+                          <span style={{
+                            fontSize: 13, fontWeight: 900, color: c, flexShrink: 0,
+                            fontFeatureSettings: "'tnum'",
+                          }}>{d.score}<span style={{ fontSize: 10, color: "#94A3B8", fontWeight: 700 }}>/{d.maxScore}</span></span>
+                        </div>
+                        <div style={{
+                          background: "#F1F5F9", borderRadius: 6, height: 6, overflow: "hidden",
+                          position: "relative",
+                        }}>
+                          <div style={{
+                            height: "100%", borderRadius: 6,
+                            width: bar ? `${pct}%` : "0%",
+                            background: g,
+                            transition: `width ${1.2 + i * 0.08}s cubic-bezier(.16,1,.3,1)`,
+                            boxShadow: `0 0 6px ${c}66`,
+                          }}/>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+
+                <div style={{
+                  marginTop: 14, padding: "8px 12px",
+                  background: "#F8FAFF", borderRadius: 10,
+                  fontSize: 10.5, color: "#64748B", fontWeight: 500,
+                  lineHeight: 1.5, textAlign: "center",
+                  border: "1px dashed #E2E8F0",
+                }}>
+                  💡 Хэмжээс тус бүрт өөрийн оноо, утга бий. Дэлгэрэнгүйг тайлангаас уншина уу.
+                </div>
+              </div>
+            )}
+
+            {/* Single-score metric bars (only when no dimensions) */}
+            {(!data.dimensions || data.dimensions.length < 2) && data.metrics.map((m, i) => (
               <div key={i} style={{ background: "#fff", borderRadius: 16, padding: "14px 16px", marginBottom: 8, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                   <div>

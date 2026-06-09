@@ -89,6 +89,31 @@ export async function POST(request: Request) {
       return `${i + 1}.${v}(${p})`
     }).join("; ")
 
+    // ─── Detect multi-dimensional tests (DISC, Big5, MBTI etc.) ──────────
+    // Group answers by their question category to discover sub-scores.
+    const dimMap = new Map<string, { sum: number; max: number; count: number }>()
+    for (const a of answersPayload) {
+      const catName: string = a?.questionCategory?.name || ""
+      if (!catName || /блок|нийт|категори\s*\d/i.test(catName)) continue
+      const p = parseFloat(a?.point ?? a?.answer?.point ?? "0") || 0
+      const maxP = parseFloat(a?.question?.point ?? a?.question?.maxValue ?? "0") || 0
+      const cur = dimMap.get(catName) || { sum: 0, max: 0, count: 0 }
+      cur.sum += p
+      cur.max += maxP || p  // if no max defined, use achieved as max so bar still shows
+      cur.count += 1
+      dimMap.set(catName, cur)
+    }
+    // Only treat as multi-dim if 2+ meaningful categories exist
+    const dimensions = dimMap.size >= 2
+      ? Array.from(dimMap.entries()).map(([label, v]) => ({
+          label,
+          score: v.sum,
+          maxScore: Math.max(v.max, v.sum, 1),
+          pct: v.max > 0 ? Math.round((v.sum / v.max) * 100) : 0,
+        }))
+      : []
+    console.log('[analyze] dimensions:', dimensions.length, dimensions.map(d => d.label).join(', '))
+
     const truncated = `Тестийн нэр: ${reportTitle}
 БОДИТ үр дүн (АНТЫ ӨӨРЧИЛБӨЛ БУРУУ!): ${actualResultLabel || "тодорхойгүй"}
 БОДИТ оноо: ${actualScore}/${actualMaxScore} (${actualPct}%)
@@ -198,8 +223,18 @@ export async function POST(request: Request) {
         maxScore: actualMaxScore,
         status: actualResultLabel || data.metrics[0]?.status || "—",
       }
-      // Strip any extra AI-invented sub-metrics — only the real one is truth
-      data.metrics = data.metrics.slice(0, 1)
+      // If real dimensions detected, use them as metrics. Otherwise keep just the main one.
+      if (dimensions.length >= 2) {
+        data.metrics = dimensions.map(d => ({
+          label: d.label,
+          score: d.score,
+          maxScore: d.maxScore,
+          status: `${d.pct}%`,
+        }))
+        data.dimensions = dimensions
+      } else {
+        data.metrics = data.metrics.slice(0, 1)
+      }
     } else if (data.healthScore == null) {
       console.error('[analyze] missing healthScore. Keys:', Object.keys(data))
       throw new Error('JSON бүтэц дутуу — healthScore байхгүй')
