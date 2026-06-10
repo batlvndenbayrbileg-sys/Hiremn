@@ -5551,13 +5551,11 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           display: "flex",
           alignItems: "flex-end",
           justifyContent: "flex-end",
-          // Extra padding so the 3D Spline mascot's overflow (~25px on each
-          // side, plus the -4px bottom offset on the mascot itself) stays
-          // inside the iframe and isn't clipped at the edges.
-          paddingTop: 40,
-          paddingBottom: 35,
-          paddingLeft: 35,
-          paddingRight: 20,
+          // Generous padding so the mascot's overflow is fully visible
+          paddingTop: 50,
+          paddingBottom: 30,
+          paddingLeft: 40,
+          paddingRight: 30,
           width: "100%",
           height: "100%",
           boxSizing: "border-box",
@@ -5568,13 +5566,15 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               position: "absolute", inset: -8, borderRadius: 30,
               background: "linear-gradient(135deg, rgba(232,84,26,0.2), rgba(255,140,66,0.15))",
               animation: "hw-ring 3s ease-out infinite",
+              pointerEvents: "none",
             }} />
             <div style={{
               position: "absolute", inset: -3, borderRadius: 29,
               background: "linear-gradient(135deg, rgba(232,84,26,0.15), rgba(255,107,61,0.1))",
               animation: "hw-ring 3s ease-out 0.8s infinite",
+              pointerEvents: "none",
             }} />
-            
+
             <button
               className="hw-mascot"
               onClick={() => setIsOpen(o => !o)}
@@ -5582,22 +5582,22 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               onMouseLeave={() => setIsHovered(false)}
               aria-label="hire.mn чат нээх"
               style={{
-                height: 58, 
+                height: 58,
                 borderRadius: 29,
-                /* Gradient with animation */
                 background: `linear-gradient(135deg, #E8541A 0%, #F06835 50%, #FF8C42 100%)`,
                 backgroundSize: "200% 200%",
                 animation: isHovered ? "hw-gradient-shift 3s ease infinite" : "none",
                 border: "1.5px solid rgba(255,255,255,0.25)",
                 cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                paddingLeft: 8, paddingRight: 18,
+                display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0,
+                // Reserve space on the left for the mascot bubble (which sits outside)
+                paddingLeft: 68, paddingRight: 18,
                 flexShrink: 0, position: "relative",
-                boxShadow: isHovered 
-                  ? `0 12px 32px rgba(232,84,26,0.4), 
+                boxShadow: isHovered
+                  ? `0 12px 32px rgba(232,84,26,0.4),
                      0 6px 12px rgba(0,0,0,0.08),
                      inset 0 1px 0 rgba(255,255,255,0.25)`
-                  : `0 8px 24px rgba(232,84,26,0.3), 
+                  : `0 8px 24px rgba(232,84,26,0.3),
                      0 3px 8px rgba(0,0,0,0.06),
                      inset 0 1px 0 rgba(255,255,255,0.15)`,
                 transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
@@ -5608,7 +5608,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               {/* Shimmer overlay on hover */}
               <div style={{
                 position: "absolute", inset: 0, overflow: "hidden", borderRadius: 29,
-                zIndex: 0,
+                zIndex: 0, pointerEvents: "none",
               }}>
                 <div style={{
                   position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%",
@@ -5616,44 +5616,44 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   animation: isHovered ? "hw-shimmer 1.2s ease-in-out infinite" : "none",
                 }} />
               </div>
-              
-              {/* White circular background — z-0, stays behind mascot */}
+
+              {/* White circular background — visible behind mascot */}
               <div style={{
                 width: 52, height: 52, borderRadius: "50%",
                 background: "rgba(255,255,255,0.97)",
-                position: "absolute", 
-                bottom: 4,
-                left: 8,
-                zIndex: 0,
+                position: "absolute",
+                top: 3,
+                left: 3,
+                zIndex: 1, pointerEvents: "none",
                 boxShadow: "0 4px 14px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
               }} />
 
-              {/* Mascot — 1.5x the white circle, popping out from top */}
+              {/* Mascot — fully contained, sitting on white circle, popping up slightly */}
               <SplineMascot
-                width={78}
-                height={78}
+                width={72}
+                height={72}
                 borderRadius={0}
                 style={{
                   position: "absolute",
-                  bottom: -4,
-                  left: -6,
+                  top: -14,
+                  left: -10,
                   zIndex: 10,
                   overflow: "visible",
-                  filter: "drop-shadow(0 10px 10px rgba(0,0,0,0.2))",
+                  filter: "drop-shadow(0 8px 10px rgba(0,0,0,0.18))",
                   transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
-                  transform: isHovered ? "translateY(-6px) scale(1.06)" : "translateY(0) scale(1)",
+                  transform: isHovered ? "translateY(-4px) scale(1.06)" : "translateY(0) scale(1)",
+                  pointerEvents: "none",
                 }}
               />
-              
+
               <span style={{
                 color: "#fff",
-                fontSize: 12,
-                fontWeight: 600,
+                fontSize: 13,
+                fontWeight: 700,
                 textShadow: "0 1px 3px rgba(0,0,0,0.2)",
                 letterSpacing: "-0.3px",
-                position: "relative", 
-                zIndex: 1,
-                marginLeft: 8,
+                position: "relative",
+                zIndex: 2,
               }}>
                 <span className="hw-fab-text">Чат</span>
               </span>
