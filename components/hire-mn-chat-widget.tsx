@@ -5551,7 +5551,6 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           display: "flex",
           alignItems: "flex-end",
           justifyContent: "flex-end",
-          // Generous padding so the mascot's overflow is fully visible
           paddingTop: 50,
           paddingBottom: 30,
           paddingLeft: 40,
@@ -5559,9 +5558,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           width: "100%",
           height: "100%",
           boxSizing: "border-box",
+          // CRITICAL: this container spans the whole widget root. Block all
+          // pointer events here so the page behind it remains clickable,
+          // then re-enable only on the actual FAB button below.
+          pointerEvents: "none",
         }}>
           {/* Animated ring effects */}
-          <div style={{ position: "relative" }}>
+          <div style={{ position: "relative", pointerEvents: "none" }}>
             <div style={{
               position: "absolute", inset: -8, borderRadius: 30,
               background: "linear-gradient(135deg, rgba(232,84,26,0.2), rgba(255,140,66,0.15))",
@@ -5589,6 +5592,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 animation: isHovered ? "hw-gradient-shift 3s ease infinite" : "none",
                 border: "1.5px solid rgba(255,255,255,0.25)",
                 cursor: "pointer",
+                // Re-enable click intake here — only this button takes events
+                pointerEvents: "auto",
                 display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0,
                 // Reserve space on the left for the mascot bubble (which sits outside)
                 paddingLeft: 68, paddingRight: 18,
