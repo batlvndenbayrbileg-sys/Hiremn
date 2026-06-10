@@ -5551,17 +5551,14 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           display: "flex",
           alignItems: "flex-end",
           justifyContent: "flex-end",
-          // Tight padding now that iframe is sized closely to button
-          paddingTop: 24,
-          paddingBottom: 14,
-          paddingLeft: 16,
-          paddingRight: 12,
+          // Tight: iframe is 145x95, leave just enough room for mascot pop-up
+          paddingTop: 18,
+          paddingBottom: 6,
+          paddingLeft: 4,
+          paddingRight: 4,
           width: "100%",
           height: "100%",
           boxSizing: "border-box",
-          // CRITICAL: this container spans the whole widget root. Block all
-          // pointer events here so the page behind it remains clickable,
-          // then re-enable only on the actual FAB button below.
           pointerEvents: "none",
         }}>
           {/* Animated ring effects */}
@@ -5596,8 +5593,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 // Re-enable click intake here — only this button takes events
                 pointerEvents: "auto",
                 display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0,
-                // Reserve space on the left for the mascot bubble (which sits outside)
-                paddingLeft: 68, paddingRight: 18,
+                // Reserve space on the left for the mascot bubble
+                paddingLeft: 58, paddingRight: 16,
                 flexShrink: 0, position: "relative",
                 boxShadow: isHovered
                   ? `0 12px 32px rgba(232,84,26,0.4),
@@ -5625,29 +5622,29 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
               {/* White circular background — visible behind mascot */}
               <div style={{
-                width: 52, height: 52, borderRadius: "50%",
+                width: 46, height: 46, borderRadius: "50%",
                 background: "rgba(255,255,255,0.97)",
                 position: "absolute",
-                top: 3,
-                left: 3,
+                top: 6,
+                left: 6,
                 zIndex: 1, pointerEvents: "none",
                 boxShadow: "0 4px 14px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
               }} />
 
-              {/* Mascot — fully contained, sitting on white circle, popping up slightly */}
+              {/* Mascot — fully contained, popping up slightly */}
               <SplineMascot
-                width={72}
-                height={72}
+                width={62}
+                height={62}
                 borderRadius={0}
                 style={{
                   position: "absolute",
-                  top: -14,
-                  left: -10,
+                  top: -10,
+                  left: -2,
                   zIndex: 10,
                   overflow: "visible",
-                  filter: "drop-shadow(0 8px 10px rgba(0,0,0,0.18))",
+                  filter: "drop-shadow(0 6px 8px rgba(0,0,0,0.18))",
                   transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
-                  transform: isHovered ? "translateY(-4px) scale(1.06)" : "translateY(0) scale(1)",
+                  transform: isHovered ? "translateY(-3px) scale(1.06)" : "translateY(0) scale(1)",
                   pointerEvents: "none",
                 }}
               />
