@@ -19,8 +19,10 @@
   // Note: the 3D Spline mascot has ~25px overflow on all sides plus a -4px
   // bottom offset, so the iframe must be tall/wide enough to contain it,
   // otherwise the mascot gets clipped at the iframe edge.
-  var BUTTON_SIZE = "320px";
-  var BUTTON_HEIGHT = "170px";
+  // Closed-state iframe size: just large enough to contain the FAB button
+  // + mascot pop-up. Anything bigger blocks clicks on the page beneath.
+  var BUTTON_SIZE = "190px";
+  var BUTTON_HEIGHT = "100px";
 
   // ── Wrapper div (fixed, bottom-right with extra margin) ────────────────────────────────────
   var wrapper = document.createElement("div");
