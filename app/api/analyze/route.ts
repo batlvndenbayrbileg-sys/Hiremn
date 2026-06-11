@@ -153,8 +153,19 @@ export async function POST(request: Request) {
 
     // ── Extract canonical values ─────────────────────────────────────────
     const actualResultLabel: string = resultObj.result || assessment.result || ''
-    const actualScore: number = Number(resultObj.point ?? resultObj.value ?? assessment.point ?? 0) || 0
-    const actualMaxScore: number = Number(resultObj.total ?? assessment.totalPoint ?? assessment.total ?? 0) || 0
+    // Score (achieved): result.point is canonical. result.value is fallback.
+    // Do NOT fall back to summing details — that's the total max for profile
+    // tests where every distributed point counts and would show e.g. "70/70".
+    const actualScore: number =
+      Number(resultObj.point ?? resultObj.value ?? assessment.point ?? 0) || 0
+    // Max possible: assessment.totalPoint is the canonical test max (what the
+    // official report displays). result.total can be the achieved sum on some
+    // tests and is NOT reliable — use only as last resort.
+    const actualMaxScore: number =
+      Number(assessment.totalPoint ?? assessment.total ?? 0) ||
+      Number(resultObj.total ?? 0) ||
+      0
+    console.log('[analyze] score raw:', { resultPoint: resultObj.point, resultValue: resultObj.value, resultTotal: resultObj.total, assessmentTotalPoint: assessment.totalPoint, picked: { score: actualScore, max: actualMaxScore } })
     const assessmentDescription: string = stripHtml(assessment.description || '')
     const assessmentUsage: string = stripHtml(assessment.usage || '')
     const assessmentMeasure: string = stripHtml(assessment.measure || '')
@@ -267,7 +278,9 @@ export async function POST(request: Request) {
 
 ═══ БОДИТ ҮР ДҮН (АНТЫ ӨӨРЧИЛБӨЛ БУРУУ) ═══
 Үр дүнгийн нэр: ${actualResultLabel || 'тодорхойгүй'}
-Нийт оноо: ${actualScore}/${actualMaxScore} (${actualPct}%)
+${testType === 'profile'
+  ? `Үндсэн төрөл: ${dimensions[0]?.label || actualResultLabel}`
+  : `Нийт оноо: ${actualScore}/${actualMaxScore} (${actualPct}%)`}
 ${cfg.hasRiskFraming ? `Эрсдэлийн түвшин: ${actualRiskLevel}` : ''}
 
 ═══ DIMENSION ОНОО (тус бүр) ═══
@@ -342,16 +355,30 @@ JSON буцаа (markdown ҮГҮЙ):
 
     // ── HARD OVERRIDE: real values are source of truth ─────────────────────
     data.testType = testType
-    if (actualMaxScore > 0) {
+    data.displayLabel = actualResultLabel
+    data.riskLevel = actualRiskLevel
+    data.summary = {
+      title: actualResultLabel || data.summary?.title || 'Дүн шинжилгээ',
+      description: data.summary?.description || assessmentDescription.slice(0, 200) || 'Үр дүн боловсруулагдсан.',
+    }
+
+    if (testType === 'profile' && dimensions.length > 0) {
+      // Profile tests: no single score. Use dominant dimension % as healthScore
+      // for the ring colour, but don't expose displayScore/Max numerics.
+      const top = dimensions[0]
+      data.healthScore = top.pct
+      data.displayScore = undefined
+      data.displayMaxScore = undefined
+    } else if (actualMaxScore > 0 && actualScore > 0) {
+      // Score-based tests (screening/cognitive/aptitude): show real numerics
       data.healthScore = actualPct
       data.displayScore = actualScore
       data.displayMaxScore = actualMaxScore
-      data.displayLabel = actualResultLabel
-      data.riskLevel = actualRiskLevel
-      data.summary = {
-        title: actualResultLabel || data.summary?.title || 'Дүн шинжилгээ',
-        description: data.summary?.description || assessmentDescription.slice(0, 200) || 'Үр дүн боловсруулагдсан.',
-      }
+    } else if (actualMaxScore > 0) {
+      // Edge case: score=0 with valid max (someone got 0 — show the zero)
+      data.healthScore = 0
+      data.displayScore = 0
+      data.displayMaxScore = actualMaxScore
     }
 
     // Force dimensions metrics from real data
