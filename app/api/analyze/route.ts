@@ -179,42 +179,83 @@ export async function POST(request: Request) {
     type Dim = { label: string; score: number; maxScore: number; pct: number }
     let dimensions: Dim[] = []
 
+    // Try to derive a per-dimension max from many possible fields.
+    // Different test types put it in different places; we try them in order.
+    const extractDimMax = (d: any): number => {
+      const candidates = [
+        d?.total, d?.totalPoint, d?.maxPoint, d?.maxValue, d?.max,
+        d?.point_total, d?.pointTotal, d?.full, d?.outOf,
+        d?.category?.total, d?.category?.totalPoint, d?.category?.maxValue,
+      ]
+      for (const c of candidates) {
+        const n = Number(c)
+        if (Number.isFinite(n) && n > 0) return n
+      }
+      return 0
+    }
+
     if (Array.isArray(resultObj.details) && resultObj.details.length > 0) {
-      // Use server-computed dimension scores. Each item: { value, cause, ... }
       const rawDims = resultObj.details
         .map((d: any) => ({
           label: String(d.value || '').trim(),
           score: Number(d.cause ?? d.point ?? 0) || 0,
+          rawMax: extractDimMax(d),
+          orig: d,
         }))
-        .filter((d: any) => d.label && d.score >= 0)
-      const maxDimScore = Math.max(...rawDims.map((d: { score: number }) => d.score), 1)
-      dimensions = rawDims.map((d: { label: string; score: number }) => ({
-        label: d.label,
-        score: d.score,
-        maxScore: maxDimScore,
-        pct: Math.round((d.score / maxDimScore) * 100),
-      }))
+        .filter((d: any) => d.label)
+
+      // Pick max with priority:
+      //   1. Per-dim max from detail fields (rawMax)
+      //   2. Distribute assessment.totalPoint evenly if it cleanly divides
+      //   3. Use the highest dim score as max (last resort — known imperfect)
+      const evenSplit = actualMaxScore > 0 && rawDims.length > 0
+        ? actualMaxScore / rawDims.length
+        : 0
+      const allHaveSameDimMax = rawDims.every((d: { rawMax: number }) => d.rawMax > 0)
+      const fallbackMax = Math.max(...rawDims.map((d: { score: number }) => d.score), 1)
+
+      dimensions = rawDims.map((d: { label: string; score: number; rawMax: number }) => {
+        const m = d.rawMax > 0 ? d.rawMax
+                : (Number.isInteger(evenSplit) && evenSplit > 0) ? evenSplit
+                : fallbackMax
+        return {
+          label: d.label,
+          score: d.score,
+          maxScore: m,
+          pct: m > 0 ? Math.round((d.score / m) * 100) : 0,
+        }
+      })
+
+      console.log('[analyze] dim source: details. sample:', JSON.stringify(resultObj.details[0]), '| evenSplit:', evenSplit, '| allHaveSameDimMax:', allHaveSameDimMax)
     }
 
-    // Fallback: derive dimensions from answers grouped by questionCategory
+    // Fallback: derive dimensions from answers grouped by questionCategory.
+    // Compute per-dim max from per-question max if available.
     if (dimensions.length === 0 && Array.isArray(answersGrouped) && answersGrouped.length > 1) {
-      const dimMap = new Map<string, { sum: number; count: number }>()
+      const dimMap = new Map<string, { label: string; sum: number; max: number; count: number }>()
       for (const grp of answersGrouped) {
         const catId = grp?.questionCategoryId ?? 'misc'
+        const catName: string = grp?.questionCategoryName || grp?.category?.name || `Бүлэг ${catId}`
         const sum = (grp?.answers || []).reduce((acc: number, a: any) => acc + (Number(a?.point) || 0), 0)
-        const cur = dimMap.get(String(catId)) || { sum: 0, count: 0 }
+        const maxSum = (grp?.answers || []).reduce((acc: number, a: any) => {
+          const m = Number(a?.question?.point ?? a?.question?.maxValue ?? a?.maxPoint ?? 0)
+          return acc + (Number.isFinite(m) && m > 0 ? m : 0)
+        }, 0)
+        const cur = dimMap.get(String(catId)) || { label: catName, sum: 0, max: 0, count: 0 }
         cur.sum += sum
+        cur.max += maxSum
         cur.count += grp?.answers?.length || 0
         dimMap.set(String(catId), cur)
       }
       if (dimMap.size >= 2) {
-        const arr = Array.from(dimMap.entries()).map(([label, v]) => ({ label: `Бүлэг ${label}`, score: v.sum }))
-        const maxDimScore = Math.max(...arr.map(d => d.score), 1)
+        const arr = Array.from(dimMap.values()).map(v => ({
+          label: v.label,
+          score: v.sum,
+          maxScore: v.max > 0 ? v.max : Math.max(v.sum, 1),
+        }))
         dimensions = arr.map(d => ({
-          label: d.label,
-          score: d.score,
-          maxScore: maxDimScore,
-          pct: Math.round((d.score / maxDimScore) * 100),
+          ...d,
+          pct: d.maxScore > 0 ? Math.round((d.score / d.maxScore) * 100) : 0,
         }))
       }
     }
