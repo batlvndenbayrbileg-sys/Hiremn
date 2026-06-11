@@ -234,11 +234,11 @@
         credentials: options.credentials || "omit"
       };
 
-      // Fetch exam metadata + user answers in parallel
-      var examUrl = API_BASE + "/api/v1/exam/exam/" + encodeURIComponent(code);
-      var answerUrl = API_BASE + "/api/v1/userAnswer/code/code/" + encodeURIComponent(code);
+      // Single endpoint — full scored report with assessment metadata, result
+      // details (per-dimension scores), and grouped answers.
+      var reportUrl = API_BASE + "/api/v1/userAnswer/report/" + encodeURIComponent(code) + "/full";
 
-      console.log("[HireMnChat] Fetching:", { examUrl: examUrl, answerUrl: answerUrl, hasToken: !!options.token });
+      console.log("[HireMnChat] Fetching:", { reportUrl: reportUrl, hasToken: !!options.token });
 
       function fetchWithDiagnostics(url, label) {
         return fetch(url, fetchOpts).then(function(r) {
@@ -259,34 +259,24 @@
         });
       }
 
-      return Promise.all([
-        fetchWithDiagnostics(examUrl, "exam"),
-        fetchWithDiagnostics(answerUrl, "userAnswer")
-      ]).then(function(results) {
-        var examRes = results[0];
-        var answerRes = results[1];
-        var examData = (examRes && !examRes.__error) ? examRes : null;
-        var answerData = (answerRes && !answerRes.__error) ? answerRes : null;
-
-        if (!examData && !answerData) {
-          var details = [];
-          if (examRes && examRes.__error) details.push("exam: HTTP " + examRes.status);
-          if (answerRes && answerRes.__error) details.push("userAnswer: HTTP " + answerRes.status);
-          throw new Error("Тайлангийн өгөгдөл олдсонгүй (" + details.join(", ") + ")");
+      return fetchWithDiagnostics(reportUrl, "report").then(function(reportRes) {
+        if (reportRes.__error) {
+          throw new Error("Тайлан татахад алдаа гарлаа (HTTP " + reportRes.status + ")");
         }
+        // API shape: { succeed: true, payload: { exam, assessment, result, answers, ... } }
+        var payload = reportRes.payload || reportRes;
+        var assessment = payload.assessment || {};
+        var resultObj = payload.result || {};
 
-        var testName = (examData && (examData.name || examData.title || examData.testName)) ||
-                       (options.testName) ||
-                       "Тест";
+        var testName = assessment.name || resultObj.assessmentName || options.testName || "Тест";
 
         iframe.contentWindow.postMessage({
           type: "HIREMN_AI_ANALYSIS",
           payload: {
             reportTitle: testName,
-            reportData: { exam: examData, answers: answerData, code: code },
-            analysisResults: (examData && (examData.results || examData.scores)) ||
-                             (answerData && (answerData.results || answerData.scores)) ||
-                             examData || answerData,
+            // reportData kept for backward compat with existing widget code
+            reportData: { report: payload, code: code },
+            analysisResults: resultObj,
             prompt: options.prompt ||
               "Миний тестийн үр дүнг дэлгэрэнгүй задлан шинжилж: 1) Гол дүгнэлт, 2) Давуу/сул тал, 3) Практик зөвлөмж, 4) Цаашид сайжруулах алхмууд гарган гаргаж өгнө үү."
           }

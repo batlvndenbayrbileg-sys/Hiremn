@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 
+type TestType = 'profile' | 'cognitive' | 'screening' | 'aptitude' | 'generic'
+
 interface AnalysisData {
+  testType?: TestType               // Drives section visibility & framing
   healthScore: number               // 0-100 percentage (used for ring fill / colour tier)
   displayScore?: number             // Raw test score (e.g. 5)
   displayMaxScore?: number          // Raw test max (e.g. 10)
@@ -755,7 +758,15 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
     grad: string
     emoji: string
   }>(null)
-  const PAGES = ["Тоймлол", "AI Дүн", "30 Хоног"]
+  // Test type determines whether the 30-day action page is shown
+  const testType: TestType = data.testType || 'generic'
+  const hasActionPage = (data.roadmap?.length ?? 0) > 0 || (data.todayGoals?.length ?? 0) > 0
+  const PAGE_LABEL_3 = testType === 'profile' ? 'Хөгжүүлэх'
+                     : testType === 'cognitive' ? 'Дадлага'
+                     : testType === 'aptitude' ? 'Карьер'
+                     : '30 Хоног'
+  const PAGES = hasActionPage ? ["Тоймлол", "AI Дүн", PAGE_LABEL_3] : ["Тоймлол", "AI Дүн"]
+  const maxPage = PAGES.length - 1
   const kpi = data.kpiLabels || {}
   const todayGoals = data.todayGoals || data.roadmap[0]?.tasks.slice(0, 3) || []
   const statCards = data.statCards || []
@@ -792,7 +803,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
   const onTS = (e: React.TouchEvent) => { touchX.current = e.touches[0].clientX }
   const onTE = (e: React.TouchEvent) => {
     const d = touchX.current - e.changedTouches[0].clientX
-    if (Math.abs(d) > 50) { if (d > 0 && page < 2) setPage(p => p + 1); if (d < 0 && page > 0) setPage(p => p - 1) }
+    if (Math.abs(d) > 50) { if (d > 0 && page < maxPage) setPage(p => p + 1); if (d < 0 && page > 0) setPage(p => p - 1) }
   }
 
   const color = scoreColor(data.healthScore)
@@ -1499,7 +1510,8 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               </div>
             </div>
 
-            {/* ─── 30-DAY PLAN CTA BANNER ──────────────────────────────── */}
+            {/* ─── ACTION PAGE CTA BANNER (hidden when no action page) ─── */}
+            {hasActionPage && (
             <div style={{
               background: "linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)",
               borderRadius: 24, padding: "16px",
@@ -1509,15 +1521,15 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               position: "relative", overflow: "hidden",
               marginTop: 10,
             }}>
-              <div style={{ fontSize: 44, flexShrink: 0, lineHeight: 1 }}>📅</div>
+              <div style={{ fontSize: 44, flexShrink: 0, lineHeight: 1 }}>{testType === 'profile' ? '🌱' : testType === 'cognitive' ? '🧠' : testType === 'aptitude' ? '🎯' : '📅'}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontSize: 13, fontWeight: 900, color: "#7C2D12", margin: "0 0 3px", lineHeight: 1.3 }}>
-                  30 хоногийн төлөвлөгөө эхлүүлэх үү?
+                  {testType === 'profile' ? 'Profile-аа хөгжүүлэх үү?' : testType === 'cognitive' ? 'Чадвараа сайжруулах уу?' : testType === 'aptitude' ? 'Карьерын алхмууд харах уу?' : '30 хоногийн төлөвлөгөө эхлүүлэх үү?'}
                 </p>
                 <p style={{ fontSize: 10, color: "#9A3412", margin: "0 0 8px", lineHeight: 1.4 }}>
                   Алхам алхмаар хамтдаа урагшилцгаая! 🚀
                 </p>
-                <button onClick={() => setPage(2)} style={{
+                <button onClick={() => setPage(maxPage)} style={{
                   background: "linear-gradient(135deg, #F97316, #EA580C)",
                   border: "none", borderRadius: 999,
                   padding: "7px 16px", color: "#fff",
@@ -1541,6 +1553,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                 </svg>
               </div>
             </div>
+            )}
           </div>
           )
         })()}
