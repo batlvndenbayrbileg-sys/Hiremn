@@ -67,28 +67,39 @@ function detectTestType(opts: {
   const desc = (assessment?.description || '').toLowerCase()
   const usage = (assessment?.usage || '').toLowerCase()
   const combined = `${name} ${desc} ${usage}`
+  const author = (assessment?.author || '').toLowerCase()
 
-  // Profile/personality — 4+ named dimensions with comparable scores
-  // (Belbin 9 roles, DISC 4, Big5 5, MBTI 4 dichotomies, Holland 6)
-  if (details.length >= 4) return 'profile'
+  // ── Profile: named personality typings ────────────────────────────────
+  // Detected by explicit profile-test keywords OR known author / dimension
+  // patterns. Just having "multiple dimensions" is NOT enough — RSES has
+  // 2 sub-scales but is a screening test, not a profile typology.
+  const profileKeywords = /(disc|mbti|big.?5|big.?five|belbin|holland|enneagram|зан чанар(?!ын.*үнэлгээ)|personality.*type|багийн дүр|профайл|profile)/i
+  const profileAuthors = /(belbin|меридит белбин|holland|майерс|бриггс|cattell)/i
+  if (profileKeywords.test(combined) || profileAuthors.test(author)) return 'profile'
+  // 5+ named dimensions where each dimension is a TYPE label (not a sub-scale)
+  // is also profile (DISC=4, Big5=5, Belbin=9, MBTI dichotomies, Holland=6)
+  if (details.length >= 5) return 'profile'
 
-  // Screening — addiction, stress, depression, anxiety, burnout keywords
-  if (/(зависим|архи|тамхи|стресс|сэтгэл.*гутрал|түгш|burnout|хамаарал|депресс|анхаарал.*алда)/.test(combined)) {
+  // ── Screening: well-being scales, mental-health, addiction ────────────
+  // RSES (self-esteem), Beck depression, GAD-7 anxiety, nicotine/alcohol
+  // dependency, stress/burnout scales. Low score on these often = concern.
+  if (/(зависим|архи|тамхи|стресс|сэтгэл.*гутрал|түгш|burnout|хамаарал|депресс|анхаарал.*алда|үнэлэмж|өөрийгөө үнэлэх|rses|beck|gad|phq|self.?esteem|depression|anxiety)/.test(combined)) {
     return 'screening'
   }
 
-  // Cognitive — IQ, logic, memory, attention, reasoning keywords
-  if (/(iq|логик|оюун|танин мэдэхүй|санах|анхаарал|шуурхай|тооцоо|reasoning)/.test(combined)) {
+  // ── Cognitive: IQ, logic, reasoning ───────────────────────────────────
+  if (/(iq|логик|оюун|танин мэдэхүй|санах|анхаарал.*шалгах|шуурхай.*бодол|тооцоо|reasoning|cognitive)/.test(combined)) {
     return 'cognitive'
   }
 
-  // Aptitude — career, profession, skill, interest, vocational
-  if (/(мэргэжил|карьер|ур чадвар|сонирхол|чиглэл|career|vocational|aptitude|holland)/.test(combined)) {
+  // ── Aptitude: career, vocational ──────────────────────────────────────
+  if (/(мэргэжил|карьер|ур чадвар(?!.*үнэлэх)|сонирхол|чиглэл|career|vocational|aptitude)/.test(combined)) {
     return 'aptitude'
   }
 
-  // Profile with 2-3 dimensions still counts
-  if (details.length >= 2) return 'profile'
+  // 2-4 dimensions with no profile keywords → screening with sub-scales
+  // (e.g. RSES has 2 sub-scales of one underlying construct)
+  if (details.length >= 2) return 'screening'
 
   return 'generic'
 }
@@ -153,19 +164,52 @@ export async function POST(request: Request) {
 
     // ── Extract canonical values ─────────────────────────────────────────
     const actualResultLabel: string = resultObj.result || assessment.result || ''
-    // Score (achieved): result.point is canonical. result.value is fallback.
-    // Do NOT fall back to summing details — that's the total max for profile
-    // tests where every distributed point counts and would show e.g. "70/70".
+
+    // ── Compute canonical score + max from ANSWERS (source of truth) ──────
+    // Why: assessment.totalPoint is unreliable across test types.
+    //   - Belbin (partialScore=true): totalPoint=70 IS the max (correct)
+    //   - RSES (partialScore=false): totalPoint=10 is the QUESTION COUNT, not max
+    // We compute from answers and reconcile with reported fields.
+    const allAnswerPoints: number[] = []
+    for (const grp of (answersGrouped || [])) {
+      for (const a of (grp?.answers || [])) {
+        const p = Number(a?.point)
+        if (Number.isFinite(p)) allAnswerPoints.push(p)
+      }
+    }
+    const sumAnswerPoints = allAnswerPoints.reduce((s, p) => s + p, 0)
+    const maxPointSeen = allAnswerPoints.length > 0 ? Math.max(...allAnswerPoints) : 0
+    const totalQuestions = allAnswerPoints.length
+    // Likert-style inference: if every Q can score up to maxPointSeen, total max = Qs × max
+    const inferredLikertMax = totalQuestions * maxPointSeen
+
+    // Score: prefer result.value (used for non-partialScore tests like RSES),
+    // then result.point, then summed answers
     const actualScore: number =
-      Number(resultObj.point ?? resultObj.value ?? assessment.point ?? 0) || 0
-    // Max possible: assessment.totalPoint is the canonical test max (what the
-    // official report displays). result.total can be the achieved sum on some
-    // tests and is NOT reliable — use only as last resort.
-    const actualMaxScore: number =
-      Number(assessment.totalPoint ?? assessment.total ?? 0) ||
-      Number(resultObj.total ?? 0) ||
+      Number(resultObj.value ?? resultObj.point ?? assessment.point ?? 0) ||
+      sumAnswerPoints ||
       0
-    console.log('[analyze] score raw:', { resultPoint: resultObj.point, resultValue: resultObj.value, resultTotal: resultObj.total, assessmentTotalPoint: assessment.totalPoint, picked: { score: actualScore, max: actualMaxScore } })
+
+    // Max: trust assessment.totalPoint ONLY if it's >= the achieved score and
+    // we have no better signal. Otherwise prefer inferredLikertMax which is
+    // grounded in real answer-level data.
+    const reportedMax = Number(assessment.totalPoint ?? assessment.total ?? 0) || 0
+    const reportedMaxLooksLikeCount = reportedMax > 0 && reportedMax < actualScore
+    const actualMaxScore: number =
+      reportedMaxLooksLikeCount && inferredLikertMax > 0 ? inferredLikertMax
+      : reportedMax > 0 ? reportedMax
+      : inferredLikertMax > 0 ? inferredLikertMax
+      : Number(resultObj.total ?? 0) || 0
+
+    console.log('[analyze] score:', {
+      resultPoint: resultObj.point,
+      resultValue: resultObj.value,
+      resultTotal: resultObj.total,
+      assessmentTotalPoint: assessment.totalPoint,
+      partialScore: assessment.partialScore,
+      sumAnswerPoints, maxPointSeen, totalQuestions, inferredLikertMax,
+      picked: { score: actualScore, max: actualMaxScore },
+    })
     const assessmentDescription: string = stripHtml(assessment.description || '')
     const assessmentUsage: string = stripHtml(assessment.usage || '')
     const assessmentMeasure: string = stripHtml(assessment.measure || '')
@@ -200,23 +244,26 @@ export async function POST(request: Request) {
           label: String(d.value || '').trim(),
           score: Number(d.cause ?? d.point ?? 0) || 0,
           rawMax: extractDimMax(d),
-          orig: d,
         }))
         .filter((d: any) => d.label)
 
-      // Pick max with priority:
-      //   1. Per-dim max from detail fields (rawMax)
-      //   2. Distribute assessment.totalPoint evenly if it cleanly divides
-      //   3. Use the highest dim score as max (last resort — known imperfect)
+      // Per-dim max priority:
+      //   1. Explicit per-detail max field (rawMax) — best
+      //   2. Equal split of total max across dims — works for symmetric tests
+      //      like RSES where 2 sub-scales each have N questions × max-per-Q
+      //   3. Highest detail score (visible relativeness only) — last resort
       const evenSplit = actualMaxScore > 0 && rawDims.length > 0
         ? actualMaxScore / rawDims.length
         : 0
-      const allHaveSameDimMax = rawDims.every((d: { rawMax: number }) => d.rawMax > 0)
+      const dimsSum = rawDims.reduce((s: number, d: { score: number }) => s + d.score, 0)
+      // Equal split is valid only if the sum of dim scores doesn't exceed the
+      // total — otherwise we'd display impossible percentages.
+      const evenSplitValid = evenSplit > 0 && rawDims.every((d: { score: number }) => d.score <= evenSplit)
       const fallbackMax = Math.max(...rawDims.map((d: { score: number }) => d.score), 1)
 
       dimensions = rawDims.map((d: { label: string; score: number; rawMax: number }) => {
         const m = d.rawMax > 0 ? d.rawMax
-                : (Number.isInteger(evenSplit) && evenSplit > 0) ? evenSplit
+                : evenSplitValid ? evenSplit
                 : fallbackMax
         return {
           label: d.label,
@@ -226,7 +273,7 @@ export async function POST(request: Request) {
         }
       })
 
-      console.log('[analyze] dim source: details. sample:', JSON.stringify(resultObj.details[0]), '| evenSplit:', evenSplit, '| allHaveSameDimMax:', allHaveSameDimMax)
+      console.log('[analyze] dims:', { source: 'details', evenSplit, evenSplitValid, dimsSum, dims: dimensions.map(d => `${d.label}: ${d.score}/${d.maxScore}`) })
     }
 
     // Fallback: derive dimensions from answers grouped by questionCategory.
