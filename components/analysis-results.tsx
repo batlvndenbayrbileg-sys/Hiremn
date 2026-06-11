@@ -6,7 +6,9 @@ type TestType = 'profile' | 'cognitive' | 'screening' | 'aptitude' | 'generic'
 
 interface AnalysisData {
   testType?: TestType               // Drives section visibility & framing
-  healthScore: number               // 0-100 percentage (used for ring fill / colour tier)
+  scoreDirection?: 'high-good' | 'low-good' | 'profile'  // Score semantics
+  outcomeQuality?: 'positive' | 'neutral' | 'concerning' // Outcome judgment
+  healthScore: number               // 0-100 WELLBEING percentage (NOT raw % — already inverted for low-good tests)
   displayScore?: number             // Raw test score (e.g. 5)
   displayMaxScore?: number          // Raw test max (e.g. 10)
   displayLabel?: string             // Verbatim label from test report
@@ -1156,32 +1158,46 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
 
           return (
           <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
-            {/* ─── HERO: Score-themed Banner (color shifts based on score) ─── */}
+            {/* ─── HERO: outcome-quality themed (not raw % themed) ─── */}
             {(() => {
-              const s = data.healthScore
-              // 3-tier theme: green (good) / amber (mid) / red (low)
-              const theme = s >= 70
+              const s = data.healthScore  // wellbeing
+              const oq = data.outcomeQuality
+              // Prefer explicit outcomeQuality when available; fall back to score tiers
+              const tier: 'positive' | 'neutral' | 'concerning' =
+                oq === 'positive' ? 'positive'
+                : oq === 'concerning' ? 'concerning'
+                : oq === 'neutral' ? 'neutral'
+                : s >= 70 ? 'positive' : s >= 40 ? 'neutral' : 'concerning'
+              const labelByType: Record<TestType, { good: string; mid: string; bad: string }> = {
+                profile:   { good: 'Тод profile',       mid: 'Тэнцвэртэй profile', bad: 'Тэнцвэрт анхаарах' },
+                cognitive: { good: 'Сайн чадвар',       mid: 'Дундаж',             bad: 'Хөгжүүлэх боломж' },
+                screening: { good: 'Эерэг үр дүн',      mid: 'Анхаарал хандуул',   bad: 'Тусламж шаарддаг' },
+                aptitude:  { good: 'Тохиромжтой',       mid: 'Боломжтой',          bad: 'Хөгжүүлэх ёстой' },
+                generic:   { good: 'Эерэг үр дүн',      mid: 'Тэнцвэртэй',         bad: 'Анхаарал хандуул' },
+              }
+              const labels = labelByType[testType]
+              const theme = tier === 'positive'
                 ? {
                     bg: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 50%, #BBF7D0 100%)",
                     border: "#BBF7D0", shadow: "rgba(34,197,94,0.12)",
                     label: "#059669", num: "#064E3B", body: "#065F46",
                     chip: "💚", decor: ["#86EFAC", "#4ADE80", "#22C55E"],
-                    progressLabel: "Маш сайн ахиц",
+                    progressLabel: labels.good,
                   }
-                : s >= 40
+                : tier === 'neutral'
                 ? {
                     bg: "linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 50%, #FDE68A 100%)",
                     border: "#FDE68A", shadow: "rgba(245,158,11,0.12)",
                     label: "#B45309", num: "#78350F", body: "#92400E",
-                    chip: "⚠️", decor: ["#FCD34D", "#FBBF24", "#F59E0B"],
-                    progressLabel: "Анхаарал хандуул",
+                    chip: "⚖️", decor: ["#FCD34D", "#FBBF24", "#F59E0B"],
+                    progressLabel: labels.mid,
                   }
                 : {
                     bg: "linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 50%, #FECACA 100%)",
                     border: "#FECACA", shadow: "rgba(239,68,68,0.12)",
                     label: "#B91C1C", num: "#7F1D1D", body: "#991B1B",
-                    chip: "🔴", decor: ["#FCA5A5", "#F87171", "#EF4444"],
-                    progressLabel: "Шуурхай арга хэмжээ",
+                    chip: "🫶", decor: ["#FCA5A5", "#F87171", "#EF4444"],
+                    progressLabel: labels.bad,
                   }
               return (
               <div style={{

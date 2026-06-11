@@ -231,18 +231,57 @@ export async function POST(request: Request) {
       pct: actualPct,
     })
     const cfg = TYPE_CONFIG[testType]
-    console.log('[analyze] testType:', testType, '| dimensions:', dimensions.length, '| label:', actualResultLabel, '| pct:', actualPct)
 
-    // ── Risk level (only for screening types) ──────────────────────────────
+    // ── Score semantic direction ──────────────────────────────────────────
+    // 'high-good' — IQ, aptitude (higher score = better)
+    // 'low-good'  — screening (higher score = more problem = worse)
+    // 'profile'   — no direction, dominant dimension is the result
+    type ScoreDirection = 'high-good' | 'low-good' | 'profile'
+    const scoreDirection: ScoreDirection =
+      testType === 'profile' ? 'profile' :
+      testType === 'screening' ? 'low-good' :
+      'high-good'
+
+    // ── Outcome quality (positive / neutral / concerning) ─────────────────
+    // Derived from result label keywords + score direction.
+    // Examples:
+    //   nicotine 2/10 + "Маш бага хамааралтай" + low-good → positive
+    //   nicotine 8/10 + "Хүнд хамааралтай"    + low-good → concerning
+    //   IQ 9/10 + "Маш сайн"                  + high-good → positive
     const lowerLabel = actualResultLabel.toLowerCase()
-    let actualRiskLevel: 'Low' | 'Medium' | 'High' = 'Medium'
-    if (cfg.hasRiskFraming) {
-      if (lowerLabel.includes('бага') || lowerLabel.includes('сул') || actualPct <= 33) actualRiskLevel = 'Low'
-      else if (lowerLabel.includes('их') || lowerLabel.includes('өндөр') || lowerLabel.includes('хүнд') || actualPct >= 67) actualRiskLevel = 'High'
+    const labelIsPositive = /(бага|сул|тайван|хэвийн|тэнцвэр|сайн|өндөр.*чадвар|зөв)/.test(lowerLabel)
+    const labelIsConcerning = /(их|өндөр|хүнд|маш их|эрсдэл|анхаарал.*шаард|муу|сул(?!.*хамаарал))/.test(lowerLabel)
+
+    let outcomeQuality: 'positive' | 'neutral' | 'concerning' = 'neutral'
+    if (scoreDirection === 'low-good') {
+      // Low score = good outcome (low dependency/stress/anxiety)
+      if (actualPct <= 33 || (labelIsPositive && !labelIsConcerning)) outcomeQuality = 'positive'
+      else if (actualPct >= 67 || labelIsConcerning) outcomeQuality = 'concerning'
+    } else if (scoreDirection === 'high-good') {
+      // High score = good outcome (high ability/fit)
+      if (actualPct >= 67 || (labelIsPositive && !labelIsConcerning)) outcomeQuality = 'positive'
+      else if (actualPct <= 33 || labelIsConcerning) outcomeQuality = 'concerning'
     } else {
-      // For non-screening: "risk" field becomes "growth area" — invert semantics
-      actualRiskLevel = actualPct >= 67 ? 'Low' : actualPct >= 34 ? 'Medium' : 'High'
+      // Profile: no single quality judgment
+      outcomeQuality = 'neutral'
     }
+
+    // ── Wellbeing score (0-100) — what the UI ring uses for COLOUR ─────────
+    // For low-good tests we invert: 2/10 raw = 20% raw, but wellbeing = 80%.
+    // Ring stays green because the OUTCOME is good even though the raw % is low.
+    const wellbeingScore =
+      scoreDirection === 'low-good' ? (100 - actualPct) :
+      scoreDirection === 'profile'  ? (dimensions[0]?.pct ?? 50) :
+      actualPct
+
+    // ── Risk level (semantic, not numeric) ─────────────────────────────────
+    // Maps to outcomeQuality: positive → Low risk, concerning → High risk.
+    const actualRiskLevel: 'Low' | 'Medium' | 'High' =
+      outcomeQuality === 'positive'    ? 'Low' :
+      outcomeQuality === 'concerning'  ? 'High' :
+      'Medium'
+
+    console.log('[analyze]', { testType, scoreDirection, outcomeQuality, label: actualResultLabel, raw: `${actualScore}/${actualMaxScore}`, pct: actualPct, wellbeing: wellbeingScore })
 
     // ── Build compact deep context for the AI ─────────────────────────────
     // Send dimension scores (primary signal), top answers, assessment metadata.
@@ -269,19 +308,38 @@ export async function POST(request: Request) {
       .map((x, i) => `${i + 1}. [${x.p}] ${x.q} → ${x.a}`)
       .join('\n')
 
+    // Outcome interpretation for AI — explicit, leaves NO room for guessing
+    const directionText =
+      scoreDirection === 'low-good'  ? 'БАГА оноо = САЙН (бага хамаарал/стресс/түгшүүр)'
+    : scoreDirection === 'high-good' ? 'ӨНДӨР оноо = САЙН (өндөр чадвар/тохирол)'
+    : 'Онооны чиглэл байхгүй — давамгайлсан хэмжээс үр дүн болно'
+
+    const qualityText =
+      outcomeQuality === 'positive'   ? 'ЭЕРЭГ — хэрэглэгчид сайн мэдээ өг, дадал хадгалах зөвлөгөө'
+    : outcomeQuality === 'concerning' ? 'АНХААРАХ — эмпатитэй, тусламж/арга хэмжээ зөвлө'
+    : 'НЭЙТРАЛ — тэнцвэрт байдлыг хадгалах зөвлөгөө'
+
     const truncated = `Тестийн нэр: ${reportTitle}
 Зохиогч: ${assessmentAuthor || '—'}
 Тестийн төрөл (autodetect): ${testType}
-Тайлбар: ${assessmentDescription.slice(0, 400)}
-Зориулалт: ${assessmentUsage.slice(0, 200)}
-Хэмжих зүйл: ${assessmentMeasure.slice(0, 200)}
+Тайлбар: ${assessmentDescription.slice(0, 500)}
+Зориулалт: ${assessmentUsage.slice(0, 300)}
+Хэмжих зүйл: ${assessmentMeasure.slice(0, 300)}
+
+═══ ОНООНЫ УТГАЧИЛАЛ (ЭНЭ НЬ ЧУХАЛ!) ═══
+Чиглэл: ${directionText}
+Үр дүнгийн чанар: ${qualityText}
+${scoreDirection === 'low-good' && outcomeQuality === 'positive'
+  ? '⚠ Бага оноотой ч ЭНЭ САЙН — "эрсдэлтэй", "анхаарал шаардлагатай", "шуурхай арга хэмжээ" гэж БҮҮ бич.'
+  : scoreDirection === 'low-good' && outcomeQuality === 'concerning'
+  ? '⚠ Өндөр оноо нь хамаарал/асуудал ИХ байгааг илтгэнэ — тусламж, арга хэмжээ зөвлө.'
+  : ''}
 
 ═══ БОДИТ ҮР ДҮН (АНТЫ ӨӨРЧИЛБӨЛ БУРУУ) ═══
 Үр дүнгийн нэр: ${actualResultLabel || 'тодорхойгүй'}
 ${testType === 'profile'
   ? `Үндсэн төрөл: ${dimensions[0]?.label || actualResultLabel}`
-  : `Нийт оноо: ${actualScore}/${actualMaxScore} (${actualPct}%)`}
-${cfg.hasRiskFraming ? `Эрсдэлийн түвшин: ${actualRiskLevel}` : ''}
+  : `Нийт оноо: ${actualScore}/${actualMaxScore} (${actualPct}% raw, wellbeing ${wellbeingScore}%)`}
 
 ═══ DIMENSION ОНОО (тус бүр) ═══
 ${dimensions.length > 0 ? dimensions.slice(0, 12).map(d => `• ${d.label}: ${d.score} оноо (${d.pct}%)`).join('\n') : '—'}
@@ -294,35 +352,56 @@ ${sampleAnswers || '—'}`
       ? `,"roadmap":[{"week":"1-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"2-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"3-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"4-р долоо хоног","title":"<товч>","tasks":["<товч>"]}]`
       : `,"roadmap":[]`
 
-    const SYSTEM = `Та hire.mn-ийн мэргэжлийн сэтгэл зүйч AI. Тест: "${reportTitle}".
+    // Strengths/Risks labelling depends on direction + quality
+    const strengthsLabel = scoreDirection === 'profile' ? 'давуу талууд'
+                        : outcomeQuality === 'positive' ? 'хадгалах сайн зүйлс'
+                        : 'эерэг үндэс/нөөц'
+    const risksLabel = scoreDirection === 'profile' ? 'сул талууд (баг доторх ажиллахад анхаарах)'
+                     : outcomeQuality === 'concerning' ? 'арга хэмжээ шаардсан зүйлс'
+                     : outcomeQuality === 'positive' ? 'хадгалахад анхаарах зүйлс'
+                     : 'хөгжүүлэх талбарууд'
 
-╔══════════════════════════════════════════════════════════╗
-║  ХАМГИЙН ЧУХАЛ — БОДИТ ӨГӨГДЛИЙГ ҮЛ ЗӨРЧИХ:              ║
-╠══════════════════════════════════════════════════════════╣
-║  • healthScore = ${actualPct}                            ║
-║  • summary.title = "${actualResultLabel || 'Дүн шинжилгээ'}"║
-║  • Dimension хүснэгтийн утгыг ЯГ ашигла, БҮҮ зохио       ║
-╚══════════════════════════════════════════════════════════╝
+    const SYSTEM = `Та hire.mn-ийн мэргэжлийн сэтгэл зүйч/коуч AI.
+
+ТЕСТ: "${reportTitle}"
+ТӨРӨЛ: ${testType}
+ОНООНЫ ЧИГЛЭЛ: ${scoreDirection} (${directionText})
+ҮР ДҮНГИЙН ЧАНАР: ${outcomeQuality} (${qualityText})
+
+═══════════════════════════════════════════════════════════════
+ХАМГИЙН ЧУХАЛ:
+1. БОДИТ үр дүнгийн нэр "${actualResultLabel || 'Дүн шинжилгээ'}" ЯГ ашигла. Өөрчилбөл буруу.
+2. Чанарын chargeering алдаа гаргахгүй:
+   ${outcomeQuality === 'positive' ? '   ✅ ЭЕРЭГ үр дүн — баяр хүргэх, дадал хадгалах өнгө. "Эрсдэл", "анхаарал шаард", "шуурхай арга хэмжээ" гэж БҮҮ ашигла.'
+   : outcomeQuality === 'concerning' ? '   ⚠ АНХААРАХ үр дүн — эмпатитэй дэмжих өнгө. Мэргэжлийн тусламж, найз/гэр бүлийн дэмжлэг, бодит арга хэмжээ зөвлө.'
+   : '   ⚪ НЭЙТРАЛ үр дүн — тэнцвэрт байдал, өөрийгөө ойлгох талаар зөвлө.'}
+3. Тест бол "${(assessmentDescription || reportTitle).slice(0, 200)}" тул контекст дотор бич.
+═══════════════════════════════════════════════════════════════
 
 ${cfg.framingLine}
 
 КРИТИК ДҮРМҮҮД:
-1. Зөвхөн БОДИТ монгол үг. Үг зохиож БҮҮ бич. (Жишээ: "сэргэх" ✅, "сэвших" ❌)
-2. Хориглосон зохиомол үгс: эмдээлэл, эмдлүүлэх, сэвших, хүүхэл, цэнгэлэг, амандуу.
-3. Тестийн БОДИТ контекст дээр үндэслэ. Зөвхөн оноо биш — асуултын утга, dimension-уудын харьцаа дээр анхаар.
-4. Доош өгсөн "ХАМГИЙН ӨНДӨР ҮНЭЛГЭЭТЭЙ ХАРИУЛТУУД"-ыг ашиглаж тодорхой ишлэл татна.
-5. Эмпатитэй, эерэг өнгө. Оношилгоо БИШ — "...магадгүй", "...болзошгүй".
-6. Бүх text ≤15 үг богино.
-7. strengths/risks: ЯГ 4 зүйл, "Богино гарчиг: тайлбар" (≤12 үг)
-8. insights: 3 зүйл, detail 2 өгүүлбэр, actions 3 алхам
-9. summary.title нь ӨГСӨН үр дүнгийн нэртэй ЯГ таарна
+A. Зөвхөн БОДИТ монгол үг. Үг зохиож БҮҮ бич. ("сэргэх" ✅, "сэвших" ❌)
+B. Хориглосон зохиомол үгс: эмдээлэл, эмдлүүлэх, сэвших, хүүхэл, цэнгэлэг, амандуу.
+C. Доорх "ХАМГИЙН ӨНДӨР ҮНЭЛГЭЭТЭЙ ХАРИУЛТУУД"-аас тодорхой ишлэл татна, ингэснээр хэрэглэгч "энэ намайг ойлгож байна" гэж мэдрэх.
+D. Оношилгоо БИШ — "...магадгүй", "...болзошгүй", "...харагдаж байна".
+E. strengths = "${strengthsLabel}" семантикийн дагуу, ЯГ 4 зүйл, "Гарчиг: тайлбар" (≤12 үг)
+F. risks = "${risksLabel}" семантикийн дагуу, ЯГ 4 зүйл
+G. insights: 3 зүйл, detail 2 өгүүлбэр, actions 3 алхам — БҮГД энэ тестийн контекст дээр (ерөнхий зөвлөгөө БИШ)
+H. roadmap${cfg.hasRoadmap ? ` (4 долоо хоног) нь ${reportTitle}-д ТОДОРХОЙ зориулсан байх:
+   ${outcomeQuality === 'concerning' ? '- Нитотин/стресс/түгшүүр шиг бол: тодорхой алхмууд (хэрэглээг бууруулах, орлуулагч, эмчид хандах, дэмжлэг олох)'
+   : outcomeQuality === 'positive' ? '- Эерэг үр дүнд: дадлыг хадгалах, бусдад туслах, эрүүл нөөцийг хөгжүүлэх'
+   : '- Тэнцвэрт үр дүнд: дадал, өөрийгөө ажиглах, хөгжүүлэх алхмууд'}` : ' = []  (энэ тестэд тохиромжгүй)'}
+I. statCards 4 ширхэг: нэр+утга нь ӨГСӨН dimension эсвэл бодит оноогоос — "+7%, +8%" гэж зохиомол ХҮВ БҮҮ бич.
+J. todayGoals 3 зүйл — өнөөдөр шууд хийж болох энгийн алхам.
+K. Бүх text ≤15 үг богино.
 
-JSON буцаа (markdown ҮГҮЙ):
-{"testType":"${testType}","healthScore":${actualPct},"riskLevel":"${actualRiskLevel}","summary":{"title":"${actualResultLabel || 'Дүн шинжилгээ'}","description":"<1 өгүүлбэр тестийн утга дээр үндэслэсэн>"},"highlightTitle":"<сэтгэл хөдөлгөм гарчиг>","highlightMessage":"<1 өгүүлбэр>","strengths":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"risks":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]}]${roadmapField},"todayGoals":["<товч>","<товч>","<товч>"],"kpiLabels":{"metric1Label":"${cfg.kpiLabels.metric1}","riskLabel":"${cfg.kpiLabels.risk}","potentialLabel":"${cfg.kpiLabels.potential}"},"statCards":[{"icon":"🎯","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"📊","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"⭐","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"🚀","label":"<нэр>","value":"<утга>","sub":"<товч>"}]}`
+JSON буцаа (markdown ҮГҮЙ, шууд { -ээр эхэл):
+{"testType":"${testType}","scoreDirection":"${scoreDirection}","outcomeQuality":"${outcomeQuality}","healthScore":${wellbeingScore},"riskLevel":"${actualRiskLevel}","summary":{"title":"${actualResultLabel || 'Дүн шинжилгээ'}","description":"<1 өгүүлбэр энэ тестийн утга дотор>"},"highlightTitle":"<${outcomeQuality === 'positive' ? 'сайн мэдээ' : outcomeQuality === 'concerning' ? 'анхаарал татах гарчиг' : 'тэнцвэртэй гарчиг'}>","highlightMessage":"<1 өгүүлбэр>","strengths":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"risks":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр энэ тестийн контекстэд>","actions":["<тестэд тодорхой алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]}]${roadmapField},"todayGoals":["<товч>","<товч>","<товч>"],"kpiLabels":{"metric1Label":"${cfg.kpiLabels.metric1}","riskLabel":"${cfg.kpiLabels.risk}","potentialLabel":"${cfg.kpiLabels.potential}"},"statCards":[{"icon":"📊","label":"<бодит хэмжээс>","value":"<бодит утга>","sub":"<товч>"},{"icon":"🎯","label":"<бодит хэмжээс>","value":"<бодит утга>","sub":"<товч>"},{"icon":"⭐","label":"<бодит хэмжээс>","value":"<бодит утга>","sub":"<товч>"},{"icon":"🧭","label":"<бодит хэмжээс>","value":"<бодит утга>","sub":"<товч>"}]}`
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
-      max_tokens: 2200,
+      max_tokens: 3000,
       system: SYSTEM,
       messages: [
         { role: 'user', content: `Дата:\n${truncated}` },
@@ -355,6 +434,8 @@ JSON буцаа (markdown ҮГҮЙ):
 
     // ── HARD OVERRIDE: real values are source of truth ─────────────────────
     data.testType = testType
+    data.scoreDirection = scoreDirection
+    data.outcomeQuality = outcomeQuality
     data.displayLabel = actualResultLabel
     data.riskLevel = actualRiskLevel
     data.summary = {
@@ -362,22 +443,18 @@ JSON буцаа (markdown ҮГҮЙ):
       description: data.summary?.description || assessmentDescription.slice(0, 200) || 'Үр дүн боловсруулагдсан.',
     }
 
+    // healthScore drives the UI ring colour — must reflect WELLBEING, not raw %
+    // (low score on a low-good test = high wellbeing, ring should be green)
+    data.healthScore = wellbeingScore
+
     if (testType === 'profile' && dimensions.length > 0) {
-      // Profile tests: no single score. Use dominant dimension % as healthScore
-      // for the ring colour, but don't expose displayScore/Max numerics.
-      const top = dimensions[0]
-      data.healthScore = top.pct
+      // Profile tests: no single score/max to display
       data.displayScore = undefined
       data.displayMaxScore = undefined
-    } else if (actualMaxScore > 0 && actualScore > 0) {
-      // Score-based tests (screening/cognitive/aptitude): show real numerics
-      data.healthScore = actualPct
-      data.displayScore = actualScore
-      data.displayMaxScore = actualMaxScore
     } else if (actualMaxScore > 0) {
-      // Edge case: score=0 with valid max (someone got 0 — show the zero)
-      data.healthScore = 0
-      data.displayScore = 0
+      // Score-based tests: show the RAW score the user got (e.g. "2/10")
+      // even though the wellbeing ring is colored independently.
+      data.displayScore = actualScore
       data.displayMaxScore = actualMaxScore
     }
 
