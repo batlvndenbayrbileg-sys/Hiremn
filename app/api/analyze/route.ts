@@ -51,57 +51,18 @@ function closeOpenBrackets(s: string): string {
 // Strip HTML tags from question/answer text (API returns "<p>...</p>")
 const stripHtml = (s: string) => (s || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
 
-// ── Test type detection ──────────────────────────────────────────────────
-// We classify tests by structural signals in the result payload, not by name.
+// Test type enum — the AI classifier decides which bucket each test falls into
+// based on the assessment description. We don't hardcode keywords because the
+// system must handle any future test without code changes.
 type TestType = 'profile' | 'cognitive' | 'screening' | 'aptitude' | 'generic'
+type ScoreDirection = 'high-good' | 'low-good' | 'profile'
+type OutcomeQuality = 'positive' | 'neutral' | 'concerning'
 
-function detectTestType(opts: {
-  assessment: any
-  result: any
-  details: Array<{ value: string; cause: number }>
-  resultLabel: string
-  pct: number
-}): TestType {
-  const { assessment, details, resultLabel } = opts
-  const name = (assessment?.name || '').toLowerCase()
-  const desc = (assessment?.description || '').toLowerCase()
-  const usage = (assessment?.usage || '').toLowerCase()
-  const combined = `${name} ${desc} ${usage}`
-  const author = (assessment?.author || '').toLowerCase()
-
-  // ── Profile: named personality typings ────────────────────────────────
-  // Detected by explicit profile-test keywords OR known author / dimension
-  // patterns. Just having "multiple dimensions" is NOT enough — RSES has
-  // 2 sub-scales but is a screening test, not a profile typology.
-  const profileKeywords = /(disc|mbti|big.?5|big.?five|belbin|holland|enneagram|зан чанар(?!ын.*үнэлгээ)|personality.*type|багийн дүр|профайл|profile)/i
-  const profileAuthors = /(belbin|меридит белбин|holland|майерс|бриггс|cattell)/i
-  if (profileKeywords.test(combined) || profileAuthors.test(author)) return 'profile'
-  // 5+ named dimensions where each dimension is a TYPE label (not a sub-scale)
-  // is also profile (DISC=4, Big5=5, Belbin=9, MBTI dichotomies, Holland=6)
-  if (details.length >= 5) return 'profile'
-
-  // ── Screening: well-being scales, mental-health, addiction ────────────
-  // RSES (self-esteem), Beck depression, GAD-7 anxiety, nicotine/alcohol
-  // dependency, stress/burnout scales. Low score on these often = concern.
-  if (/(зависим|архи|тамхи|стресс|сэтгэл.*гутрал|түгш|burnout|хамаарал|депресс|анхаарал.*алда|үнэлэмж|өөрийгөө үнэлэх|rses|beck|gad|phq|self.?esteem|depression|anxiety)/.test(combined)) {
-    return 'screening'
-  }
-
-  // ── Cognitive: IQ, logic, reasoning ───────────────────────────────────
-  if (/(iq|логик|оюун|танин мэдэхүй|санах|анхаарал.*шалгах|шуурхай.*бодол|тооцоо|reasoning|cognitive)/.test(combined)) {
-    return 'cognitive'
-  }
-
-  // ── Aptitude: career, vocational ──────────────────────────────────────
-  if (/(мэргэжил|карьер|ур чадвар(?!.*үнэлэх)|сонирхол|чиглэл|career|vocational|aptitude)/.test(combined)) {
-    return 'aptitude'
-  }
-
-  // 2-4 dimensions with no profile keywords → screening with sub-scales
-  // (e.g. RSES has 2 sub-scales of one underlying construct)
-  if (details.length >= 2) return 'screening'
-
-  return 'generic'
+// Structural-only heuristic fallback — used ONLY if the AI classification
+// fails to parse or returns garbage. Conservative defaults that won't be
+// wildly misleading: many dims → profile, otherwise generic.
+function structuralFallbackType(dimCount: number): TestType {
+  return dimCount >= 5 ? 'profile' : dimCount >= 2 ? 'screening' : 'generic'
 }
 
 // Per-type configuration: which UI sections to emit, label vocabulary, framing
@@ -310,66 +271,92 @@ export async function POST(request: Request) {
     // Sort dimensions descending so highest is first
     dimensions.sort((a, b) => b.score - a.score)
 
-    // ── Detect test type ──────────────────────────────────────────────────
-    const testType = detectTestType({
-      assessment,
-      result: resultObj,
-      details: dimensions.map(d => ({ value: d.label, cause: d.score })),
-      resultLabel: actualResultLabel,
-      pct: actualPct,
-    })
-    const cfg = TYPE_CONFIG[testType]
+    // ── Phase 1: AI classification (fast Haiku call) ──────────────────────
+    // The AI reads the assessment description + result label and decides:
+    //   - testType: profile | cognitive | screening | aptitude | generic
+    //   - scoreDirection: high-good | low-good | profile
+    //   - outcomeQuality: positive | neutral | concerning
+    // This makes the system test-agnostic — any new test author just needs
+    // to write a good description and result label.
+    const classifyPrompt = `Тест мета өгөгдөл уншиж 3 талбарыг тогтоо. ЗӨВ ангилахын тулд description-ыг сайн уншина уу.
 
-    // ── Score semantic direction ──────────────────────────────────────────
-    // 'high-good' — IQ, aptitude (higher score = better)
-    // 'low-good'  — screening (higher score = more problem = worse)
-    // 'profile'   — no direction, dominant dimension is the result
-    type ScoreDirection = 'high-good' | 'low-good' | 'profile'
-    const scoreDirection: ScoreDirection =
-      testType === 'profile' ? 'profile' :
-      testType === 'screening' ? 'low-good' :
-      'high-good'
+ТЕСТИЙН НЭР: ${reportTitle}
+ЗОХИОГЧ: ${assessmentAuthor || '—'}
+DESCRIPTION: ${assessmentDescription.slice(0, 600)}
+USAGE: ${assessmentUsage.slice(0, 300)}
+MEASURE: ${assessmentMeasure.slice(0, 300)}
+DIMENSION ТОО: ${dimensions.length}
+DIMENSION НЭРС: ${dimensions.slice(0, 6).map(d => d.label).join(', ') || '—'}
+ОНОО: ${actualScore}/${actualMaxScore} (${actualPct}%)
+ҮР ДҮНГИЙН LABEL: "${actualResultLabel || 'тодорхойгүй'}"
 
-    // ── Outcome quality (positive / neutral / concerning) ─────────────────
-    // Derived from result label keywords + score direction.
-    // Examples:
-    //   nicotine 2/10 + "Маш бага хамааралтай" + low-good → positive
-    //   nicotine 8/10 + "Хүнд хамааралтай"    + low-good → concerning
-    //   IQ 9/10 + "Маш сайн"                  + high-good → positive
-    const lowerLabel = actualResultLabel.toLowerCase()
-    const labelIsPositive = /(бага|сул|тайван|хэвийн|тэнцвэр|сайн|өндөр.*чадвар|зөв)/.test(lowerLabel)
-    const labelIsConcerning = /(их|өндөр|хүнд|маш их|эрсдэл|анхаарал.*шаард|муу|сул(?!.*хамаарал))/.test(lowerLabel)
+Тогтоох талбарууд:
 
-    let outcomeQuality: 'positive' | 'neutral' | 'concerning' = 'neutral'
-    if (scoreDirection === 'low-good') {
-      // Low score = good outcome (low dependency/stress/anxiety)
-      if (actualPct <= 33 || (labelIsPositive && !labelIsConcerning)) outcomeQuality = 'positive'
-      else if (actualPct >= 67 || labelIsConcerning) outcomeQuality = 'concerning'
-    } else if (scoreDirection === 'high-good') {
-      // High score = good outcome (high ability/fit)
-      if (actualPct >= 67 || (labelIsPositive && !labelIsConcerning)) outcomeQuality = 'positive'
-      else if (actualPct <= 33 || labelIsConcerning) outcomeQuality = 'concerning'
-    } else {
-      // Profile: no single quality judgment
-      outcomeQuality = 'neutral'
+1. testType (нэг сонгох):
+   • profile = зан чанарын төрөл/багийн дүр илрүүлэх (DISC/MBTI/Belbin/Big5 г.м). Хүн бүр өөр төрөл, "сайн/муу" гэж дүгнэхгүй.
+   • cognitive = ОЮУНЫ чадвар хэмжих (IQ/логик/санах ой/анхаарал). Өндөр оноо = сайн чадвар.
+   • screening = СЭТГЭЛ ЗҮЙ/ЭРҮҮЛ МЭНДИЙН scale (стресс/зависимости/түгшүүр/гутрал/үнэлэмж г.м). Тодорхой үр дүн = сайн/муу.
+   • aptitude = МЭРГЭЖЛИЙН тохирол/ур чадварын хэмжээ.
+   • generic = дээрхээс аль нь ч биш.
+
+2. scoreDirection (нэг сонгох):
+   • high-good = өндөр оноо нь сайн утгатай (IQ, ур чадвар, өндөр үнэлэмж)
+   • low-good = бага оноо нь сайн утгатай (бага стресс, бага зависимости, бага түгшүүр)
+   • profile = онооны чиглэл байхгүй (давамгай dimension нь үр дүн)
+
+3. outcomeQuality (нэг сонгох) — ЭНЭ ХЭРЭГЛЭГЧИЙН үр дүнг үнэлэх:
+   • positive = энэ хэрэглэгчид ЭЕРЭГ үр дүн (тэдний эрүүл мэндэд/чадварт сайн)
+   • concerning = АНХААРАХ үр дүн (тусламж, арга хэмжээ хэрэгтэй)
+   • neutral = эерэг ч биш, концерн ч биш (profile тестүүд ихэвчлэн)
+
+ХАРИУ: ЗӨВХӨН JSON, ӨӨР ҮГ БҮҮ БИЧ:
+{"testType":"...","scoreDirection":"...","outcomeQuality":"...","reasoning":"<1 өгүүлбэр яагаад>"}`
+
+    let aiClassification: { testType: TestType; scoreDirection: ScoreDirection; outcomeQuality: OutcomeQuality; reasoning?: string } = {
+      testType: structuralFallbackType(dimensions.length),
+      scoreDirection: dimensions.length >= 5 ? 'profile' : 'high-good',
+      outcomeQuality: 'neutral',
+    }
+    try {
+      const classifyResp = await anthropic.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 200,
+        messages: [
+          { role: 'user', content: classifyPrompt },
+          { role: 'assistant', content: '{' },
+        ],
+      })
+      const txt = classifyResp.content[0].type === 'text' ? classifyResp.content[0].text : ''
+      const parsed = JSON.parse('{' + txt.replace(/```json|```/g, '').trim().split('}')[0] + '}')
+      const validTypes: TestType[] = ['profile', 'cognitive', 'screening', 'aptitude', 'generic']
+      const validDirs: ScoreDirection[] = ['high-good', 'low-good', 'profile']
+      const validQuals: OutcomeQuality[] = ['positive', 'neutral', 'concerning']
+      if (validTypes.includes(parsed.testType)) aiClassification.testType = parsed.testType
+      if (validDirs.includes(parsed.scoreDirection)) aiClassification.scoreDirection = parsed.scoreDirection
+      if (validQuals.includes(parsed.outcomeQuality)) aiClassification.outcomeQuality = parsed.outcomeQuality
+      aiClassification.reasoning = parsed.reasoning
+    } catch (e) {
+      console.warn('[analyze] classification failed, using structural fallback:', e)
     }
 
-    // ── Wellbeing score (0-100) — what the UI ring uses for COLOUR ─────────
-    // For low-good tests we invert: 2/10 raw = 20% raw, but wellbeing = 80%.
-    // Ring stays green because the OUTCOME is good even though the raw % is low.
+    const testType = aiClassification.testType
+    const scoreDirection = aiClassification.scoreDirection
+    const outcomeQuality = aiClassification.outcomeQuality
+    const cfg = TYPE_CONFIG[testType]
+
+    // Wellbeing score for ring colour — inverted on low-good tests so green
+    // means "good outcome for the user" regardless of raw % direction.
     const wellbeingScore =
       scoreDirection === 'low-good' ? (100 - actualPct) :
       scoreDirection === 'profile'  ? (dimensions[0]?.pct ?? 50) :
       actualPct
 
-    // ── Risk level (semantic, not numeric) ─────────────────────────────────
-    // Maps to outcomeQuality: positive → Low risk, concerning → High risk.
     const actualRiskLevel: 'Low' | 'Medium' | 'High' =
       outcomeQuality === 'positive'    ? 'Low' :
       outcomeQuality === 'concerning'  ? 'High' :
       'Medium'
 
-    console.log('[analyze]', { testType, scoreDirection, outcomeQuality, label: actualResultLabel, raw: `${actualScore}/${actualMaxScore}`, pct: actualPct, wellbeing: wellbeingScore })
+    console.log('[analyze] classification:', { ...aiClassification, label: actualResultLabel, raw: `${actualScore}/${actualMaxScore}`, wellbeing: wellbeingScore })
 
     // ── Build compact deep context for the AI ─────────────────────────────
     // Send dimension scores (primary signal), top answers, assessment metadata.
