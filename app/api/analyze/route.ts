@@ -313,29 +313,41 @@ ${dimensions.length > 0 ? dimensions.slice(0, 12).map(d => `• ${d.label}: ${d.
 ═══ ХАМГИЙН ӨНДӨР ҮНЭЛГЭЭТЭЙ ХАРИУЛТУУД (контекстэд ашиглах) ═══
 ${sampleAnswers || '—'}`
 
-    const SYSTEM = `Та hire.mn-ийн сэтгэл зүйч/коуч AI. Тест: "${reportTitle}".
+    const SYSTEM = `Та hire.mn-ийн мэргэжлийн сэтгэл зүйч, коуч AI. Эерэг, эмпатитэй, мэргэжлийн өнгөөр зөв монгол хэлээр бичнэ.
+
+ТЕСТ: "${reportTitle}"
 
 АНГИЛАЛ — description уншаад тогтоо:
-testType: profile (DISC/MBTI/Belbin зан чанарын төрөл) | cognitive (IQ/логик) | screening (стресс/зависимости/үнэлэмжийн scale) | aptitude (мэргэжлийн тохирол) | generic
-scoreDirection: high-good (өндөр оноо=сайн) | low-good (бага оноо=сайн, стресс/зависимости г.м) | profile (давамгай dimension)
-outcomeQuality: positive (хэрэглэгчид сайн үр дүн) | concerning (тусламж шаардсан) | neutral
+• testType: profile | cognitive | screening | aptitude | generic
+• scoreDirection: high-good | low-good | profile
+• outcomeQuality: positive | concerning | neutral
 
-Шинжилгээний дүрэм:
-- Label "${actualResultLabel || ''}" ЯГ ашигла, өөрчлөхгүй.
-- positive үр дүнд: "эрсдэл, шуурхай арга хэмжээ" БҮҮ ашигла, баяр хүргэх өнгө.
-- concerning үр дүнд: эмпатитэй, мэргэжлийн тусламж зөвлө.
-- Зөвхөн БОДИТ монгол үг. Зохиосон үг хориглоно (сэвших, эмдээлэл г.м).
-- Оношилгоо БИШ: "...магадгүй", "...болзошгүй".
-- Бүх text ≤12 үг.
-- "ХАМГИЙН ӨНДӨР ҮНЭЛГЭЭТЭЙ ХАРИУЛТУУД"-аас ишлэл татна.
-- roadmap: profile/cognitive→[]; concerning screening→хэрэглээ бууруулах/орлуулагч/тусламж; positive→дадал хадгалах; cognitive→дасгал/ном/курс.
-- statCards 4 ширхэг — БОДИТ dimension утгаас, зохиомол хувь БҮҮ бич.
+═══ ХАМГИЙН ЧУХАЛ — ТОО ЗОХИОХЫГ ХОРИГЛОНО ═══
+1. ХУВЬ ХЭМЖЭЭ: text дотор хувь хэмжээ ОРУУЛБОЛ зөвхөн БҮХЭЛ ТОО (71% ✅, 71.43% ❌, 633.33% ❌)
+2. SCORE үнэлгээ: зөвхөн БОДИТ оноог л давтан бич ("${actualScore}/${actualMaxScore}" эсвэл dimension утгуудыг)
+3. ХҮВ "+7%, +12%" гэх ЗОХИОМОЛ хувь хэмжээ БҮҮ зохио — БОДИТ data байхгүй бол хувь хэмжээ хий
+4. highlightMessage / summary / insight зэрэг text-д тоо оруулахаасаа ТАТГАЛЗ — зөвхөн semantic үг ашигла
+
+═══ МОНГОЛ ХЭЛНИЙ ЧАНАР ═══
+5. Зөв, бичигийн хэлээр (хүндэтгэлийн өнгөөр)
+6. Зохиосон үг хориглоно: эмдээлэл, эмдлүүлэх, сэвших, хүүхэл, цэнгэлэг, амандуу
+7. Оношилгоо БИШ: "...магадгүй", "...болзошгүй", "...харагдаж байна"
+8. label "${actualResultLabel || ''}" ЯГ ашигла, өөрчилбөл буруу
+9. positive үр дүнд: баяр хүргэх өнгө, "эрсдэл/шуурхай арга хэмжээ" БҮҮ ашигла
+10. concerning үр дүнд: эмпатитэй, мэргэжлийн тусламж зөвлө
+
+═══ AGRARRA SECTIONS ═══
+• strengths/risks: ЯГ 4 ширхэг тус бүр, "Гарчиг: тайлбар" ≤12 үг
+• insights: 3 ширхэг
+• roadmap: ҮРГЭЛЖ 4 долоо хоног (тестэд тохирсон ТОДОРХОЙ алхмууд)
+• todayGoals: ҮРГЭЛЖ 3 ширхэг өнөөдрийн зорилго
+• statCards: 4 ширхэг — label нь өгөгдсөн dimension/ангилалын нэр, value нь "оноо/max" хэлбэртэй БОДИТ тоо (БҮҮ "+7%" зохио)
 
 JSON буцаа ({ -ээр эхэл):
-{"testType":"...","scoreDirection":"...","outcomeQuality":"...","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр>"},"highlightTitle":"<гарчиг>","highlightMessage":"<1 өгүүлбэр>","strengths":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"risks":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<1 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<1 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<1 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]}],"roadmap":[{"week":"1-р","title":"<товч>","tasks":["<товч>"]},{"week":"2-р","title":"<товч>","tasks":["<товч>"]},{"week":"3-р","title":"<товч>","tasks":["<товч>"]},{"week":"4-р","title":"<товч>","tasks":["<товч>"]}],"todayGoals":["<товч>","<товч>","<товч>"],"kpiLabels":{"metric1Label":"<нэр>","riskLabel":"<нэр>","potentialLabel":"<нэр>"},"statCards":[{"icon":"📊","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"🎯","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"⭐","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"🧭","label":"<нэр>","value":"<утга>","sub":"<товч>"}]}`
+{"testType":"...","scoreDirection":"...","outcomeQuality":"...","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"highlightTitle":"<гарчиг>","highlightMessage":"<1 өгүүлбэр тоогүй>","strengths":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"risks":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<1 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<1 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<1 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]}],"roadmap":[{"week":"1-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"2-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"3-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"4-р долоо хоног","title":"<товч>","tasks":["<товч>"]}],"todayGoals":["<товч>","<товч>","<товч>"],"kpiLabels":{"metric1Label":"<нэр>","riskLabel":"<нэр>","potentialLabel":"<нэр>"}}`
 
     const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
+      model: 'claude-sonnet-4-5',
       max_tokens: 2000,
       system: SYSTEM,
       messages: [
@@ -429,21 +441,64 @@ JSON буцаа ({ -ээр эхэл):
       }]
     }
 
-    // KPI label fallback — AI-ийн өгсөн утга байвал нь хадгална, эс бөгөөс
-    // testType-аас тохирох default-ийг сонгоно
+    // KPI label fallback — AI-ийн өгсөн утга байвал нь хадгална, эс бөгөөс default
     const cfg = TYPE_CONFIG[testType]
     if (!data.kpiLabels || typeof data.kpiLabels !== 'object') data.kpiLabels = {}
     data.kpiLabels.metric1Label = data.kpiLabels.metric1Label || cfg.kpiLabels.metric1
     data.kpiLabels.riskLabel = data.kpiLabels.riskLabel || cfg.kpiLabels.risk
     data.kpiLabels.potentialLabel = data.kpiLabels.potentialLabel || cfg.kpiLabels.potential
 
-    // ── Defaults ───────────────────────────────────────────────────────────
+    // ── Strip fabricated decimal/percent numbers from AI text fields ────────
+    // AI sometimes computes percentages with floats (71.4285714%) — clamp.
+    const stripBadNumbers = (s: any): string => {
+      if (typeof s !== 'string') return s
+      // Round floats with many decimals like 71.4285714 → 71
+      return s.replace(/(\d+)\.(\d{2,})/g, (_, intPart) => intPart)
+    }
+    if (data.summary?.description) data.summary.description = stripBadNumbers(data.summary.description)
+    if (data.highlightTitle) data.highlightTitle = stripBadNumbers(data.highlightTitle)
+    if (data.highlightMessage) data.highlightMessage = stripBadNumbers(data.highlightMessage)
+    if (Array.isArray(data.strengths)) data.strengths = data.strengths.map(stripBadNumbers)
+    if (Array.isArray(data.risks)) data.risks = data.risks.map(stripBadNumbers)
+
+    // ── statCards always derived server-side from REAL dimensions ──────────
+    // AI was inventing "+7%, +8%" — instead we build cards from actual data.
+    if (dimensions.length >= 2) {
+      data.statCards = dimensions.slice(0, 4).map((d, i) => ({
+        icon: ['📊', '🎯', '⭐', '🧭'][i] || '📊',
+        label: d.label.slice(0, 18),
+        value: `${d.score}/${d.maxScore}`,
+        sub: `${d.pct}%`,
+      }))
+    } else if (actualMaxScore > 0) {
+      // Single-score test: show just one card with the real value
+      data.statCards = [{
+        icon: '📊',
+        label: 'Үндсэн оноо',
+        value: `${actualScore}/${actualMaxScore}`,
+        sub: `${actualPct}%`,
+      }]
+    } else {
+      data.statCards = []
+    }
+
+    // ── Roadmap + todayGoals ALWAYS present (user expects this section) ────
+    if (!Array.isArray(data.summary)) {/* no-op */}
     if (!data.summary) data.summary = { title: 'Дүн шинжилгээ', description: 'Үр дүн боловсруулагдсан.' }
     if (!Array.isArray(data.strengths)) data.strengths = []
     if (!Array.isArray(data.risks)) data.risks = []
     if (!Array.isArray(data.insights)) data.insights = []
-    if (!Array.isArray(data.roadmap)) data.roadmap = []
-    // For profile/cognitive without roadmap, leave roadmap empty (UI hides the section)
+    if (!Array.isArray(data.roadmap) || data.roadmap.length === 0) {
+      data.roadmap = [
+        { week: '1-р долоо хоног', title: 'Эхлэлийн алхам', tasks: ['Үр дүнгээ үзэх'] },
+        { week: '2-р долоо хоног', title: 'Дадал хэвшүүлэх', tasks: ['Шинэ дадал эхлүүлэх'] },
+        { week: '3-р долоо хоног', title: 'Тогтворжуулах', tasks: ['Үргэлжлүүлэх'] },
+        { week: '4-р долоо хоног', title: 'Үр дүн', tasks: ['Шинжлэх'] },
+      ]
+    }
+    if (!Array.isArray(data.todayGoals) || data.todayGoals.length === 0) {
+      data.todayGoals = data.roadmap[0]?.tasks?.slice(0, 3) || ['Үр дүнгээ үзэх', 'Зорилго тодорхойлох', 'Дараагийн алхам төлөвлөх']
+    }
     if (!data.riskLevel) data.riskLevel = actualRiskLevel
     if (!data.quitPotential) data.quitPotential = 'Medium'
 
