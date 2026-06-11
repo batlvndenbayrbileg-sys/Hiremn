@@ -21,7 +21,7 @@
   // otherwise the mascot gets clipped at the iframe edge.
   // Closed-state iframe size: tight bounding box of the FAB pill + mascot pop-up.
   // Any bigger area BLOCKS page clicks underneath (iframe captures touch events).
-  var BUTTON_SIZE = "110px";
+  var BUTTON_SIZE = "95px";
   var BUTTON_HEIGHT = "75px";
 
   // ── Wrapper div (fixed, bottom-right with extra margin) ────────────────────────────────────
@@ -72,7 +72,7 @@
     "position:absolute !important;" +
     "bottom:0 !important;" +
     "right:0 !important;" +
-    "width:110px !important;" +
+    "width:95px !important;" +
     "height:70px !important;" +
     "pointer-events:auto !important;" +
     "cursor:pointer !important;" +
