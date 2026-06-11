@@ -290,10 +290,9 @@ export async function POST(request: Request) {
         })
       }
     }
-    // Take top-scored answers + a few diverse samples to stay under token budget
+    // Top 5 highest-scoring answers — enough context, keeps prompt fast
     flatAnswers.sort((a, b) => b.p - a.p)
-    const topAnswers = flatAnswers.slice(0, 8)
-    const sampleAnswers = topAnswers
+    const sampleAnswers = flatAnswers.slice(0, 5)
       .map((x, i) => `${i + 1}. [${x.p}] ${x.q} → ${x.a}`)
       .join('\n')
 
@@ -314,57 +313,30 @@ ${dimensions.length > 0 ? dimensions.slice(0, 12).map(d => `• ${d.label}: ${d.
 ═══ ХАМГИЙН ӨНДӨР ҮНЭЛГЭЭТЭЙ ХАРИУЛТУУД (контекстэд ашиглах) ═══
 ${sampleAnswers || '—'}`
 
-    const SYSTEM = `Та hire.mn-ийн мэргэжлийн сэтгэл зүйч/коуч AI. Тест: "${reportTitle}".
+    const SYSTEM = `Та hire.mn-ийн сэтгэл зүйч/коуч AI. Тест: "${reportTitle}".
 
-ҮҮРГИЙН 2 АЛХАМ:
-АЛХАМ 1 — Тестийг АНГИЛ. Description-ыг уншиж дараахыг тогтоо:
-  testType:
-    • profile = зан чанарын ТӨРӨЛ илрүүлэх (DISC/MBTI/Belbin г.м), "сайн/муу" биш
-    • cognitive = ОЮУНЫ чадвар (IQ/логик/санах ой), өндөр оноо = сайн
-    • screening = СЭТГЭЛ ЗҮЙ/ЭРҮҮЛ МЭНДИЙН scale (стресс/зависимости/үнэлэмж г.м)
-    • aptitude = МЭРГЭЖЛИЙН чиглэл/ур чадварын тохирол
-    • generic = дээрхээс аль нь ч биш
-  scoreDirection:
-    • high-good = өндөр оноо нь САЙН (IQ, чадвар, өндөр үнэлэмж г.м)
-    • low-good = бага оноо нь САЙН (бага стресс/зависимости/түгшүүр г.м)
-    • profile = чиглэл байхгүй (давамгай dimension нь үр дүн)
-  outcomeQuality (ЭНЭ хэрэглэгчийн үр дүнд):
-    • positive = ТЭДНИЙ эрүүл мэндэд/чадварт ЭЕРЭГ үр дүн
-    • concerning = АНХААРАХ үр дүн (тусламж/арга хэмжээ хэрэгтэй)
-    • neutral = эерэг ч биш, концерн ч биш
+АНГИЛАЛ — description уншаад тогтоо:
+testType: profile (DISC/MBTI/Belbin зан чанарын төрөл) | cognitive (IQ/логик) | screening (стресс/зависимости/үнэлэмжийн scale) | aptitude (мэргэжлийн тохирол) | generic
+scoreDirection: high-good (өндөр оноо=сайн) | low-good (бага оноо=сайн, стресс/зависимости г.м) | profile (давамгай dimension)
+outcomeQuality: positive (хэрэглэгчид сайн үр дүн) | concerning (тусламж шаардсан) | neutral
 
-АЛХАМ 2 — Алхам 1-ийн шийдвэрт ТУЛГУУРЛАН шинжилгээг хийнэ.
+Шинжилгээний дүрэм:
+- Label "${actualResultLabel || ''}" ЯГ ашигла, өөрчлөхгүй.
+- positive үр дүнд: "эрсдэл, шуурхай арга хэмжээ" БҮҮ ашигла, баяр хүргэх өнгө.
+- concerning үр дүнд: эмпатитэй, мэргэжлийн тусламж зөвлө.
+- Зөвхөн БОДИТ монгол үг. Зохиосон үг хориглоно (сэвших, эмдээлэл г.м).
+- Оношилгоо БИШ: "...магадгүй", "...болзошгүй".
+- Бүх text ≤12 үг.
+- "ХАМГИЙН ӨНДӨР ҮНЭЛГЭЭТЭЙ ХАРИУЛТУУД"-аас ишлэл татна.
+- roadmap: profile/cognitive→[]; concerning screening→хэрэглээ бууруулах/орлуулагч/тусламж; positive→дадал хадгалах; cognitive→дасгал/ном/курс.
+- statCards 4 ширхэг — БОДИТ dimension утгаас, зохиомол хувь БҮҮ бич.
 
-═══════════════════════════════════════════════════════════════
-КРИТИК ДҮРМҮҮД:
-1. БОДИТ үр дүнгийн label "${actualResultLabel || 'Дүн шинжилгээ'}" ЯГ ашигла. Өөрчилбөл буруу.
-2. Чанарын алдаа гаргахгүй:
-   • outcomeQuality=positive → "Эрсдэл", "анхаарал шаард", "шуурхай арга хэмжээ" гэж БҮҮ ашигла. Баяр хүргэх, дадал хадгалах өнгө.
-   • outcomeQuality=concerning → эмпатитэй дэмжих өнгө. Мэргэжлийн тусламж, найз/гэр бүл, бодит арга хэмжээ зөвлө.
-   • outcomeQuality=neutral → тэнцвэрт байдал, өөрийгөө ойлгох талаар.
-3. Тест description: "${(assessmentDescription || reportTitle).slice(0, 200)}" — контекст дотор бич.
-4. Зөвхөн БОДИТ монгол үг. Үг зохиож БҮҮ бич. ("сэргэх" ✅, "сэвших" ❌)
-5. Хориглосон зохиомол үгс: эмдээлэл, эмдлүүлэх, сэвших, хүүхэл, цэнгэлэг, амандуу.
-6. Доорх "ХАМГИЙН ӨНДӨР ҮНЭЛГЭЭТЭЙ ХАРИУЛТУУД"-аас тодорхой ишлэл татна.
-7. Оношилгоо БИШ — "...магадгүй", "...болзошгүй", "...харагдаж байна".
-8. strengths/risks: ЯГ 4 зүйл тус бүр, "Гарчиг: тайлбар" (≤12 үг). Семантик нь outcomeQuality-аас хамаарна.
-9. insights: 3 зүйл, detail 2 өгүүлбэр, actions 3 алхам — БҮГД энэ тестийн контекст дээр.
-10. roadmap: testType=profile эсвэл cognitive болон зөвхөн өөрийгөө хөгжүүлэх биш үед=[].
-    Бусад үед 4 долоо хоног, энэ тестийн чиглэлд ТОДОРХОЙ зориулсан алхмууд:
-    - concerning + screening (нитотин/стресс) → хэрэглээ бууруулах, орлуулагч, эмчид хандах, дэмжлэг
-    - positive үр дүнд → дадал хадгалах, бусдад туслах, нөөц хөгжүүлэх
-    - cognitive/aptitude → ур чадварын дасгал, шинэ ном/курс, практик хэрэглээ
-11. statCards 4 ширхэг: нэр+утга нь БОДИТ dimension эсвэл оноогоос. "+7%, +8%" зохиомол утга БҮҮ бич.
-12. todayGoals 3 зүйл — өнөөдөр шууд хийж болох энгийн алхам.
-13. Бүх text ≤15 үг богино.
-14. kpiLabels: testType-д тохирох тэмдэглэгээ (profile→"Үндсэн төрөл", screening→"Түвшин", cognitive→"Гүйцэтгэл" г.м)
-
-JSON буцаа (markdown ҮГҮЙ, шууд { -ээр эхэл):
-{"testType":"<profile|cognitive|screening|aptitude|generic>","scoreDirection":"<high-good|low-good|profile>","outcomeQuality":"<positive|neutral|concerning>","summary":{"title":"${actualResultLabel || 'Дүн шинжилгээ'}","description":"<1 өгүүлбэр энэ тестийн утга дотор>"},"highlightTitle":"<гарчиг outcomeQuality-д тохируулсан>","highlightMessage":"<1 өгүүлбэр>","strengths":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"risks":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<2 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]}],"roadmap":[{"week":"1-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"2-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"3-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"4-р долоо хоног","title":"<товч>","tasks":["<товч>"]}],"todayGoals":["<товч>","<товч>","<товч>"],"kpiLabels":{"metric1Label":"<нэр>","riskLabel":"<нэр>","potentialLabel":"<нэр>"},"statCards":[{"icon":"📊","label":"<бодит хэмжээс>","value":"<бодит утга>","sub":"<товч>"},{"icon":"🎯","label":"<бодит хэмжээс>","value":"<бодит утга>","sub":"<товч>"},{"icon":"⭐","label":"<бодит хэмжээс>","value":"<бодит утга>","sub":"<товч>"},{"icon":"🧭","label":"<бодит хэмжээс>","value":"<бодит утга>","sub":"<товч>"}]}`
+JSON буцаа ({ -ээр эхэл):
+{"testType":"...","scoreDirection":"...","outcomeQuality":"...","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр>"},"highlightTitle":"<гарчиг>","highlightMessage":"<1 өгүүлбэр>","strengths":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"risks":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<1 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<1 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<1 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]}],"roadmap":[{"week":"1-р","title":"<товч>","tasks":["<товч>"]},{"week":"2-р","title":"<товч>","tasks":["<товч>"]},{"week":"3-р","title":"<товч>","tasks":["<товч>"]},{"week":"4-р","title":"<товч>","tasks":["<товч>"]}],"todayGoals":["<товч>","<товч>","<товч>"],"kpiLabels":{"metric1Label":"<нэр>","riskLabel":"<нэр>","potentialLabel":"<нэр>"},"statCards":[{"icon":"📊","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"🎯","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"⭐","label":"<нэр>","value":"<утга>","sub":"<товч>"},{"icon":"🧭","label":"<нэр>","value":"<утга>","sub":"<товч>"}]}`
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 2400,
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 2000,
       system: SYSTEM,
       messages: [
         { role: 'user', content: `Дата:\n${truncated}` },
