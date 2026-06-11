@@ -54,11 +54,36 @@
     "height:" + BUTTON_HEIGHT + " !important;" +
     "border:none !important;" +
     "background:transparent !important;" +
-    "pointer-events:auto !important;" +
+    "pointer-events:none !important;" +
     "display:block !important;" +
     "overflow:visible !important;" +
     "color-scheme:light !important;" +
     "transition:width 0.3s ease, height 0.3s ease !important;";
+
+  // ── FAB hotspot (outside iframe) ──────────────────────────────────────────
+  // Iframes are event "black boxes" — even with transparent body, the iframe
+  // rectangle captures all clicks. So we keep the iframe pointer-events:none
+  // when closed and use this external hotspot to receive the FAB click and
+  // forward it to the widget via postMessage. Sized to match the visible
+  // pill at the bottom of the iframe.
+  var fabHotspot = document.createElement("div");
+  fabHotspot.id = "hiremn-widget-fab-hotspot";
+  fabHotspot.style.cssText =
+    "position:absolute !important;" +
+    "bottom:0 !important;" +
+    "right:0 !important;" +
+    "width:135px !important;" +
+    "height:70px !important;" +
+    "pointer-events:auto !important;" +
+    "cursor:pointer !important;" +
+    "background:transparent !important;" +
+    "border:none !important;";
+  fabHotspot.setAttribute("aria-label", "hire.mn чат нээх");
+  fabHotspot.addEventListener("click", function () {
+    if (iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: "HIREMN_OPEN" }, "*");
+    }
+  });
 
   // ══════════════════════════════════════════════════════════════════════════
   // EXTERNAL API - hire.mn developers can use these methods
@@ -315,6 +340,10 @@
       var mobile = window.innerWidth <= 480;
 
       if (isOpen) {
+        // Chat is open — iframe needs to receive events, hide the hotspot
+        iframe.style.pointerEvents = "auto";
+        fabHotspot.style.display = "none";
+
         if (mobile) {
           wrapper.style.width = "100vw";
           wrapper.style.height = "100vh";
@@ -335,7 +364,10 @@
           iframe.style.height = "680px";
         }
       } else {
-        // Closed - futuristic floating button
+        // Closed — iframe must not block page clicks; FAB hotspot handles open
+        iframe.style.pointerEvents = "none";
+        fabHotspot.style.display = "block";
+
         wrapper.style.width = BUTTON_SIZE;
         wrapper.style.height = BUTTON_HEIGHT;
         wrapper.style.bottom = "10px";
@@ -359,5 +391,6 @@
   });
 
   wrapper.appendChild(iframe);
+  wrapper.appendChild(fabHotspot);
   document.body.appendChild(wrapper);
 })();
