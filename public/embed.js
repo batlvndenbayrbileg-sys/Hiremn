@@ -282,7 +282,7 @@
           }
         }, "*");
 
-        return { exam: examData, answers: answerData };
+        return payload;
       }).catch(function(error) {
         console.error("[HireMnChat] analyzeReport error:", error);
         iframe.contentWindow.postMessage({
