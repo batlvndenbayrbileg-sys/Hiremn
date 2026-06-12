@@ -190,8 +190,9 @@ export async function submitUserAnswers(payload: {
 export function getIconUrl(icons?: string): string {
   if (!icons) return ''
   if (icons.startsWith('http')) return icons
-  // hire.mn serves uploaded files via /api/v1/file/{filename}
-  return `https://api.hire-test.cloud/api/v1/file/${encodeURIComponent(icons)}`
+  // Same base host as the API we read assessments from, so icons and
+  // metadata always come from the same environment (prod vs test).
+  return `${API_BASE}/file/${encodeURIComponent(icons)}`
 }
 
 const CATEGORY_EMOJIS: Record<string, string> = {
