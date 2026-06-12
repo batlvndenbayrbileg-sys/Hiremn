@@ -700,72 +700,102 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
     setTimeout(() => requestAnimationFrame(tick), 350)
   }, [data.healthScore, displayTarget, circ])
   const kpi = data.kpiLabels || {}
-  const charType: keyof typeof CHARS = data.healthScore >= 75 ? "ok" : data.healthScore >= 50 ? "thumbsup" : "thinking"
+  // Outcome-based accent (matches the journey view)
+  const acc = data.outcomeQuality === 'positive' ? { c: "#00C48C", c2: "#00A876", soft: "#E9FBF4", soft2: "#D3F7EA", ring: "#B2F5E3", glow: "rgba(0,196,140,0.3)" }
+    : data.outcomeQuality === 'concerning' ? { c: "#F97316", c2: "#EA580C", soft: "#FFF4EC", soft2: "#FFE8D6", ring: "#FED7AA", glow: "rgba(249,115,22,0.28)" }
+    : { c: "#6366F1", c2: "#4F46E5", soft: "#EEF0FE", soft2: "#E0E3FD", ring: "#C7CBFB", glow: "rgba(99,102,241,0.26)" }
+  const charType: keyof typeof CHARS = data.outcomeQuality === 'positive' ? "thumbsup" : data.outcomeQuality === 'concerning' ? "thinking" : "ok"
+
+  // Stat tiles
+  const stats = [
+    { label: kpi.metric1Label || "Түвшин", value: data.metrics[0] ? `${data.metrics[0].score}/${data.metrics[0].maxScore}` : (data.displayScore != null ? `${data.displayScore}/${displayMax}` : "—"), color: "#16A34A", bg: "#ECFDF3",
+      icon: <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 12h6M9 16h6" /> },
+    { label: kpi.riskLabel || "Эрсдэл", value: data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : "Өндөр", color: riskColor(data.riskLevel), bg: "#EFF6FF",
+      icon: <path d="M3 17l6-6 4 4 8-8M21 7v4M21 7h-4" /> },
+    { label: kpi.potentialLabel || "Боломж", value: data.quitPotential === "High" ? "Өндөр" : data.quitPotential === "Medium" ? "Дунд" : "Бага", color: "#F59E0B", bg: "#FFFBEB",
+      icon: <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3" /> },
+  ]
+
+  const dimIcons = ["M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z", "M2 4h2v16M22 4h-2v16M4 8h16v6H4zM7 14v3M17 14v3", "M12 2a7 7 0 0 0-7 7c0 2 1 3 2 4M12 2a7 7 0 0 1 7 7c0 2-1 3-2 4M9 17h6M10 21h4"]
+
   return (
-    <div onClick={onExpand} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{ background: "#fff", borderRadius: 20, overflow: "hidden", cursor: "pointer", boxShadow: hov ? "0 16px 48px rgba(0,0,0,0.13), 0 0 0 2px rgba(0,196,140,0.3)" : "0 4px 20px rgba(0,0,0,0.08)", transform: hov ? "translateY(-3px)" : "translateY(0)", transition: "all 0.25s cubic-bezier(.16,1,.3,1)" }}>
-      {/* Header */}
-      <div style={{ background: "linear-gradient(135deg, #E8FFF6, #D0F7EB)", borderBottom: "1px solid #B2F5E3", padding: "16px 16px 12px", display: "flex", gap: 12, alignItems: "center" }}>
-        <div style={{ position: "relative", width: 68, height: 68, flexShrink: 0 }}>
-          <svg width="68" height="68" style={{ transform: "rotate(-90deg)" }}>
-            <circle cx="34" cy="34" r="28" fill="none" stroke={`${color}25`} strokeWidth="6" />
-            <circle cx="34" cy="34" r="28" fill="none" stroke={color} strokeWidth="6" strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round" />
+    <div onClick={onExpand} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{ background: "#F4F6FB", borderRadius: 26, overflow: "hidden", cursor: "pointer", padding: 8, boxShadow: hov ? `0 18px 50px ${acc.glow}, 0 0 0 2px ${acc.c}40` : "0 6px 24px rgba(15,23,42,0.1)", transform: hov ? "translateY(-3px)" : "translateY(0)", transition: "all 0.3s cubic-bezier(.16,1,.3,1)" }}>
+      {/* Hero */}
+      <div style={{ position: "relative", overflow: "hidden", background: `linear-gradient(150deg, ${acc.soft} 0%, ${acc.soft2} 100%)`, borderRadius: 20, padding: "16px 16px 18px", display: "flex", gap: 12, alignItems: "center" }}>
+        <div style={{ position: "absolute", top: -30, right: 60, width: 90, height: 90, borderRadius: "50%", background: acc.glow, filter: "blur(26px)", pointerEvents: "none" }} />
+        {/* Ring */}
+        <div style={{ position: "relative", width: 76, height: 76, flexShrink: 0 }}>
+          <svg width="76" height="76" style={{ transform: "rotate(-90deg)" }}>
+            <circle cx="38" cy="38" r="31" fill="#fff" stroke={`${color}20`} strokeWidth="7" />
+            <circle cx="38" cy="38" r="31" fill="none" stroke={color} strokeWidth="7" strokeDasharray={2 * Math.PI * 31} strokeDashoffset={(2 * Math.PI * 31) * (1 - Math.min(data.healthScore, 100) / 100 * (bar ? 1 : 0))} strokeLinecap="round" style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1)" }} />
           </svg>
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ fontSize: 20, fontWeight: 900, color: "#1E293B", lineHeight: 1 }}>{scoreDisp}</span>
-            <span style={{ fontSize: 8, color: "#94A3B8" }}>/{displayMax}</span>
+            <span style={{ fontSize: 23, fontWeight: 900, color: "#1E293B", lineHeight: 1 }}>{scoreDisp}</span>
+            <span style={{ fontSize: 9, color: "#94A3B8", fontWeight: 600 }}>/{displayMax}</span>
           </div>
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: 9, fontWeight: 700, color: TEAL, letterSpacing: "0.5px", margin: "0 0 3px" }}>💙 AI ШИНЖИЛГЭЭ</p>
-          <p style={{ fontSize: 14, fontWeight: 800, color: "#1E293B", margin: "0 0 5px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</p>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: `${color}18`, borderRadius: 20, padding: "3px 10px", border: `1px solid ${color}30` }}>
-            <span style={{ width: 5, height: 5, borderRadius: "50%", background: color, display: "inline-block" }} />
-            <span style={{ color, fontSize: 11, fontWeight: 700 }}>{data.summary.title}</span>
-          </span>
-        </div>
-        <Char type={charType} size={64} style={{ flexShrink: 0 }} />
-      </div>
-      {/* KPIs */}
-      <div style={{ display: "flex", borderBottom: "1px solid #F1F5F9" }}>
-        {[
-          { label: kpi.metric1Label || "Хамаарал", value: data.metrics[0] ? `${data.metrics[0].score}/${data.metrics[0].maxScore}` : "—", color: BRAND },
-          { label: kpi.riskLabel || "Эрсдэл", value: data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : "Өндөр", color: riskColor(data.riskLevel) },
-          { label: kpi.potentialLabel || "Боломж", value: data.quitPotential === "High" ? "Өндөр" : data.quitPotential === "Medium" ? "Дунд" : "Бага", color: potColor(data.quitPotential) },
-        ].map((k, i) => (
-          <div key={i} style={{ flex: 1, padding: "10px 6px", textAlign: "center", borderRight: i < 2 ? "1px solid #F1F5F9" : "none" }}>
-            <p style={{ fontSize: 8, color: "#94A3B8", fontWeight: 700, margin: "0 0 2px", letterSpacing: "0.3px" }}>{k.label.toUpperCase()}</p>
-            <p style={{ fontSize: 15, fontWeight: 900, color: k.color, margin: 0 }}>{k.value}</p>
+        {/* Title + badge */}
+        <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
+          <p style={{ fontSize: 9.5, fontWeight: 800, color: acc.c, letterSpacing: "0.6px", margin: "0 0 4px", display: "flex", alignItems: "center", gap: 4 }}>💙 AI ШИНЖИЛГЭЭ</p>
+          <p style={{ fontSize: 15, fontWeight: 900, color: "#1E293B", margin: "0 0 8px", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</p>
+          <div style={{ display: "inline-flex", alignItems: "flex-start", gap: 7, background: "rgba(255,255,255,0.75)", backdropFilter: "blur(6px)", borderRadius: 14, padding: "8px 11px", border: "1px solid rgba(255,255,255,0.9)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill={acc.c} style={{ flexShrink: 0, marginTop: 1 }}><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21 8 14 2 9.4h7.6z"/></svg>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: "#334155", lineHeight: 1.35 }}>{data.summary.title}</span>
           </div>
-        ))}
+        </div>
+        {/* Mascot */}
+        <img src={CHARS[charType]} alt="" style={{ width: 64, height: "auto", flexShrink: 0, alignSelf: "flex-end", marginBottom: -6, animation: "ar-float 5s ease-in-out infinite", filter: `drop-shadow(0 6px 10px ${acc.glow})` }} />
       </div>
-      {/* Metrics */}
-      <div style={{ padding: "12px 16px 8px" }}>
-        {data.metrics.slice(0, 2).map((m, i) => (
-          <div key={i} style={{ marginBottom: 9 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#475569" }}>{m.label}</span>
-              <span style={{ fontSize: 10, color: "#94A3B8" }}>{m.score}/{m.maxScore}</span>
+
+      {/* Stat tiles */}
+      <div style={{ display: "flex", background: "#fff", borderRadius: 18, padding: "12px 4px", marginTop: 8, boxShadow: "0 2px 10px rgba(15,23,42,0.04)" }}>
+        {stats.map((k, i) => (
+          <div key={i} style={{ flex: 1, padding: "0 8px", display: "flex", alignItems: "center", gap: 9, borderRight: i < 2 ? "1px solid #F1F5F9" : "none" }}>
+            <div style={{ width: 34, height: 34, borderRadius: 11, background: k.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={k.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{k.icon}</svg>
             </div>
-            <div style={{ background: "#F1F5F9", borderRadius: 8, height: 7, overflow: "hidden" }}>
-              <div style={{ height: "100%", borderRadius: 8, width: bar ? `${(m.score / m.maxScore) * 100}%` : "0%", background: m.score / m.maxScore > 0.6 ? "linear-gradient(90deg,#FF4444,#FF6B6B)" : m.score / m.maxScore > 0.3 ? "linear-gradient(90deg,#FF9800,#FFCC44)" : `linear-gradient(90deg,${TEAL},#00E5A0)`, transition: "width 1.1s cubic-bezier(.16,1,.3,1)" }} />
+            <div style={{ minWidth: 0 }}>
+              <p style={{ fontSize: 8, color: "#94A3B8", fontWeight: 700, margin: "0 0 1px", letterSpacing: "0.3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{k.label.toUpperCase()}</p>
+              <p style={{ fontSize: 15, fontWeight: 900, color: k.color, margin: 0 }}>{k.value}</p>
             </div>
           </div>
         ))}
       </div>
-      {/* Insight pills */}
-      <div style={{ display: "flex", gap: 6, padding: "0 14px 12px" }}>
-        {data.insights?.slice(0, 3).map((ins, i) => (
-          <div key={i} style={{ flex: 1, background: "#F8FAFF", borderRadius: 10, padding: "7px 6px", textAlign: "center", border: "1px solid #E2E8F0" }}>
-            <div style={{ fontSize: 16 }}>{ins.emoji}</div>
-            <p style={{ fontSize: 9, fontWeight: 600, color: "#64748B", margin: "3px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ins.title}</p>
-          </div>
-        ))}
+
+      {/* Dimension bars with icon tiles */}
+      <div style={{ marginTop: 8 }}>
+        {data.metrics.slice(0, 2).map((m, i) => {
+          const ratio = m.maxScore > 0 ? m.score / m.maxScore : 0
+          const barCol = ratio > 0.6 ? "#F59E0B" : ratio > 0.3 ? "#F59E0B" : TEAL
+          const barGrad = ratio > 0.5 ? "linear-gradient(90deg,#FB923C,#F59E0B)" : `linear-gradient(90deg,${TEAL},#34D399)`
+          const tileBg = ratio > 0.5 ? "#FEF3C7" : "#ECFDF3"
+          const tileCol = ratio > 0.5 ? "#9333EA" : "#16A34A"
+          return (
+            <div key={i} style={{ background: "#fff", borderRadius: 16, padding: "13px 14px", marginBottom: i < Math.min(data.metrics.length, 2) - 1 ? 8 : 0, boxShadow: "0 2px 10px rgba(15,23,42,0.04)", display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 12, background: tileBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={tileCol} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={dimIcons[i % dimIcons.length]} /></svg>
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, gap: 8 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#334155", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.label}</span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: "#94A3B8", flexShrink: 0 }}>{m.score}/{m.maxScore}</span>
+                </div>
+                <div style={{ background: "#F1F5F9", borderRadius: 8, height: 8, overflow: "hidden" }}>
+                  <div style={{ height: "100%", borderRadius: 8, width: bar ? `${ratio * 100}%` : "0%", background: barGrad, transition: "width 1.1s cubic-bezier(.16,1,.3,1)" }} />
+                </div>
+              </div>
+            </div>
+          )
+        })}
       </div>
+
       {/* CTA */}
-      <div style={{ padding: "0 14px 14px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: `linear-gradient(135deg, ${TEAL}, #00A876)`, borderRadius: 14, padding: "13px", boxShadow: `0 6px 20px ${TEAL}40`, transform: hov ? "scale(1.02)" : "scale(1)", transition: "transform 0.2s" }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>
-          <span style={{ color: "#fff", fontSize: 13, fontWeight: 800 }}>Дэлгэрэнгүй шинжилгээ харах</span>
+      <div style={{ marginTop: 8 }}>
+        <div style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, background: `linear-gradient(135deg, ${acc.c}, ${acc.c2})`, borderRadius: 18, padding: "16px", boxShadow: `0 8px 22px ${acc.glow}`, transform: hov ? "scale(1.015)" : "scale(1)", transition: "transform 0.2s" }}>
+          <div style={{ position: "absolute", top: 0, left: 0, width: "40%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent)", animation: "ar-shimmer 4s ease-in-out 1.5s infinite" }} />
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>
+          <span style={{ color: "#fff", fontSize: 14, fontWeight: 800, position: "relative" }}>Дэлгэрэнгүй шинжилгээ харах</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ position: "relative" }}><path d="M9 18l6-6-6-6" /></svg>
         </div>
       </div>
     </div>
