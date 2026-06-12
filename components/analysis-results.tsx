@@ -7,7 +7,7 @@ type TestType = 'profile' | 'cognitive' | 'screening' | 'aptitude' | 'generic'
 // ── Dynamic section model — the AI's presentation plan ──────────────────────
 // Each section carries presentation intent: layout, priority, tone, expansion.
 // The renderer adapts automatically; new section kinds need no code changes.
-type SectionLayout = 'hero' | 'cards' | 'quotes' | 'bars' | 'timeline' | 'checklist' | 'list' | 'grid' | 'carousel'
+type SectionLayout = 'hero' | 'cards' | 'quotes' | 'bars' | 'radar' | 'timeline' | 'checklist' | 'list' | 'grid' | 'carousel'
 type SectionTone = 'positive' | 'warning' | 'neutral' | 'info'
 
 interface SectionItem {
@@ -44,6 +44,10 @@ interface AnalysisData {
   displayScore?: number             // Raw test score (e.g. 5)
   displayMaxScore?: number          // Raw test max (e.g. 10)
   displayLabel?: string             // Verbatim label from test report
+  isProfile?: boolean               // Profile test → show dominant-type hero, not a score ring
+  dominantLabel?: string            // Profile: top dimension name (e.g. "Сэтгэгч")
+  dominantScore?: number            // Profile: top dimension raw score
+  secondaryLabel?: string           // Profile: 2nd dimension name
   dimensions?: Array<{ label: string; score: number; maxScore: number; pct: number }>  // Multi-dim tests (DISC etc.)
   riskLevel: string
   quitPotential: string
@@ -788,6 +792,73 @@ function fallbackChapter(layout: SectionLayout): string {
   return 'Дүн шинжилгээ'
 }
 
+// ── Radar / spider chart — profile-test dimension map (Belbin, DISC...) ──────
+function RadarChart({ items, color }: { items: SectionItem[]; color: string }) {
+  const data = items.filter(it => it.title)
+  const n = data.length
+  if (n < 3) return null
+  const size = 280, cx = size / 2, cy = size / 2 + 6, R = size * 0.30
+  const ang = (i: number) => (Math.PI * 2 * i) / n - Math.PI / 2
+  const pt = (i: number, r: number) => [cx + Math.cos(ang(i)) * r, cy + Math.sin(ang(i)) * r]
+  const rings = [0.25, 0.5, 0.75, 1]
+  // Data polygon — pct already normalized to the dominant dimension (0-100)
+  const dataPts = data.map((it, i) => pt(i, R * (Math.max(0, Math.min(100, it.pct ?? 0)) / 100)))
+  const polyStr = dataPts.map(p => p.join(',')).join(' ')
+  const [drawn, setDrawn] = useState(false)
+  useEffect(() => { const t = setTimeout(() => setDrawn(true), 100); return () => clearTimeout(t) }, [])
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <svg width="100%" viewBox={`0 0 ${size} ${size + 10}`} style={{ maxWidth: 320, overflow: "visible" }}>
+        {/* Grid rings */}
+        {rings.map((rr, ri) => (
+          <polygon key={ri}
+            points={data.map((_, i) => pt(i, R * rr).join(',')).join(' ')}
+            fill={ri === rings.length - 1 ? "none" : "none"}
+            stroke="#E2E8F0" strokeWidth={1} />
+        ))}
+        {/* Axes */}
+        {data.map((_, i) => {
+          const [x, y] = pt(i, R)
+          return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#E8EDF3" strokeWidth={1} />
+        })}
+        {/* Data polygon */}
+        <polygon points={polyStr}
+          fill={`${color}33`} stroke={color} strokeWidth={2} strokeLinejoin="round"
+          style={{ opacity: drawn ? 1 : 0, transform: drawn ? "scale(1)" : "scale(0.3)", transformOrigin: `${cx}px ${cy}px`, transition: "all 0.7s cubic-bezier(.16,1,.3,1)" }} />
+        {/* Vertices */}
+        {dataPts.map((p, i) => (
+          <circle key={i} cx={p[0]} cy={p[1]} r={3} fill={color}
+            style={{ opacity: drawn ? 1 : 0, transition: `opacity 0.4s ease ${0.5 + i * 0.05}s` }} />
+        ))}
+        {/* Labels */}
+        {data.map((it, i) => {
+          const [lx, ly] = pt(i, R + 22)
+          const a = ang(i)
+          const anchor = Math.abs(Math.cos(a)) < 0.3 ? "middle" : Math.cos(a) > 0 ? "start" : "end"
+          const top = data[i]?.title === data[0]?.title
+          return (
+            <text key={i} x={lx} y={ly} textAnchor={anchor} dominantBaseline="middle"
+              fontSize={9.5} fontWeight={top ? 800 : 600} fill={top ? color : "#64748B"}>
+              {(it.title || '').length > 12 ? (it.title || '').slice(0, 11) + '…' : it.title}
+            </text>
+          )
+        })}
+      </svg>
+      {/* Ranked legend */}
+      <div style={{ width: "100%", marginTop: 8 }}>
+        {data.slice(0, 6).map((it, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", borderBottom: i < Math.min(data.length, 6) - 1 ? "1px solid #F1F5F9" : "none" }}>
+            <span style={{ width: 18, height: 18, borderRadius: 6, background: i === 0 ? color : "#F1F5F9", color: i === 0 ? "#fff" : "#94A3B8", fontSize: 9, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
+            <span style={{ flex: 1, fontSize: 12, fontWeight: i === 0 ? 800 : 600, color: i === 0 ? "#1E293B" : "#475569" }}>{it.title}</span>
+            <span style={{ fontSize: 12, fontWeight: 800, color: i === 0 ? color : "#94A3B8" }}>{it.meta}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Premium swipeable advice carousel ───────────────────────────────────────
 // Big full-width cards: strengths / weaknesses / detailed advice. Each card is
 // tone-colored, with a header badge, emoji, title, long detail and a tip strip.
@@ -988,26 +1059,48 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
         <div style={{ position: "absolute", top: -40, right: -30, width: 150, height: 150, borderRadius: "50%", background: accent.mesh, filter: "blur(28px)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: -50, left: -20, width: 120, height: 120, borderRadius: "50%", background: accent.mesh, filter: "blur(30px)", pointerEvents: "none" }} />
 
-        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 16 }}>
-          {/* Ring with glow halo */}
-          <div style={{ position: "relative", flexShrink: 0 }}>
-            <div style={{ position: "absolute", inset: -6, borderRadius: "50%", background: `radial-gradient(circle, ${ringColor}33 0%, transparent 70%)`, filter: "blur(6px)" }} />
-            <div style={{ position: "relative" }}>
-              <ScoreRing score={data.healthScore} size={96} display={data.displayScore != null && data.displayMaxScore ? { score: data.displayScore, max: data.displayMaxScore } : undefined} />
+        {data.isProfile ? (
+          /* Profile hero — dominant type, no 0-100 score */
+          <div style={{ position: "relative" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: 20, flexShrink: 0,
+                background: `linear-gradient(135deg, ${accent.c}, ${accent.c2})`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 30, boxShadow: `0 8px 22px ${accent.glow}`,
+              }}>{chapters[0]?.emoji || "🧩"}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 10.5, fontWeight: 800, color: accent.c, letterSpacing: 0.6, margin: "0 0 2px", textTransform: "uppercase" }}>Таны давамгай дүр</p>
+                <p style={{ fontSize: 21, fontWeight: 900, color: "#1E293B", margin: 0, lineHeight: 1.1 }}>{data.dominantLabel || data.displayLabel}</p>
+                {data.secondaryLabel && <p style={{ fontSize: 11.5, color: "#94A3B8", margin: "3px 0 0", fontWeight: 600 }}>2-рт: {data.secondaryLabel}</p>}
+              </div>
             </div>
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            {data.displayLabel && (
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: `linear-gradient(135deg, ${ringColor}, ${ringColor}CC)`, color: "#fff", fontSize: 11.5, fontWeight: 800, padding: "5px 13px", borderRadius: 22, marginBottom: 8, boxShadow: `0 4px 12px ${ringColor}50` }}>
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff", opacity: 0.9 }} />
-                {data.displayLabel}
-              </span>
-            )}
             <p style={{ fontSize: 12.5, color: "#475569", lineHeight: 1.55, margin: 0, fontWeight: 500 }}>
               {data.opening || data.summary.description}
             </p>
           </div>
-        </div>
+        ) : (
+          /* Score hero — ring + label for scored tests */
+          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ position: "relative", flexShrink: 0 }}>
+              <div style={{ position: "absolute", inset: -6, borderRadius: "50%", background: `radial-gradient(circle, ${ringColor}33 0%, transparent 70%)`, filter: "blur(6px)" }} />
+              <div style={{ position: "relative" }}>
+                <ScoreRing score={data.healthScore} size={96} display={data.displayScore != null && data.displayMaxScore ? { score: data.displayScore, max: data.displayMaxScore } : undefined} />
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {data.displayLabel && (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: `linear-gradient(135deg, ${ringColor}, ${ringColor}CC)`, color: "#fff", fontSize: 11.5, fontWeight: 800, padding: "5px 13px", borderRadius: 22, marginBottom: 8, boxShadow: `0 4px 12px ${ringColor}50` }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff", opacity: 0.9 }} />
+                  {data.displayLabel}
+                </span>
+              )}
+              <p style={{ fontSize: 12.5, color: "#475569", lineHeight: 1.55, margin: 0, fontWeight: 500 }}>
+                {data.opening || data.summary.description}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
       )}
 
@@ -1069,6 +1162,10 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
 
             {s.layout === "carousel" && s.items.length > 0 && (
               <AdviceCarousel items={s.items} onAskAI={onAskAI} />
+            )}
+
+            {s.layout === "radar" && s.items.length >= 3 && (
+              <RadarChart items={s.items} color={accent.c} />
             )}
 
             {s.layout === "bars" && s.items.length > 0 && (

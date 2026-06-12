@@ -358,6 +358,7 @@ Layout сонголт (ЗӨВХӨН эдгээр):
 • cards — 3-4 карт: товч жагсаалт
 • quotes — хэрэглэгчийн хариултаас 2-3 ишлэл + тайлбар (нотолгоо)
 • bars — хэмжээсүүдийн харьцуулалт (тоог сервер тавина)
+• radar — ⭐PROFILE тестэд (DISC/Belbin/MBTI): олон дүр/хэмжээсийн зураглал. Сервер тоог тавина. profile тест бол ЗААВАЛ bars биш radar ашигла.
 • timeline — ЯГ 4 алхамт төлөвлөгөө (meta="1-р долоо хоног")
 • checklist — өнөөдөр хийх ЯГ 3 зүйл
 • list — энгийн жагсаалт 3-5 зүйл
@@ -380,7 +381,7 @@ JSON буцаа ({ -ээр эхэл):
     // we instruct raw JSON output and extract the {...} span instead.
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 2000,
+      max_tokens: 2200,
       system: SYSTEM,
       messages: [
         { role: 'user', content: `Дата:\n${truncated}\n\nЗӨВХӨН JSON буцаа — markdown, тайлбар үг ҮГҮЙ, шууд { -ээр эхэл.` },
@@ -443,9 +444,14 @@ JSON буцаа ({ -ээр эхэл):
     data.healthScore = wellbeingScore
 
     if (testType === 'profile' && dimensions.length > 0) {
-      // Profile tests: no single score/max to display
+      // Profile tests: no single score/max — the dominant dimension IS the
+      // result. Signal the UI to show a "type" hero instead of a 0-100 ring.
       data.displayScore = undefined
       data.displayMaxScore = undefined
+      data.isProfile = true
+      data.dominantLabel = dimensions[0].label       // e.g. "Сэтгэгч" (Plant)
+      data.dominantScore = dimensions[0].score
+      data.secondaryLabel = dimensions[1]?.label || ''
     } else if (actualMaxScore > 0) {
       // Score-based tests: show the RAW score the user got (e.g. "2/10")
       // even though the wellbeing ring is colored independently.
@@ -516,7 +522,7 @@ JSON буцаа ({ -ээр эхэл):
     // The AI decides WHAT sections exist, their ORDER, LAYOUT and EMPHASIS.
     // The server only validates enums, strips fabricated numbers, and injects
     // real data into number-bearing layouts (bars).
-    const VALID_LAYOUTS = ['hero', 'cards', 'quotes', 'bars', 'timeline', 'checklist', 'list', 'grid', 'carousel']
+    const VALID_LAYOUTS = ['hero', 'cards', 'quotes', 'bars', 'radar', 'timeline', 'checklist', 'list', 'grid', 'carousel']
     const VALID_PRIORITIES = ['critical', 'high', 'normal', 'low']
     const VALID_TONES = ['positive', 'warning', 'neutral', 'info']
 
@@ -550,32 +556,36 @@ JSON буцаа ({ -ээр эхэл):
         items: Array.isArray(s.items) ? s.items.slice(0, 8).map(cleanItem) : [],
       }))
 
-    // bars layout: numbers ALWAYS from real dimensions, never from the AI
-    const barsIdx = sections.findIndex(s => s.layout === 'bars')
+    // dimensions viz: numbers ALWAYS from real dimensions, never from the AI.
+    // Profile tests (Belbin/DISC/MBTI) → radar chart (signature visualization);
+    // everything else → horizontal bars. 3+ dims required for a readable radar.
+    const dimsIdx = sections.findIndex(s => s.layout === 'bars' || s.layout === 'radar')
     if (dimensions.length >= 2) {
-      const barsSection = {
-        chapter: (barsIdx >= 0 && sections[barsIdx].chapter) || sections[0]?.chapter || 'Тойм',
+      const useRadar = testType === 'profile' && dimensions.length >= 3
+      const vizSection = {
+        chapter: (dimsIdx >= 0 && sections[dimsIdx].chapter) || sections[0]?.chapter || 'Тойм',
         kind: 'dimensions',
-        layout: 'bars',
+        layout: useRadar ? 'radar' : 'bars',
         priority: 'high',
         tone: 'neutral',
         expanded: true,
-        emoji: '📊',
-        title: (barsIdx >= 0 && sections[barsIdx].title) || 'Хэмжээсүүдийн задаргаа',
-        body: barsIdx >= 0 ? sections[barsIdx].body : '',
+        emoji: useRadar ? '🕸️' : '📊',
+        title: (dimsIdx >= 0 && sections[dimsIdx].title) || (useRadar ? 'Таны дүрийн зураглал' : 'Хэмжээсүүдийн задаргаа'),
+        body: dimsIdx >= 0 ? sections[dimsIdx].body : '',
         items: dimensions.slice(0, 12).map(d => ({
           emoji: '',
           title: d.label,
           text: '',
-          meta: `${d.score}/${d.maxScore}`,
+          // radar shows just the raw score; bars show score/max for context
+          meta: useRadar ? `${d.score}` : `${d.score}/${d.maxScore}`,
           pct: d.pct,
         })),
       }
-      if (barsIdx >= 0) sections[barsIdx] = barsSection
-      else sections.splice(Math.min(2, sections.length), 0, barsSection)
-    } else if (barsIdx >= 0) {
-      // AI asked for bars but we have no real dimensional data — drop it
-      sections.splice(barsIdx, 1)
+      if (dimsIdx >= 0) sections[dimsIdx] = vizSection
+      else sections.splice(Math.min(2, sections.length), 0, vizSection)
+    } else if (dimsIdx >= 0) {
+      // AI asked for a dimensions viz but we have no real data — drop it
+      sections.splice(dimsIdx, 1)
     }
 
     // ── Guarantee a carousel section (strengths/weaknesses/advice) ─────────
