@@ -352,7 +352,8 @@ ${sampleAnswers || '—'}`
 
 Layout сонголт (ЗӨВХӨН эдгээр):
 • hero — том онцлох карт: хамгийн чухал 1 дүгнэлт (ЭХЭНД 1 байх)
-• cards — 3-4 карт: давуу тал / анхаарах зүйл / зөвлөмж
+• carousel — ⭐ГОЛ ХЭСЭГ: давуу тал, сул тал, дэлгэрэнгүй зөвлөгөөг swipe хийдэг том картууд. 4-6 item. Item бүр: tone (positive=давуу, warning=сул/анхаарах, info=зөвлөгөө), emoji, title (богино гарчиг), detail (2-3 өгүүлбэр ДЭЛГЭРЭНГҮЙ тайлбар — яагаад, юу гэсэн үг), tip (1 өгүүлбэр практик зөвлөмж), meta (label: "Давуу тал"/"Сул тал"/"Зөвлөгөө")
+• cards — 3-4 карт: товч жагсаалт
 • quotes — хэрэглэгчийн хариултаас 2-3 ишлэл + тайлбар (нотолгоо)
 • bars — хэмжээсүүдийн харьцуулалт (тоог сервер тавина)
 • timeline — ЯГ 4 алхамт төлөвлөгөө (meta="1-р долоо хоног")
@@ -360,22 +361,24 @@ Layout сонголт (ЗӨВХӨН эдгээр):
 • list — энгийн жагсаалт 3-5 зүйл
 • grid — 2 баганат жижиг блокууд 4 хүртэл
 
-Хүүрнэлийн зарчим: 1) хамгийн чухал ажиглалт 2) яагаад чухал 3) нотолгоо 4) давуу тал 5) сохор цэг 6) боломж 7) төлөвлөгөө 8) өнөөдрийн алхам. Тестдээ тохируул.
+⭐ ЗААВАЛ: дунд chapter-уудын нэгэнд carousel layout бүхий section байрлуул. Энэ нь давуу тал, сул тал, дэлгэрэнгүй зөвлөгөөг харуулна. Item бүрийн detail нь ҮНЭХЭЭР дэлгэрэнгүй (2-3 өгүүлбэр) — хэрэглэгчийн хариултад суурилсан, "яагаад" гэдгийг тайлбарласан байх. tip нь шууд хийж болох практик алхам.
+
+Хүүрнэлийн зарчим: 1) хамгийн чухал ажиглалт 2) яагаад чухал 3) нотолгоо 4) давуу/сул тал+зөвлөгөө (carousel) 5) боломж 6) төлөвлөгөө 7) өнөөдрийн алхам. Тестдээ тохируул.
 
 priority: critical (том hero) | high | normal | low (анхнаасаа хураангуй)
 tone: positive (ногоон) | warning (улбар шар) | neutral (саарал) | info (цэнхэр)
 expanded: false бол хэрэглэгч дарж дэлгэнэ
 
-ШААРДЛАГА: 6-8 section, 3-4 chapter. Эхнийх нь ҮРГЭЛЖ hero. timeline ЯГ 4 item, checklist ЯГ 3 item. Бүх text ≤15 үг.
+ШААРДЛАГА: 6-8 section, 3-4 chapter, 1 carousel section ЗААВАЛ. Эхнийх нь ҮРГЭЛЖ hero. timeline ЯГ 4 item, checklist ЯГ 3 item. carousel-аас БУСАД text ≤15 үг; carousel detail 2-3 өгүүлбэр.
 
 JSON буцаа ({ -ээр эхэл):
-{"testType":"...","scoreDirection":"...","outcomeQuality":"...","opening":"<1 өгүүлбэр — хувийн өнгөтэй эхлэл>","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"sections":[{"chapter":"<бүлгийн нэр ≤12 тэмдэгт>","kind":"<семантик нэр>","layout":"<hero|cards|quotes|bars|timeline|checklist|list|grid>","priority":"<critical|high|normal|low>","tone":"<positive|warning|neutral|info>","expanded":true,"emoji":"<e>","title":"<гарчиг>","body":"<0-2 өгүүлбэр>","items":[{"emoji":"<e>","title":"<товч>","text":"<тайлбар ≤15 үг>","meta":"<нэмэлт label>"}]}]}`
+{"testType":"...","scoreDirection":"...","outcomeQuality":"...","opening":"<1 өгүүлбэр — хувийн өнгөтэй эхлэл>","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"sections":[{"chapter":"<бүлгийн нэр ≤12 тэмдэгт>","kind":"<семантик нэр>","layout":"<hero|carousel|cards|quotes|bars|timeline|checklist|list|grid>","priority":"<critical|high|normal|low>","tone":"<positive|warning|neutral|info>","expanded":true,"emoji":"<e>","title":"<гарчиг>","body":"<0-2 өгүүлбэр>","items":[{"emoji":"<e>","tone":"<positive|warning|info>","title":"<товч гарчиг>","detail":"<carousel: 2-3 өгүүлбэр дэлгэрэнгүй>","text":"<бусад layout: ≤15 үг>","tip":"<carousel: 1 практик зөвлөмж>","meta":"<label>"}]}]}`
 
     // Note: Sonnet 4.6 does not support assistant message prefill —
     // we instruct raw JSON output and extract the {...} span instead.
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 2800,
+      max_tokens: 3400,
       system: SYSTEM,
       messages: [
         { role: 'user', content: `Дата:\n${truncated}\n\nЗӨВХӨН JSON буцаа — markdown, тайлбар үг ҮГҮЙ, шууд { -ээр эхэл.` },
@@ -511,7 +514,7 @@ JSON буцаа ({ -ээр эхэл):
     // The AI decides WHAT sections exist, their ORDER, LAYOUT and EMPHASIS.
     // The server only validates enums, strips fabricated numbers, and injects
     // real data into number-bearing layouts (bars).
-    const VALID_LAYOUTS = ['hero', 'cards', 'quotes', 'bars', 'timeline', 'checklist', 'list', 'grid']
+    const VALID_LAYOUTS = ['hero', 'cards', 'quotes', 'bars', 'timeline', 'checklist', 'list', 'grid', 'carousel']
     const VALID_PRIORITIES = ['critical', 'high', 'normal', 'low']
     const VALID_TONES = ['positive', 'warning', 'neutral', 'info']
 
@@ -519,7 +522,13 @@ JSON буцаа ({ -ээр эхэл):
       emoji: typeof it?.emoji === 'string' ? it.emoji.slice(0, 4) : '',
       title: stripBadNumbers(String(it?.title || '')).slice(0, 80),
       text: stripBadNumbers(String(it?.text || '')).slice(0, 240),
+      // Longer field for carousel cards — detailed advice/explanation
+      detail: stripBadNumbers(String(it?.detail || '')).slice(0, 360),
       meta: stripBadNumbers(String(it?.meta || '')).slice(0, 40),
+      // Per-item tone for carousel colour coding (strength/weakness/advice)
+      tone: VALID_TONES.includes(it?.tone) ? it.tone : '',
+      // Optional one-line actionable tip on the card
+      tip: stripBadNumbers(String(it?.tip || '')).slice(0, 120),
     })
 
     let sections: any[] = Array.isArray(data.sections) ? data.sections : []
@@ -565,6 +574,39 @@ JSON буцаа ({ -ээр эхэл):
     } else if (barsIdx >= 0) {
       // AI asked for bars but we have no real dimensional data — drop it
       sections.splice(barsIdx, 1)
+    }
+
+    // ── Guarantee a carousel section (strengths/weaknesses/advice) ─────────
+    // The detailed advice carousel is the centerpiece. If the AI didn't emit
+    // one, synthesize it from strengths/risks/insights it did provide.
+    const hasCarousel = sections.some(s => s.layout === 'carousel')
+    if (!hasCarousel) {
+      const carItems: any[] = []
+      if (Array.isArray(data.strengths)) {
+        for (const s of data.strengths.slice(0, 3)) {
+          const str = String(s)
+          const [t, ...rest] = str.split(':')
+          carItems.push({ emoji: '💪', tone: 'positive', title: (rest.length ? t : 'Давуу тал').trim().slice(0, 60), detail: (rest.length ? rest.join(':') : str).trim().slice(0, 360), tip: '', meta: 'Давуу тал' })
+        }
+      }
+      if (Array.isArray(data.risks)) {
+        for (const r of data.risks.slice(0, 3)) {
+          const str = String(r)
+          const [t, ...rest] = str.split(':')
+          carItems.push({ emoji: '🎯', tone: 'warning', title: (rest.length ? t : 'Анхаарах зүйл').trim().slice(0, 60), detail: (rest.length ? rest.join(':') : str).trim().slice(0, 360), tip: '', meta: 'Анхаарах зүйл' })
+        }
+      }
+      if (carItems.length >= 2) {
+        // Place after the overview/bars (around index 2) in a middle chapter
+        const insertAt = Math.min(2, sections.length)
+        sections.splice(insertAt, 0, {
+          chapter: 'Дүгнэлт',
+          kind: 'strengths_weaknesses', layout: 'carousel', priority: 'high',
+          tone: 'neutral', expanded: true, emoji: '💡',
+          title: 'Давуу тал ба зөвлөгөө', body: '',
+          items: carItems,
+        })
+      }
     }
 
     // Fallback plan if the AI failed to produce a usable layout

@@ -7,13 +7,16 @@ type TestType = 'profile' | 'cognitive' | 'screening' | 'aptitude' | 'generic'
 // ── Dynamic section model — the AI's presentation plan ──────────────────────
 // Each section carries presentation intent: layout, priority, tone, expansion.
 // The renderer adapts automatically; new section kinds need no code changes.
-type SectionLayout = 'hero' | 'cards' | 'quotes' | 'bars' | 'timeline' | 'checklist' | 'list' | 'grid'
+type SectionLayout = 'hero' | 'cards' | 'quotes' | 'bars' | 'timeline' | 'checklist' | 'list' | 'grid' | 'carousel'
 type SectionTone = 'positive' | 'warning' | 'neutral' | 'info'
 
 interface SectionItem {
   emoji?: string
   title?: string
   text?: string
+  detail?: string   // carousel — long-form explanation (2-3 sentences)
+  tip?: string      // carousel — actionable one-line tip
+  tone?: SectionTone // carousel — per-card colour coding
   meta?: string
   pct?: number   // bars only — injected server-side from real dimensions
 }
@@ -785,6 +788,99 @@ function fallbackChapter(layout: SectionLayout): string {
   return 'Дүн шинжилгээ'
 }
 
+// ── Premium swipeable advice carousel ───────────────────────────────────────
+// Big full-width cards: strengths / weaknesses / detailed advice. Each card is
+// tone-colored, with a header badge, emoji, title, long detail and a tip strip.
+function AdviceCarousel({ items, onAskAI }: { items: SectionItem[]; onAskAI: (q: string) => void }) {
+  const [idx, setIdx] = useState(0)
+  const touchX = useRef(0)
+  const n = items.length
+  const go = (i: number) => setIdx(Math.max(0, Math.min(n - 1, i)))
+  const onTS = (e: React.TouchEvent) => { touchX.current = e.touches[0].clientX }
+  const onTE = (e: React.TouchEvent) => {
+    const d = touchX.current - e.changedTouches[0].clientX
+    if (Math.abs(d) > 40) go(idx + (d > 0 ? 1 : -1))
+  }
+  if (!n) return null
+
+  const tones: Record<string, { main: string; bg: string; soft: string; text: string; ring: string }> = {
+    positive: { main: "#00C48C", bg: "linear-gradient(160deg,#F0FDF4,#DCFCE7)", soft: "#DCFCE7", text: "#065F46", ring: "#BBF7D0" },
+    warning:  { main: "#F59E0B", bg: "linear-gradient(160deg,#FFFBEB,#FEF3C7)", soft: "#FEF3C7", text: "#92400E", ring: "#FDE68A" },
+    info:     { main: "#3B82F6", bg: "linear-gradient(160deg,#EFF6FF,#DBEAFE)", soft: "#DBEAFE", text: "#1E40AF", ring: "#BFDBFE" },
+    neutral:  { main: "#64748B", bg: "linear-gradient(160deg,#F8FAFC,#F1F5F9)", soft: "#F1F5F9", text: "#334155", ring: "#E2E8F0" },
+  }
+
+  return (
+    <div>
+      {/* Swipeable card viewport */}
+      <div style={{ overflow: "hidden", borderRadius: 20 }} onTouchStart={onTS} onTouchEnd={onTE}>
+        <div style={{ display: "flex", transform: `translateX(-${idx * 100}%)`, transition: "transform 0.4s cubic-bezier(.16,1,.3,1)" }}>
+          {items.map((it, i) => {
+            const tk = tones[it.tone || "neutral"] || tones.neutral
+            return (
+              <div key={i} style={{ minWidth: "100%", boxSizing: "border-box" }}>
+                <div style={{
+                  background: tk.bg, border: `1.5px solid ${tk.ring}`, borderRadius: 20,
+                  padding: "16px", minHeight: 188, display: "flex", flexDirection: "column",
+                }}>
+                  {/* Badge row */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                    <div style={{
+                      width: 44, height: 44, borderRadius: 14, flexShrink: 0,
+                      background: tk.main, display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 22, boxShadow: `0 4px 14px ${tk.main}55`,
+                    }}>{it.emoji || "✨"}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {it.meta && <span style={{ display: "inline-block", background: tk.main, color: "#fff", fontSize: 9.5, fontWeight: 800, padding: "3px 9px", borderRadius: 20, letterSpacing: 0.3, marginBottom: 3 }}>{it.meta}</span>}
+                      <p style={{ fontSize: 14.5, fontWeight: 900, color: tk.text, margin: 0, lineHeight: 1.25 }}>{it.title}</p>
+                    </div>
+                  </div>
+                  {/* Detail */}
+                  {it.detail && <p style={{ fontSize: 12.5, color: "#475569", lineHeight: 1.6, margin: 0, flex: 1 }}>{it.detail}</p>}
+                  {/* Tip strip */}
+                  {it.tip && (
+                    <div style={{ display: "flex", gap: 7, alignItems: "flex-start", background: "rgba(255,255,255,0.7)", border: `1px solid ${tk.ring}`, borderRadius: 12, padding: "9px 11px", marginTop: 12 }}>
+                      <span style={{ fontSize: 13, flexShrink: 0 }}>💡</span>
+                      <p style={{ fontSize: 11.5, color: tk.text, fontWeight: 600, lineHeight: 1.45, margin: 0 }}>{it.tip}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Controls: arrows + dots + counter */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }}>
+        <button onClick={() => go(idx - 1)} disabled={idx === 0} style={{
+          width: 34, height: 34, borderRadius: "50%", border: "none",
+          background: idx === 0 ? "#F1F5F9" : "#fff", boxShadow: idx === 0 ? "none" : "0 2px 8px rgba(0,0,0,0.1)",
+          cursor: idx === 0 ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={idx === 0 ? "#CBD5E1" : "#475569"} strokeWidth="3" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
+          {items.map((_, i) => (
+            <button key={i} onClick={() => go(i)} style={{
+              width: i === idx ? 22 : 7, height: 7, borderRadius: 4,
+              background: i === idx ? "#1E293B" : "#CBD5E1", border: "none", cursor: "pointer",
+              transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)", padding: 0,
+            }} />
+          ))}
+        </div>
+        <button onClick={() => go(idx + 1)} disabled={idx === n - 1} style={{
+          width: 34, height: 34, borderRadius: "50%", border: "none",
+          background: idx === n - 1 ? "#F1F5F9" : "#fff", boxShadow: idx === n - 1 ? "none" : "0 2px 8px rgba(0,0,0,0.1)",
+          cursor: idx === n - 1 ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={idx === n - 1 ? "#CBD5E1" : "#475569"} strokeWidth="3" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: string) => void }) {
   const sections = data.sections || []
 
@@ -932,6 +1028,10 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
             )}
 
             {/* ── Layout-specific item rendering ── */}
+
+            {s.layout === "carousel" && s.items.length > 0 && (
+              <AdviceCarousel items={s.items} onAskAI={onAskAI} />
+            )}
 
             {s.layout === "bars" && s.items.length > 0 && (
               <div>
