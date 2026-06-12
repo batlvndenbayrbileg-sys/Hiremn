@@ -917,17 +917,23 @@ function AdviceCarousel({ items, onAskAI }: { items: SectionItem[]; onAskAI: (q:
           {items.map((it, i) => {
             const tk = tones[it.tone || "neutral"] || tones.neutral
             return (
-              <div key={i} style={{ minWidth: "100%", boxSizing: "border-box" }}>
+              <div key={i} style={{ minWidth: "100%", boxSizing: "border-box", padding: "2px 1px 6px" }}>
                 <div style={{
+                  position: "relative", overflow: "hidden",
                   background: tk.bg, border: `1.5px solid ${tk.ring}`, borderRadius: 20,
                   padding: "16px", minHeight: 188, display: "flex", flexDirection: "column",
+                  boxShadow: idx === i ? `0 10px 28px ${tk.main}26` : "0 2px 8px rgba(0,0,0,0.04)",
+                  transform: idx === i ? "scale(1)" : "scale(0.97)",
+                  transition: "transform 0.4s cubic-bezier(.16,1,.3,1), box-shadow 0.4s ease",
                 }}>
+                  {/* Glossy top sheen */}
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 60, background: "linear-gradient(180deg, rgba(255,255,255,0.5), transparent)", pointerEvents: "none" }} />
                   {/* Badge row */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                  <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                     <div style={{
                       width: 44, height: 44, borderRadius: 14, flexShrink: 0,
-                      background: tk.main, display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 22, boxShadow: `0 4px 14px ${tk.main}55`,
+                      background: `linear-gradient(135deg, ${tk.main}, ${tk.main}DD)`, display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 22, boxShadow: `0 6px 16px ${tk.main}55`,
                     }}>{it.emoji || "✨"}</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       {it.meta && <span style={{ display: "inline-block", background: tk.main, color: "#fff", fontSize: 9.5, fontWeight: 800, padding: "3px 9px", borderRadius: 20, letterSpacing: 0.3, marginBottom: 3 }}>{it.meta}</span>}
@@ -1037,6 +1043,13 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
 
   const ringColor = scoreColor(data.healthScore)
 
+  // Mascot reacts to the outcome — celebrate (great), thumbsup (good),
+  // ok (neutral), thinking (needs attention).
+  const heroChar: keyof typeof CHARS =
+    data.outcomeQuality === 'positive' ? (data.isProfile ? 'thumbsup' : 'celebrate')
+    : data.outcomeQuality === 'concerning' ? 'thinking'
+    : 'ok'
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#F4F6FB" }} onTouchStart={onChapTS} onTouchEnd={onChapTE}>
       {/* Reading-progress bar */}
@@ -1080,40 +1093,45 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
       <div style={{
         position: "relative", borderRadius: 26, padding: "22px 18px 20px", marginBottom: 14,
         background: `linear-gradient(150deg, #fff 0%, ${accent.soft} 100%)`,
-        boxShadow: `0 8px 30px ${accent.glow}, 0 2px 10px rgba(0,0,0,0.04)`,
+        boxShadow: `0 10px 34px ${accent.glow}, 0 2px 10px rgba(0,0,0,0.04)`,
         border: `1px solid ${accent.c}22`, overflow: "hidden",
+        animation: "ci 0.5s cubic-bezier(.16,1,.3,1) both",
       }}>
-        {/* Decorative mesh blobs */}
-        <div style={{ position: "absolute", top: -40, right: -30, width: 150, height: 150, borderRadius: "50%", background: accent.mesh, filter: "blur(28px)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: -50, left: -20, width: 120, height: 120, borderRadius: "50%", background: accent.mesh, filter: "blur(30px)", pointerEvents: "none" }} />
+        {/* Animated mesh orbs */}
+        <div style={{ position: "absolute", top: -40, right: -30, width: 150, height: 150, borderRadius: "50%", background: accent.mesh, filter: "blur(28px)", pointerEvents: "none", animation: "ar-orb 9s ease-in-out infinite" }} />
+        <div style={{ position: "absolute", bottom: -50, left: -20, width: 120, height: 120, borderRadius: "50%", background: accent.mesh, filter: "blur(30px)", pointerEvents: "none", animation: "ar-orb 11s ease-in-out infinite reverse" }} />
+        {/* Shimmer sweep */}
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", borderRadius: 26 }}>
+          <div style={{ position: "absolute", top: 0, left: 0, width: "45%", height: "100%", background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent)", animation: "ar-shimmer 5s ease-in-out 1s infinite" }} />
+        </div>
 
         {data.isProfile ? (
-          /* Profile hero — dominant type, no 0-100 score */
+          /* Profile hero — dominant type with floating mascot */
           <div style={{ position: "relative" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-              <div style={{
-                width: 64, height: 64, borderRadius: 20, flexShrink: 0,
-                background: `linear-gradient(135deg, ${accent.c}, ${accent.c2})`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 30, boxShadow: `0 8px 22px ${accent.glow}`,
-              }}>{chapters[0]?.emoji || "🧩"}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+              <div style={{ position: "relative", flexShrink: 0, width: 72, height: 72 }}>
+                <div style={{ position: "absolute", inset: -2, borderRadius: "50%", background: `radial-gradient(circle, ${accent.c}44, transparent 70%)`, animation: "ar-glow 3s ease-in-out infinite" }} />
+                <div style={{ position: "relative", width: 72, height: 72, borderRadius: 22, background: `linear-gradient(135deg, ${accent.c}, ${accent.c2})`, display: "flex", alignItems: "flex-end", justifyContent: "center", boxShadow: `0 10px 24px ${accent.glow}`, overflow: "hidden" }}>
+                  <img src={CHARS[heroChar]} alt="" style={{ width: 60, height: "auto", marginBottom: -4, animation: "ar-float2 4s ease-in-out infinite", filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.2))" }} />
+                </div>
+              </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontSize: 10.5, fontWeight: 800, color: accent.c, letterSpacing: 0.6, margin: "0 0 2px", textTransform: "uppercase" }}>Таны давамгай дүр</p>
                 <p style={{ fontSize: 21, fontWeight: 900, color: "#1E293B", margin: 0, lineHeight: 1.1 }}>{data.dominantLabel || data.displayLabel}</p>
                 {data.secondaryLabel && <p style={{ fontSize: 11.5, color: "#94A3B8", margin: "3px 0 0", fontWeight: 600 }}>2-рт: {data.secondaryLabel}</p>}
               </div>
             </div>
-            <p style={{ fontSize: 12.5, color: "#475569", lineHeight: 1.55, margin: 0, fontWeight: 500 }}>
+            <p style={{ fontSize: 12.5, color: "#475569", lineHeight: 1.55, margin: 0, fontWeight: 500, position: "relative" }}>
               {data.opening || data.summary.description}
             </p>
           </div>
         ) : (
-          /* Score hero — ring + label for scored tests */
-          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 16 }}>
+          /* Score hero — ring + label + floating mascot */
+          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ position: "relative", flexShrink: 0 }}>
-              <div style={{ position: "absolute", inset: -6, borderRadius: "50%", background: `radial-gradient(circle, ${ringColor}33 0%, transparent 70%)`, filter: "blur(6px)" }} />
+              <div style={{ position: "absolute", inset: -6, borderRadius: "50%", background: `radial-gradient(circle, ${ringColor}33 0%, transparent 70%)`, filter: "blur(6px)", animation: "ar-glow 3.5s ease-in-out infinite" }} />
               <div style={{ position: "relative" }}>
-                <ScoreRing score={data.healthScore} size={96} display={data.displayScore != null && data.displayMaxScore ? { score: data.displayScore, max: data.displayMaxScore } : undefined} />
+                <ScoreRing score={data.healthScore} size={94} display={data.displayScore != null && data.displayMaxScore ? { score: data.displayScore, max: data.displayMaxScore } : undefined} />
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -1127,6 +1145,8 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
                 {data.opening || data.summary.description}
               </p>
             </div>
+            {/* Floating mascot — peeks from the right */}
+            <img src={CHARS[heroChar]} alt="" style={{ position: "absolute", right: -8, bottom: -20, width: 58, height: "auto", opacity: 0.92, animation: "ar-float 5s ease-in-out infinite", filter: `drop-shadow(0 6px 10px ${accent.glow})`, pointerEvents: "none" }} />
           </div>
         )}
       </div>
@@ -1275,10 +1295,23 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
               const pct = total ? Math.round((doneCount / total) * 100) : 0
               return (
                 <div>
+                  {/* Celebration banner when all done */}
+                  {allDone && (
+                    <div style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", gap: 10, background: "linear-gradient(135deg,#F0FDF4,#DCFCE7)", border: `1.5px solid #A7F3D0`, borderRadius: 16, padding: "10px 12px", marginBottom: 10, animation: "ar-pop-b 0.5s cubic-bezier(.16,1,.3,1) both" }}>
+                      {[0,1,2,3,4,5].map(ci => (
+                        <span key={ci} style={{ position: "absolute", top: -6, left: `${12 + ci * 16}%`, width: 6, height: 6, borderRadius: 2, background: ["#00C48C","#FBBF24","#F97316","#6366F1","#EC4899","#22C55E"][ci], animation: `ar-confetti ${1.2 + ci * 0.15}s ease-in ${ci * 0.1}s infinite` }} />
+                      ))}
+                      <img src={CHARS.celebrate} alt="" style={{ width: 38, height: "auto", animation: "ar-float2 2.5s ease-in-out infinite" }} />
+                      <div style={{ position: "relative" }}>
+                        <p style={{ fontSize: 12.5, fontWeight: 900, color: "#065F46", margin: 0 }}>Гайхалтай! Бүгдийг хийлээ 🎉</p>
+                        <p style={{ fontSize: 10.5, color: "#047857", margin: "1px 0 0" }}>Өнөөдрийн алхмаа дуусгасан танд баяр хүргэе</p>
+                      </div>
+                    </div>
+                  )}
                   {/* Progress header */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8" }}>
-                      {allDone ? "Бүгдийг гүйцэтгэлээ! 🎉" : `${doneCount}/${total} гүйцэтгэсэн`}
+                      {allDone ? "Бүгдийг гүйцэтгэлээ!" : `${doneCount}/${total} гүйцэтгэсэн`}
                     </span>
                     <span style={{ fontSize: 11, fontWeight: 800, color: allDone ? TEAL : "#94A3B8" }}>{pct}%</span>
                   </div>
@@ -1352,7 +1385,9 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
           <div style={{ position: "absolute", top: -30, right: -20, width: 100, height: 100, borderRadius: "50%", background: accent.mesh, filter: "blur(24px)", pointerEvents: "none" }} />
           {/* Header */}
           <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-            <div style={{ width: 48, height: 48, borderRadius: 15, background: `linear-gradient(135deg, ${accent.c}, ${accent.c2})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 23, flexShrink: 0, boxShadow: `0 5px 16px ${accent.glow}` }}>🤖</div>
+            <div style={{ position: "relative", width: 52, height: 52, borderRadius: 16, background: `linear-gradient(135deg, ${accent.c}, ${accent.c2})`, display: "flex", alignItems: "flex-end", justifyContent: "center", flexShrink: 0, boxShadow: `0 6px 18px ${accent.glow}`, overflow: "hidden" }}>
+              <img src={CHARS.phone} alt="" style={{ width: 46, height: "auto", marginBottom: -3, animation: "ar-float2 3.5s ease-in-out infinite", filter: "drop-shadow(0 3px 5px rgba(0,0,0,0.2))" }} />
+            </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: 13.5, fontWeight: 900, color: "#1E293B", margin: "0 0 2px" }}>AI зөвлөхөөс асуу</p>
               <p style={{ fontSize: 11, color: "#64748B", margin: 0, lineHeight: 1.4 }}>Үр дүнгийнхээ талаар юу ч асууж болно</p>
@@ -2656,6 +2691,15 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
           60%  { transform: scale(1.02) translateY(-3px); }
           100% { opacity: 1; transform: scale(1) translateY(0); }
         }
+        @keyframes ar-float { 0%,100%{transform:translateY(0) rotate(-1.5deg)} 50%{transform:translateY(-7px) rotate(1.5deg)} }
+        @keyframes ar-float2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+        @keyframes ar-orb { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(10px,-8px) scale(1.1)} 66%{transform:translate(-6px,6px) scale(0.95)} }
+        @keyframes ar-shimmer { 0%{transform:translateX(-120%)} 100%{transform:translateX(220%)} }
+        @keyframes ar-glow { 0%,100%{opacity:0.5;transform:scale(1)} 50%{opacity:0.85;transform:scale(1.08)} }
+        @keyframes ar-pop-b { 0%{opacity:0;transform:scale(0.5)} 55%{transform:scale(1.18)} 100%{opacity:1;transform:scale(1)} }
+        @keyframes ar-confetti { 0%{opacity:1;transform:translateY(0) rotate(0)} 100%{opacity:0;transform:translateY(120px) rotate(360deg)} }
+        @keyframes ar-ring-spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+        @keyframes ar-sheen { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
         .hw-card-tilt { transition: transform 0.25s cubic-bezier(.16,1,.3,1), box-shadow 0.25s ease; }
       `}</style>
     </div>
