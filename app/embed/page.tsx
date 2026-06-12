@@ -5,6 +5,9 @@ import HireMnChatWidget from "@/components/hire-mn-chat-widget"
 export default function EmbedPage() {
   return (
     <>
+      {/* Preconnect to hire.mn API for fast test-cover image loading */}
+      <link rel="preconnect" href="https://api.hire-test.cloud" />
+      <link rel="dns-prefetch" href="https://api.hire-test.cloud" />
       {/* Preconnect + preload Spline scene as early as possible */}
       <link rel="preconnect" href="https://prod.spline.design" crossOrigin="anonymous" />
       <link rel="dns-prefetch" href="https://prod.spline.design" />

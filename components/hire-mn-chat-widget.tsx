@@ -2772,9 +2772,11 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
         <img
           src={cover}
           alt={test.name}
+          loading={index < 2 ? "eager" : "lazy"}
+          decoding="async"
+          fetchPriority={index < 2 ? "high" : "low"}
           onLoad={() => setImgLoaded(true)}
           onError={(e) => {
-            // If both API icon and category fallback fail, show default cover
             const el = e.currentTarget
             if (!el.src.endsWith('/covers/default.jpg')) {
               el.src = '/covers/default.jpg'
@@ -2784,7 +2786,7 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
           style={{
             width: "100%", height: "100%", objectFit: "cover",
             opacity: imgLoaded ? 1 : 0.6,
-            transition: "opacity 0.3s ease",
+            transition: "opacity 0.2s ease",
             display: "block",
           }}
         />
