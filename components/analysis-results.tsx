@@ -4,10 +4,38 @@ import { useState, useEffect, useRef, useCallback } from "react"
 
 type TestType = 'profile' | 'cognitive' | 'screening' | 'aptitude' | 'generic'
 
+// ── Dynamic section model — the AI's presentation plan ──────────────────────
+// Each section carries presentation intent: layout, priority, tone, expansion.
+// The renderer adapts automatically; new section kinds need no code changes.
+type SectionLayout = 'hero' | 'cards' | 'quotes' | 'bars' | 'timeline' | 'checklist' | 'list' | 'grid'
+type SectionTone = 'positive' | 'warning' | 'neutral' | 'info'
+
+interface SectionItem {
+  emoji?: string
+  title?: string
+  text?: string
+  meta?: string
+  pct?: number   // bars only — injected server-side from real dimensions
+}
+
+interface Section {
+  kind: string
+  layout: SectionLayout
+  priority: 'critical' | 'high' | 'normal' | 'low'
+  tone: SectionTone
+  expanded: boolean
+  emoji: string
+  title: string
+  body: string
+  items: SectionItem[]
+}
+
 interface AnalysisData {
   testType?: TestType               // Drives section visibility & framing
   scoreDirection?: 'high-good' | 'low-good' | 'profile'  // Score semantics
   outcomeQuality?: 'positive' | 'neutral' | 'concerning' // Outcome judgment
+  sections?: Section[]              // AI presentation plan (journey mode)
+  opening?: string                  // Personal narrative opener
   healthScore: number               // 0-100 WELLBEING percentage (NOT raw % — already inverted for low-good tests)
   displayScore?: number             // Raw test score (e.g. 5)
   displayMaxScore?: number          // Raw test max (e.g. 10)
@@ -736,6 +764,248 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
   )
 }
 
+// ── Dynamic Journey renderer ─────────────────────────────────────────────────
+// Renders the AI's presentation plan (sections[]) as a guided single-scroll
+// narrative. Layout, order, emphasis and tone all come from the AI — adding a
+// new assessment type requires zero changes here.
+
+const TONE_THEME: Record<SectionTone, { main: string; bg: string; border: string; text: string; soft: string }> = {
+  positive: { main: "#00C48C", bg: "#F0FDF4", border: "#BBF7D0", text: "#065F46", soft: "#DCFCE7" },
+  warning:  { main: "#F59E0B", bg: "#FFFBEB", border: "#FDE68A", text: "#92400E", soft: "#FEF3C7" },
+  info:     { main: "#3B82F6", bg: "#EFF6FF", border: "#BFDBFE", text: "#1E40AF", soft: "#DBEAFE" },
+  neutral:  { main: "#64748B", bg: "#F8FAFC", border: "#E2E8F0", text: "#334155", soft: "#F1F5F9" },
+}
+
+function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: string) => void }) {
+  const sections = data.sections || []
+  // Collapse state — low priority or expanded:false start collapsed
+  const [open, setOpen] = useState<Record<number, boolean>>(() => {
+    const o: Record<number, boolean> = {}
+    sections.forEach((s, i) => { o[i] = s.expanded && s.priority !== 'low' })
+    return o
+  })
+  // Checklist completion state, keyed "sectionIdx-itemIdx"
+  const [done, setDone] = useState<Record<string, boolean>>({})
+
+  const toggleOpen = (i: number) => setOpen(prev => ({ ...prev, [i]: !prev[i] }))
+  const toggleDone = (k: string) => setDone(prev => ({ ...prev, [k]: !prev[k] }))
+
+  return (
+    <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
+      {/* Score hero — always server data, never AI-generated */}
+      <div style={{ background: "#fff", borderRadius: 20, padding: "18px 16px", marginBottom: 12, boxShadow: "0 2px 14px rgba(0,0,0,0.07)", display: "flex", alignItems: "center", gap: 14 }}>
+        <ScoreRing score={data.healthScore} size={92} display={data.displayScore != null && data.displayMaxScore ? { score: data.displayScore, max: data.displayMaxScore } : undefined} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {data.displayLabel && (
+            <span style={{ display: "inline-block", background: `${scoreColor(data.healthScore)}18`, color: scoreColor(data.healthScore), fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 20, marginBottom: 6 }}>
+              {data.displayLabel}
+            </span>
+          )}
+          <p style={{ fontSize: 12, color: "#475569", lineHeight: 1.5, margin: 0 }}>
+            {data.opening || data.summary.description}
+          </p>
+        </div>
+      </div>
+
+      {/* AI-planned sections in narrative order */}
+      {sections.map((s, si) => {
+        const t = TONE_THEME[s.tone] || TONE_THEME.neutral
+        const isOpen = open[si] !== false
+        const isHero = s.layout === "hero"
+
+        // Collapsed pill for low-priority sections
+        if (!isOpen) {
+          return (
+            <button key={si} onClick={() => toggleOpen(si)} style={{
+              width: "100%", display: "flex", alignItems: "center", gap: 10,
+              background: "#fff", border: `1.5px solid ${t.border}`, borderRadius: 16,
+              padding: "12px 14px", marginBottom: 10, cursor: "pointer", textAlign: "left",
+            }}>
+              <span style={{ fontSize: 18 }}>{s.emoji}</span>
+              <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: "#1E293B" }}>{s.title}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+          )
+        }
+
+        return (
+          <div key={si} style={{
+            background: isHero ? `linear-gradient(135deg, ${t.bg} 0%, ${t.soft} 100%)` : "#fff",
+            border: `1.5px solid ${isHero ? t.border : "#F1F5F9"}`,
+            borderRadius: isHero ? 24 : 18,
+            padding: isHero ? "20px 18px" : "16px 14px",
+            marginBottom: 12,
+            boxShadow: isHero ? `0 6px 24px ${t.main}1A` : "0 2px 10px rgba(0,0,0,0.05)",
+            animation: `ci 0.35s ease ${si * 0.06}s both`,
+          }}>
+            {/* Section header */}
+            <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: s.body || s.items.length ? 10 : 0 }}>
+              <div style={{
+                width: isHero ? 42 : 32, height: isHero ? 42 : 32, borderRadius: isHero ? 14 : 10,
+                background: isHero ? t.main : t.soft,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: isHero ? 21 : 16, flexShrink: 0,
+                boxShadow: isHero ? `0 4px 12px ${t.main}50` : "none",
+              }}>{s.emoji}</div>
+              <p style={{ fontSize: isHero ? 16 : 14, fontWeight: 900, color: isHero ? t.text : "#1E293B", margin: 0, flex: 1, lineHeight: 1.3 }}>{s.title}</p>
+              {(s.priority === 'low' || !s.expanded) && (
+                <button onClick={() => toggleOpen(si)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round"><path d="M18 15l-6-6-6 6"/></svg>
+                </button>
+              )}
+            </div>
+
+            {s.body && (
+              <p style={{ fontSize: isHero ? 13 : 12, color: isHero ? t.text : "#475569", lineHeight: 1.6, margin: s.items.length ? "0 0 12px" : 0 }}>{s.body}</p>
+            )}
+
+            {/* ── Layout-specific item rendering ── */}
+
+            {s.layout === "bars" && s.items.length > 0 && (
+              <div>
+                {s.items.map((it, ii) => (
+                  <div key={ii} style={{ marginBottom: ii < s.items.length - 1 ? 10 : 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: "#334155" }}>{it.title}</span>
+                      <span style={{ fontSize: 12, fontWeight: 800, color: t.main }}>{it.meta}</span>
+                    </div>
+                    <div style={{ height: 8, background: "#F1F5F9", borderRadius: 6, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${Math.min(it.pct ?? 0, 100)}%`, background: `linear-gradient(90deg, ${t.main}, ${t.main}99)`, borderRadius: 6, transition: "width 0.8s cubic-bezier(.16,1,.3,1)" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {s.layout === "quotes" && s.items.map((it, ii) => (
+              <div key={ii} style={{ borderLeft: `3px solid ${t.main}`, background: t.bg, borderRadius: "0 12px 12px 0", padding: "10px 12px", marginBottom: ii < s.items.length - 1 ? 8 : 0 }}>
+                {it.title && <p style={{ fontSize: 11, fontWeight: 800, color: t.text, margin: "0 0 3px" }}>{it.title}</p>}
+                {it.text && <p style={{ fontSize: 12, color: "#475569", fontStyle: "italic", lineHeight: 1.5, margin: 0 }}>"{it.text}"</p>}
+              </div>
+            ))}
+
+            {(s.layout === "cards" || s.layout === "list") && s.items.map((it, ii) => (
+              <div key={ii} style={{
+                display: "flex", gap: 10, alignItems: "flex-start",
+                background: s.layout === "cards" ? t.bg : "transparent",
+                borderRadius: s.layout === "cards" ? 14 : 0,
+                padding: s.layout === "cards" ? "11px 12px" : "5px 0",
+                marginBottom: ii < s.items.length - 1 ? (s.layout === "cards" ? 8 : 2) : 0,
+              }}>
+                <span style={{ fontSize: 16, flexShrink: 0, lineHeight: 1.3 }}>{it.emoji || "•"}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {it.title && <p style={{ fontSize: 12.5, fontWeight: 800, color: "#1E293B", margin: "0 0 2px", lineHeight: 1.35 }}>{it.title}</p>}
+                  {it.text && <p style={{ fontSize: 11.5, color: "#64748B", lineHeight: 1.5, margin: 0 }}>{it.text}</p>}
+                </div>
+              </div>
+            ))}
+
+            {s.layout === "grid" && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {s.items.map((it, ii) => (
+                  <div key={ii} style={{ background: t.bg, borderRadius: 14, padding: "12px 10px", textAlign: "center" }}>
+                    <div style={{ fontSize: 20, marginBottom: 4 }}>{it.emoji || s.emoji}</div>
+                    <p style={{ fontSize: 11.5, fontWeight: 800, color: "#1E293B", margin: "0 0 2px" }}>{it.title}</p>
+                    {it.text && <p style={{ fontSize: 10.5, color: "#64748B", margin: 0, lineHeight: 1.4 }}>{it.text}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {s.layout === "timeline" && (
+              <div style={{ position: "relative", paddingLeft: 26 }}>
+                <div style={{ position: "absolute", left: 9, top: 8, bottom: 8, width: 2, background: t.border }} />
+                {s.items.map((it, ii) => (
+                  <div key={ii} style={{ position: "relative", marginBottom: ii < s.items.length - 1 ? 14 : 0 }}>
+                    <div style={{
+                      position: "absolute", left: -26, top: 0,
+                      width: 20, height: 20, borderRadius: "50%",
+                      background: t.main, color: "#fff",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 10, fontWeight: 900,
+                      boxShadow: `0 0 0 3px ${t.bg}`,
+                    }}>{ii + 1}</div>
+                    {it.meta && <p style={{ fontSize: 9.5, fontWeight: 800, color: "#94A3B8", letterSpacing: 0.5, margin: "0 0 1px", textTransform: "uppercase" }}>{it.meta}</p>}
+                    <p style={{ fontSize: 12.5, fontWeight: 800, color: "#1E293B", margin: "0 0 2px" }}>{it.title}</p>
+                    {it.text && <p style={{ fontSize: 11.5, color: "#64748B", lineHeight: 1.5, margin: 0 }}>{it.text}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {s.layout === "checklist" && (() => {
+              const total = s.items.length
+              const doneCount = s.items.filter((_, ii) => done[`${si}-${ii}`]).length
+              return (
+                <div>
+                  <div style={{ height: 6, background: "#F1F5F9", borderRadius: 4, overflow: "hidden", marginBottom: 10 }}>
+                    <div style={{ height: "100%", width: total ? `${(doneCount / total) * 100}%` : "0%", background: `linear-gradient(90deg, ${TEAL}, #00E5A0)`, transition: "width 0.4s ease" }} />
+                  </div>
+                  {s.items.map((it, ii) => {
+                    const k = `${si}-${ii}`
+                    const checked = !!done[k]
+                    return (
+                      <button key={ii} onClick={() => toggleDone(k)} style={{
+                        width: "100%", display: "flex", alignItems: "center", gap: 10,
+                        background: checked ? "#F0FDF4" : "#F8FAFC",
+                        border: `1.5px solid ${checked ? "#BBF7D0" : "#F1F5F9"}`,
+                        borderRadius: 14, padding: "11px 12px",
+                        marginBottom: ii < s.items.length - 1 ? 7 : 0,
+                        cursor: "pointer", textAlign: "left", transition: "all 0.2s",
+                      }}>
+                        <div style={{
+                          width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
+                          border: `2px solid ${checked ? TEAL : "#CBD5E1"}`,
+                          background: checked ? TEAL : "transparent",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          transition: "all 0.2s",
+                        }}>
+                          {checked && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round"><path d="M20 6L9 17l-5-5"/></svg>}
+                        </div>
+                        <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: checked ? "#94A3B8" : "#1E293B", textDecoration: checked ? "line-through" : "none" }}>
+                          {it.title || it.text}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )
+            })()}
+
+            {/* Hero chips */}
+            {isHero && s.items.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+                {s.items.map((it, ii) => (
+                  <span key={ii} style={{ background: "rgba(255,255,255,0.7)", border: `1px solid ${t.border}`, borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 700, color: t.text }}>
+                    {it.emoji} {it.title || it.text}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })}
+
+      {/* Closing CTA — ask the AI */}
+      <div style={{
+        background: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)",
+        border: "1.5px solid #BBF7D0", borderRadius: 20, padding: "14px 16px",
+        display: "flex", alignItems: "center", gap: 12, marginBottom: 6,
+      }}>
+        <span style={{ fontSize: 26 }}>💬</span>
+        <div style={{ flex: 1 }}>
+          <p style={{ fontSize: 12.5, fontWeight: 800, color: "#065F46", margin: "0 0 2px" }}>Асуух зүйл байна уу?</p>
+          <p style={{ fontSize: 11, color: "#047857", margin: 0 }}>Үр дүнгийнхээ талаар AI-аас юу ч асууж болно</p>
+        </div>
+        <button onClick={() => onAskAI("Миний үр дүнгийн хамгийн чухал зүйл юу вэ?")} style={{
+          background: TEAL, border: "none", borderRadius: 20, padding: "8px 14px",
+          color: "#fff", fontSize: 11, fontWeight: 800, cursor: "pointer", flexShrink: 0,
+        }}>Асуух</button>
+      </div>
+    </div>
+  )
+}
+
 // ── Full Results ──────────────────────────────────────────────────────────────
 export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) {
   const [page, setPage] = useState(0)
@@ -760,6 +1030,10 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
     grad: string
     emoji: string
   }>(null)
+  // Journey mode: the AI provided a dynamic presentation plan — render the
+  // guided single-scroll narrative instead of the legacy fixed 3-page layout.
+  const hasJourney = Array.isArray(data.sections) && data.sections.length >= 3
+
   // Test type determines whether the 30-day action page is shown
   const testType: TestType = data.testType || 'generic'
   const hasActionPage = (data.roadmap?.length ?? 0) > 0 || (data.todayGoals?.length ?? 0) > 0
@@ -825,17 +1099,22 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             </svg>
           </button>
         </div>
+        {!hasJourney && (
         <div style={{ display: "flex", background: "#F1F5F9", borderRadius: 12, padding: 3, gap: 2 }}>
           {PAGES.map((p, i) => (
             <button key={i} onClick={() => setPage(i)} style={{ flex: 1, padding: "7px", fontSize: 11, fontWeight: 700, border: "none", borderRadius: 10, cursor: "pointer", background: page === i ? "#fff" : "transparent", color: page === i ? "#1E293B" : "#94A3B8", boxShadow: page === i ? "0 2px 8px rgba(0,0,0,0.08)" : "none", transition: "all 0.2s" }}>{p}</button>
           ))}
         </div>
+        )}
       </div>
 
       {/* Content */}
       <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }} onTouchStart={onTS} onTouchEnd={onTE}>
+        {/* JOURNEY MODE — AI-planned dynamic narrative */}
+        {hasJourney && <JourneyView data={data} onAskAI={onAskAI} />}
+
         {/* PAGE 0 — Overview */}
-        {page === 0 && (
+        {!hasJourney && page === 0 && (
           <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
             {/* Score + character */}
             <div style={{ background: "#fff", borderRadius: 20, padding: "18px 16px", marginBottom: 12, boxShadow: "0 2px 14px rgba(0,0,0,0.07)", display: "flex", alignItems: "center", gap: 14 }}>
@@ -1072,7 +1351,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
         )}
 
         {/* PAGE 1 — AI Insights (carousel design) */}
-        {page === 1 && (() => {
+        {!hasJourney && page === 1 && (() => {
           // Stats pills derived from statCards or computed
           const heroStats = (data.statCards && data.statCards.length >= 4)
             ? data.statCards.slice(0, 4)
@@ -1830,7 +2109,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
         )}
 
         {/* PAGE 2 — 30 Day Plan + Goals */}
-        {page === 2 && (
+        {!hasJourney && page === 2 && (
           <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
             {/* Goals card */}
             <div style={{ background: "#fff", borderRadius: 18, padding: "16px", marginBottom: 12, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
@@ -1942,12 +2221,14 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
         </div>
       </div>
 
-      {/* Page dots */}
+      {/* Page dots (legacy paged mode only) */}
+      {!hasJourney && (
       <div style={{ background: "#fff", padding: "6px 0 8px", display: "flex", justifyContent: "center", gap: 6, flexShrink: 0, borderTop: "1px solid #F1F5F9" }}>
         {PAGES.map((_, i) => (
           <button key={i} onClick={() => setPage(i)} style={{ width: i === page ? 20 : 7, height: 7, borderRadius: 4, background: i === page ? TEAL : "#E2E8F0", border: "none", cursor: "pointer", transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)", padding: 0 }} />
         ))}
       </div>
+      )}
 
       <Sheet insight={insDetail} onClose={() => setInsDetail(null)} onAskAI={onAskAI} />
       <ListDetailSheet data={listDetail} onClose={() => setListDetail(null)} onAskAI={onAskAI} />

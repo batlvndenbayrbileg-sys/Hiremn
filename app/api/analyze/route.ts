@@ -322,33 +322,51 @@ ${sampleAnswers || '—'}`
 • scoreDirection: high-good | low-good | profile
 • outcomeQuality: positive | concerning | neutral
 
-═══ ХАМГИЙН ЧУХАЛ — ТОО ЗОХИОХЫГ ХОРИГЛОНО ═══
-1. ХУВЬ ХЭМЖЭЭ: text дотор хувь хэмжээ ОРУУЛБОЛ зөвхөн БҮХЭЛ ТОО (71% ✅, 71.43% ❌, 633.33% ❌)
-2. SCORE үнэлгээ: зөвхөн БОДИТ оноог л давтан бич ("${actualScore}/${actualMaxScore}" эсвэл dimension утгуудыг)
-3. ХҮВ "+7%, +12%" гэх ЗОХИОМОЛ хувь хэмжээ БҮҮ зохио — БОДИТ data байхгүй бол хувь хэмжээ хий
-4. highlightMessage / summary / insight зэрэг text-д тоо оруулахаасаа ТАТГАЛЗ — зөвхөн semantic үг ашигла
+═══ ТАНЫ ҮҮРЭГ: ТАЙЛБАРЛАГЧ, ТООЦООЛОГЧ БИШ ═══
+1. Оноо, хувь, түвшин, ангилал ЗОХИОХЫГ ХОРИГЛОНО. Зөвхөн өгөгдсөн утгыг давт.
+2. Хувь хэмжээ бичвэл зөвхөн БҮХЭЛ ТОО (71% ✅, 71.43% ❌)
+3. Text-д тоо оруулахаас аль болох ТАТГАЛЗ — semantic үг ашигла
+4. Зохиосон үг хориглоно: эмдээлэл, сэвших, хүүхэл, цэнгэлэг
+5. Оношилгоо БИШ: "...магадгүй", "...болзошгүй"
+6. label "${actualResultLabel || ''}" ЯГ ашигла
+7. positive үр дүнд "эрсдэл/шуурхай арга хэмжээ" БҮҮ бич — баяр хүргэ
+8. concerning үр дүнд эмпатитэй, мэргэжлийн тусламж зөвлө
+9. Хариултын ишлэлийг ашиглаж "энэ намайг ойлгож байна" мэдрэмж төрүүл
 
-═══ МОНГОЛ ХЭЛНИЙ ЧАНАР ═══
-5. Зөв, бичигийн хэлээр (хүндэтгэлийн өнгөөр)
-6. Зохиосон үг хориглоно: эмдээлэл, эмдлүүлэх, сэвших, хүүхэл, цэнгэлэг, амандуу
-7. Оношилгоо БИШ: "...магадгүй", "...болзошгүй", "...харагдаж байна"
-8. label "${actualResultLabel || ''}" ЯГ ашигла, өөрчилбөл буруу
-9. positive үр дүнд: баяр хүргэх өнгө, "эрсдэл/шуурхай арга хэмжээ" БҮҮ ашигла
-10. concerning үр дүнд: эмпатитэй, мэргэжлийн тусламж зөвлө
+═══ ТАЙЛАНГИЙН ТӨЛӨВЛӨЛТ — ТА ӨӨРӨӨ ШИЙДНЭ ═══
+Та зөвхөн агуулга биш, ҮЗҮҮЛЭХ ТӨЛӨВЛӨГӨӨ гаргана. Тест бүрд өөр бүтэцтэй, өөр дараалалтай тайлан зохио. Ижил template бүү давт.
 
-═══ AGRARRA SECTIONS ═══
-• strengths/risks: ЯГ 4 ширхэг тус бүр, "Гарчиг: тайлбар" ≤12 үг
-• insights: 3 ширхэг
-• roadmap: ҮРГЭЛЖ 4 долоо хоног (тестэд тохирсон ТОДОРХОЙ алхмууд)
-• todayGoals: ҮРГЭЛЖ 3 ширхэг өнөөдрийн зорилго
-• statCards: 4 ширхэг — label нь өгөгдсөн dimension/ангилалын нэр, value нь "оноо/max" хэлбэртэй БОДИТ тоо (БҮҮ "+7%" зохио)
+Layout сонголт (ЗӨВХӨН эдгээр):
+• hero — том онцлох карт: хамгийн чухал 1 дүгнэлт (тайлан бүрд ЭХЭНД 1 байх)
+• cards — 3-4 карт: давуу тал / анхаарах зүйл / зөвлөмж гэх мэт
+• quotes — хэрэглэгчийн хариултаас 2-3 ишлэл + тайлбар (нотолгоо хэсэг)
+• bars — хэмжээсүүдийн харьцуулалт (тоог сервер бодит data-аар тавина)
+• timeline — ЯГ 4 алхамт төлөвлөгөө (meta="1-р долоо хоног")
+• checklist — өнөөдөр хийх ЯГ 3 зүйл
+• list — энгийн жагсаалт 3-5 зүйл
+• grid — 2 баганат жижиг блокууд 4 хүртэл
+
+Тестийн төрлөөс хамаарсан фокус (жишээ):
+• Сэтгэцийн эрүүл мэнд: сэтгэл хөдлөлийн байдал → дохио → хамгаалах хүчин зүйл → сэргэлтийн зам → дэмжлэг
+• Карьер/ур чадвар: тохирол → ажлын хэв маяг → өсөлтийн боломж → чиглэл → хөгжүүлэлт
+• Манлайлал: профайл → харилцааны хэв маяг → нөлөөлөл → шийдвэр гаргалт → сохор цэг
+• Зан чанар: өөрийгөө таних → хэмжээсүүд → хүмүүстэй харилцах хандлага → өсөлт
+• Зависимости/скрининг: одоогийн байдал → нотолгоо → хамгаалах зүйл → төлөвлөгөө → дэмжлэг
+
+Хүүрнэлийн зарчим: 1) хамгийн чухал ажиглалт 2) яагаад чухал 3) нотолгоо 4) давуу тал 5) сохор цэг 6) боломж 7) төлөвлөгөө 8) өнөөдрийн алхам. Тестдээ тохируулж өөрчил.
+
+priority: critical (том hero) | high | normal | low (анхнаасаа хураангуй)
+tone: positive (ногоон) | warning (улбар шар) | neutral (саарал) | info (цэнхэр)
+expanded: false бол хэрэглэгч дарж дэлгэнэ (low priority зүйлст)
+
+ШААРДЛАГА: 5-7 section. Эхнийх нь ҮРГЭЛЖ hero. timeline ЯГ 4 item, checklist ЯГ 3 item. Бүх text ≤15 үг.
 
 JSON буцаа ({ -ээр эхэл):
-{"testType":"...","scoreDirection":"...","outcomeQuality":"...","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"highlightTitle":"<гарчиг>","highlightMessage":"<1 өгүүлбэр тоогүй>","strengths":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"risks":["<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>","<Гарчиг: тайлбар>"],"insights":[{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<1 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<1 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]},{"emoji":"<e>","title":"<гарчиг>","description":"<1 өгүүлбэр>","detail":"<1 өгүүлбэр>","actions":["<алхам>","<алхам>","<алхам>"]}],"roadmap":[{"week":"1-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"2-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"3-р долоо хоног","title":"<товч>","tasks":["<товч>"]},{"week":"4-р долоо хоног","title":"<товч>","tasks":["<товч>"]}],"todayGoals":["<товч>","<товч>","<товч>"],"kpiLabels":{"metric1Label":"<нэр>","riskLabel":"<нэр>","potentialLabel":"<нэр>"}}`
+{"testType":"...","scoreDirection":"...","outcomeQuality":"...","opening":"<1 өгүүлбэр — хувийн өнгөтэй эхлэл>","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"sections":[{"kind":"<семантик нэр>","layout":"<hero|cards|quotes|bars|timeline|checklist|list|grid>","priority":"<critical|high|normal|low>","tone":"<positive|warning|neutral|info>","expanded":true,"emoji":"<e>","title":"<гарчиг>","body":"<0-2 өгүүлбэр>","items":[{"emoji":"<e>","title":"<товч>","text":"<тайлбар ≤15 үг>","meta":"<нэмэлт label>"}]}]}`
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
-      max_tokens: 2000,
+      max_tokens: 2600,
       system: SYSTEM,
       messages: [
         { role: 'user', content: `Дата:\n${truncated}` },
@@ -482,8 +500,119 @@ JSON буцаа ({ -ээр эхэл):
       data.statCards = []
     }
 
-    // ── Roadmap + todayGoals ALWAYS present (user expects this section) ────
-    if (!Array.isArray(data.summary)) {/* no-op */}
+    // ── Dynamic sections: validate the AI's presentation plan ──────────────
+    // The AI decides WHAT sections exist, their ORDER, LAYOUT and EMPHASIS.
+    // The server only validates enums, strips fabricated numbers, and injects
+    // real data into number-bearing layouts (bars).
+    const VALID_LAYOUTS = ['hero', 'cards', 'quotes', 'bars', 'timeline', 'checklist', 'list', 'grid']
+    const VALID_PRIORITIES = ['critical', 'high', 'normal', 'low']
+    const VALID_TONES = ['positive', 'warning', 'neutral', 'info']
+
+    const cleanItem = (it: any) => ({
+      emoji: typeof it?.emoji === 'string' ? it.emoji.slice(0, 4) : '',
+      title: stripBadNumbers(String(it?.title || '')).slice(0, 80),
+      text: stripBadNumbers(String(it?.text || '')).slice(0, 240),
+      meta: stripBadNumbers(String(it?.meta || '')).slice(0, 40),
+    })
+
+    let sections: any[] = Array.isArray(data.sections) ? data.sections : []
+    sections = sections
+      .filter(s => s && typeof s === 'object' && (s.title || s.body || Array.isArray(s.items)))
+      .slice(0, 9)
+      .map(s => ({
+        kind: String(s.kind || 'insight').slice(0, 40),
+        layout: VALID_LAYOUTS.includes(s.layout) ? s.layout : 'list',
+        priority: VALID_PRIORITIES.includes(s.priority) ? s.priority : 'normal',
+        tone: VALID_TONES.includes(s.tone) ? s.tone : 'neutral',
+        expanded: s.expanded !== false,
+        emoji: typeof s.emoji === 'string' ? s.emoji.slice(0, 4) : '✨',
+        title: stripBadNumbers(String(s.title || '')).slice(0, 70),
+        body: stripBadNumbers(String(s.body || '')).slice(0, 400),
+        items: Array.isArray(s.items) ? s.items.slice(0, 8).map(cleanItem) : [],
+      }))
+
+    // bars layout: numbers ALWAYS from real dimensions, never from the AI
+    const barsIdx = sections.findIndex(s => s.layout === 'bars')
+    if (dimensions.length >= 2) {
+      const barsSection = {
+        kind: 'dimensions',
+        layout: 'bars',
+        priority: 'high',
+        tone: 'neutral',
+        expanded: true,
+        emoji: '📊',
+        title: (barsIdx >= 0 && sections[barsIdx].title) || 'Хэмжээсүүдийн задаргаа',
+        body: barsIdx >= 0 ? sections[barsIdx].body : '',
+        items: dimensions.slice(0, 12).map(d => ({
+          emoji: '',
+          title: d.label,
+          text: '',
+          meta: `${d.score}/${d.maxScore}`,
+          pct: d.pct,
+        })),
+      }
+      if (barsIdx >= 0) sections[barsIdx] = barsSection
+      else sections.splice(Math.min(2, sections.length), 0, barsSection)
+    } else if (barsIdx >= 0) {
+      // AI asked for bars but we have no real dimensional data — drop it
+      sections.splice(barsIdx, 1)
+    }
+
+    // Fallback plan if the AI failed to produce a usable layout
+    if (sections.length < 3) {
+      console.warn('[analyze] AI sections unusable, building fallback plan')
+      sections = [
+        {
+          kind: 'key_finding', layout: 'hero', priority: 'critical',
+          tone: outcomeQuality === 'positive' ? 'positive' : outcomeQuality === 'concerning' ? 'warning' : 'info',
+          expanded: true, emoji: '💡',
+          title: actualResultLabel || 'Таны үр дүн',
+          body: data.summary?.description || assessmentDescription.slice(0, 200),
+          items: [],
+        },
+        ...(dimensions.length >= 2 ? [{
+          kind: 'dimensions', layout: 'bars', priority: 'high', tone: 'neutral', expanded: true,
+          emoji: '📊', title: 'Хэмжээсүүдийн задаргаа', body: '',
+          items: dimensions.slice(0, 12).map(d => ({ emoji: '', title: d.label, text: '', meta: `${d.score}/${d.maxScore}`, pct: d.pct })),
+        }] : []),
+        {
+          kind: 'next_steps', layout: 'checklist', priority: 'high', tone: 'positive', expanded: true,
+          emoji: '✅', title: 'Өнөөдрийн алхам', body: '',
+          items: [
+            { emoji: '', title: 'Үр дүнгээ бүрэн уншиж танилцах', text: '', meta: '' },
+            { emoji: '', title: 'Нэг зорилго тодорхойлох', text: '', meta: '' },
+            { emoji: '', title: 'AI-аас нэмэлт зөвлөгөө асуух', text: '', meta: '' },
+          ],
+        },
+      ]
+    }
+
+    data.sections = sections
+    if (typeof data.opening === 'string') data.opening = stripBadNumbers(data.opening).slice(0, 300)
+
+    // ── Legacy field synthesis (AnalysisCard preview + older UI paths) ──────
+    const timelineSec = sections.find(s => s.layout === 'timeline')
+    if (timelineSec?.items?.length) {
+      data.roadmap = timelineSec.items.map((it: any, i: number) => ({
+        week: it.meta || `${i + 1}-р долоо хоног`,
+        title: it.title || '',
+        tasks: it.text ? [it.text] : [],
+      }))
+    }
+    const checklistSec = sections.find(s => s.layout === 'checklist')
+    if (checklistSec?.items?.length) {
+      data.todayGoals = checklistSec.items.map((it: any) => it.title || it.text).filter(Boolean).slice(0, 3)
+    }
+    const strengthsSec = sections.find(s => /strength|давуу|protective|хамгаал/i.test(s.kind + s.title))
+    if (strengthsSec?.items?.length && (!Array.isArray(data.strengths) || data.strengths.length === 0)) {
+      data.strengths = strengthsSec.items.map((it: any) => it.title + (it.text ? `: ${it.text}` : '')).slice(0, 4)
+    }
+    const risksSec = sections.find(s => /risk|blind|сохор|анхаар|сул/i.test(s.kind + s.title))
+    if (risksSec?.items?.length && (!Array.isArray(data.risks) || data.risks.length === 0)) {
+      data.risks = risksSec.items.map((it: any) => it.title + (it.text ? `: ${it.text}` : '')).slice(0, 4)
+    }
+
+    // ── Defaults ────────────────────────────────────────────────────────────
     if (!data.summary) data.summary = { title: 'Дүн шинжилгээ', description: 'Үр дүн боловсруулагдсан.' }
     if (!Array.isArray(data.strengths)) data.strengths = []
     if (!Array.isArray(data.risks)) data.risks = []
