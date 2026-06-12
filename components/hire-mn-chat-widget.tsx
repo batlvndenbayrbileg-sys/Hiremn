@@ -3912,7 +3912,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     } as any])
 
     const ctrl = new AbortController()
-    const timer = setTimeout(() => ctrl.abort(), 60000)
+    const timer = setTimeout(() => ctrl.abort(), 115000)
     const startedAt = Date.now()
 
     fetch("/api/analyze", {
@@ -3946,7 +3946,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       .catch(err => {
         clearTimeout(timer)
         const elapsed = Date.now() - startedAt
-        const isTimeout = err?.name === "AbortError" || elapsed > 40000
+        const isTimeout = err?.name === "AbortError" || elapsed > 110000
         console.error(`[analyze] failed after ${elapsed}ms:`, err)
         setMessages(prev => prev.map(m =>
           (m as any).analysisId === analysisId

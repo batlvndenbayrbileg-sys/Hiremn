@@ -1,6 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk'
 
-export const maxDuration = 60
+// 120s ceiling for the detailed Sonnet 4.6 analysis (applies on Vercel Pro;
+// Hobby caps at 60s). Frontend AbortController is aligned to this.
+export const maxDuration = 120
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -369,7 +371,7 @@ priority: critical (том hero) | high | normal | low (анхнаасаа ху�
 tone: positive (ногоон) | warning (улбар шар) | neutral (саарал) | info (цэнхэр)
 expanded: false бол хэрэглэгч дарж дэлгэнэ
 
-ШААРДЛАГА: 6-8 section, 3-4 chapter, 1 carousel section ЗААВАЛ. Эхнийх нь ҮРГЭЛЖ hero. timeline ЯГ 4 item, checklist ЯГ 3 item. carousel-аас БУСАД text ≤15 үг; carousel detail 2-3 өгүүлбэр.
+ШААРДЛАГА: ЯГ 5-6 section, 3 chapter, 1 carousel section ЗААВАЛ. Эхнийх нь ҮРГЭЛЖ hero. carousel 4 item. timeline ЯГ 4 item, checklist ЯГ 3 item. carousel-аас БУСАД text ≤12 үг; carousel detail 2 өгүүлбэр.
 
 JSON буцаа ({ -ээр эхэл):
 {"testType":"...","scoreDirection":"...","outcomeQuality":"...","opening":"<1 өгүүлбэр — хувийн өнгөтэй эхлэл>","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"sections":[{"chapter":"<бүлгийн нэр ≤12 тэмдэгт>","kind":"<семантик нэр>","layout":"<hero|carousel|cards|quotes|bars|timeline|checklist|list|grid>","priority":"<critical|high|normal|low>","tone":"<positive|warning|neutral|info>","expanded":true,"emoji":"<e>","title":"<гарчиг>","body":"<0-2 өгүүлбэр>","items":[{"emoji":"<e>","tone":"<positive|warning|info>","title":"<товч гарчиг>","detail":"<carousel: 2-3 өгүүлбэр дэлгэрэнгүй>","text":"<бусад layout: ≤15 үг>","tip":"<carousel: 1 практик зөвлөмж>","meta":"<label>"}]}]}`
@@ -378,7 +380,7 @@ JSON буцаа ({ -ээр эхэл):
     // we instruct raw JSON output and extract the {...} span instead.
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 3400,
+      max_tokens: 2600,
       system: SYSTEM,
       messages: [
         { role: 'user', content: `Дата:\n${truncated}\n\nЗӨВХӨН JSON буцаа — markdown, тайлбар үг ҮГҮЙ, шууд { -ээр эхэл.` },
