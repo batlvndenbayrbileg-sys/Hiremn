@@ -350,42 +350,22 @@ ${sampleAnswers || '—'}`
 5. tip нь практик, шууд хэрэгжих ёстой (албан ёсны тайлан bullet point-той адил).
 6. Эерэг, хүндэтгэлтэй, "та" хэллэгээр. Хэрэглэгчийг ойлгож буйгаа мэдрүүл.
 
-═══ ТАЙЛАНГИЙН ТӨЛӨВЛӨЛТ — ТА ӨӨРӨӨ ШИЙДНЭ ═══
-Та зөвхөн агуулга биш, ҮЗҮҮЛЭХ ТӨЛӨВЛӨГӨӨ гаргана. Тест бүрд өөр бүтэцтэй тайлан зохио. Ижил template бүү давт.
+═══ ЮУ ГАРГАХ ВЭ — ЗӨВХӨН АГУУЛГА (бүтцийг сервер угсарна) ═══
+Та доорх агуулгыг л бичнэ. Хуудас, layout, диаграмыг СЕРВЕР автоматаар угсарна.
 
-БҮЛЭГ (chapter): section бүрд chapter нэр өг. 3-4 бүлэгт хуваагдана — бүлэг бүр тусдаа хуудас болж харагдана.
-Жишээ бүлэглэлт (тестдээ тохируулж ӨӨРИЙНХӨӨРӨӨ нэрлэ, ≤12 тэмдэгт):
-• Сэтгэцийн тест: "Тойм" → "Нотолгоо" → "Хамгаалалт" → "Сэргэлт"
-• Карьерын тест: "Тохирол" → "Хэв маяг" → "Боломжууд" → "Алхамууд"
-• Зан чанарын тест: "Таны төрөл" → "Задаргаа" → "Харилцаа" → "Өсөлт"
-Дараалсан section-ууд ижил chapter нэртэй бол нэг хуудсанд орно.
+1. opening — хэрэглэгчид зориулсан 1 дулаахан өгүүлбэр.
+2. headline — хамгийн чухал НЭГ дүгнэлт: title (богино) + body (1-2 өгүүлбэр, яагаад чухал).
+3. cards — ⭐ХАМГИЙН ЧУХАЛ: 4-5 карт (давуу тал / анхаарах зүйл / зөвлөгөө). Swipe хийгдэх том картууд болж харагдана.
+   Карт бүр: tone (positive=давуу/сайн, warning=анхаарах/сул, info=зөвлөгөө), emoji, title (богино гарчиг), detail (2 өгүүлбэр — ЯАГААД, юу гэсэн үг, хэрэглэгчийн хариултад суурилсан), tip (1 богино практик алхам), meta (богино шошго).
+   ОЛОН ХЭМЖЭЭСТ тест: давамгай 2-3 хэмжээс тус бүрд карт (meta=хэмжээсийн нэр, title=түвшин) + 1-2 зөвлөгөөний карт.
+   НЭГ онооны тест: давуу тал, анхаарах зүйл, зөвлөгөө, дэмжлэг гэсэн картууд.
+4. plan — ЯГ 4 алхам (сэргэх зам / хөгжүүлэх зам): алхам бүр title (богино) + text (1 өгүүлбэр, ТУСГАЙЛСАН бодит алхам).
+5. today — өнөөдөр шууд хийх ЯГ 3 энгийн зорилго (богино).
 
-Layout сонголт (ЗӨВХӨН эдгээр):
-• hero — том онцлох карт: хамгийн чухал 1 дүгнэлт (ЭХЭНД 1 байх)
-• carousel — ⭐ГОЛ ХЭСЭГ: swipe хийдэг том картууд. 4-5 item. Item бүр: tone (positive/warning/info), emoji, title (богино гарчиг), detail (2 өгүүлбэр ДЭЛГЭРЭНГҮЙ — яагаад, юу гэсэн үг), tip (1 практик зөвлөмж), meta (label).
-  ОЛОН ХЭМЖЭЭСТ тест бол: хэмжээс/дүр бүрд НЭГ карт — meta=хэмжээсийн нэр, title=түвшин, detail=тухайн хэмжээсийн утга, tip=ТЭР хэмжээст тусгайлсан алхам.
-  Нэг онооны тест бол: давуу тал, анхаарах зүйл, зөвлөгөө гэсэн картууд.
-• cards — 3-4 карт: товч жагсаалт
-• quotes — хэрэглэгчийн хариултаас 2-3 ишлэл + тайлбар (нотолгоо)
-• bars — хэмжээсүүдийн харьцуулалт (тоог сервер тавина)
-• radar — ⭐PROFILE тестэд (DISC/Belbin/MBTI): олон дүр/хэмжээсийн зураглал. Сервер тоог тавина. profile тест бол ЗААВАЛ bars биш radar ашигла.
-• timeline — ЯГ 4 алхамт төлөвлөгөө (meta="1-р долоо хоног")
-• checklist — өнөөдөр хийх ЯГ 3 зүйл
-• list — энгийн жагсаалт 3-5 зүйл
-• grid — 2 баганат жижиг блокууд 4 хүртэл
+ЧАНАР: detail нь ҮНЭХЭЭР хэрэгтэй, тестийн контекст + хариултад суурилсан. tip/plan нь домэйнд тусгайлсан (generic "тайвшир" БИШ). Бүх text цэвэр монгол, тоо багатай.
 
-⭐ ЗААВАЛ: дунд chapter-уудын нэгэнд carousel layout бүхий section байрлуул. Энэ нь давуу тал, сул тал, дэлгэрэнгүй зөвлөгөөг харуулна. Item бүрийн detail нь ҮНЭХЭЭР дэлгэрэнгүй (2-3 өгүүлбэр) — хэрэглэгчийн хариултад суурилсан, "яагаад" гэдгийг тайлбарласан байх. tip нь шууд хийж болох практик алхам.
-
-Хүүрнэлийн зарчим: 1) хамгийн чухал ажиглалт 2) яагаад чухал 3) нотолгоо 4) давуу/сул тал+зөвлөгөө (carousel) 5) боломж 6) төлөвлөгөө 7) өнөөдрийн алхам. Тестдээ тохируул.
-
-priority: critical (том hero) | high | normal | low (анхнаасаа хураангуй)
-tone: positive (ногоон) | warning (улбар шар) | neutral (саарал) | info (цэнхэр)
-expanded: false бол хэрэглэгч дарж дэлгэнэ
-
-ШААРДЛАГА: ЯГ 5 section, 3 chapter, 1 carousel ЗААВАЛ. Эхнийх hero. carousel 4 item. timeline 4 item, checklist 3 item. БҮХ text богино: carousel detail ЯГ 2 богино өгүүлбэр, tip 1 өгүүлбэр; бусад ≤10 үг.
-
-JSON буцаа ({ -ээр эхэл):
-{"testType":"...","scoreDirection":"...","outcomeQuality":"...","opening":"<1 өгүүлбэр — хувийн өнгөтэй эхлэл>","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"sections":[{"chapter":"<бүлгийн нэр ≤12 тэмдэгт>","kind":"<семантик нэр>","layout":"<hero|carousel|cards|quotes|bars|timeline|checklist|list|grid>","priority":"<critical|high|normal|low>","tone":"<positive|warning|neutral|info>","expanded":true,"emoji":"<e>","title":"<гарчиг>","body":"<0-2 өгүүлбэр>","items":[{"emoji":"<e>","tone":"<positive|warning|info>","title":"<товч гарчиг>","detail":"<carousel: 2-3 өгүүлбэр дэлгэрэнгүй>","text":"<бусад layout: ≤15 үг>","tip":"<carousel: 1 практик зөвлөмж>","meta":"<label>"}]}]}`
+JSON буцаа ({ -ээр эхэл, ЗӨВХӨН энэ бүтэц):
+{"testType":"...","scoreDirection":"...","outcomeQuality":"...","opening":"<1 өгүүлбэр>","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"headline":{"title":"<богино>","body":"<1-2 өгүүлбэр>"},"cards":[{"tone":"<positive|warning|info>","emoji":"<e>","title":"<гарчиг>","detail":"<2 өгүүлбэр>","tip":"<1 алхам>","meta":"<шошго>"},{"tone":"...","emoji":"...","title":"...","detail":"...","tip":"...","meta":"..."},{"tone":"...","emoji":"...","title":"...","detail":"...","tip":"...","meta":"..."},{"tone":"...","emoji":"...","title":"...","detail":"...","tip":"...","meta":"..."}],"plan":[{"title":"<богино>","text":"<1 өгүүлбэр>"},{"title":"...","text":"..."},{"title":"...","text":"..."},{"title":"...","text":"..."}],"today":["<богино>","<богино>","<богино>"]}`
 
     // Note: Sonnet 4.6 does not support assistant message prefill —
     // we instruct raw JSON output and extract the {...} span instead.
@@ -528,164 +508,114 @@ JSON буцаа ({ -ээр эхэл):
       data.statCards = []
     }
 
-    // ── Dynamic sections: validate the AI's presentation plan ──────────────
-    // The AI decides WHAT sections exist, their ORDER, LAYOUT and EMPHASIS.
-    // The server only validates enums, strips fabricated numbers, and injects
-    // real data into number-bearing layouts (bars).
-    const VALID_LAYOUTS = ['hero', 'cards', 'quotes', 'bars', 'radar', 'timeline', 'checklist', 'list', 'grid', 'carousel']
-    const VALID_PRIORITIES = ['critical', 'high', 'normal', 'low']
+    // ── SERVER ASSEMBLES THE PRESENTATION PLAN ─────────────────────────────
+    // The AI returns compact CONTENT (headline, cards, plan, today). The server
+    // builds the sections[] + chapters with correct layouts and real dimension
+    // numbers. This is reliable (small AI output never truncates) and guarantees
+    // the carousel + radar/bars + recovery plan + checklist always appear.
     const VALID_TONES = ['positive', 'warning', 'neutral', 'info']
+    const clip = (v: any, n: number) => stripBadNumbers(String(v ?? '')).slice(0, n)
 
-    const cleanItem = (it: any) => ({
-      emoji: typeof it?.emoji === 'string' ? it.emoji.slice(0, 4) : '',
-      title: stripBadNumbers(String(it?.title || '')).slice(0, 80),
-      text: stripBadNumbers(String(it?.text || '')).slice(0, 240),
-      // Longer field for carousel cards — detailed advice/explanation
-      detail: stripBadNumbers(String(it?.detail || '')).slice(0, 360),
-      meta: stripBadNumbers(String(it?.meta || '')).slice(0, 40),
-      // Per-item tone for carousel colour coding (strength/weakness/advice)
-      tone: VALID_TONES.includes(it?.tone) ? it.tone : '',
-      // Optional one-line actionable tip on the card
-      tip: stripBadNumbers(String(it?.tip || '')).slice(0, 120),
+    // Chapter names by test type — distinct feel per assessment
+    const chapNames = testType === 'profile'
+      ? { overview: 'Таны дүр', insights: 'Гүн тал', plan: 'Хөгжүүлэх' }
+      : testType === 'cognitive'
+      ? { overview: 'Тойм', insights: 'Чадвар', plan: 'Дасгал' }
+      : testType === 'aptitude'
+      ? { overview: 'Тохирол', insights: 'Дүгнэлт', plan: 'Карьер' }
+      : { overview: 'Тойм', insights: 'Дүгнэлт', plan: 'Сэргэх зам' }
+
+    const heroTone: string = outcomeQuality === 'positive' ? 'positive' : outcomeQuality === 'concerning' ? 'warning' : 'info'
+    const sections: any[] = []
+
+    // 1) Hero — headline insight (chapter: overview)
+    const hl = data.headline || {}
+    sections.push({
+      chapter: chapNames.overview, kind: 'key_finding', layout: 'hero',
+      priority: 'critical', tone: heroTone, expanded: true, emoji: '💡',
+      title: clip(hl.title || actualResultLabel || 'Таны үр дүн', 70),
+      body: clip(hl.body || data.summary?.description || '', 400),
+      items: [],
     })
 
-    let sections: any[] = Array.isArray(data.sections) ? data.sections : []
-    sections = sections
-      .filter(s => s && typeof s === 'object' && (s.title || s.body || Array.isArray(s.items)))
-      .slice(0, 9)
-      .map(s => ({
-        chapter: typeof s.chapter === 'string' ? s.chapter.slice(0, 16) : '',
-        kind: String(s.kind || 'insight').slice(0, 40),
-        layout: VALID_LAYOUTS.includes(s.layout) ? s.layout : 'list',
-        priority: VALID_PRIORITIES.includes(s.priority) ? s.priority : 'normal',
-        tone: VALID_TONES.includes(s.tone) ? s.tone : 'neutral',
-        expanded: s.expanded !== false,
-        emoji: typeof s.emoji === 'string' ? s.emoji.slice(0, 4) : '✨',
-        title: stripBadNumbers(String(s.title || '')).slice(0, 70),
-        body: stripBadNumbers(String(s.body || '')).slice(0, 400),
-        items: Array.isArray(s.items) ? s.items.slice(0, 8).map(cleanItem) : [],
-      }))
-
-    // dimensions viz: numbers ALWAYS from real dimensions, never from the AI.
-    // Profile tests (Belbin/DISC/MBTI) → radar chart (signature visualization);
-    // everything else → horizontal bars. 3+ dims required for a readable radar.
-    const dimsIdx = sections.findIndex(s => s.layout === 'bars' || s.layout === 'radar')
+    // 2) Dimensions viz — radar (3+) or bars (2). Numbers from REAL data only.
     if (dimensions.length >= 2) {
-      const useRadar = testType === 'profile' && dimensions.length >= 3
-      const vizSection = {
-        chapter: (dimsIdx >= 0 && sections[dimsIdx].chapter) || sections[0]?.chapter || 'Тойм',
-        kind: 'dimensions',
-        layout: useRadar ? 'radar' : 'bars',
-        priority: 'high',
-        tone: 'neutral',
-        expanded: true,
-        emoji: useRadar ? '🕸️' : '📊',
-        title: (dimsIdx >= 0 && sections[dimsIdx].title) || (useRadar ? 'Таны дүрийн зураглал' : 'Хэмжээсүүдийн задаргаа'),
-        body: dimsIdx >= 0 ? sections[dimsIdx].body : '',
+      const useRadar = dimensions.length >= 3
+      sections.push({
+        chapter: chapNames.overview, kind: 'dimensions',
+        layout: useRadar ? 'radar' : 'bars', priority: 'high', tone: 'neutral',
+        expanded: true, emoji: useRadar ? '🕸️' : '📊',
+        title: testType === 'profile' ? 'Таны дүрийн зураглал'
+          : useRadar ? 'Хэмжээсүүдийн зураглал' : 'Хэмжээсүүдийн задаргаа',
+        body: '',
         items: dimensions.slice(0, 12).map(d => ({
-          emoji: '',
-          title: d.label,
-          text: '',
-          // radar shows just the raw score; bars show score/max for context
-          meta: useRadar ? `${d.score}` : `${d.score}/${d.maxScore}`,
+          emoji: '', title: d.label, text: '',
+          meta: testType === 'profile' ? `${d.score}` : `${d.score}/${d.maxScore}`,
           pct: d.pct,
         })),
-      }
-      if (dimsIdx >= 0) sections[dimsIdx] = vizSection
-      else sections.splice(Math.min(2, sections.length), 0, vizSection)
-    } else if (dimsIdx >= 0) {
-      // AI asked for a dimensions viz but we have no real data — drop it
-      sections.splice(dimsIdx, 1)
+      })
     }
 
-    // ── Guarantee a carousel section (strengths/weaknesses/advice) ─────────
-    // The detailed advice carousel is the centerpiece. If the AI didn't emit
-    // one, synthesize it from strengths/risks/insights it did provide.
-    const hasCarousel = sections.some(s => s.layout === 'carousel')
-    if (!hasCarousel) {
-      const carItems: any[] = []
-      if (Array.isArray(data.strengths)) {
-        for (const s of data.strengths.slice(0, 3)) {
-          const str = String(s)
-          const [t, ...rest] = str.split(':')
-          carItems.push({ emoji: '💪', tone: 'positive', title: (rest.length ? t : 'Давуу тал').trim().slice(0, 60), detail: (rest.length ? rest.join(':') : str).trim().slice(0, 360), tip: '', meta: 'Давуу тал' })
-        }
-      }
-      if (Array.isArray(data.risks)) {
-        for (const r of data.risks.slice(0, 3)) {
-          const str = String(r)
-          const [t, ...rest] = str.split(':')
-          carItems.push({ emoji: '🎯', tone: 'warning', title: (rest.length ? t : 'Анхаарах зүйл').trim().slice(0, 60), detail: (rest.length ? rest.join(':') : str).trim().slice(0, 360), tip: '', meta: 'Анхаарах зүйл' })
-        }
-      }
-      if (carItems.length >= 2) {
-        // Place after the overview/bars (around index 2) in a middle chapter
-        const insertAt = Math.min(2, sections.length)
-        sections.splice(insertAt, 0, {
-          chapter: 'Дүгнэлт',
-          kind: 'strengths_weaknesses', layout: 'carousel', priority: 'high',
-          tone: 'neutral', expanded: true, emoji: '💡',
-          title: 'Давуу тал ба зөвлөгөө', body: '',
-          items: carItems,
-        })
-      }
+    // 3) Carousel — strengths / weaknesses / advice (chapter: insights). ⭐
+    const rawCards = Array.isArray(data.cards) ? data.cards : []
+    const cardItems = rawCards.slice(0, 6).map((c: any) => ({
+      emoji: typeof c?.emoji === 'string' ? c.emoji.slice(0, 4) : '✨',
+      tone: VALID_TONES.includes(c?.tone) ? c.tone : 'info',
+      title: clip(c?.title, 70),
+      detail: clip(c?.detail, 360),
+      tip: clip(c?.tip, 130),
+      meta: clip(c?.meta, 28),
+      text: '',
+    })).filter((c: any) => c.title || c.detail)
+    if (cardItems.length >= 2) {
+      sections.push({
+        chapter: chapNames.insights, kind: 'strengths_weaknesses', layout: 'carousel',
+        priority: 'high', tone: 'neutral', expanded: true, emoji: '💡',
+        title: 'Давуу тал, зөвлөгөө', body: '',
+        items: cardItems,
+      })
     }
 
-    // Fallback plan if the AI failed to produce a usable layout
-    if (sections.length < 3) {
-      console.warn('[analyze] AI sections unusable, building fallback plan')
-      sections = [
-        {
-          chapter: 'Тойм',
-          kind: 'key_finding', layout: 'hero', priority: 'critical',
-          tone: outcomeQuality === 'positive' ? 'positive' : outcomeQuality === 'concerning' ? 'warning' : 'info',
-          expanded: true, emoji: '💡',
-          title: actualResultLabel || 'Таны үр дүн',
-          body: data.summary?.description || assessmentDescription.slice(0, 200),
-          items: [],
-        },
-        ...(dimensions.length >= 2 ? [{
-          chapter: 'Тойм',
-          kind: 'dimensions', layout: 'bars', priority: 'high', tone: 'neutral', expanded: true,
-          emoji: '📊', title: 'Хэмжээсүүдийн задаргаа', body: '',
-          items: dimensions.slice(0, 12).map(d => ({ emoji: '', title: d.label, text: '', meta: `${d.score}/${d.maxScore}`, pct: d.pct })),
-        }] : []),
-        {
-          chapter: 'Алхамууд',
-          kind: 'next_steps', layout: 'checklist', priority: 'high', tone: 'positive', expanded: true,
-          emoji: '✅', title: 'Өнөөдрийн алхам', body: '',
-          items: [
-            { emoji: '', title: 'Үр дүнгээ бүрэн уншиж танилцах', text: '', meta: '' },
-            { emoji: '', title: 'Нэг зорилго тодорхойлох', text: '', meta: '' },
-            { emoji: '', title: 'AI-аас нэмэлт зөвлөгөө асуух', text: '', meta: '' },
-          ],
-        },
-      ]
+    // 4) Recovery / development plan — timeline (chapter: plan)
+    const rawPlan = Array.isArray(data.plan) ? data.plan : []
+    const planItems = rawPlan.slice(0, 4).map((p: any, i: number) => ({
+      emoji: '', title: clip(p?.title, 60), text: clip(p?.text, 160),
+      meta: `${i + 1}-р алхам`,
+    })).filter((p: any) => p.title)
+    if (planItems.length >= 2) {
+      sections.push({
+        chapter: chapNames.plan, kind: 'plan', layout: 'timeline',
+        priority: 'high', tone: 'info', expanded: true, emoji: '🗺️',
+        title: testType === 'profile' ? 'Хөгжүүлэх алхмууд' : 'Цаашид юу хийх вэ',
+        body: '', items: planItems,
+      })
     }
+
+    // 5) Today's checklist (chapter: plan)
+    const rawToday = Array.isArray(data.today) ? data.today : []
+    const todayItems = rawToday.slice(0, 3).map((t: any) => ({ emoji: '', title: clip(t, 90), text: '', meta: '' })).filter((t: any) => t.title)
+    sections.push({
+      chapter: chapNames.plan, kind: 'next_steps', layout: 'checklist',
+      priority: 'high', tone: 'positive', expanded: true, emoji: '✅',
+      title: 'Өнөөдрийн алхам', body: '',
+      items: todayItems.length ? todayItems : [
+        { emoji: '', title: 'Үр дүнгээ дахин уншиж эргэцүүлэх', text: '', meta: '' },
+        { emoji: '', title: 'Нэг тодорхой зорилго сонгох', text: '', meta: '' },
+        { emoji: '', title: 'AI-аас нэмэлт зөвлөгөө асуух', text: '', meta: '' },
+      ],
+    })
 
     data.sections = sections
     if (typeof data.opening === 'string') data.opening = stripBadNumbers(data.opening).slice(0, 300)
 
-    // ── Legacy field synthesis (AnalysisCard preview + older UI paths) ──────
-    const timelineSec = sections.find(s => s.layout === 'timeline')
-    if (timelineSec?.items?.length) {
-      data.roadmap = timelineSec.items.map((it: any, i: number) => ({
-        week: it.meta || `${i + 1}-р долоо хоног`,
-        title: it.title || '',
-        tasks: it.text ? [it.text] : [],
-      }))
-    }
-    const checklistSec = sections.find(s => s.layout === 'checklist')
-    if (checklistSec?.items?.length) {
-      data.todayGoals = checklistSec.items.map((it: any) => it.title || it.text).filter(Boolean).slice(0, 3)
-    }
-    const strengthsSec = sections.find(s => /strength|давуу|protective|хамгаал/i.test(s.kind + s.title))
-    if (strengthsSec?.items?.length && (!Array.isArray(data.strengths) || data.strengths.length === 0)) {
-      data.strengths = strengthsSec.items.map((it: any) => it.title + (it.text ? `: ${it.text}` : '')).slice(0, 4)
-    }
-    const risksSec = sections.find(s => /risk|blind|сохор|анхаар|сул/i.test(s.kind + s.title))
-    if (risksSec?.items?.length && (!Array.isArray(data.risks) || data.risks.length === 0)) {
-      data.risks = risksSec.items.map((it: any) => it.title + (it.text ? `: ${it.text}` : '')).slice(0, 4)
+    // ── Legacy field synthesis (AnalysisCard preview compatibility) ─────────
+    data.roadmap = planItems.length
+      ? planItems.map((p: any, i: number) => ({ week: p.meta || `${i + 1}-р алхам`, title: p.title, tasks: p.text ? [p.text] : [] }))
+      : data.roadmap
+    data.todayGoals = todayItems.length ? todayItems.map((t: any) => t.title) : data.todayGoals
+    if (cardItems.length) {
+      data.strengths = cardItems.filter((c: any) => c.tone === 'positive').map((c: any) => `${c.title}: ${c.detail}`).slice(0, 4)
+      data.risks = cardItems.filter((c: any) => c.tone === 'warning').map((c: any) => `${c.title}: ${c.detail}`).slice(0, 4)
     }
 
     // ── Defaults ────────────────────────────────────────────────────────────
