@@ -207,19 +207,13 @@ const CATEGORY_COLORS: Record<string, string> = {
   'default': '#E8541A',
 }
 
-// Test-specific image mapping (AI-generated professional illustrations)
-const TEST_IMAGES: Record<number, string> = {
-  1: '/images/tests/test-1-growth-mindset.jpg',
-  2: '/images/tests/test-2-work-life-balance.jpg',
-  3: '/images/tests/test-3-communication-style.jpg',
-  5: '/images/tests/test-5-nicotine.jpg',
-  6: '/images/tests/test-6-semut.jpg',
-  99: '/images/tests/test-99-audit.jpg',
-}
-
 export function formatAssessmentForWidget(a: Assessment, lang: 'mn' | 'en' = 'mn') {
   const isFree = a.price === 0
   const categoryKey = (a.category?.name || '').toLowerCase()
+
+  // Cover image: real assessment.icons URL from hire.mn API. Any new test added
+  // on the platform automatically gets its cover without code changes.
+  const coverUrl = getIconUrl(a.icons)
 
   return {
     id: a.id,
@@ -231,10 +225,10 @@ export function formatAssessmentForWidget(a: Assessment, lang: 'mn' | 'en' = 'mn
     emoji: CATEGORY_EMOJIS[categoryKey] || CATEGORY_EMOJIS.default,
     color: CATEGORY_COLORS[categoryKey] || CATEGORY_COLORS.default,
     free: isFree,
-    icon: getIconUrl(a.icons),   // зургийн бүрэн URL
-    image: TEST_IMAGES[a.id],    // AI-generated test illustration
+    icon: coverUrl,    // real cover URL from hire.mn API
+    image: coverUrl,   // same — both fields exposed for widget back-compat
     category: a.category?.name || '',
-    count: a.count || 0,          // хэдэн хэрэглэгч авсан (social proof)
+    count: a.count || 0,
     author: a.author || '',
   }
 }
