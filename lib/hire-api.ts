@@ -190,7 +190,8 @@ export async function submitUserAnswers(payload: {
 export function getIconUrl(icons?: string): string {
   if (!icons) return ''
   if (icons.startsWith('http')) return icons
-  return `https://api.hire.mn/uploads/${icons}`
+  // hire.mn serves uploaded files via /api/v1/file/{filename}
+  return `https://api.hire-test.cloud/api/v1/file/${encodeURIComponent(icons)}`
 }
 
 const CATEGORY_EMOJIS: Record<string, string> = {
