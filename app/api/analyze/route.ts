@@ -567,6 +567,28 @@ JSON буцаа ({ -ээр эхэл, ЗӨВХӨН энэ бүтэц):
       meta: clip(c?.meta, 28),
       text: '',
     })).filter((c: any) => c.title || c.detail)
+
+    // Safety net: if the AI returned too few cards but we have dimensions,
+    // synthesize one card per dimension so the advice carousel NEVER vanishes
+    // on multi-dimension tests (sleep, burnout, etc).
+    if (cardItems.length < 2 && dimensions.length >= 2) {
+      const isLowGood = scoreDirection === 'low-good'
+      for (const d of dimensions.slice(0, 4)) {
+        // For low-good tests high pct = concern; for others high pct = strength
+        const high = d.pct >= 50
+        const tone = isLowGood ? (high ? 'warning' : 'positive') : (high ? 'positive' : 'warning')
+        cardItems.push({
+          emoji: tone === 'positive' ? '💪' : tone === 'warning' ? '🎯' : '💡',
+          tone,
+          title: clip(d.label, 70),
+          detail: clip(`Энэ хэмжээст ${d.score}/${d.maxScore} оноо авсан байна. ${tone === 'warning' ? 'Энэ чиглэлд анхаарал хандуулах нь зүйтэй.' : 'Энэ нь таны давуу тал юм.'}`, 360),
+          tip: '',
+          meta: clip(d.label, 28),
+          text: '',
+        })
+      }
+    }
+
     if (cardItems.length >= 2) {
       sections.push({
         chapter: chapNames.insights, kind: 'strengths_weaknesses', layout: 'carousel',

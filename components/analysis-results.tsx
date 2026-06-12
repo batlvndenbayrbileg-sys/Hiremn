@@ -792,66 +792,94 @@ function fallbackChapter(layout: SectionLayout): string {
   return 'Дүн шинжилгээ'
 }
 
-// ── Radar / spider chart — profile-test dimension map (Belbin, DISC...) ──────
+// ── Radar / spider chart — dimension map (Belbin, DISC, sleep, burnout...) ───
+// Wrap a long Mongolian label into up to 2 lines for tidy axis labels.
+function wrapLabel(s: string, max = 12): string[] {
+  const words = (s || '').split(' ')
+  if ((s || '').length <= max) return [s]
+  const lines: string[] = []
+  let cur = ''
+  for (const w of words) {
+    if ((cur + ' ' + w).trim().length > max && cur) { lines.push(cur.trim()); cur = w }
+    else cur = (cur + ' ' + w).trim()
+  }
+  if (cur) lines.push(cur.trim())
+  return lines.slice(0, 2).map((l, i, a) => i === 1 && lines.length > 2 ? l + '…' : l)
+}
+
 function RadarChart({ items, color }: { items: SectionItem[]; color: string }) {
   const data = items.filter(it => it.title)
   const n = data.length
+  const [drawn, setDrawn] = useState(false)
+  useEffect(() => { const t = setTimeout(() => setDrawn(true), 120); return () => clearTimeout(t) }, [])
   if (n < 3) return null
-  const size = 280, cx = size / 2, cy = size / 2 + 6, R = size * 0.30
+
+  const W = 340, H = 300, cx = W / 2, cy = H / 2, R = 88
   const ang = (i: number) => (Math.PI * 2 * i) / n - Math.PI / 2
   const pt = (i: number, r: number) => [cx + Math.cos(ang(i)) * r, cy + Math.sin(ang(i)) * r]
   const rings = [0.25, 0.5, 0.75, 1]
-  // Data polygon — pct already normalized to the dominant dimension (0-100)
   const dataPts = data.map((it, i) => pt(i, R * (Math.max(0, Math.min(100, it.pct ?? 0)) / 100)))
   const polyStr = dataPts.map(p => p.join(',')).join(' ')
-  const [drawn, setDrawn] = useState(false)
-  useEffect(() => { const t = setTimeout(() => setDrawn(true), 100); return () => clearTimeout(t) }, [])
+  const gid = `radg-${Math.round(R)}-${n}`
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <svg width="100%" viewBox={`0 0 ${size} ${size + 10}`} style={{ maxWidth: 320, overflow: "visible" }}>
-        {/* Grid rings */}
-        {rings.map((rr, ri) => (
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ maxWidth: 360, overflow: "visible" }}>
+        <defs>
+          <radialGradient id={gid} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor={color} stopOpacity="0.45" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.12" />
+          </radialGradient>
+        </defs>
+        {/* Grid rings (subtle filled) */}
+        {rings.slice().reverse().map((rr, ri) => (
           <polygon key={ri}
             points={data.map((_, i) => pt(i, R * rr).join(',')).join(' ')}
-            fill={ri === rings.length - 1 ? "none" : "none"}
-            stroke="#E2E8F0" strokeWidth={1} />
+            fill={ri === 0 ? "#F8FAFC" : "none"}
+            stroke="#E5E9F0" strokeWidth={1} />
         ))}
         {/* Axes */}
         {data.map((_, i) => {
           const [x, y] = pt(i, R)
-          return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#E8EDF3" strokeWidth={1} />
+          return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#EAEEF4" strokeWidth={1} />
         })}
         {/* Data polygon */}
         <polygon points={polyStr}
-          fill={`${color}33`} stroke={color} strokeWidth={2} strokeLinejoin="round"
-          style={{ opacity: drawn ? 1 : 0, transform: drawn ? "scale(1)" : "scale(0.3)", transformOrigin: `${cx}px ${cy}px`, transition: "all 0.7s cubic-bezier(.16,1,.3,1)" }} />
-        {/* Vertices */}
+          fill={`url(#${gid})`} stroke={color} strokeWidth={2.5} strokeLinejoin="round"
+          style={{ opacity: drawn ? 1 : 0, transform: drawn ? "scale(1)" : "scale(0.2)", transformOrigin: `${cx}px ${cy}px`, transition: "all 0.8s cubic-bezier(.16,1,.3,1)" }} />
+        {/* Vertices with halo */}
         {dataPts.map((p, i) => (
-          <circle key={i} cx={p[0]} cy={p[1]} r={3} fill={color}
-            style={{ opacity: drawn ? 1 : 0, transition: `opacity 0.4s ease ${0.5 + i * 0.05}s` }} />
+          <g key={i} style={{ opacity: drawn ? 1 : 0, transition: `opacity 0.4s ease ${0.5 + i * 0.06}s` }}>
+            <circle cx={p[0]} cy={p[1]} r={5} fill="#fff" stroke={color} strokeWidth={2.5} />
+            {i === 0 && <circle cx={p[0]} cy={p[1]} r={9} fill="none" stroke={color} strokeWidth={1} opacity={0.4} />}
+          </g>
         ))}
-        {/* Labels */}
+        {/* Axis labels — wrapped to 2 lines, dominant highlighted */}
         {data.map((it, i) => {
-          const [lx, ly] = pt(i, R + 22)
+          const [lx, ly] = pt(i, R + 18)
           const a = ang(i)
-          const anchor = Math.abs(Math.cos(a)) < 0.3 ? "middle" : Math.cos(a) > 0 ? "start" : "end"
-          const top = data[i]?.title === data[0]?.title
+          const cos = Math.cos(a)
+          const anchor = Math.abs(cos) < 0.35 ? "middle" : cos > 0 ? "start" : "end"
+          const isTop = i === 0
+          const lines = wrapLabel(it.title || '', 13)
           return (
-            <text key={i} x={lx} y={ly} textAnchor={anchor} dominantBaseline="middle"
-              fontSize={9.5} fontWeight={top ? 800 : 600} fill={top ? color : "#64748B"}>
-              {(it.title || '').length > 12 ? (it.title || '').slice(0, 11) + '…' : it.title}
+            <text key={i} x={lx} y={ly - (lines.length - 1) * 5} textAnchor={anchor as any}
+              fontSize={9.5} fontWeight={isTop ? 800 : 600} fill={isTop ? color : "#64748B"}>
+              {lines.map((ln, li) => <tspan key={li} x={lx} dy={li === 0 ? 0 : 11}>{ln}</tspan>)}
             </text>
           )
         })}
       </svg>
-      {/* Ranked legend */}
-      <div style={{ width: "100%", marginTop: 8 }}>
-        {data.slice(0, 6).map((it, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", borderBottom: i < Math.min(data.length, 6) - 1 ? "1px solid #F1F5F9" : "none" }}>
-            <span style={{ width: 18, height: 18, borderRadius: 6, background: i === 0 ? color : "#F1F5F9", color: i === 0 ? "#fff" : "#94A3B8", fontSize: 9, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
-            <span style={{ flex: 1, fontSize: 12, fontWeight: i === 0 ? 800 : 600, color: i === 0 ? "#1E293B" : "#475569" }}>{it.title}</span>
-            <span style={{ fontSize: 12, fontWeight: 800, color: i === 0 ? color : "#94A3B8" }}>{it.meta}</span>
+      {/* Ranked legend with mini bars */}
+      <div style={{ width: "100%", marginTop: 6 }}>
+        {data.slice(0, 8).map((it, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 9, padding: "6px 0", borderBottom: i < Math.min(data.length, 8) - 1 ? "1px solid #F4F6FB" : "none" }}>
+            <span style={{ width: 19, height: 19, borderRadius: 7, background: i === 0 ? color : "#F1F5F9", color: i === 0 ? "#fff" : "#94A3B8", fontSize: 9.5, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
+            <span style={{ flex: 1, fontSize: 12, fontWeight: i === 0 ? 800 : 600, color: i === 0 ? "#1E293B" : "#475569", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{it.title}</span>
+            <div style={{ width: 46, height: 5, borderRadius: 4, background: "#F1F5F9", overflow: "hidden", flexShrink: 0 }}>
+              <div style={{ height: "100%", width: `${Math.min(it.pct ?? 0, 100)}%`, background: i === 0 ? color : "#CBD5E1", borderRadius: 4 }} />
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 800, color: i === 0 ? color : "#94A3B8", flexShrink: 0, minWidth: 34, textAlign: "right" }}>{it.meta}</span>
           </div>
         ))}
       </div>
