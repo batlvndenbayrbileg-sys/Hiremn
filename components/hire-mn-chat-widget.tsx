@@ -2717,12 +2717,25 @@ function TypingIndicator() {
 // ── Cover image picker ────────────────────────────────────────────────────────
 
 function getCoverImage(test: Test): string {
-  // Real hire.mn API icon (assessment.icons field). When admins add a new
-  // test on hire.mn with a cover, it appears here automatically.
-  // Returns "" when no API icon — caller renders a styled placeholder instead.
+  // 1. Real hire.mn API icon (assessment.icons via /api/v1/file/{name}).
+  //    Auto-updates for any new test the admin uploads.
   if (test.icon) return test.icon
   if (test.image) return test.image
-  return ""
+  // 2. Smart category-based fallback for tests where API has no icon.
+  //    Matches test name + category keywords to a curated local cover.
+  const name = (test.name || "").toLowerCase()
+  const cat = (test.category || "").toLowerCase()
+  const combined = name + " " + cat
+  if (/нойргүй|нойр|sleep|insomnia/.test(combined)) return "/covers/balance.jpg"
+  if (/өөртөө итгэх|итгэл|confidence|self.?efficacy/.test(combined)) return "/covers/mindset.jpg"
+  if (/сэтгэц|mental|сэмүт|semut|сэтгэл.*гутрал|депресс|анхаарал.*алда/.test(combined)) return "/covers/mental-health.jpg"
+  if (/харилц|communicat|leadership|удирд/.test(combined)) return "/covers/communication.jpg"
+  if (/тэнцвэр|balance|стресс|stress|ажил.*амьдрал/.test(combined)) return "/covers/balance.jpg"
+  if (/mindset|хандлага|өсөлт|итгэл|өөртөө/.test(combined)) return "/covers/mindset.jpg"
+  if (/никотин|тамхи|audit|архи|дарс|health|эрүүл|жирэмс/.test(combined)) return "/covers/health.jpg"
+  if (/манаж|leader/.test(combined)) return "/covers/leadership.jpg"
+  if (/хиймэл оюун|ai|оюун ухаан/.test(combined)) return "/covers/mindset.jpg"
+  return "/covers/default.jpg"
 }
 
 // ── Test Card ─────────────────────────────────────────────────────────────────
@@ -2756,31 +2769,17 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
         height: 95, position: "relative", overflow: "hidden",
         background: `linear-gradient(135deg, ${test.color || "#FEF3EE"}, ${test.color || "#FFE8DC"})`,
       }}>
-        {cover ? (
-          <img
-            src={cover}
-            alt={test.name}
-            onLoad={() => setImgLoaded(true)}
-            style={{
-              width: "100%", height: "100%", objectFit: "cover",
-              opacity: imgLoaded ? 1 : 0,
-              transition: "opacity 0.4s ease",
-              display: "block",
-            }}
-          />
-        ) : (
-          // Styled placeholder when API has no icon — branded, not broken-image
-          <div style={{
-            width: "100%", height: "100%", display: "flex",
-            alignItems: "center", justifyContent: "center",
-            background: `linear-gradient(135deg, ${test.color || "#E8541A"} 0%, ${test.color ? test.color + "CC" : "#F06835"} 100%)`,
-            color: "#fff",
-          }}>
-            <span style={{ fontSize: 38, filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.2))" }}>
-              {test.emoji || "📋"}
-            </span>
-          </div>
-        )}
+        <img
+          src={cover}
+          alt={test.name}
+          onLoad={() => setImgLoaded(true)}
+          style={{
+            width: "100%", height: "100%", objectFit: "cover",
+            opacity: imgLoaded ? 1 : 0,
+            transition: "opacity 0.4s ease",
+            display: "block",
+          }}
+        />
         {/* Gradient overlay */}
         <div style={{
           position: "absolute", inset: 0,
