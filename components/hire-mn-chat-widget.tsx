@@ -2773,10 +2773,18 @@ function TestCard({ test, index = 0, fontSize }: { test: Test; index?: number; f
           src={cover}
           alt={test.name}
           onLoad={() => setImgLoaded(true)}
+          onError={(e) => {
+            // If both API icon and category fallback fail, show default cover
+            const el = e.currentTarget
+            if (!el.src.endsWith('/covers/default.jpg')) {
+              el.src = '/covers/default.jpg'
+            }
+            setImgLoaded(true)
+          }}
           style={{
             width: "100%", height: "100%", objectFit: "cover",
-            opacity: imgLoaded ? 1 : 0,
-            transition: "opacity 0.4s ease",
+            opacity: imgLoaded ? 1 : 0.6,
+            transition: "opacity 0.3s ease",
             display: "block",
           }}
         />
