@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 
 type TestType = 'profile' | 'cognitive' | 'screening' | 'aptitude' | 'generic'
 
@@ -19,6 +19,7 @@ interface SectionItem {
 }
 
 interface Section {
+  chapter?: string   // AI-assigned chapter name — sections group into pages
   kind: string
   layout: SectionLayout
   priority: 'critical' | 'high' | 'normal' | 'low'
@@ -776,8 +777,39 @@ const TONE_THEME: Record<SectionTone, { main: string; bg: string; border: string
   neutral:  { main: "#64748B", bg: "#F8FAFC", border: "#E2E8F0", text: "#334155", soft: "#F1F5F9" },
 }
 
+// Fallback chapter names when the AI didn't assign them — derived from layout semantics
+function fallbackChapter(layout: SectionLayout): string {
+  if (layout === 'hero' || layout === 'bars') return 'Тойм'
+  if (layout === 'quotes') return 'Нотолгоо'
+  if (layout === 'timeline' || layout === 'checklist') return 'Төлөвлөгөө'
+  return 'Дүн шинжилгээ'
+}
+
 function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: string) => void }) {
   const sections = data.sections || []
+
+  // ── Group sections into chapters (separate pages) ───────────────────────
+  // Grouped by first-occurrence chapter name so the AI's intended page
+  // structure is preserved; capped at 5 chapters.
+  const chapters = useMemo(() => {
+    const out: Array<{ title: string; emoji: string; entries: Array<{ s: Section; si: number }> }> = []
+    sections.forEach((s, si) => {
+      const name = (s.chapter || '').trim() || fallbackChapter(s.layout)
+      const existing = out.find(c => c.title === name)
+      if (existing) existing.entries.push({ s, si })
+      else out.push({ title: name, emoji: s.emoji, entries: [{ s, si }] })
+    })
+    while (out.length > 5) {
+      const extra = out.pop()!
+      out[out.length - 1].entries.push(...extra.entries)
+    }
+    return out
+  }, [sections])
+
+  const [chap, setChap] = useState(0)
+  const chapTouchX = useRef(0)
+  const maxChap = chapters.length - 1
+
   // Collapse state — low priority or expanded:false start collapsed
   const [open, setOpen] = useState<Record<number, boolean>>(() => {
     const o: Record<number, boolean> = {}
@@ -790,9 +822,48 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
   const toggleOpen = (i: number) => setOpen(prev => ({ ...prev, [i]: !prev[i] }))
   const toggleDone = (k: string) => setDone(prev => ({ ...prev, [k]: !prev[k] }))
 
+  const goChap = (i: number) => setChap(Math.max(0, Math.min(maxChap, i)))
+  const onChapTS = (e: React.TouchEvent) => { chapTouchX.current = e.touches[0].clientX }
+  const onChapTE = (e: React.TouchEvent) => {
+    const d = chapTouchX.current - e.changedTouches[0].clientX
+    if (Math.abs(d) > 55) goChap(chap + (d > 0 ? 1 : -1))
+  }
+
+  const isLastChap = chap === maxChap
+
   return (
-    <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
-      {/* Score hero — always server data, never AI-generated */}
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }} onTouchStart={onChapTS} onTouchEnd={onChapTE}>
+      {/* Chapter tab bar — AI-named pages */}
+      <div style={{
+        display: "flex", gap: 5, padding: "10px 14px 8px",
+        overflowX: "auto", flexShrink: 0,
+        background: "#F0F4F8",
+        WebkitOverflowScrolling: "touch",
+      }}>
+        {chapters.map((c, i) => (
+          <button key={i} onClick={() => goChap(i)} style={{
+            display: "flex", alignItems: "center", gap: 5,
+            padding: "8px 13px", borderRadius: 20, border: "none",
+            background: chap === i ? "#1E293B" : "#fff",
+            color: chap === i ? "#fff" : "#64748B",
+            fontSize: 11.5, fontWeight: 800, cursor: "pointer",
+            whiteSpace: "nowrap", flexShrink: 0,
+            boxShadow: chap === i ? "0 4px 12px rgba(30,41,59,0.25)" : "0 1px 4px rgba(0,0,0,0.05)",
+            transition: "all 0.25s cubic-bezier(.16,1,.3,1)",
+            transform: chap === i ? "scale(1.03)" : "scale(1)",
+          }}>
+            <span style={{ fontSize: 13 }}>{c.emoji}</span>
+            {c.title}
+            {chap === i && <span style={{ fontSize: 9, opacity: 0.7 }}>{i + 1}/{chapters.length}</span>}
+          </button>
+        ))}
+      </div>
+
+      {/* Chapter content */}
+      <div key={chap} style={{ flex: 1, overflowY: "auto", padding: "12px 14px 14px", animation: "si 0.3s ease" }}>
+
+      {/* Score hero — only on first chapter, always server data */}
+      {chap === 0 && (
       <div style={{ background: "#fff", borderRadius: 20, padding: "18px 16px", marginBottom: 12, boxShadow: "0 2px 14px rgba(0,0,0,0.07)", display: "flex", alignItems: "center", gap: 14 }}>
         <ScoreRing score={data.healthScore} size={92} display={data.displayScore != null && data.displayMaxScore ? { score: data.displayScore, max: data.displayMaxScore } : undefined} />
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -806,9 +877,10 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
           </p>
         </div>
       </div>
+      )}
 
-      {/* AI-planned sections in narrative order */}
-      {sections.map((s, si) => {
+      {/* Sections of the active chapter, in AI narrative order */}
+      {chapters[chap]?.entries.map(({ s, si }) => {
         const t = TONE_THEME[s.tone] || TONE_THEME.neutral
         const isOpen = open[si] !== false
         const isHero = s.layout === "hero"
@@ -986,7 +1058,8 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
         )
       })}
 
-      {/* Closing CTA — ask the AI */}
+      {/* Closing CTA — only on the final chapter */}
+      {isLastChap && (
       <div style={{
         background: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)",
         border: "1.5px solid #BBF7D0", borderRadius: 20, padding: "14px 16px",
@@ -1001,6 +1074,45 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
           background: TEAL, border: "none", borderRadius: 20, padding: "8px 14px",
           color: "#fff", fontSize: 11, fontWeight: 800, cursor: "pointer", flexShrink: 0,
         }}>Асуух</button>
+      </div>
+      )}
+      </div>
+
+      {/* Chapter navigation — prev/next + dots */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "9px 14px", background: "#fff", borderTop: "1px solid #F1F5F9", flexShrink: 0,
+      }}>
+        <button onClick={() => goChap(chap - 1)} disabled={chap === 0} style={{
+          display: "flex", alignItems: "center", gap: 5,
+          background: chap === 0 ? "#F8FAFC" : "#F1F5F9", border: "none", borderRadius: 18,
+          padding: "8px 14px", fontSize: 11.5, fontWeight: 800,
+          color: chap === 0 ? "#CBD5E1" : "#475569",
+          cursor: chap === 0 ? "default" : "pointer", transition: "all 0.2s",
+        }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Өмнөх
+        </button>
+        <div style={{ display: "flex", gap: 5 }}>
+          {chapters.map((_, i) => (
+            <button key={i} onClick={() => goChap(i)} style={{
+              width: i === chap ? 18 : 6, height: 6, borderRadius: 4,
+              background: i === chap ? TEAL : "#E2E8F0", border: "none", cursor: "pointer",
+              transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)", padding: 0,
+            }} />
+          ))}
+        </div>
+        <button onClick={() => isLastChap ? onAskAI("Миний үр дүнгийн хамгийн чухал зүйл юу вэ?") : goChap(chap + 1)} style={{
+          display: "flex", alignItems: "center", gap: 5,
+          background: isLastChap ? `linear-gradient(135deg, ${TEAL}, #00A876)` : "#1E293B",
+          border: "none", borderRadius: 18,
+          padding: "8px 16px", fontSize: 11.5, fontWeight: 800, color: "#fff",
+          cursor: "pointer", transition: "all 0.2s",
+          boxShadow: isLastChap ? `0 4px 14px ${TEAL}50` : "0 4px 12px rgba(30,41,59,0.25)",
+        }}>
+          {isLastChap ? "AI-аас асуух" : "Дараах"}
+          {!isLastChap && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>}
+        </button>
       </div>
     </div>
   )
@@ -1109,8 +1221,8 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }} onTouchStart={onTS} onTouchEnd={onTE}>
-        {/* JOURNEY MODE — AI-planned dynamic narrative */}
+      <div style={{ flex: 1, overflowY: hasJourney ? "hidden" : "auto", overflowX: "hidden", display: hasJourney ? "flex" : "block", flexDirection: "column" }} onTouchStart={hasJourney ? undefined : onTS} onTouchEnd={hasJourney ? undefined : onTE}>
+        {/* JOURNEY MODE — AI-planned chapter-paged narrative */}
         {hasJourney && <JourneyView data={data} onAskAI={onAskAI} />}
 
         {/* PAGE 0 — Overview */}

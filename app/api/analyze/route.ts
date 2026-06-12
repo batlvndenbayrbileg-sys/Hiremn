@@ -290,9 +290,9 @@ export async function POST(request: Request) {
         })
       }
     }
-    // Top 5 highest-scoring answers — enough context, keeps prompt fast
+    // Top 8 highest-scoring answers — richer evidence for pattern detection
     flatAnswers.sort((a, b) => b.p - a.p)
-    const sampleAnswers = flatAnswers.slice(0, 5)
+    const sampleAnswers = flatAnswers.slice(0, 8)
       .map((x, i) => `${i + 1}. [${x.p}] ${x.q} → ${x.a}`)
       .join('\n')
 
@@ -333,40 +333,47 @@ ${sampleAnswers || '—'}`
 8. concerning үр дүнд эмпатитэй, мэргэжлийн тусламж зөвлө
 9. Хариултын ишлэлийг ашиглаж "энэ намайг ойлгож байна" мэдрэмж төрүүл
 
+═══ ГҮН ШИНЖИЛГЭЭ — ЭНЭ ТАНЫ ҮНЭ ЦЭНЭ ═══
+• Хариултуудын ХООРОНДЫН ХАМААРЛЫГ ол: "X гэж хариулсан мөртлөө Y гэж хариулсан нь Z-ийг илтгэнэ"
+• Давтагдах ХЭВ МАЯГИЙГ илрүүл: ижил сэдэвт хэд хэдэн хариулт юу өгүүлж байна
+• Зан төлөвийн ДОХИОГ тайлбарла: хариултын сонголт ямар хандлагыг харуулж байна
+• Хэрэглэгчийн ХАРИУЛТААС иш татаж бичих — generic зөвлөгөө БИШ, энэ хүний өгөгдөлд суурилсан ажиглалт
+• Гадаргуун дүгнэлт БИШ — "яагаад", "юу гэсэн үг" гэдгийг тайлбарла
+
 ═══ ТАЙЛАНГИЙН ТӨЛӨВЛӨЛТ — ТА ӨӨРӨӨ ШИЙДНЭ ═══
-Та зөвхөн агуулга биш, ҮЗҮҮЛЭХ ТӨЛӨВЛӨГӨӨ гаргана. Тест бүрд өөр бүтэцтэй, өөр дараалалтай тайлан зохио. Ижил template бүү давт.
+Та зөвхөн агуулга биш, ҮЗҮҮЛЭХ ТӨЛӨВЛӨГӨӨ гаргана. Тест бүрд өөр бүтэцтэй тайлан зохио. Ижил template бүү давт.
+
+БҮЛЭГ (chapter): section бүрд chapter нэр өг. 3-4 бүлэгт хуваагдана — бүлэг бүр тусдаа хуудас болж харагдана.
+Жишээ бүлэглэлт (тестдээ тохируулж ӨӨРИЙНХӨӨРӨӨ нэрлэ, ≤12 тэмдэгт):
+• Сэтгэцийн тест: "Тойм" → "Нотолгоо" → "Хамгаалалт" → "Сэргэлт"
+• Карьерын тест: "Тохирол" → "Хэв маяг" → "Боломжууд" → "Алхамууд"
+• Зан чанарын тест: "Таны төрөл" → "Задаргаа" → "Харилцаа" → "Өсөлт"
+Дараалсан section-ууд ижил chapter нэртэй бол нэг хуудсанд орно.
 
 Layout сонголт (ЗӨВХӨН эдгээр):
-• hero — том онцлох карт: хамгийн чухал 1 дүгнэлт (тайлан бүрд ЭХЭНД 1 байх)
-• cards — 3-4 карт: давуу тал / анхаарах зүйл / зөвлөмж гэх мэт
-• quotes — хэрэглэгчийн хариултаас 2-3 ишлэл + тайлбар (нотолгоо хэсэг)
-• bars — хэмжээсүүдийн харьцуулалт (тоог сервер бодит data-аар тавина)
+• hero — том онцлох карт: хамгийн чухал 1 дүгнэлт (ЭХЭНД 1 байх)
+• cards — 3-4 карт: давуу тал / анхаарах зүйл / зөвлөмж
+• quotes — хэрэглэгчийн хариултаас 2-3 ишлэл + тайлбар (нотолгоо)
+• bars — хэмжээсүүдийн харьцуулалт (тоог сервер тавина)
 • timeline — ЯГ 4 алхамт төлөвлөгөө (meta="1-р долоо хоног")
 • checklist — өнөөдөр хийх ЯГ 3 зүйл
 • list — энгийн жагсаалт 3-5 зүйл
 • grid — 2 баганат жижиг блокууд 4 хүртэл
 
-Тестийн төрлөөс хамаарсан фокус (жишээ):
-• Сэтгэцийн эрүүл мэнд: сэтгэл хөдлөлийн байдал → дохио → хамгаалах хүчин зүйл → сэргэлтийн зам → дэмжлэг
-• Карьер/ур чадвар: тохирол → ажлын хэв маяг → өсөлтийн боломж → чиглэл → хөгжүүлэлт
-• Манлайлал: профайл → харилцааны хэв маяг → нөлөөлөл → шийдвэр гаргалт → сохор цэг
-• Зан чанар: өөрийгөө таних → хэмжээсүүд → хүмүүстэй харилцах хандлага → өсөлт
-• Зависимости/скрининг: одоогийн байдал → нотолгоо → хамгаалах зүйл → төлөвлөгөө → дэмжлэг
-
-Хүүрнэлийн зарчим: 1) хамгийн чухал ажиглалт 2) яагаад чухал 3) нотолгоо 4) давуу тал 5) сохор цэг 6) боломж 7) төлөвлөгөө 8) өнөөдрийн алхам. Тестдээ тохируулж өөрчил.
+Хүүрнэлийн зарчим: 1) хамгийн чухал ажиглалт 2) яагаад чухал 3) нотолгоо 4) давуу тал 5) сохор цэг 6) боломж 7) төлөвлөгөө 8) өнөөдрийн алхам. Тестдээ тохируул.
 
 priority: critical (том hero) | high | normal | low (анхнаасаа хураангуй)
 tone: positive (ногоон) | warning (улбар шар) | neutral (саарал) | info (цэнхэр)
-expanded: false бол хэрэглэгч дарж дэлгэнэ (low priority зүйлст)
+expanded: false бол хэрэглэгч дарж дэлгэнэ
 
-ШААРДЛАГА: 5-7 section. Эхнийх нь ҮРГЭЛЖ hero. timeline ЯГ 4 item, checklist ЯГ 3 item. Бүх text ≤15 үг.
+ШААРДЛАГА: 6-8 section, 3-4 chapter. Эхнийх нь ҮРГЭЛЖ hero. timeline ЯГ 4 item, checklist ЯГ 3 item. Бүх text ≤15 үг.
 
 JSON буцаа ({ -ээр эхэл):
-{"testType":"...","scoreDirection":"...","outcomeQuality":"...","opening":"<1 өгүүлбэр — хувийн өнгөтэй эхлэл>","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"sections":[{"kind":"<семантик нэр>","layout":"<hero|cards|quotes|bars|timeline|checklist|list|grid>","priority":"<critical|high|normal|low>","tone":"<positive|warning|neutral|info>","expanded":true,"emoji":"<e>","title":"<гарчиг>","body":"<0-2 өгүүлбэр>","items":[{"emoji":"<e>","title":"<товч>","text":"<тайлбар ≤15 үг>","meta":"<нэмэлт label>"}]}]}`
+{"testType":"...","scoreDirection":"...","outcomeQuality":"...","opening":"<1 өгүүлбэр — хувийн өнгөтэй эхлэл>","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"sections":[{"chapter":"<бүлгийн нэр ≤12 тэмдэгт>","kind":"<семантик нэр>","layout":"<hero|cards|quotes|bars|timeline|checklist|list|grid>","priority":"<critical|high|normal|low>","tone":"<positive|warning|neutral|info>","expanded":true,"emoji":"<e>","title":"<гарчиг>","body":"<0-2 өгүүлбэр>","items":[{"emoji":"<e>","title":"<товч>","text":"<тайлбар ≤15 үг>","meta":"<нэмэлт label>"}]}]}`
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 2600,
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2800,
       system: SYSTEM,
       messages: [
         { role: 'user', content: `Дата:\n${truncated}` },
@@ -520,6 +527,7 @@ JSON буцаа ({ -ээр эхэл):
       .filter(s => s && typeof s === 'object' && (s.title || s.body || Array.isArray(s.items)))
       .slice(0, 9)
       .map(s => ({
+        chapter: typeof s.chapter === 'string' ? s.chapter.slice(0, 16) : '',
         kind: String(s.kind || 'insight').slice(0, 40),
         layout: VALID_LAYOUTS.includes(s.layout) ? s.layout : 'list',
         priority: VALID_PRIORITIES.includes(s.priority) ? s.priority : 'normal',
@@ -535,6 +543,7 @@ JSON буцаа ({ -ээр эхэл):
     const barsIdx = sections.findIndex(s => s.layout === 'bars')
     if (dimensions.length >= 2) {
       const barsSection = {
+        chapter: (barsIdx >= 0 && sections[barsIdx].chapter) || sections[0]?.chapter || 'Тойм',
         kind: 'dimensions',
         layout: 'bars',
         priority: 'high',
@@ -563,6 +572,7 @@ JSON буцаа ({ -ээр эхэл):
       console.warn('[analyze] AI sections unusable, building fallback plan')
       sections = [
         {
+          chapter: 'Тойм',
           kind: 'key_finding', layout: 'hero', priority: 'critical',
           tone: outcomeQuality === 'positive' ? 'positive' : outcomeQuality === 'concerning' ? 'warning' : 'info',
           expanded: true, emoji: '💡',
@@ -571,11 +581,13 @@ JSON буцаа ({ -ээр эхэл):
           items: [],
         },
         ...(dimensions.length >= 2 ? [{
+          chapter: 'Тойм',
           kind: 'dimensions', layout: 'bars', priority: 'high', tone: 'neutral', expanded: true,
           emoji: '📊', title: 'Хэмжээсүүдийн задаргаа', body: '',
           items: dimensions.slice(0, 12).map(d => ({ emoji: '', title: d.label, text: '', meta: `${d.score}/${d.maxScore}`, pct: d.pct })),
         }] : []),
         {
+          chapter: 'Алхамууд',
           kind: 'next_steps', layout: 'checklist', priority: 'high', tone: 'positive', expanded: true,
           emoji: '✅', title: 'Өнөөдрийн алхам', body: '',
           items: [
