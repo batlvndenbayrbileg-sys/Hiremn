@@ -292,9 +292,9 @@ export async function POST(request: Request) {
         })
       }
     }
-    // Top 8 highest-scoring answers — richer evidence for pattern detection
+    // Top 6 highest-scoring answers — evidence for pattern detection
     flatAnswers.sort((a, b) => b.p - a.p)
-    const sampleAnswers = flatAnswers.slice(0, 8)
+    const sampleAnswers = flatAnswers.slice(0, 6)
       .map((x, i) => `${i + 1}. [${x.p}] ${x.q} → ${x.a}`)
       .join('\n')
 
@@ -371,7 +371,7 @@ priority: critical (том hero) | high | normal | low (анхнаасаа ху�
 tone: positive (ногоон) | warning (улбар шар) | neutral (саарал) | info (цэнхэр)
 expanded: false бол хэрэглэгч дарж дэлгэнэ
 
-ШААРДЛАГА: ЯГ 5-6 section, 3 chapter, 1 carousel section ЗААВАЛ. Эхнийх нь ҮРГЭЛЖ hero. carousel 4 item. timeline ЯГ 4 item, checklist ЯГ 3 item. carousel-аас БУСАД text ≤12 үг; carousel detail 2 өгүүлбэр.
+ШААРДЛАГА: ЯГ 5 section, 3 chapter, 1 carousel ЗААВАЛ. Эхнийх hero. carousel 4 item. timeline 4 item, checklist 3 item. БҮХ text богино: carousel detail ЯГ 2 богино өгүүлбэр, tip 1 өгүүлбэр; бусад ≤10 үг.
 
 JSON буцаа ({ -ээр эхэл):
 {"testType":"...","scoreDirection":"...","outcomeQuality":"...","opening":"<1 өгүүлбэр — хувийн өнгөтэй эхлэл>","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"sections":[{"chapter":"<бүлгийн нэр ≤12 тэмдэгт>","kind":"<семантик нэр>","layout":"<hero|carousel|cards|quotes|bars|timeline|checklist|list|grid>","priority":"<critical|high|normal|low>","tone":"<positive|warning|neutral|info>","expanded":true,"emoji":"<e>","title":"<гарчиг>","body":"<0-2 өгүүлбэр>","items":[{"emoji":"<e>","tone":"<positive|warning|info>","title":"<товч гарчиг>","detail":"<carousel: 2-3 өгүүлбэр дэлгэрэнгүй>","text":"<бусад layout: ≤15 үг>","tip":"<carousel: 1 практик зөвлөмж>","meta":"<label>"}]}]}`
@@ -380,7 +380,7 @@ JSON буцаа ({ -ээр эхэл):
     // we instruct raw JSON output and extract the {...} span instead.
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 2600,
+      max_tokens: 2000,
       system: SYSTEM,
       messages: [
         { role: 'user', content: `Дата:\n${truncated}\n\nЗӨВХӨН JSON буцаа — markdown, тайлбар үг ҮГҮЙ, шууд { -ээр эхэл.` },
