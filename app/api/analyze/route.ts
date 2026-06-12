@@ -613,18 +613,34 @@ JSON буцаа ({ -ээр эхэл, ЗӨВХӨН энэ бүтэц):
       })
     }
 
-    // 5) Today's checklist (chapter: plan)
+    // 5) Today's checklist (chapter: plan) — test-specific, never generic
     const rawToday = Array.isArray(data.today) ? data.today : []
-    const todayItems = rawToday.slice(0, 3).map((t: any) => ({ emoji: '', title: clip(t, 90), text: '', meta: '' })).filter((t: any) => t.title)
+    let todayItems = rawToday.slice(0, 3).map((t: any) => ({ emoji: '', title: clip(t, 90), text: '', meta: '' })).filter((t: any) => t.title)
+    // Fallback ladder: AI today → card tips → plan steps → generic. Card tips
+    // and plan steps are already test-specific actionable content.
+    if (todayItems.length < 3) {
+      const tipPool = [
+        ...cardItems.map((c: any) => c.tip).filter(Boolean),
+        ...planItems.map((p: any) => p.title).filter(Boolean),
+      ]
+      for (const tip of tipPool) {
+        if (todayItems.length >= 3) break
+        if (todayItems.some((t: any) => t.title === clip(tip, 90))) continue
+        todayItems.push({ emoji: '', title: clip(tip, 90), text: '', meta: '' })
+      }
+    }
+    if (todayItems.length < 1) {
+      todayItems = [
+        { emoji: '', title: 'Үр дүнгээ дахин уншиж эргэцүүлэх', text: '', meta: '' },
+        { emoji: '', title: 'Нэг тодорхой зорилго сонгох', text: '', meta: '' },
+        { emoji: '', title: 'AI-аас нэмэлт зөвлөгөө асуух', text: '', meta: '' },
+      ]
+    }
     sections.push({
       chapter: chapNames.plan, kind: 'next_steps', layout: 'checklist',
       priority: 'high', tone: 'positive', expanded: true, emoji: '✅',
       title: 'Өнөөдрийн алхам', body: '',
-      items: todayItems.length ? todayItems : [
-        { emoji: '', title: 'Үр дүнгээ дахин уншиж эргэцүүлэх', text: '', meta: '' },
-        { emoji: '', title: 'Нэг тодорхой зорилго сонгох', text: '', meta: '' },
-        { emoji: '', title: 'AI-аас нэмэлт зөвлөгөө асуух', text: '', meta: '' },
-      ],
+      items: todayItems,
     })
 
     data.sections = sections

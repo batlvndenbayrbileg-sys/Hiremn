@@ -1271,33 +1271,46 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
             {s.layout === "checklist" && (() => {
               const total = s.items.length
               const doneCount = s.items.filter((_, ii) => done[`${si}-${ii}`]).length
+              const allDone = doneCount === total && total > 0
+              const pct = total ? Math.round((doneCount / total) * 100) : 0
               return (
                 <div>
-                  <div style={{ height: 6, background: "#F1F5F9", borderRadius: 4, overflow: "hidden", marginBottom: 10 }}>
-                    <div style={{ height: "100%", width: total ? `${(doneCount / total) * 100}%` : "0%", background: `linear-gradient(90deg, ${TEAL}, #00E5A0)`, transition: "width 0.4s ease" }} />
+                  {/* Progress header */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8" }}>
+                      {allDone ? "Бүгдийг гүйцэтгэлээ! 🎉" : `${doneCount}/${total} гүйцэтгэсэн`}
+                    </span>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: allDone ? TEAL : "#94A3B8" }}>{pct}%</span>
+                  </div>
+                  <div style={{ height: 7, background: "#EEF2F7", borderRadius: 5, overflow: "hidden", marginBottom: 12 }}>
+                    <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg, ${TEAL}, #00E5A0)`, borderRadius: 5, transition: "width 0.5s cubic-bezier(.16,1,.3,1)", boxShadow: pct > 0 ? `0 0 8px ${TEAL}66` : "none" }} />
                   </div>
                   {s.items.map((it, ii) => {
                     const k = `${si}-${ii}`
                     const checked = !!done[k]
                     return (
                       <button key={ii} onClick={() => toggleDone(k)} style={{
-                        width: "100%", display: "flex", alignItems: "center", gap: 10,
-                        background: checked ? "#F0FDF4" : "#F8FAFC",
-                        border: `1.5px solid ${checked ? "#BBF7D0" : "#F1F5F9"}`,
-                        borderRadius: 14, padding: "11px 12px",
-                        marginBottom: ii < s.items.length - 1 ? 7 : 0,
-                        cursor: "pointer", textAlign: "left", transition: "all 0.2s",
+                        width: "100%", display: "flex", alignItems: "center", gap: 11,
+                        background: checked ? "linear-gradient(135deg,#F0FDF4,#ECFDF5)" : "#fff",
+                        border: `1.5px solid ${checked ? "#A7F3D0" : "#EEF2F7"}`,
+                        borderRadius: 15, padding: "13px 13px",
+                        marginBottom: ii < s.items.length - 1 ? 8 : 0,
+                        cursor: "pointer", textAlign: "left", transition: "all 0.25s cubic-bezier(.16,1,.3,1)",
+                        boxShadow: checked ? `0 2px 10px ${TEAL}1F` : "0 1px 4px rgba(0,0,0,0.03)",
                       }}>
                         <div style={{
-                          width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
-                          border: `2px solid ${checked ? TEAL : "#CBD5E1"}`,
-                          background: checked ? TEAL : "transparent",
+                          width: 24, height: 24, borderRadius: "50%", flexShrink: 0,
+                          border: `2px solid ${checked ? TEAL : "#D1D9E3"}`,
+                          background: checked ? `linear-gradient(135deg,${TEAL},#00A876)` : "transparent",
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          transition: "all 0.2s",
+                          transition: "all 0.25s", transform: checked ? "scale(1.08)" : "scale(1)",
+                          boxShadow: checked ? `0 3px 8px ${TEAL}55` : "none",
                         }}>
-                          {checked && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round"><path d="M20 6L9 17l-5-5"/></svg>}
+                          {checked
+                            ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                            : <span style={{ fontSize: 10, fontWeight: 800, color: "#94A3B8" }}>{ii + 1}</span>}
                         </div>
-                        <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: checked ? "#94A3B8" : "#1E293B", textDecoration: checked ? "line-through" : "none" }}>
+                        <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: checked ? "#94A3B8" : "#1E293B", textDecoration: checked ? "line-through" : "none", lineHeight: 1.4, transition: "color 0.2s" }}>
                           {it.title || it.text}
                         </span>
                       </button>
@@ -1322,27 +1335,48 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
       })}
 
       {/* Closing CTA — only on the final chapter */}
-      {isLastChap && (
-      <div style={{
-        position: "relative", overflow: "hidden",
-        background: `linear-gradient(135deg, ${accent.soft} 0%, #fff 100%)`,
-        border: `1.5px solid ${accent.c}33`, borderRadius: 22, padding: "16px",
-        display: "flex", alignItems: "center", gap: 12, marginBottom: 6,
-        boxShadow: `0 6px 20px ${accent.glow}`,
-      }}>
-        <div style={{ position: "absolute", top: -30, right: -20, width: 90, height: 90, borderRadius: "50%", background: accent.mesh, filter: "blur(22px)", pointerEvents: "none" }} />
-        <div style={{ position: "relative", width: 46, height: 46, borderRadius: 14, background: `linear-gradient(135deg, ${accent.c}, ${accent.c2})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0, boxShadow: `0 4px 14px ${accent.glow}` }}>💬</div>
-        <div style={{ flex: 1, position: "relative" }}>
-          <p style={{ fontSize: 13, fontWeight: 800, color: "#1E293B", margin: "0 0 2px" }}>Гүн зөвлөгөө хэрэгтэй юу?</p>
-          <p style={{ fontSize: 11, color: "#64748B", margin: 0, lineHeight: 1.4 }}>Үр дүнгийнхээ талаар AI-аас чөлөөтэй асууна уу</p>
+      {isLastChap && (() => {
+        const reportTitle = data.summary?.title || ''
+        const suggestions = [
+          "Энэ үр дүн юу гэсэн үг вэ?",
+          "Би юунаас эхлэх вэ?",
+          data.outcomeQuality === 'concerning' ? "Хэрхэн сайжруулах вэ?" : "Үүнийг хэрхэн хадгалах вэ?",
+        ]
+        return (
+        <div style={{
+          position: "relative", overflow: "hidden",
+          background: `linear-gradient(150deg, ${accent.soft} 0%, #fff 70%)`,
+          border: `1.5px solid ${accent.c}33`, borderRadius: 22, padding: "16px",
+          marginBottom: 6, boxShadow: `0 8px 24px ${accent.glow}`,
+        }}>
+          <div style={{ position: "absolute", top: -30, right: -20, width: 100, height: 100, borderRadius: "50%", background: accent.mesh, filter: "blur(24px)", pointerEvents: "none" }} />
+          {/* Header */}
+          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 15, background: `linear-gradient(135deg, ${accent.c}, ${accent.c2})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 23, flexShrink: 0, boxShadow: `0 5px 16px ${accent.glow}` }}>🤖</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 13.5, fontWeight: 900, color: "#1E293B", margin: "0 0 2px" }}>AI зөвлөхөөс асуу</p>
+              <p style={{ fontSize: 11, color: "#64748B", margin: 0, lineHeight: 1.4 }}>Үр дүнгийнхээ талаар юу ч асууж болно</p>
+            </div>
+          </div>
+          {/* Suggested question chips */}
+          <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 7 }}>
+            {suggestions.map((q, i) => (
+              <button key={i} onClick={() => onAskAI(q)} style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
+                width: "100%", background: "#fff", border: `1.5px solid ${accent.c}22`,
+                borderRadius: 14, padding: "11px 14px", cursor: "pointer", textAlign: "left",
+                transition: "all 0.2s", boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+              }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#334155" }}>{q}</span>
+                <span style={{ width: 24, height: 24, borderRadius: "50%", background: accent.soft, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accent.c} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
-        <button onClick={() => onAskAI("Миний үр дүнгийн хамгийн чухал зүйл юу вэ?")} style={{
-          position: "relative", background: `linear-gradient(135deg, ${accent.c}, ${accent.c2})`, border: "none", borderRadius: 20, padding: "9px 16px",
-          color: "#fff", fontSize: 11.5, fontWeight: 800, cursor: "pointer", flexShrink: 0,
-          boxShadow: `0 4px 14px ${accent.glow}`,
-        }}>Асуух</button>
-      </div>
-      )}
+        )
+      })()}
       </div>
 
       {/* Chapter navigation — prev/next + dots */}
