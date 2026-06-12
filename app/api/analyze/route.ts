@@ -371,19 +371,19 @@ expanded: false бол хэрэглэгч дарж дэлгэнэ
 JSON буцаа ({ -ээр эхэл):
 {"testType":"...","scoreDirection":"...","outcomeQuality":"...","opening":"<1 өгүүлбэр — хувийн өнгөтэй эхлэл>","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"sections":[{"chapter":"<бүлгийн нэр ≤12 тэмдэгт>","kind":"<семантик нэр>","layout":"<hero|cards|quotes|bars|timeline|checklist|list|grid>","priority":"<critical|high|normal|low>","tone":"<positive|warning|neutral|info>","expanded":true,"emoji":"<e>","title":"<гарчиг>","body":"<0-2 өгүүлбэр>","items":[{"emoji":"<e>","title":"<товч>","text":"<тайлбар ≤15 үг>","meta":"<нэмэлт label>"}]}]}`
 
+    // Note: Sonnet 4.6 does not support assistant message prefill —
+    // we instruct raw JSON output and extract the {...} span instead.
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 2800,
       system: SYSTEM,
       messages: [
-        { role: 'user', content: `Дата:\n${truncated}` },
-        { role: 'assistant', content: '{' },
+        { role: 'user', content: `Дата:\n${truncated}\n\nЗӨВХӨН JSON буцаа — markdown, тайлбар үг ҮГҮЙ, шууд { -ээр эхэл.` },
       ],
     })
 
     const rawText = response.content[0].type === 'text' ? response.content[0].text : ''
-    let jsonStr = '{' + rawText
-    jsonStr = jsonStr.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    let jsonStr = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
     const start = jsonStr.indexOf('{')
     const end = jsonStr.lastIndexOf('}')
     if (start === -1 || end === -1) throw new Error('JSON олдсонгүй')
