@@ -719,69 +719,71 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
   const dimIcons = ["M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z", "M2 4h2v16M22 4h-2v16M4 8h16v6H4zM7 14v3M17 14v3", "M12 2a7 7 0 0 0-7 7c0 2 1 3 2 4M12 2a7 7 0 0 1 7 7c0 2-1 3-2 4M9 17h6M10 21h4"]
 
   return (
-    <div onClick={onExpand} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{ background: "#F4F6FB", borderRadius: 26, overflow: "hidden", cursor: "pointer", padding: 8, boxShadow: hov ? `0 18px 50px ${acc.glow}, 0 0 0 2px ${acc.c}40` : "0 6px 24px rgba(15,23,42,0.1)", transform: hov ? "translateY(-3px)" : "translateY(0)", transition: "all 0.3s cubic-bezier(.16,1,.3,1)" }}>
+    <div onClick={onExpand} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{ background: "#F6F8FB", borderRadius: 20, overflow: "hidden", cursor: "pointer", padding: 7, boxShadow: hov ? `0 14px 36px rgba(15,23,42,0.08), 0 0 0 1px ${acc.c}33` : "0 4px 16px rgba(15,23,42,0.06)", transform: hov ? "translateY(-2px)" : "translateY(0)", transition: "all 0.25s cubic-bezier(.16,1,.3,1)" }}>
       {/* Hero */}
-      <div style={{ position: "relative", overflow: "hidden", background: `linear-gradient(150deg, ${acc.soft} 0%, ${acc.soft2} 100%)`, borderRadius: 20, padding: "16px 16px 18px", display: "flex", gap: 12, alignItems: "center" }}>
-        <div style={{ position: "absolute", top: -30, right: 60, width: 90, height: 90, borderRadius: "50%", background: acc.glow, filter: "blur(26px)", pointerEvents: "none" }} />
+      <div style={{ position: "relative", overflow: "hidden", background: `linear-gradient(150deg, ${acc.soft} 0%, ${acc.soft2} 100%)`, borderRadius: 16, padding: "14px 14px 15px", display: "flex", gap: 11, alignItems: "center" }}>
+        <div style={{ position: "absolute", top: -30, right: 60, width: 80, height: 80, borderRadius: "50%", background: acc.glow, filter: "blur(24px)", pointerEvents: "none", opacity: 0.7 }} />
         {/* Ring */}
-        <div style={{ position: "relative", width: 76, height: 76, flexShrink: 0 }}>
-          <svg width="76" height="76" style={{ transform: "rotate(-90deg)" }}>
-            <circle cx="38" cy="38" r="31" fill="#fff" stroke={`${color}20`} strokeWidth="7" />
-            <circle cx="38" cy="38" r="31" fill="none" stroke={color} strokeWidth="7" strokeDasharray={2 * Math.PI * 31} strokeDashoffset={(2 * Math.PI * 31) * (1 - Math.min(data.healthScore, 100) / 100 * (bar ? 1 : 0))} strokeLinecap="round" style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1)" }} />
+        <div style={{ position: "relative", width: 60, height: 60, flexShrink: 0 }}>
+          <svg width="60" height="60" style={{ transform: "rotate(-90deg)" }}>
+            <circle cx="30" cy="30" r="24" fill="#fff" stroke={`${color}18`} strokeWidth="5" />
+            <circle cx="30" cy="30" r="24" fill="none" stroke={color} strokeWidth="5" strokeDasharray={2 * Math.PI * 24} strokeDashoffset={(2 * Math.PI * 24) * (1 - Math.min(data.healthScore, 100) / 100 * (bar ? 1 : 0))} strokeLinecap="round" style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1)" }} />
           </svg>
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ fontSize: 23, fontWeight: 900, color: "#1E293B", lineHeight: 1 }}>{scoreDisp}</span>
-            <span style={{ fontSize: 9, color: "#94A3B8", fontWeight: 600 }}>/{displayMax}</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", lineHeight: 1, letterSpacing: "-0.3px" }}>{scoreDisp}</span>
+            <span style={{ fontSize: 8, color: "#94A3B8", fontWeight: 500, marginTop: 1 }}>/{displayMax}</span>
           </div>
         </div>
         {/* Title + badge */}
         <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
-          <p style={{ fontSize: 9.5, fontWeight: 800, color: acc.c, letterSpacing: "0.6px", margin: "0 0 4px", display: "flex", alignItems: "center", gap: 4 }}>💙 AI ШИНЖИЛГЭЭ</p>
-          <p style={{ fontSize: 15, fontWeight: 900, color: "#1E293B", margin: "0 0 8px", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</p>
-          <div style={{ display: "inline-flex", alignItems: "flex-start", gap: 7, background: "rgba(255,255,255,0.75)", backdropFilter: "blur(6px)", borderRadius: 14, padding: "8px 11px", border: "1px solid rgba(255,255,255,0.9)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill={acc.c} style={{ flexShrink: 0, marginTop: 1 }}><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21 8 14 2 9.4h7.6z"/></svg>
-            <span style={{ fontSize: 11.5, fontWeight: 700, color: "#334155", lineHeight: 1.35 }}>{data.summary.title}</span>
+          <p style={{ fontSize: 8.5, fontWeight: 700, color: acc.c, letterSpacing: "0.5px", margin: "0 0 3px", display: "flex", alignItems: "center", gap: 4 }}>
+            <svg width="9" height="9" viewBox="0 0 24 24" fill={acc.c}><path d="M12 2L2 22h20L12 2zm0 4l7 14H5L12 6z"/></svg>
+            AI ШИНЖИЛГЭЭ
+          </p>
+          <p style={{ fontSize: 12.5, fontWeight: 600, color: "#0F172A", margin: "0 0 6px", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", letterSpacing: "-0.1px" }}>{title}</p>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(6px)", borderRadius: 10, padding: "4px 9px", border: "1px solid rgba(255,255,255,0.95)" }}>
+            <svg width="9" height="9" viewBox="0 0 24 24" fill={acc.c} style={{ flexShrink: 0 }}><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21 8 14 2 9.4h7.6z"/></svg>
+            <span style={{ fontSize: 10, fontWeight: 600, color: "#475569", lineHeight: 1.3 }}>{data.summary.title}</span>
           </div>
         </div>
         {/* Mascot */}
-        <img src={CHARS[charType]} alt="" style={{ width: 64, height: "auto", flexShrink: 0, alignSelf: "flex-end", marginBottom: -6, animation: "ar-float 5s ease-in-out infinite", filter: `drop-shadow(0 6px 10px ${acc.glow})` }} />
+        <img src={CHARS[charType]} alt="" style={{ width: 52, height: "auto", flexShrink: 0, alignSelf: "flex-end", marginBottom: -4, animation: "ar-float 5s ease-in-out infinite", filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.1))" }} />
       </div>
 
       {/* Stat tiles */}
-      <div style={{ display: "flex", background: "#fff", borderRadius: 18, padding: "12px 4px", marginTop: 8, boxShadow: "0 2px 10px rgba(15,23,42,0.04)" }}>
+      <div style={{ display: "flex", background: "#fff", borderRadius: 14, padding: "10px 4px", marginTop: 6 }}>
         {stats.map((k, i) => (
-          <div key={i} style={{ flex: 1, padding: "0 8px", display: "flex", alignItems: "center", gap: 9, borderRight: i < 2 ? "1px solid #F1F5F9" : "none" }}>
-            <div style={{ width: 34, height: 34, borderRadius: 11, background: k.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={k.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{k.icon}</svg>
+          <div key={i} style={{ flex: 1, padding: "0 7px", display: "flex", alignItems: "center", gap: 8, borderRight: i < 2 ? "1px solid #F1F5F9" : "none", minWidth: 0 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 9, background: k.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={k.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{k.icon}</svg>
             </div>
             <div style={{ minWidth: 0 }}>
-              <p style={{ fontSize: 8, color: "#94A3B8", fontWeight: 700, margin: "0 0 1px", letterSpacing: "0.3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{k.label.toUpperCase()}</p>
-              <p style={{ fontSize: 15, fontWeight: 900, color: k.color, margin: 0 }}>{k.value}</p>
+              <p style={{ fontSize: 7.5, color: "#94A3B8", fontWeight: 600, margin: "0 0 1px", letterSpacing: "0.3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{k.label.toUpperCase()}</p>
+              <p style={{ fontSize: 12.5, fontWeight: 700, color: "#0F172A", margin: 0, letterSpacing: "-0.2px" }}>{k.value}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Dimension bars with icon tiles */}
-      <div style={{ marginTop: 8 }}>
+      {/* Dimension bars */}
+      <div style={{ marginTop: 6 }}>
         {data.metrics.slice(0, 2).map((m, i) => {
           const ratio = m.maxScore > 0 ? m.score / m.maxScore : 0
-          const barCol = ratio > 0.6 ? "#F59E0B" : ratio > 0.3 ? "#F59E0B" : TEAL
           const barGrad = ratio > 0.5 ? "linear-gradient(90deg,#FB923C,#F59E0B)" : `linear-gradient(90deg,${TEAL},#34D399)`
-          const tileBg = ratio > 0.5 ? "#FEF3C7" : "#ECFDF3"
-          const tileCol = ratio > 0.5 ? "#9333EA" : "#16A34A"
+          const tileBg = ratio > 0.5 ? "#FFF7ED" : "#ECFDF5"
+          const tileCol = ratio > 0.5 ? "#EA580C" : "#16A34A"
           return (
-            <div key={i} style={{ background: "#fff", borderRadius: 16, padding: "13px 14px", marginBottom: i < Math.min(data.metrics.length, 2) - 1 ? 8 : 0, boxShadow: "0 2px 10px rgba(15,23,42,0.04)", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 38, height: 38, borderRadius: 12, background: tileBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={tileCol} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={dimIcons[i % dimIcons.length]} /></svg>
+            <div key={i} style={{ background: "#fff", borderRadius: 13, padding: "10px 12px", marginBottom: i < Math.min(data.metrics.length, 2) - 1 ? 6 : 0, display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 30, height: 30, borderRadius: 9, background: tileBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={tileCol} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={dimIcons[i % dimIcons.length]} /></svg>
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, gap: 8 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#334155", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.label}</span>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#94A3B8", flexShrink: 0 }}>{m.score}/{m.maxScore}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, gap: 8 }}>
+                  <span style={{ fontSize: 10.5, fontWeight: 600, color: "#334155", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", letterSpacing: "-0.1px" }}>{m.label}</span>
+                  <span style={{ fontSize: 10.5, fontWeight: 700, color: "#64748B", flexShrink: 0, letterSpacing: "-0.2px" }}>{m.score}/{m.maxScore}</span>
                 </div>
-                <div style={{ background: "#F1F5F9", borderRadius: 8, height: 8, overflow: "hidden" }}>
-                  <div style={{ height: "100%", borderRadius: 8, width: bar ? `${ratio * 100}%` : "0%", background: barGrad, transition: "width 1.1s cubic-bezier(.16,1,.3,1)" }} />
+                <div style={{ background: "#F1F5F9", borderRadius: 6, height: 5, overflow: "hidden" }}>
+                  <div style={{ height: "100%", borderRadius: 6, width: bar ? `${ratio * 100}%` : "0%", background: barGrad, transition: "width 1.1s cubic-bezier(.16,1,.3,1)" }} />
                 </div>
               </div>
             </div>
@@ -790,12 +792,12 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
       </div>
 
       {/* CTA */}
-      <div style={{ marginTop: 8 }}>
-        <div style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, background: `linear-gradient(135deg, ${acc.c}, ${acc.c2})`, borderRadius: 18, padding: "16px", boxShadow: `0 8px 22px ${acc.glow}`, transform: hov ? "scale(1.015)" : "scale(1)", transition: "transform 0.2s" }}>
-          <div style={{ position: "absolute", top: 0, left: 0, width: "40%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent)", animation: "ar-shimmer 4s ease-in-out 1.5s infinite" }} />
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>
-          <span style={{ color: "#fff", fontSize: 14, fontWeight: 800, position: "relative" }}>Дэлгэрэнгүй шинжилгээ харах</span>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ position: "relative" }}><path d="M9 18l6-6-6-6" /></svg>
+      <div style={{ marginTop: 6 }}>
+        <div style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: `linear-gradient(135deg, ${acc.c}, ${acc.c2})`, borderRadius: 13, padding: "12px", boxShadow: `0 4px 14px ${acc.glow}`, transform: hov ? "scale(1.01)" : "scale(1)", transition: "transform 0.2s" }}>
+          <div style={{ position: "absolute", top: 0, left: 0, width: "40%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)", animation: "ar-shimmer 4s ease-in-out 1.5s infinite" }} />
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: "relative" }}><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>
+          <span style={{ color: "#fff", fontSize: 11.5, fontWeight: 600, position: "relative", letterSpacing: "0.1px" }}>Дэлгэрэнгүй шинжилгээ харах</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: "relative" }}><path d="M9 18l6-6-6-6" /></svg>
         </div>
       </div>
     </div>
