@@ -154,7 +154,7 @@ export async function POST(req: Request) {
           'ЗААВАЛ "Цаашдын алхам" хэсгийг үлдээх. Тон: эерэг, эмпатитэй, оношилгоо БИШ.'
 
         const analysisResp = await anthropic.messages.create({
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-sonnet-4-6',
           max_tokens: 900,
           system: analysisSystem,
           messages: [{ role: 'user', content: trimmedPrompt }],
@@ -330,7 +330,7 @@ export async function POST(req: Request) {
         content: String(m.content),
       }))
 
-    const model = 'claude-sonnet-4-20250514'
+    const model = 'claude-sonnet-4-6'
 
     // Parallel processing: LLM call + Agent search simultaneously
     // Agent search runs for user's problem regardless of LLM markers

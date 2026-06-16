@@ -356,7 +356,7 @@ export async function runAgent(
   
   // Initial API call with tools
   let response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 500,
     system: systemPrompt,
     messages: formattedMessages,
@@ -388,7 +388,7 @@ export async function runAgent(
     
     // Continue conversation with tool results
     response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6',
       max_tokens: 500,
       system: systemPrompt,
       messages: [
