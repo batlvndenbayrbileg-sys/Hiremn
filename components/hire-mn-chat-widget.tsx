@@ -5473,8 +5473,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               </div>
               )}
 
-              {/* TEMP: Usage Limit Popup disabled ───────────────────────── */}
-              {/* {isUserLocked() && <UsageLimitPopup />} */}
+              {/* Usage Limit Popup — shows when user hits the daily 20-message limit */}
+              {isUserLocked() && <UsageLimitPopup />}
 
               {/* Sidebar Overlay */}
               {showSidebar && (
