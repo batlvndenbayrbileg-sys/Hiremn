@@ -53,6 +53,14 @@ function closeOpenBrackets(s: string): string {
 // Strip HTML tags from question/answer text (API returns "<p>...</p>")
 const stripHtml = (s: string) => (s || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
 
+// Format a (possibly decimal) score for display: integers stay whole,
+// decimals round to 1 place with no trailing ".0" (e.g. 3.67 → "3.7", 4 → "4")
+const fmtScore = (n: number): string => {
+  if (!Number.isFinite(n)) return '0'
+  const r = Math.round(n * 10) / 10
+  return Number.isInteger(r) ? String(r) : r.toFixed(1)
+}
+
 // Test type enum — the AI classifier decides which bucket each test falls into
 // based on the assessment description. We don't hardcode keywords because the
 // system must handle any future test without code changes.
@@ -359,10 +367,10 @@ ${sampleAnswers || '—'}`
    Карт бүр: tone (positive=давуу/сайн, warning=анхаарах/сул, info=зөвлөгөө), emoji, title (богино гарчиг), detail (2 өгүүлбэр — ЯАГААД, юу гэсэн үг, хэрэглэгчийн хариултад суурилсан), tip (1 богино практик алхам), meta (богино шошго).
    ОЛОН ХЭМЖЭЭСТ тест: давамгай 2-3 хэмжээс тус бүрд карт (meta=хэмжээсийн нэр, title=түвшин) + 1-2 зөвлөгөөний карт.
    НЭГ онооны тест: давуу тал, анхаарах зүйл, зөвлөгөө, дэмжлэг гэсэн картууд.
-4. plan — ЯГ 4 алхам (сэргэх зам / хөгжүүлэх зам): алхам бүр title (богино) + text (1 өгүүлбэр, ТУСГАЙЛСАН бодит алхам).
-5. today — өнөөдөр шууд хийх ЯГ 3 энгийн зорилго (богино).
+4. plan — ЯГ 4 алхам (сэргэх зам / хөгжүүлэх зам): алхам бүр title (богино нэрлэсэн гарчиг) + text (1 БҮТЭН өгүүлбэр, ТУСГАЙЛСАН бодит алхам).
+5. today — өнөөдөр шууд хийх ЯГ 3 даалгавар. ЗААВАЛ үйл үгээр төгссөн БҮТЭН тушаах өгүүлбэр (≤8 үг). Жишээ: "Унтахын өмнө утсаа хойш тавь", "10 минут алхах дасгал хий". ТАСАРХАЙ хэллэг, нэр үг биш — цэвэр зөв монгол.
 
-ЧАНАР: detail нь ҮНЭХЭЭР хэрэгтэй, тестийн контекст + хариултад суурилсан. tip/plan нь домэйнд тусгайлсан (generic "тайвшир" БИШ). Бүх text цэвэр монгол, тоо багатай.
+ЧАНАР: detail нь ҮНЭХЭЭР хэрэгтэй, тестийн контекст + хариултад суурилсан. tip/plan нь домэйнд тусгайлсан (generic "тайвшир" БИШ). Бүх text цэвэр зөв монгол хэл, үг үсгийн алдаагүй, бүтэн өгүүлбэр, тоо багатай.
 
 JSON буцаа ({ -ээр эхэл, ЗӨВХӨН энэ бүтэц):
 {"testType":"...","scoreDirection":"...","outcomeQuality":"...","opening":"<1 өгүүлбэр>","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"headline":{"title":"<богино>","body":"<1-2 өгүүлбэр>"},"cards":[{"tone":"<positive|warning|info>","emoji":"<e>","title":"<гарчиг>","detail":"<2 өгүүлбэр>","tip":"<1 алхам>","meta":"<шошго>"},{"tone":"...","emoji":"...","title":"...","detail":"...","tip":"...","meta":"..."},{"tone":"...","emoji":"...","title":"...","detail":"...","tip":"...","meta":"..."},{"tone":"...","emoji":"...","title":"...","detail":"...","tip":"...","meta":"..."}],"plan":[{"title":"<богино>","text":"<1 өгүүлбэр>"},{"title":"...","text":"..."},{"title":"...","text":"..."},{"title":"...","text":"..."}],"today":["<богино>","<богино>","<богино>"]}`
@@ -445,24 +453,26 @@ JSON буцаа ({ -ээр эхэл, ЗӨВХӨН энэ бүтэц):
     } else if (actualMaxScore > 0) {
       // Score-based tests: show the RAW score the user got (e.g. "2/10")
       // even though the wellbeing ring is colored independently.
-      data.displayScore = actualScore
-      data.displayMaxScore = actualMaxScore
+      data.displayScore = Math.round(actualScore * 10) / 10
+      data.displayMaxScore = Math.round(actualMaxScore * 10) / 10
     }
 
+    // Round display numbers to 1 decimal so the UI never shows "3.6666667".
+    const round1 = (n: number) => Number.isFinite(n) ? Math.round(n * 10) / 10 : 0
     // Force dimensions metrics from real data
     if (dimensions.length >= 2) {
       data.metrics = dimensions.map(d => ({
         label: d.label,
-        score: d.score,
-        maxScore: d.maxScore,
+        score: round1(d.score),
+        maxScore: round1(d.maxScore),
         status: `${d.pct}%`,
       }))
-      data.dimensions = dimensions
+      data.dimensions = dimensions.map(d => ({ ...d, score: round1(d.score), maxScore: round1(d.maxScore) }))
     } else {
       data.metrics = [{
         label: reportTitle.slice(0, 30) || 'Үр дүн',
-        score: actualScore,
-        maxScore: actualMaxScore,
+        score: round1(actualScore),
+        maxScore: round1(actualMaxScore),
         status: actualResultLabel || '—',
       }]
     }
@@ -493,7 +503,7 @@ JSON буцаа ({ -ээр эхэл, ЗӨВХӨН энэ бүтэц):
       data.statCards = dimensions.slice(0, 4).map((d, i) => ({
         icon: ['📊', '🎯', '⭐', '🧭'][i] || '📊',
         label: d.label.slice(0, 18),
-        value: `${d.score}/${d.maxScore}`,
+        value: `${fmtScore(d.score)}/${fmtScore(d.maxScore)}`,
         sub: `${d.pct}%`,
       }))
     } else if (actualMaxScore > 0) {
@@ -550,7 +560,7 @@ JSON буцаа ({ -ээр эхэл, ЗӨВХӨН энэ бүтэц):
         body: '',
         items: dimensions.slice(0, 12).map(d => ({
           emoji: '', title: d.label, text: '',
-          meta: testType === 'profile' ? `${d.score}` : `${d.score}/${d.maxScore}`,
+          meta: testType === 'profile' ? `${fmtScore(d.score)}` : `${fmtScore(d.score)}/${fmtScore(d.maxScore)}`,
           pct: d.pct,
         })),
       })
@@ -581,7 +591,7 @@ JSON буцаа ({ -ээр эхэл, ЗӨВХӨН энэ бүтэц):
           emoji: tone === 'positive' ? '💪' : tone === 'warning' ? '🎯' : '💡',
           tone,
           title: clip(d.label, 70),
-          detail: clip(`Энэ хэмжээст ${d.score}/${d.maxScore} оноо авсан байна. ${tone === 'warning' ? 'Энэ чиглэлд анхаарал хандуулах нь зүйтэй.' : 'Энэ нь таны давуу тал юм.'}`, 360),
+          detail: clip(`Энэ хэмжээст ${fmtScore(d.score)}/${fmtScore(d.maxScore)} оноо авсан байна. ${tone === 'warning' ? 'Энэ чиглэлд анхаарал хандуулах нь зүйтэй.' : 'Энэ нь таны давуу тал юм.'}`, 360),
           tip: '',
           meta: clip(d.label, 28),
           text: '',
@@ -613,28 +623,35 @@ JSON буцаа ({ -ээр эхэл, ЗӨВХӨН энэ бүтэц):
       })
     }
 
-    // 5) Today's checklist (chapter: plan) — test-specific, never generic
+    // 5) Today's checklist (chapter: plan) — test-specific, clean imperatives.
+    // Keep only complete sentence-like todos (not truncated noun fragments).
+    const cleanTodo = (s: string) => {
+      let v = clip(s, 80).trim()
+      // Drop trailing ellipsis/incomplete punctuation from clipping
+      v = v.replace(/[…\-,;:]\s*$/, '').trim()
+      return v
+    }
+    const isUsableTodo = (s: string) => s.length >= 6 && s.split(' ').length >= 2 && !s.endsWith('…')
     const rawToday = Array.isArray(data.today) ? data.today : []
-    let todayItems = rawToday.slice(0, 3).map((t: any) => ({ emoji: '', title: clip(t, 90), text: '', meta: '' })).filter((t: any) => t.title)
-    // Fallback ladder: AI today → card tips → plan steps → generic. Card tips
-    // and plan steps are already test-specific actionable content.
+    let todayItems = rawToday.map((t: any) => cleanTodo(String(t))).filter(isUsableTodo).slice(0, 3)
+      .map((t: string) => ({ emoji: '', title: t, text: '', meta: '' }))
+    // Fallback ladder: AI today → card tips (imperative, test-specific) → generic.
+    // We prefer card TIPS over plan titles because tips are full action sentences
+    // while plan titles are noun-phrase headers that read awkwardly as todos.
     if (todayItems.length < 3) {
-      const tipPool = [
-        ...cardItems.map((c: any) => c.tip).filter(Boolean),
-        ...planItems.map((p: any) => p.title).filter(Boolean),
-      ]
+      const tipPool = cardItems.map((c: any) => cleanTodo(c.tip)).filter(isUsableTodo)
       for (const tip of tipPool) {
         if (todayItems.length >= 3) break
-        if (todayItems.some((t: any) => t.title === clip(tip, 90))) continue
-        todayItems.push({ emoji: '', title: clip(tip, 90), text: '', meta: '' })
+        if (todayItems.some((t: any) => t.title === tip)) continue
+        todayItems.push({ emoji: '', title: tip, text: '', meta: '' })
       }
     }
-    if (todayItems.length < 1) {
-      todayItems = [
-        { emoji: '', title: 'Үр дүнгээ дахин уншиж эргэцүүлэх', text: '', meta: '' },
-        { emoji: '', title: 'Нэг тодорхой зорилго сонгох', text: '', meta: '' },
-        { emoji: '', title: 'AI-аас нэмэлт зөвлөгөө асуух', text: '', meta: '' },
-      ]
+    // Top up to 3 with clean generic todos if still short
+    const genericTodos = ['Үр дүнгээ дахин уншиж эргэцүүлээрэй', 'Өнөөдөр нэг тодорхой зорилго тавиарай', 'AI-аас нэмэлт зөвлөгөө аваарай']
+    for (const g of genericTodos) {
+      if (todayItems.length >= 3) break
+      if (todayItems.some((t: any) => t.title === g)) continue
+      todayItems.push({ emoji: '', title: g, text: '', meta: '' })
     }
     sections.push({
       chapter: chapNames.plan, kind: 'next_steps', layout: 'checklist',

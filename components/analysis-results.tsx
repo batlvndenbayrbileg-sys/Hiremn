@@ -72,11 +72,16 @@ interface Props {
   onAskAI: (question: string) => void
 }
 
-const TEAL = "#00C48C"
+// Single brand accent — orange. Used for all chrome (rings, bars, CTAs, etc).
+const PRIMARY = "#E8541A"
 const BRAND = "#E8541A"
-const scoreColor = (s: number) => s >= 70 ? TEAL : s >= 40 ? "#FF9800" : "#FF4444"
-const riskColor = (r: string) => r === "Low" ? TEAL : r === "Medium" ? "#FF9800" : "#FF4444"
-const potColor = (p: string) => p === "High" ? TEAL : p === "Medium" ? "#FF9800" : "#FF4444"
+// Score ring uses brand orange (one-colour theme).
+const scoreColor = (_s: number) => PRIMARY
+// KPI status colours stay SEMANTIC (green good / amber mid / red high) — this
+// is the one place colour carries real meaning, matching the approved mockup.
+const GREEN = "#16A34A", AMBER = "#F59E0B", RED = "#EF4444"
+const riskColor = (r: string) => r === "Low" ? GREEN : r === "Medium" ? AMBER : RED
+const potColor = (p: string) => p === "High" ? GREEN : p === "Medium" ? AMBER : RED
 
 // Character images
 const CHARS = {
@@ -363,14 +368,14 @@ function Sheet({ insight, onClose, onAskAI }: {
           <div style={{ position: "relative" }}>
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 6,
-              background: "#fff", color: TEAL,
+              background: "#fff", color: PRIMARY,
               padding: "4px 12px", borderRadius: 999,
               fontSize: 9, fontWeight: 800, letterSpacing: 0.8,
               textTransform: "uppercase", marginBottom: 10,
               border: "1px solid #BBF7D0",
               boxShadow: "0 4px 10px rgba(0,196,140,0.15)",
             }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: TEAL, boxShadow: `0 0 8px ${TEAL}` }}/>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: PRIMARY, boxShadow: `0 0 8px ${PRIMARY}` }}/>
               AI Insight
             </div>
             <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
@@ -435,7 +440,7 @@ function Sheet({ insight, onClose, onAskAI }: {
               </div>
               <div style={{
                 background: doneCount > 0 ? "#F0FDF4" : "#F1F5F9",
-                color: doneCount > 0 ? TEAL : "#94A3B8",
+                color: doneCount > 0 ? PRIMARY : "#94A3B8",
                 fontSize: 10, fontWeight: 800,
                 padding: "3px 10px", borderRadius: 999,
                 border: `1px solid ${doneCount > 0 ? "#BBF7D0" : "#E2E8F0"}`,
@@ -452,9 +457,9 @@ function Sheet({ insight, onClose, onAskAI }: {
               <div style={{
                 height: "100%", borderRadius: 8,
                 width: `${progressPct}%`,
-                background: `linear-gradient(90deg, ${TEAL}, #00E5A0)`,
+                background: `linear-gradient(90deg, ${PRIMARY}, #F97316)`,
                 transition: "width 0.4s ease",
-                boxShadow: doneCount > 0 ? `0 0 8px ${TEAL}55` : "none",
+                boxShadow: doneCount > 0 ? `0 0 8px ${PRIMARY}55` : "none",
               }}/>
             </div>
           )}
@@ -467,7 +472,7 @@ function Sheet({ insight, onClose, onAskAI }: {
                 display: "flex", gap: 12, marginBottom: 8,
                 padding: "12px 14px",
                 background: isDone ? "#F0FDF4" : "#fff",
-                border: `1.5px solid ${isDone ? TEAL + "40" : "#E2E8F0"}`,
+                border: `1.5px solid ${isDone ? PRIMARY + "40" : "#E2E8F0"}`,
                 borderRadius: 14, cursor: "pointer",
                 alignItems: "flex-start",
                 transition: "all 0.2s",
@@ -476,8 +481,8 @@ function Sheet({ insight, onClose, onAskAI }: {
               }}>
                 <div style={{
                   width: 22, height: 22, borderRadius: "50%",
-                  background: isDone ? TEAL : "#fff",
-                  border: `2px solid ${isDone ? TEAL : "#CBD5E1"}`,
+                  background: isDone ? PRIMARY : "#fff",
+                  border: `2px solid ${isDone ? PRIMARY : "#CBD5E1"}`,
                   flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
                   marginTop: 1,
                   transition: "all 0.2s",
@@ -520,11 +525,11 @@ function Sheet({ insight, onClose, onAskAI }: {
             onClose()
           }} style={{
             flex: 2, padding: "13px",
-            background: `linear-gradient(135deg, ${TEAL}, #00A876)`,
+            background: `linear-gradient(135deg, ${PRIMARY}, #F97316)`,
             color: "#fff", border: "none", borderRadius: 14,
             fontSize: 13, fontWeight: 800, cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-            boxShadow: `0 6px 18px ${TEAL}44`,
+            boxShadow: `0 6px 18px ${PRIMARY}44`,
             fontFamily: "inherit",
           }}>
             ✨ AI-аас илүү асуу
@@ -570,9 +575,9 @@ export function AnalysisLoadingCard({ title }: { title: string }) {
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
         <div style={{
           width: 38, height: 38, borderRadius: 12,
-          background: `linear-gradient(135deg, ${TEAL}, #00A876)`,
+          background: `linear-gradient(135deg, ${PRIMARY}, #F97316)`,
           display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: `0 4px 12px ${TEAL}55`, flexShrink: 0,
+          boxShadow: `0 4px 12px ${PRIMARY}55`, flexShrink: 0,
           position: "relative", overflow: "hidden",
         }}>
           <div style={{
@@ -585,8 +590,8 @@ export function AnalysisLoadingCard({ title }: { title: string }) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: TEAL, boxShadow: `0 0 6px ${TEAL}`, animation: "ar-pulse 1.6s ease-in-out infinite" }}/>
-            <span style={{ fontSize: 9, fontWeight: 800, color: TEAL, letterSpacing: 0.6 }}>AI ШИНЖИЛЖ БАЙНА</span>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: PRIMARY, boxShadow: `0 0 6px ${PRIMARY}`, animation: "ar-pulse 1.6s ease-in-out infinite" }}/>
+            <span style={{ fontSize: 9, fontWeight: 800, color: PRIMARY, letterSpacing: 0.6 }}>AI ШИНЖИЛЖ БАЙНА</span>
           </div>
           <p style={{ fontSize: 13, fontWeight: 800, color: "#1E293B", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {title}
@@ -603,9 +608,9 @@ export function AnalysisLoadingCard({ title }: { title: string }) {
           <div style={{
             height: "100%", borderRadius: 8,
             width: `${progress}%`,
-            background: `linear-gradient(90deg, ${TEAL}, #00E5A0)`,
+            background: `linear-gradient(90deg, ${PRIMARY}, #F97316)`,
             transition: "width 0.4s ease",
-            boxShadow: `0 0 10px ${TEAL}66`,
+            boxShadow: `0 0 10px ${PRIMARY}66`,
             position: "relative", overflow: "hidden",
           }}>
             <div style={{
@@ -621,7 +626,7 @@ export function AnalysisLoadingCard({ title }: { title: string }) {
           marginTop: 5, fontSize: 9, color: "#94A3B8", fontWeight: 700,
         }}>
           <span>Шинжилгээ үргэлжилж байна...</span>
-          <span style={{ color: TEAL }}>{Math.round(progress)}%</span>
+          <span style={{ color: PRIMARY }}>{Math.round(progress)}%</span>
         </div>
       </div>
 
@@ -640,11 +645,11 @@ export function AnalysisLoadingCard({ title }: { title: string }) {
             }}>
               <div style={{
                 width: 20, height: 20, borderRadius: "50%",
-                background: isDone ? TEAL : isActive ? "#fff" : "#F1F5F9",
-                border: isActive ? `2px solid ${TEAL}` : "none",
+                background: isDone ? PRIMARY : isActive ? "#fff" : "#F1F5F9",
+                border: isActive ? `2px solid ${PRIMARY}` : "none",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 flexShrink: 0,
-                boxShadow: isActive ? `0 0 0 4px ${TEAL}22` : "none",
+                boxShadow: isActive ? `0 0 0 4px ${PRIMARY}22` : "none",
                 animation: isActive ? "ar-pulse 1.6s ease-in-out infinite" : undefined,
               }}>
                 {isDone ? (
@@ -652,7 +657,7 @@ export function AnalysisLoadingCard({ title }: { title: string }) {
                     <path d="M3 8l4 4 6-7"/>
                   </svg>
                 ) : isActive ? (
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: TEAL }}/>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: PRIMARY }}/>
                 ) : null}
               </div>
               <span style={{
@@ -700,10 +705,8 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
     setTimeout(() => requestAnimationFrame(tick), 350)
   }, [data.healthScore, displayTarget, circ])
   const kpi = data.kpiLabels || {}
-  // Outcome-based accent (matches the journey view)
-  const acc = data.outcomeQuality === 'positive' ? { c: "#00C48C", c2: "#00A876", soft: "#E9FBF4", soft2: "#D3F7EA", ring: "#B2F5E3", glow: "rgba(0,196,140,0.3)" }
-    : data.outcomeQuality === 'concerning' ? { c: "#F97316", c2: "#EA580C", soft: "#FFF4EC", soft2: "#FFE8D6", ring: "#FED7AA", glow: "rgba(249,115,22,0.28)" }
-    : { c: "#6366F1", c2: "#4F46E5", soft: "#EEF0FE", soft2: "#E0E3FD", ring: "#C7CBFB", glow: "rgba(99,102,241,0.26)" }
+  // Single orange brand accent (one-colour theme)
+  const acc = { c: "#E8541A", c2: "#F97316", soft: "#FFF4EC", soft2: "#FFE9D8", ring: "#FBE2D2", glow: "rgba(232,84,26,0.26)" }
   const charType: keyof typeof CHARS = data.outcomeQuality === 'positive' ? "thumbsup" : data.outcomeQuality === 'concerning' ? "thinking" : "ok"
 
   // Stat tiles
@@ -769,9 +772,9 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
       <div style={{ marginTop: 6 }}>
         {data.metrics.slice(0, 2).map((m, i) => {
           const ratio = m.maxScore > 0 ? m.score / m.maxScore : 0
-          const barGrad = ratio > 0.5 ? "linear-gradient(90deg,#FB923C,#F59E0B)" : `linear-gradient(90deg,${TEAL},#34D399)`
-          const tileBg = ratio > 0.5 ? "#FFF7ED" : "#ECFDF5"
-          const tileCol = ratio > 0.5 ? "#EA580C" : "#16A34A"
+          const barGrad = `linear-gradient(90deg,${PRIMARY},#FB923C)`
+          const tileBg = "#FFF4EC"
+          const tileCol = "#E8541A"
           return (
             <div key={i} style={{ background: "#fff", borderRadius: 13, padding: "10px 12px", marginBottom: i < Math.min(data.metrics.length, 2) - 1 ? 6 : 0, display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ width: 30, height: 30, borderRadius: 9, background: tileBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -809,11 +812,21 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
 // narrative. Layout, order, emphasis and tone all come from the AI — adding a
 // new assessment type requires zero changes here.
 
+// Single orange brand palette — used as THE accent across the whole report.
+const ORANGE = {
+  c: "#E8541A", c2: "#F97316", c3: "#FB923C",
+  soft: "#FFF4EC", soft2: "#FFE9D8",
+  glow: "rgba(232,84,26,0.26)", mesh: "rgba(232,84,26,0.13)",
+}
+
+// Tone themes — pure white surfaces with orange-only accents & borders.
+// Differentiation between cards comes from the emoji + label, NOT from hue,
+// for a clean single-colour professional look.
 const TONE_THEME: Record<SectionTone, { main: string; bg: string; border: string; text: string; soft: string }> = {
-  positive: { main: "#00C48C", bg: "#F0FDF4", border: "#BBF7D0", text: "#065F46", soft: "#DCFCE7" },
-  warning:  { main: "#F59E0B", bg: "#FFFBEB", border: "#FDE68A", text: "#92400E", soft: "#FEF3C7" },
-  info:     { main: "#3B82F6", bg: "#EFF6FF", border: "#BFDBFE", text: "#1E40AF", soft: "#DBEAFE" },
-  neutral:  { main: "#64748B", bg: "#F8FAFC", border: "#E2E8F0", text: "#334155", soft: "#F1F5F9" },
+  positive: { main: "#E8541A", bg: "#FFFFFF", border: "#F6DECE", text: "#9A3412", soft: "#FFF4EC" },
+  warning:  { main: "#E8541A", bg: "#FFFFFF", border: "#F6DECE", text: "#9A3412", soft: "#FFF4EC" },
+  info:     { main: "#E8541A", bg: "#FFFFFF", border: "#F6DECE", text: "#9A3412", soft: "#FFF4EC" },
+  neutral:  { main: "#E8541A", bg: "#FFFFFF", border: "#EFE7E2", text: "#7C3A1E", soft: "#FFF7F2" },
 }
 
 // Fallback chapter names when the AI didn't assign them — derived from layout semantics
@@ -934,11 +947,12 @@ function AdviceCarousel({ items, onAskAI }: { items: SectionItem[]; onAskAI: (q:
   }
   if (!n) return null
 
+  // Pure white cards, orange-only accent & borders. Cards differ by emoji+label.
   const tones: Record<string, { main: string; bg: string; soft: string; text: string; ring: string }> = {
-    positive: { main: "#00C48C", bg: "linear-gradient(160deg,#F0FDF4,#DCFCE7)", soft: "#DCFCE7", text: "#065F46", ring: "#BBF7D0" },
-    warning:  { main: "#F59E0B", bg: "linear-gradient(160deg,#FFFBEB,#FEF3C7)", soft: "#FEF3C7", text: "#92400E", ring: "#FDE68A" },
-    info:     { main: "#3B82F6", bg: "linear-gradient(160deg,#EFF6FF,#DBEAFE)", soft: "#DBEAFE", text: "#1E40AF", ring: "#BFDBFE" },
-    neutral:  { main: "#64748B", bg: "linear-gradient(160deg,#F8FAFC,#F1F5F9)", soft: "#F1F5F9", text: "#334155", ring: "#E2E8F0" },
+    positive: { main: "#E8541A", bg: "#FFFFFF", soft: "#FFF4EC", text: "#9A3412", ring: "#F6DECE" },
+    warning:  { main: "#E8541A", bg: "#FFFFFF", soft: "#FFF4EC", text: "#9A3412", ring: "#F6DECE" },
+    info:     { main: "#E8541A", bg: "#FFFFFF", soft: "#FFF4EC", text: "#9A3412", ring: "#F6DECE" },
+    neutral:  { main: "#E8541A", bg: "#FFFFFF", soft: "#FFF7F2", text: "#7C3A1E", ring: "#EFE7E2" },
   }
 
   return (
@@ -1064,16 +1078,9 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
 
   const isLastChap = chap === maxChap
 
-  // ── Dynamic accent — the whole report tints by outcome, so each test feels
-  //    distinct. positive→teal, concerning→warm, neutral→indigo. ──────────
-  const accent = (() => {
-    const oq = data.outcomeQuality
-    if (oq === 'positive') return { c: "#00C48C", c2: "#00A876", glow: "rgba(0,196,140,0.35)", soft: "#ECFDF5", mesh: "rgba(0,196,140,0.18)" }
-    if (oq === 'concerning') return { c: "#F97316", c2: "#EA580C", glow: "rgba(249,115,22,0.32)", soft: "#FFF7ED", mesh: "rgba(249,115,22,0.16)" }
-    return { c: "#6366F1", c2: "#4F46E5", glow: "rgba(99,102,241,0.3)", soft: "#EEF2FF", mesh: "rgba(99,102,241,0.16)" }
-  })()
-
-  const ringColor = scoreColor(data.healthScore)
+  // ── Single brand accent: orange + white theme throughout (premium, cohesive)
+  const accent = ORANGE
+  const ringColor = ORANGE.c
 
   // Mascot reacts to the outcome — celebrate (great), thumbsup (good),
   // ok (neutral), thinking (needs attention).
@@ -1083,38 +1090,37 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
     : 'ok'
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#F4F6FB" }} onTouchStart={onChapTS} onTouchEnd={onChapTE}>
-      {/* Reading-progress bar */}
-      <div style={{ height: 3, background: "#E5E9F0", flexShrink: 0 }}>
-        <div style={{ height: "100%", width: `${((chap + 1) / chapters.length) * 100}%`, background: `linear-gradient(90deg, ${accent.c}, ${accent.c2})`, borderRadius: 4, transition: "width 0.4s cubic-bezier(.16,1,.3,1)" }} />
-      </div>
-
-      {/* Chapter tab bar — AI-named pages */}
-      <div style={{
-        display: "flex", gap: 6, padding: "11px 14px 9px",
-        overflowX: "auto", flexShrink: 0,
-        background: "#F4F6FB",
-        WebkitOverflowScrolling: "touch",
-      }}>
-        {chapters.map((c, i) => {
-          const active = chap === i
-          return (
-          <button key={i} onClick={() => goChap(i)} style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "8px 14px", borderRadius: 22, border: "none",
-            background: active ? `linear-gradient(135deg, ${accent.c}, ${accent.c2})` : "#fff",
-            color: active ? "#fff" : "#64748B",
-            fontSize: 11.5, fontWeight: 800, cursor: "pointer",
-            whiteSpace: "nowrap", flexShrink: 0,
-            boxShadow: active ? `0 6px 16px ${accent.glow}` : "0 1px 4px rgba(0,0,0,0.05)",
-            transition: "all 0.28s cubic-bezier(.16,1,.3,1)",
-            transform: active ? "translateY(-1px) scale(1.03)" : "scale(1)",
-          }}>
-            <span style={{ fontSize: 13 }}>{c.emoji}</span>
-            {c.title}
-            {active && <span style={{ fontSize: 9, opacity: 0.85, fontWeight: 700, background: "rgba(255,255,255,0.25)", borderRadius: 10, padding: "1px 6px" }}>{i + 1}/{chapters.length}</span>}
-          </button>
-        )})}
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#FFFFFF" }} onTouchStart={onChapTS} onTouchEnd={onChapTE}>
+      {/* Professional header: segmented chapter nav + thin progress underline */}
+      <div style={{ flexShrink: 0, background: "#fff", borderBottom: "1px solid #F1ECE8" }}>
+        <div style={{
+          display: "flex", gap: 8, padding: "12px 16px 13px",
+          overflowX: "auto", WebkitOverflowScrolling: "touch",
+        }}>
+          {chapters.map((c, i) => {
+            const active = chap === i
+            return (
+            <button key={i} onClick={() => goChap(i)} style={{
+              display: "flex", alignItems: "center", gap: 7,
+              padding: "9px 15px", borderRadius: 12, border: `1.5px solid ${active ? "transparent" : "#F0E6DF"}`,
+              background: active ? `linear-gradient(135deg, ${ORANGE.c}, ${ORANGE.c2})` : "#fff",
+              color: active ? "#fff" : "#9A8E86",
+              fontSize: 12, fontWeight: 700, cursor: "pointer",
+              whiteSpace: "nowrap", flexShrink: 0,
+              boxShadow: active ? `0 5px 14px ${ORANGE.glow}` : "none",
+              transition: "all 0.25s cubic-bezier(.16,1,.3,1)",
+              letterSpacing: "-0.1px",
+            }}>
+              <span style={{ fontSize: 13, opacity: active ? 1 : 0.6 }}>{c.emoji}</span>
+              {c.title}
+              {active && <span style={{ fontSize: 9.5, fontWeight: 700, background: "rgba(255,255,255,0.28)", borderRadius: 8, padding: "1px 6px" }}>{i + 1}/{chapters.length}</span>}
+            </button>
+          )})}
+        </div>
+        {/* progress underline */}
+        <div style={{ height: 2.5, background: "#F4EEEA", position: "relative" }}>
+          <div style={{ height: "100%", width: `${((chap + 1) / chapters.length) * 100}%`, background: `linear-gradient(90deg, ${ORANGE.c}, ${ORANGE.c3})`, transition: "width 0.45s cubic-bezier(.16,1,.3,1)" }} />
+        </div>
       </div>
 
       {/* Chapter content */}
@@ -1123,19 +1129,14 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
       {/* Premium score hero — only on first chapter, always server data */}
       {chap === 0 && (
       <div style={{
-        position: "relative", borderRadius: 26, padding: "22px 18px 20px", marginBottom: 14,
-        background: `linear-gradient(150deg, #fff 0%, ${accent.soft} 100%)`,
-        boxShadow: `0 10px 34px ${accent.glow}, 0 2px 10px rgba(0,0,0,0.04)`,
-        border: `1px solid ${accent.c}22`, overflow: "hidden",
+        position: "relative", borderRadius: 22, padding: "20px 18px", marginBottom: 14,
+        background: "#fff",
+        boxShadow: `0 4px 20px rgba(232,84,26,0.07)`,
+        border: `1.5px solid #F3DDD0`, overflow: "hidden",
         animation: "ci 0.5s cubic-bezier(.16,1,.3,1) both",
       }}>
-        {/* Animated mesh orbs */}
-        <div style={{ position: "absolute", top: -40, right: -30, width: 150, height: 150, borderRadius: "50%", background: accent.mesh, filter: "blur(28px)", pointerEvents: "none", animation: "ar-orb 9s ease-in-out infinite" }} />
-        <div style={{ position: "absolute", bottom: -50, left: -20, width: 120, height: 120, borderRadius: "50%", background: accent.mesh, filter: "blur(30px)", pointerEvents: "none", animation: "ar-orb 11s ease-in-out infinite reverse" }} />
-        {/* Shimmer sweep */}
-        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", borderRadius: 26 }}>
-          <div style={{ position: "absolute", top: 0, left: 0, width: "45%", height: "100%", background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent)", animation: "ar-shimmer 5s ease-in-out 1s infinite" }} />
-        </div>
+        {/* Subtle orange accent bar on the left edge */}
+        <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 4, background: `linear-gradient(180deg, ${ORANGE.c}, ${ORANGE.c3})` }} />
 
         {data.isProfile ? (
           /* Profile hero — dominant type with floating mascot */
@@ -1207,26 +1208,30 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
 
         const chapEntries = chapters[chap]?.entries || []
         const localIdx = chapEntries.findIndex(e => e.si === si)
+        // Hero sections always use the orange brand surface; the per-section
+        // icon tile keeps a small tone-coloured accent for semantic signal.
         return (
           <div key={si} style={{
-            background: isHero ? `linear-gradient(135deg, ${t.bg} 0%, ${t.soft} 100%)` : "#fff",
-            border: `1.5px solid ${isHero ? t.border : "#EEF1F6"}`,
-            borderRadius: isHero ? 24 : 18,
-            padding: isHero ? "20px 18px" : "16px 14px",
+            position: "relative", overflow: "hidden",
+            background: "#fff",
+            border: `1.5px solid ${isHero ? "#F3DDD0" : "#EFEDEB"}`,
+            borderRadius: isHero ? 20 : 16,
+            padding: isHero ? "18px 16px 18px 18px" : "16px 14px",
             marginBottom: 12,
-            boxShadow: isHero ? `0 8px 28px ${t.main}22` : "0 3px 14px rgba(15,23,42,0.06)",
+            boxShadow: isHero ? `0 4px 18px rgba(232,84,26,0.06)` : "0 2px 12px rgba(20,14,10,0.04)",
             animation: `ci 0.4s cubic-bezier(.16,1,.3,1) ${(localIdx < 0 ? 0 : localIdx) * 0.08}s both`,
           }}>
+            {isHero && <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 4, background: `linear-gradient(180deg, ${ORANGE.c}, ${ORANGE.c3})` }} />}
             {/* Section header */}
             <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: s.body || s.items.length ? 10 : 0 }}>
               <div style={{
                 width: isHero ? 42 : 32, height: isHero ? 42 : 32, borderRadius: isHero ? 14 : 10,
-                background: isHero ? t.main : t.soft,
+                background: isHero ? `linear-gradient(135deg, ${ORANGE.c}, ${ORANGE.c2})` : t.soft,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: isHero ? 21 : 16, flexShrink: 0,
-                boxShadow: isHero ? `0 4px 12px ${t.main}50` : "none",
+                boxShadow: isHero ? `0 4px 12px ${ORANGE.glow}` : "none",
               }}>{s.emoji}</div>
-              <p style={{ fontSize: isHero ? 16 : 14, fontWeight: 900, color: isHero ? t.text : "#1E293B", margin: 0, flex: 1, lineHeight: 1.3 }}>{s.title}</p>
+              <p style={{ fontSize: isHero ? 16 : 14, fontWeight: 800, color: isHero ? "#9A3412" : "#1F2937", margin: 0, flex: 1, lineHeight: 1.3 }}>{s.title}</p>
               {(s.priority === 'low' || !s.expanded) && (
                 <button onClick={() => toggleOpen(si)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round"><path d="M18 15l-6-6-6 6"/></svg>
@@ -1235,7 +1240,7 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
             </div>
 
             {s.body && (
-              <p style={{ fontSize: isHero ? 13 : 12, color: isHero ? t.text : "#475569", lineHeight: 1.6, margin: s.items.length ? "0 0 12px" : 0 }}>{s.body}</p>
+              <p style={{ fontSize: isHero ? 13 : 12, color: isHero ? "#7C3A1E" : "#4B5563", lineHeight: 1.6, margin: s.items.length ? "0 0 12px" : 0 }}>{s.body}</p>
             )}
 
             {/* ── Layout-specific item rendering ── */}
@@ -1251,13 +1256,13 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
             {s.layout === "bars" && s.items.length > 0 && (
               <div>
                 {s.items.map((it, ii) => (
-                  <div key={ii} style={{ marginBottom: ii < s.items.length - 1 ? 10 : 0 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: "#334155" }}>{it.title}</span>
-                      <span style={{ fontSize: 12, fontWeight: 800, color: t.main }}>{it.meta}</span>
+                  <div key={ii} style={{ marginBottom: ii < s.items.length - 1 ? 12 : 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>{it.title}</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: ORANGE.c }}>{it.meta}</span>
                     </div>
-                    <div style={{ height: 8, background: "#F1F5F9", borderRadius: 6, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${Math.min(it.pct ?? 0, 100)}%`, background: `linear-gradient(90deg, ${t.main}, ${t.main}99)`, borderRadius: 6, transition: "width 0.8s cubic-bezier(.16,1,.3,1)" }} />
+                    <div style={{ height: 8, background: "#F4F1EF", borderRadius: 6, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${Math.min(it.pct ?? 0, 100)}%`, background: `linear-gradient(90deg, ${ORANGE.c}, ${ORANGE.c3})`, borderRadius: 6, transition: "width 0.9s cubic-bezier(.16,1,.3,1)", boxShadow: `0 1px 4px ${ORANGE.glow}` }} />
                     </div>
                   </div>
                 ))}
@@ -1329,26 +1334,26 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
                 <div>
                   {/* Celebration banner when all done */}
                   {allDone && (
-                    <div style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", gap: 10, background: "linear-gradient(135deg,#F0FDF4,#DCFCE7)", border: `1.5px solid #A7F3D0`, borderRadius: 16, padding: "10px 12px", marginBottom: 10, animation: "ar-pop-b 0.5s cubic-bezier(.16,1,.3,1) both" }}>
+                    <div style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", gap: 10, background: "linear-gradient(135deg,#FFF7F1,#FFEEDF)", border: `1.5px solid #FBD9C4`, borderRadius: 16, padding: "10px 12px", marginBottom: 10, animation: "ar-pop-b 0.5s cubic-bezier(.16,1,.3,1) both" }}>
                       {[0,1,2,3,4,5].map(ci => (
                         <span key={ci} style={{ position: "absolute", top: -6, left: `${12 + ci * 16}%`, width: 6, height: 6, borderRadius: 2, background: ["#00C48C","#FBBF24","#F97316","#6366F1","#EC4899","#22C55E"][ci], animation: `ar-confetti ${1.2 + ci * 0.15}s ease-in ${ci * 0.1}s infinite` }} />
                       ))}
                       <img src={CHARS.celebrate} alt="" style={{ width: 38, height: "auto", animation: "ar-float2 2.5s ease-in-out infinite" }} />
                       <div style={{ position: "relative" }}>
-                        <p style={{ fontSize: 12.5, fontWeight: 900, color: "#065F46", margin: 0 }}>Гайхалтай! Бүгдийг хийлээ 🎉</p>
-                        <p style={{ fontSize: 10.5, color: "#047857", margin: "1px 0 0" }}>Өнөөдрийн алхмаа дуусгасан танд баяр хүргэе</p>
+                        <p style={{ fontSize: 12.5, fontWeight: 800, color: "#9A3412", margin: 0 }}>Гайхалтай! Бүгдийг хийлээ 🎉</p>
+                        <p style={{ fontSize: 10.5, color: "#C2410C", margin: "1px 0 0" }}>Өнөөдрийн алхмаа дуусгасан танд баяр хүргэе</p>
                       </div>
                     </div>
                   )}
                   {/* Progress header */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8" }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#9CA3AF" }}>
                       {allDone ? "Бүгдийг гүйцэтгэлээ!" : `${doneCount}/${total} гүйцэтгэсэн`}
                     </span>
-                    <span style={{ fontSize: 11, fontWeight: 800, color: allDone ? TEAL : "#94A3B8" }}>{pct}%</span>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: allDone ? ORANGE.c : "#9CA3AF" }}>{pct}%</span>
                   </div>
-                  <div style={{ height: 7, background: "#EEF2F7", borderRadius: 5, overflow: "hidden", marginBottom: 12 }}>
-                    <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg, ${TEAL}, #00E5A0)`, borderRadius: 5, transition: "width 0.5s cubic-bezier(.16,1,.3,1)", boxShadow: pct > 0 ? `0 0 8px ${TEAL}66` : "none" }} />
+                  <div style={{ height: 7, background: "#F2EFEC", borderRadius: 5, overflow: "hidden", marginBottom: 12 }}>
+                    <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg, ${ORANGE.c}, ${ORANGE.c3})`, borderRadius: 5, transition: "width 0.5s cubic-bezier(.16,1,.3,1)", boxShadow: pct > 0 ? `0 0 8px ${ORANGE.glow}` : "none" }} />
                   </div>
                   {s.items.map((it, ii) => {
                     const k = `${si}-${ii}`
@@ -1356,26 +1361,26 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
                     return (
                       <button key={ii} onClick={() => toggleDone(k)} style={{
                         width: "100%", display: "flex", alignItems: "center", gap: 11,
-                        background: checked ? "linear-gradient(135deg,#F0FDF4,#ECFDF5)" : "#fff",
-                        border: `1.5px solid ${checked ? "#A7F3D0" : "#EEF2F7"}`,
+                        background: checked ? "linear-gradient(135deg,#FFF7F1,#FFF1E8)" : "#fff",
+                        border: `1.5px solid ${checked ? "#FBD9C4" : "#F0EDEA"}`,
                         borderRadius: 15, padding: "13px 13px",
                         marginBottom: ii < s.items.length - 1 ? 8 : 0,
                         cursor: "pointer", textAlign: "left", transition: "all 0.25s cubic-bezier(.16,1,.3,1)",
-                        boxShadow: checked ? `0 2px 10px ${TEAL}1F` : "0 1px 4px rgba(0,0,0,0.03)",
+                        boxShadow: checked ? `0 2px 10px ${ORANGE.glow}` : "0 1px 4px rgba(0,0,0,0.03)",
                       }}>
                         <div style={{
                           width: 24, height: 24, borderRadius: "50%", flexShrink: 0,
-                          border: `2px solid ${checked ? TEAL : "#D1D9E3"}`,
-                          background: checked ? `linear-gradient(135deg,${TEAL},#00A876)` : "transparent",
+                          border: `2px solid ${checked ? ORANGE.c : "#D8D5D1"}`,
+                          background: checked ? `linear-gradient(135deg,${ORANGE.c2},${ORANGE.c})` : "transparent",
                           display: "flex", alignItems: "center", justifyContent: "center",
                           transition: "all 0.25s", transform: checked ? "scale(1.08)" : "scale(1)",
-                          boxShadow: checked ? `0 3px 8px ${TEAL}55` : "none",
+                          boxShadow: checked ? `0 3px 8px ${ORANGE.glow}` : "none",
                         }}>
                           {checked
                             ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                            : <span style={{ fontSize: 10, fontWeight: 800, color: "#94A3B8" }}>{ii + 1}</span>}
+                            : <span style={{ fontSize: 10, fontWeight: 800, color: "#9CA3AF" }}>{ii + 1}</span>}
                         </div>
-                        <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: checked ? "#94A3B8" : "#1E293B", textDecoration: checked ? "line-through" : "none", lineHeight: 1.4, transition: "color 0.2s" }}>
+                        <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: checked ? "#9CA3AF" : "#1F2937", textDecoration: checked ? "line-through" : "none", lineHeight: 1.4, transition: "color 0.2s" }}>
                           {it.title || it.text}
                         </span>
                       </button>
@@ -1449,13 +1454,13 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
       {/* Chapter navigation — prev/next + dots */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "9px 14px", background: "#fff", borderTop: "1px solid #F1F5F9", flexShrink: 0,
+        padding: "10px 14px", background: "#fff", borderTop: "1px solid #F1ECE8", flexShrink: 0,
       }}>
         <button onClick={() => goChap(chap - 1)} disabled={chap === 0} style={{
           display: "flex", alignItems: "center", gap: 5,
-          background: chap === 0 ? "#F8FAFC" : "#F1F5F9", border: "none", borderRadius: 18,
-          padding: "8px 14px", fontSize: 11.5, fontWeight: 800,
-          color: chap === 0 ? "#CBD5E1" : "#475569",
+          background: "#fff", border: `1.5px solid ${chap === 0 ? "#F4EEEA" : "#F0E6DF"}`, borderRadius: 12,
+          padding: "8px 14px", fontSize: 11.5, fontWeight: 700,
+          color: chap === 0 ? "#D6CEC8" : "#7C6F66",
           cursor: chap === 0 ? "default" : "pointer", transition: "all 0.2s",
         }}>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -1465,18 +1470,18 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
           {chapters.map((_, i) => (
             <button key={i} onClick={() => goChap(i)} style={{
               width: i === chap ? 20 : 6, height: 6, borderRadius: 4,
-              background: i === chap ? accent.c : "#E2E8F0", border: "none", cursor: "pointer",
+              background: i === chap ? ORANGE.c : "#EFE3DB", border: "none", cursor: "pointer",
               transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)", padding: 0,
             }} />
           ))}
         </div>
         <button onClick={() => isLastChap ? onAskAI("Миний үр дүнгийн хамгийн чухал зүйл юу вэ?") : goChap(chap + 1)} style={{
           display: "flex", alignItems: "center", gap: 5,
-          background: `linear-gradient(135deg, ${accent.c}, ${accent.c2})`,
-          border: "none", borderRadius: 18,
-          padding: "9px 17px", fontSize: 11.5, fontWeight: 800, color: "#fff",
+          background: `linear-gradient(135deg, ${ORANGE.c}, ${ORANGE.c2})`,
+          border: "none", borderRadius: 12,
+          padding: "9px 18px", fontSize: 11.5, fontWeight: 700, color: "#fff",
           cursor: "pointer", transition: "all 0.2s",
-          boxShadow: `0 5px 16px ${accent.glow}`,
+          boxShadow: `0 5px 14px ${ORANGE.glow}`,
         }}>
           {isLastChap ? "AI-аас асуух" : "Дараах"}
           {!isLastChap && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>}
@@ -1526,9 +1531,9 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
   const kpi = data.kpiLabels || {}
   const todayGoals = data.todayGoals || data.roadmap[0]?.tasks.slice(0, 3) || []
   const statCards = data.statCards || []
-  const metricColor = (pct: number) => pct > 0.6 ? "#FF4444" : pct > 0.3 ? "#FF9800" : TEAL
-  const metricGrad = (pct: number) => pct > 0.6 ? "linear-gradient(90deg,#FF4444,#FF6B6B)" : pct > 0.3 ? "linear-gradient(90deg,#FF9800,#FFCC44)" : `linear-gradient(90deg,${TEAL},#00E5A0)`
-  const weekColors = ["#6C63FF", "#FF6B6B", TEAL, "#FF9800"]
+  const metricColor = (pct: number) => pct > 0.6 ? "#FF4444" : pct > 0.3 ? "#FF9800" : PRIMARY
+  const metricGrad = (_pct: number) => `linear-gradient(90deg,${PRIMARY},#FB923C)`
+  const weekColors = ["#6C63FF", "#FF6B6B", PRIMARY, "#FF9800"]
   const weekIcons = ["📋", "⚡", "🔄", "🏆"]
   const allGoalsDone = goals.filter(Boolean).length === todayGoals.length && todayGoals.length > 0
 
@@ -1567,13 +1572,13 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
   const pc = potColor(data.quitPotential)
 
   return (
-    <div style={{ position: "absolute", inset: 0, background: "#F0F4F8", display: "flex", flexDirection: "column", fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif", zIndex: 50, animation: "ar-in 0.3s ease" }}>
+    <div style={{ position: "absolute", inset: 0, background: "#FFFFFF", display: "flex", flexDirection: "column", fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif", zIndex: 50, animation: "ar-in 0.3s ease" }}>
       {/* Header */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #E2E8F0", padding: "10px 14px", flexShrink: 0, boxShadow: "0 1px 8px rgba(0,0,0,0.05)" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-          <button onClick={close} style={{ background: "#F1F5F9", border: "none", borderRadius: 20, padding: "6px 14px", fontSize: 12, color: "#64748B", cursor: "pointer", fontWeight: 700 }}>← Буцах</button>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#1E293B", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{reportTitle}</span>
-          <button onClick={expand} style={{ background: "#F1F5F9", border: "none", borderRadius: 20, padding: "7px 10px", cursor: "pointer", color: "#94A3B8", display: "flex", alignItems: "center" }}>
+      <div style={{ background: "#fff", borderBottom: hasJourney ? "none" : "1px solid #F1ECE8", padding: "10px 14px", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: hasJourney ? 0 : 10 }}>
+          <button onClick={close} style={{ background: "#FAF6F3", border: "1px solid #F0E6DF", borderRadius: 20, padding: "6px 14px", fontSize: 12, color: "#7C6F66", cursor: "pointer", fontWeight: 600 }}>← Буцах</button>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#1F2937", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{reportTitle}</span>
+          <button onClick={expand} style={{ background: "#FAF6F3", border: "1px solid #F0E6DF", borderRadius: 20, padding: "7px 10px", cursor: "pointer", color: "#B89A88", display: "flex", alignItems: "center" }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
               {expanded ? <path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3" /> : <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />}
             </svg>
@@ -1619,8 +1624,8 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginBottom: 12 }}>
               {[
                 { label: kpi.metric1Label || "Хамаарал", value: data.metrics[0] ? `${data.metrics[0].score}/10` : "—", sub: data.metrics[0]?.status || "", color: BRAND, bg: "#FFF5F0", border: "#FFD0B8", barPct: data.metrics[0] ? (data.metrics[0].score / data.metrics[0].maxScore) * 100 : 0 },
-                { label: kpi.riskLabel || "Эрсдэл", value: data.riskLevel === "Low" ? "Low" : data.riskLevel === "Medium" ? "Mid" : "High", sub: data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : "Өндөр", color: rc, bg: rc === TEAL ? "#F0FDF4" : rc === "#FF9800" ? "#FFFBEB" : "#FFF2F2", border: `${rc}30`, barPct: data.riskLevel === "Low" ? 20 : data.riskLevel === "Medium" ? 55 : 90 },
-                { label: kpi.potentialLabel || "Боломж", value: data.quitPotential === "High" ? "High" : data.quitPotential === "Medium" ? "Mid" : "Low", sub: data.quitPotential === "High" ? "Өндөр" : data.quitPotential === "Medium" ? "Дунд" : "Бага", color: pc, bg: pc === TEAL ? "#F0FDF4" : pc === "#FF9800" ? "#FFFBEB" : "#FFF2F2", border: `${pc}30`, barPct: data.quitPotential === "High" ? 85 : data.quitPotential === "Medium" ? 50 : 20 },
+                { label: kpi.riskLabel || "Эрсдэл", value: data.riskLevel === "Low" ? "Low" : data.riskLevel === "Medium" ? "Mid" : "High", sub: data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : "Өндөр", color: rc, bg: rc === GREEN ? "#F0FDF4" : rc === AMBER ? "#FFFBEB" : "#FFF2F2", border: `${rc}30`, barPct: data.riskLevel === "Low" ? 20 : data.riskLevel === "Medium" ? 55 : 90 },
+                { label: kpi.potentialLabel || "Боломж", value: data.quitPotential === "High" ? "High" : data.quitPotential === "Medium" ? "Mid" : "Low", sub: data.quitPotential === "High" ? "Өндөр" : data.quitPotential === "Medium" ? "Дунд" : "Бага", color: pc, bg: pc === GREEN ? "#F0FDF4" : pc === AMBER ? "#FFFBEB" : "#FFF2F2", border: `${pc}30`, barPct: data.quitPotential === "High" ? 85 : data.quitPotential === "Medium" ? 50 : 20 },
               ].map((k, i) => (
                 <div key={i} style={{ background: "#fff", borderRadius: 14, padding: "12px 10px", boxShadow: "0 2px 10px rgba(0,0,0,0.06)", border: `1.5px solid ${k.border}` }}>
                   <p style={{ fontSize: 8, color: "#94A3B8", fontWeight: 700, margin: "0 0 4px", letterSpacing: "0.3px", lineHeight: 1.3 }}>{k.label.toUpperCase()}</p>
@@ -1642,7 +1647,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                 <p style={{ fontSize: 12, color: "#065F46", lineHeight: 1.6, margin: "0 0 12px" }}>
                   {data.highlightMessage || data.insights[0]?.description || data.summary.description}
                 </p>
-                <button onClick={() => data.insights[0] && setInsDetail(data.insights[0])} style={{ background: TEAL, border: "none", borderRadius: 22, padding: "9px 18px", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: `0 4px 14px ${TEAL}50` }}>
+                <button onClick={() => data.insights[0] && setInsDetail(data.insights[0])} style={{ background: PRIMARY, border: "none", borderRadius: 22, padding: "9px 18px", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: `0 4px 14px ${PRIMARY}50` }}>
                   Дэлгэрэнгүй үзэх →
                 </button>
               </div>
@@ -1789,7 +1794,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                   {data.strengths.map((s, i) => (
                     <div key={i} style={{ display: "flex", gap: 7, marginBottom: 7 }}>
                       <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#D1FAE5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
-                        <span style={{ color: TEAL, fontSize: 10, fontWeight: 800 }}>✓</span>
+                        <span style={{ color: PRIMARY, fontSize: 10, fontWeight: 800 }}>✓</span>
                       </div>
                       <span style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{s}</span>
                     </div>
@@ -2428,7 +2433,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             {/* ── Insight cards (rich) ── */}
             {data.insights.map((ins, i) => {
               const palettes = [
-                { bg: "#F0FDF4", border: "#BBF7D0", color: TEAL, text: "Маш сайн", priority: "Өндөр" },
+                { bg: "#F0FDF4", border: "#BBF7D0", color: PRIMARY, text: "Маш сайн", priority: "Өндөр" },
                 { bg: "#FFF5F0", border: "#FFD0B8", color: BRAND, text: "Анхаарал", priority: "Дунд" },
                 { bg: "#F0F4FF", border: "#C7D2FE", color: "#6366F1", text: "Боломж", priority: "Чухал" },
               ]
@@ -2559,7 +2564,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                 <p style={{ fontSize: 11, fontWeight: 800, color: "#059669", margin: "0 0 8px", display: "flex", alignItems: "center", gap: 5 }}>💪 Давуу талууд</p>
                 {data.strengths.slice(0, 3).map((s, i) => (
                   <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "flex-start" }}>
-                    <span style={{ color: TEAL, fontSize: 10, fontWeight: 800, marginTop: 1 }}>✓</span>
+                    <span style={{ color: PRIMARY, fontSize: 10, fontWeight: 800, marginTop: 1 }}>✓</span>
                     <span style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{s}</span>
                   </div>
                 ))}
@@ -2577,10 +2582,10 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
 
             <button onClick={() => setPage(2)} style={{
               width: "100%", marginTop: 4, padding: "12px",
-              background: `linear-gradient(135deg, ${TEAL}, #00A876)`,
+              background: `linear-gradient(135deg, ${PRIMARY}, #F97316)`,
               border: "none", borderRadius: 14, color: "#fff",
               fontSize: 12, fontWeight: 800, cursor: "pointer",
-              boxShadow: `0 4px 14px ${TEAL}40`,
+              boxShadow: `0 4px 14px ${PRIMARY}40`,
               display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
             }}>
               📅 30 Хоногийн төлөвлөгөө харах →
@@ -2601,16 +2606,16 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                     <p style={{ fontSize: 10, color: "#94A3B8", margin: 0 }}>Зорилгоо тэмдэглэж явна уу</p>
                   </div>
                 </div>
-                <div style={{ background: "#F0FDF4", borderRadius: 20, padding: "4px 12px", border: `1px solid ${TEAL}30` }}>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: TEAL }}>{goals.filter(Boolean).length}<span style={{ color: "#94A3B8", fontWeight: 400 }}>/{todayGoals.length}</span></span>
+                <div style={{ background: "#F0FDF4", borderRadius: 20, padding: "4px 12px", border: `1px solid ${PRIMARY}30` }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: PRIMARY }}>{goals.filter(Boolean).length}<span style={{ color: "#94A3B8", fontWeight: 400 }}>/{todayGoals.length}</span></span>
                 </div>
               </div>
               <div style={{ background: "#F1F5F9", borderRadius: 8, height: 6, marginBottom: 14, overflow: "hidden" }}>
-                <div style={{ height: "100%", borderRadius: 8, background: `linear-gradient(90deg, ${TEAL}, #00E5A0)`, width: todayGoals.length > 0 ? `${(goals.filter(Boolean).length / todayGoals.length) * 100}%` : "0%", transition: "width 0.4s ease" }} />
+                <div style={{ height: "100%", borderRadius: 8, background: `linear-gradient(90deg, ${PRIMARY}, #F97316)`, width: todayGoals.length > 0 ? `${(goals.filter(Boolean).length / todayGoals.length) * 100}%` : "0%", transition: "width 0.4s ease" }} />
               </div>
               {todayGoals.map((task, i) => (
-                <div key={i} onClick={() => toggleGoal(i)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", marginBottom: 8, cursor: "pointer", borderRadius: 14, background: goals[i] ? "#F0FDF4" : "#FAFAFA", border: `1.5px solid ${goals[i] ? TEAL + "40" : "#E2E8F0"}`, transition: "all 0.25s ease", userSelect: "none" }}>
-                  <div style={{ width: 24, height: 24, borderRadius: "50%", flexShrink: 0, background: goals[i] ? TEAL : "#fff", border: `2px solid ${goals[i] ? TEAL : "#CBD5E1"}`, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.25s ease" }}>
+                <div key={i} onClick={() => toggleGoal(i)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", marginBottom: 8, cursor: "pointer", borderRadius: 14, background: goals[i] ? "#F0FDF4" : "#FAFAFA", border: `1.5px solid ${goals[i] ? PRIMARY + "40" : "#E2E8F0"}`, transition: "all 0.25s ease", userSelect: "none" }}>
+                  <div style={{ width: 24, height: 24, borderRadius: "50%", flexShrink: 0, background: goals[i] ? PRIMARY : "#fff", border: `2px solid ${goals[i] ? PRIMARY : "#CBD5E1"}`, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.25s ease" }}>
                     {goals[i] && <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M3 8l4 4 6-7" /></svg>}
                   </div>
                   <span style={{ fontSize: 13, color: goals[i] ? "#059669" : "#374151", fontWeight: goals[i] ? 700 : 500, textDecoration: goals[i] ? "line-through" : "none", flex: 1, transition: "all 0.2s" }}>{task}</span>
@@ -2618,7 +2623,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                 </div>
               ))}
               {allGoalsDone && (
-                <div style={{ background: "linear-gradient(135deg, #F0FDF4, #DCFCE7)", borderRadius: 14, padding: "12px 16px", border: `1px solid ${TEAL}30`, display: "flex", alignItems: "center", gap: 12, marginTop: 4 }}>
+                <div style={{ background: "linear-gradient(135deg, #F0FDF4, #DCFCE7)", borderRadius: 14, padding: "12px 16px", border: `1px solid ${PRIMARY}30`, display: "flex", alignItems: "center", gap: 12, marginTop: 4 }}>
                   <Char type="celebrate" size={56} />
                   <span style={{ fontSize: 13, fontWeight: 700, color: "#059669" }}>🎉 Бүх зорилгоо биелүүллээ! Гайхалтай!</span>
                 </div>
@@ -2689,10 +2694,10 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             onKeyDown={e => { if (e.key === "Enter") handleAI() }}
             placeholder="Жишээ нь: Хэрхэн сайжрах вэ?"
             style={{ flex: 1, background: "#F1F5F9", border: "1.5px solid #E2E8F0", borderRadius: 22, padding: "9px 16px", color: "#1E293B", fontSize: 12, outline: "none", fontFamily: "inherit", transition: "border-color 0.2s" }}
-            onFocus={e => (e.target as HTMLInputElement).style.borderColor = TEAL}
+            onFocus={e => (e.target as HTMLInputElement).style.borderColor = PRIMARY}
             onBlur={e => (e.target as HTMLInputElement).style.borderColor = "#E2E8F0"}
           />
-          <button onClick={handleAI} disabled={!chatInput.trim()} style={{ width: 38, height: 38, borderRadius: "50%", border: "none", background: chatInput.trim() ? `linear-gradient(135deg, ${TEAL}, #00A876)` : "#E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", cursor: chatInput.trim() ? "pointer" : "not-allowed", flexShrink: 0, boxShadow: chatInput.trim() ? `0 4px 12px ${TEAL}40` : "none", transition: "all 0.2s" }}>
+          <button onClick={handleAI} disabled={!chatInput.trim()} style={{ width: 38, height: 38, borderRadius: "50%", border: "none", background: chatInput.trim() ? `linear-gradient(135deg, ${PRIMARY}, #F97316)` : "#E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", cursor: chatInput.trim() ? "pointer" : "not-allowed", flexShrink: 0, boxShadow: chatInput.trim() ? `0 4px 12px ${PRIMARY}40` : "none", transition: "all 0.2s" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={chatInput.trim() ? "white" : "#94A3B8"} strokeWidth="2.5" strokeLinecap="round">
               <line x1="22" y1="2" x2="11" y2="13" />
               <polygon points="22 2 15 22 11 13 2 9 22 2" fill={chatInput.trim() ? "white" : "#94A3B8"} stroke="none" />
@@ -2705,7 +2710,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
       {!hasJourney && (
       <div style={{ background: "#fff", padding: "6px 0 8px", display: "flex", justifyContent: "center", gap: 6, flexShrink: 0, borderTop: "1px solid #F1F5F9" }}>
         {PAGES.map((_, i) => (
-          <button key={i} onClick={() => setPage(i)} style={{ width: i === page ? 20 : 7, height: 7, borderRadius: 4, background: i === page ? TEAL : "#E2E8F0", border: "none", cursor: "pointer", transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)", padding: 0 }} />
+          <button key={i} onClick={() => setPage(i)} style={{ width: i === page ? 20 : 7, height: 7, borderRadius: 4, background: i === page ? PRIMARY : "#E2E8F0", border: "none", cursor: "pointer", transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)", padding: 0 }} />
         ))}
       </div>
       )}
