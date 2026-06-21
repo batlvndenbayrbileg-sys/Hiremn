@@ -963,36 +963,33 @@ function AdviceCarousel({ items, onAskAI }: { items: SectionItem[]; onAskAI: (q:
           {items.map((it, i) => {
             const tk = tones[it.tone || "neutral"] || tones.neutral
             return (
-              <div key={i} style={{ minWidth: "100%", boxSizing: "border-box", padding: "2px 1px 6px" }}>
+              <div key={i} style={{ minWidth: "100%", boxSizing: "border-box", padding: "1px 1px 4px" }}>
                 <div style={{
                   position: "relative", overflow: "hidden",
-                  background: tk.bg, border: `1.5px solid ${tk.ring}`, borderRadius: 20,
-                  padding: "16px", minHeight: 188, display: "flex", flexDirection: "column",
-                  boxShadow: idx === i ? `0 10px 28px ${tk.main}26` : "0 2px 8px rgba(0,0,0,0.04)",
-                  transform: idx === i ? "scale(1)" : "scale(0.97)",
-                  transition: "transform 0.4s cubic-bezier(.16,1,.3,1), box-shadow 0.4s ease",
+                  background: "#fff", border: `1.5px solid ${tk.ring}`, borderRadius: 16,
+                  padding: "16px", minHeight: 186, display: "flex", flexDirection: "column",
+                  boxShadow: "0 2px 12px rgba(20,14,10,0.05)",
+                  transition: "box-shadow 0.3s ease",
                 }}>
-                  {/* Glossy top sheen */}
-                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 60, background: "linear-gradient(180deg, rgba(255,255,255,0.5), transparent)", pointerEvents: "none" }} />
                   {/* Badge row */}
-                  <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 13 }}>
                     <div style={{
-                      width: 44, height: 44, borderRadius: 14, flexShrink: 0,
-                      background: `linear-gradient(135deg, ${tk.main}, ${tk.main}DD)`, display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 22, boxShadow: `0 6px 16px ${tk.main}55`,
+                      width: 38, height: 38, borderRadius: 11, flexShrink: 0,
+                      background: ORANGE.soft, border: `1px solid #F6DECE`, display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 18,
                     }}>{it.emoji || "✨"}</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      {it.meta && <span style={{ display: "inline-block", background: tk.main, color: "#fff", fontSize: 9.5, fontWeight: 800, padding: "3px 9px", borderRadius: 20, letterSpacing: 0.3, marginBottom: 3 }}>{it.meta}</span>}
-                      <p style={{ fontSize: 14.5, fontWeight: 900, color: tk.text, margin: 0, lineHeight: 1.25 }}>{it.title}</p>
+                      {it.meta && <span style={{ display: "inline-block", color: ORANGE.c, fontSize: 9.5, fontWeight: 700, letterSpacing: "0.4px", textTransform: "uppercase", marginBottom: 2 }}>{it.meta}</span>}
+                      <p style={{ fontSize: 14, fontWeight: 700, color: "#1F1B18", margin: 0, lineHeight: 1.25, letterSpacing: "-0.2px" }}>{it.title}</p>
                     </div>
                   </div>
                   {/* Detail */}
-                  {it.detail && <p style={{ fontSize: 12.5, color: "#475569", lineHeight: 1.6, margin: 0, flex: 1 }}>{it.detail}</p>}
+                  {it.detail && <p style={{ fontSize: 12.5, color: "#5B5650", lineHeight: 1.65, margin: 0, flex: 1, fontWeight: 400 }}>{it.detail}</p>}
                   {/* Tip strip */}
                   {it.tip && (
-                    <div style={{ display: "flex", gap: 7, alignItems: "flex-start", background: "rgba(255,255,255,0.7)", border: `1px solid ${tk.ring}`, borderRadius: 12, padding: "9px 11px", marginTop: 12 }}>
-                      <span style={{ fontSize: 13, flexShrink: 0 }}>💡</span>
-                      <p style={{ fontSize: 11.5, color: tk.text, fontWeight: 600, lineHeight: 1.45, margin: 0 }}>{it.tip}</p>
+                    <div style={{ display: "flex", gap: 8, alignItems: "flex-start", background: ORANGE.soft, borderRadius: 10, padding: "10px 12px", marginTop: 13 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={ORANGE.c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1h6c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg>
+                      <p style={{ fontSize: 11.5, color: "#9A3412", fontWeight: 500, lineHeight: 1.5, margin: 0 }}>{it.tip}</p>
                     </div>
                   )}
                 </div>
@@ -1139,47 +1136,39 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
         <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 4, background: `linear-gradient(180deg, ${ORANGE.c}, ${ORANGE.c3})` }} />
 
         {data.isProfile ? (
-          /* Profile hero — dominant type with floating mascot */
+          /* Profile hero — dominant type, clean */
           <div style={{ position: "relative" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-              <div style={{ position: "relative", flexShrink: 0, width: 72, height: 72 }}>
-                <div style={{ position: "absolute", inset: -2, borderRadius: "50%", background: `radial-gradient(circle, ${accent.c}44, transparent 70%)`, animation: "ar-glow 3s ease-in-out infinite" }} />
-                <div style={{ position: "relative", width: 72, height: 72, borderRadius: 22, background: `linear-gradient(135deg, ${accent.c}, ${accent.c2})`, display: "flex", alignItems: "flex-end", justifyContent: "center", boxShadow: `0 10px 24px ${accent.glow}`, overflow: "hidden" }}>
-                  <img src={CHARS[heroChar]} alt="" style={{ width: 60, height: "auto", marginBottom: -4, animation: "ar-float2 4s ease-in-out infinite", filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.2))" }} />
-                </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 13, marginBottom: 13 }}>
+              <div style={{ position: "relative", flexShrink: 0, width: 60, height: 60, borderRadius: 16, background: `linear-gradient(135deg, ${ORANGE.c}, ${ORANGE.c2})`, display: "flex", alignItems: "flex-end", justifyContent: "center", boxShadow: `0 6px 16px ${ORANGE.glow}`, overflow: "hidden" }}>
+                <img src={CHARS[heroChar]} alt="" style={{ width: 50, height: "auto", marginBottom: -3 }} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 10.5, fontWeight: 800, color: accent.c, letterSpacing: 0.6, margin: "0 0 2px", textTransform: "uppercase" }}>Таны давамгай дүр</p>
-                <p style={{ fontSize: 21, fontWeight: 900, color: "#1E293B", margin: 0, lineHeight: 1.1 }}>{data.dominantLabel || data.displayLabel}</p>
-                {data.secondaryLabel && <p style={{ fontSize: 11.5, color: "#94A3B8", margin: "3px 0 0", fontWeight: 600 }}>2-рт: {data.secondaryLabel}</p>}
+                <p style={{ fontSize: 9.5, fontWeight: 700, color: ORANGE.c, letterSpacing: "0.5px", margin: "0 0 3px", textTransform: "uppercase" }}>Таны давамгай дүр</p>
+                <p style={{ fontSize: 19, fontWeight: 700, color: "#1F1B18", margin: 0, lineHeight: 1.15, letterSpacing: "-0.3px" }}>{data.dominantLabel || data.displayLabel}</p>
+                {data.secondaryLabel && <p style={{ fontSize: 11.5, color: "#A89E96", margin: "3px 0 0", fontWeight: 500 }}>2-рт: {data.secondaryLabel}</p>}
               </div>
             </div>
-            <p style={{ fontSize: 12.5, color: "#475569", lineHeight: 1.55, margin: 0, fontWeight: 500, position: "relative" }}>
+            <p style={{ fontSize: 12.5, color: "#5B5650", lineHeight: 1.6, margin: 0, fontWeight: 400, position: "relative" }}>
               {data.opening || data.summary.description}
             </p>
           </div>
         ) : (
-          /* Score hero — ring + label + floating mascot */
-          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ position: "relative", flexShrink: 0 }}>
-              <div style={{ position: "absolute", inset: -6, borderRadius: "50%", background: `radial-gradient(circle, ${ringColor}33 0%, transparent 70%)`, filter: "blur(6px)", animation: "ar-glow 3.5s ease-in-out infinite" }} />
-              <div style={{ position: "relative" }}>
-                <ScoreRing score={data.healthScore} size={94} display={data.displayScore != null && data.displayMaxScore ? { score: data.displayScore, max: data.displayMaxScore } : undefined} />
-              </div>
+          /* Score hero — ring + label, clean and clinical */
+          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ flexShrink: 0 }}>
+              <ScoreRing score={data.healthScore} size={88} display={data.displayScore != null && data.displayMaxScore ? { score: data.displayScore, max: data.displayMaxScore } : undefined} />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               {data.displayLabel && (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: `linear-gradient(135deg, ${ringColor}, ${ringColor}CC)`, color: "#fff", fontSize: 11.5, fontWeight: 800, padding: "5px 13px", borderRadius: 22, marginBottom: 8, boxShadow: `0 4px 12px ${ringColor}50` }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff", opacity: 0.9 }} />
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: ORANGE.soft, color: ORANGE.c, fontSize: 11, fontWeight: 700, padding: "5px 11px", borderRadius: 8, marginBottom: 9, border: `1px solid #F6DECE`, letterSpacing: "-0.1px" }}>
+                  <span style={{ width: 5, height: 5, borderRadius: "50%", background: ORANGE.c }} />
                   {data.displayLabel}
                 </span>
               )}
-              <p style={{ fontSize: 12.5, color: "#475569", lineHeight: 1.55, margin: 0, fontWeight: 500 }}>
+              <p style={{ fontSize: 12.5, color: "#5B5650", lineHeight: 1.6, margin: 0, fontWeight: 400 }}>
                 {data.opening || data.summary.description}
               </p>
             </div>
-            {/* Floating mascot — peeks from the right */}
-            <img src={CHARS[heroChar]} alt="" style={{ position: "absolute", right: -8, bottom: -20, width: 58, height: "auto", opacity: 0.92, animation: "ar-float 5s ease-in-out infinite", filter: `drop-shadow(0 6px 10px ${accent.glow})`, pointerEvents: "none" }} />
           </div>
         )}
       </div>
@@ -1223,24 +1212,25 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
           }}>
             {isHero && <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 4, background: `linear-gradient(180deg, ${ORANGE.c}, ${ORANGE.c3})` }} />}
             {/* Section header */}
-            <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: s.body || s.items.length ? 10 : 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: s.body || s.items.length ? 11 : 0 }}>
               <div style={{
-                width: isHero ? 42 : 32, height: isHero ? 42 : 32, borderRadius: isHero ? 14 : 10,
-                background: isHero ? `linear-gradient(135deg, ${ORANGE.c}, ${ORANGE.c2})` : t.soft,
+                width: isHero ? 38 : 30, height: isHero ? 38 : 30, borderRadius: isHero ? 12 : 9,
+                background: isHero ? `linear-gradient(135deg, ${ORANGE.c}, ${ORANGE.c2})` : ORANGE.soft,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: isHero ? 21 : 16, flexShrink: 0,
-                boxShadow: isHero ? `0 4px 12px ${ORANGE.glow}` : "none",
+                fontSize: isHero ? 18 : 15, flexShrink: 0,
+                boxShadow: isHero ? `0 3px 10px ${ORANGE.glow}` : "none",
+                border: isHero ? "none" : `1px solid #F6DECE`,
               }}>{s.emoji}</div>
-              <p style={{ fontSize: isHero ? 16 : 14, fontWeight: 800, color: isHero ? "#9A3412" : "#1F2937", margin: 0, flex: 1, lineHeight: 1.3 }}>{s.title}</p>
+              <p style={{ fontSize: isHero ? 15 : 13.5, fontWeight: 700, color: "#1F1B18", margin: 0, flex: 1, lineHeight: 1.3, letterSpacing: "-0.2px" }}>{s.title}</p>
               {(s.priority === 'low' || !s.expanded) && (
                 <button onClick={() => toggleOpen(si)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round"><path d="M18 15l-6-6-6 6"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B8AEA6" strokeWidth="2.5" strokeLinecap="round"><path d="M18 15l-6-6-6 6"/></svg>
                 </button>
               )}
             </div>
 
             {s.body && (
-              <p style={{ fontSize: isHero ? 13 : 12, color: isHero ? "#7C3A1E" : "#4B5563", lineHeight: 1.6, margin: s.items.length ? "0 0 12px" : 0 }}>{s.body}</p>
+              <p style={{ fontSize: 12.5, color: "#5B5650", lineHeight: 1.65, margin: s.items.length ? "0 0 13px" : 0, fontWeight: 400 }}>{s.body}</p>
             )}
 
             {/* ── Layout-specific item rendering ── */}
@@ -1305,21 +1295,21 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
             )}
 
             {s.layout === "timeline" && (
-              <div style={{ position: "relative", paddingLeft: 26 }}>
-                <div style={{ position: "absolute", left: 9, top: 8, bottom: 8, width: 2, background: t.border }} />
+              <div style={{ position: "relative", paddingLeft: 28 }}>
+                <div style={{ position: "absolute", left: 10, top: 10, bottom: 10, width: 2, background: "#F1E6DF" }} />
                 {s.items.map((it, ii) => (
-                  <div key={ii} style={{ position: "relative", marginBottom: ii < s.items.length - 1 ? 14 : 0 }}>
+                  <div key={ii} style={{ position: "relative", marginBottom: ii < s.items.length - 1 ? 16 : 0 }}>
                     <div style={{
-                      position: "absolute", left: -26, top: 0,
-                      width: 20, height: 20, borderRadius: "50%",
-                      background: t.main, color: "#fff",
+                      position: "absolute", left: -28, top: -1,
+                      width: 22, height: 22, borderRadius: "50%",
+                      background: "#fff", color: ORANGE.c,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 10, fontWeight: 900,
-                      boxShadow: `0 0 0 3px ${t.bg}`,
+                      fontSize: 11, fontWeight: 700,
+                      border: `2px solid ${ORANGE.c}`,
                     }}>{ii + 1}</div>
-                    {it.meta && <p style={{ fontSize: 9.5, fontWeight: 800, color: "#94A3B8", letterSpacing: 0.5, margin: "0 0 1px", textTransform: "uppercase" }}>{it.meta}</p>}
-                    <p style={{ fontSize: 12.5, fontWeight: 800, color: "#1E293B", margin: "0 0 2px" }}>{it.title}</p>
-                    {it.text && <p style={{ fontSize: 11.5, color: "#64748B", lineHeight: 1.5, margin: 0 }}>{it.text}</p>}
+                    {it.meta && <p style={{ fontSize: 9.5, fontWeight: 700, color: ORANGE.c, letterSpacing: "0.5px", margin: "0 0 2px", textTransform: "uppercase" }}>{it.meta}</p>}
+                    <p style={{ fontSize: 13, fontWeight: 700, color: "#1F1B18", margin: "0 0 3px", letterSpacing: "-0.2px" }}>{it.title}</p>
+                    {it.text && <p style={{ fontSize: 12, color: "#5B5650", lineHeight: 1.6, margin: 0, fontWeight: 400 }}>{it.text}</p>}
                   </div>
                 ))}
               </div>
@@ -1414,35 +1404,32 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
         ]
         return (
         <div style={{
-          position: "relative", overflow: "hidden",
-          background: `linear-gradient(150deg, ${accent.soft} 0%, #fff 70%)`,
-          border: `1.5px solid ${accent.c}33`, borderRadius: 22, padding: "16px",
-          marginBottom: 6, boxShadow: `0 8px 24px ${accent.glow}`,
+          position: "relative",
+          background: "#fff",
+          border: `1.5px solid #F0EAE6`, borderRadius: 18, padding: "16px",
+          marginBottom: 6, boxShadow: "0 2px 14px rgba(20,14,10,0.05)",
         }}>
-          <div style={{ position: "absolute", top: -30, right: -20, width: 100, height: 100, borderRadius: "50%", background: accent.mesh, filter: "blur(24px)", pointerEvents: "none" }} />
           {/* Header */}
-          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-            <div style={{ position: "relative", width: 52, height: 52, borderRadius: 16, background: `linear-gradient(135deg, ${accent.c}, ${accent.c2})`, display: "flex", alignItems: "flex-end", justifyContent: "center", flexShrink: 0, boxShadow: `0 6px 18px ${accent.glow}`, overflow: "hidden" }}>
-              <img src={CHARS.phone} alt="" style={{ width: 46, height: "auto", marginBottom: -3, animation: "ar-float2 3.5s ease-in-out infinite", filter: "drop-shadow(0 3px 5px rgba(0,0,0,0.2))" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 13 }}>
+            <div style={{ width: 42, height: 42, borderRadius: 12, background: ORANGE.soft, border: `1px solid #F6DECE`, display: "flex", alignItems: "flex-end", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
+              <img src={CHARS.phone} alt="" style={{ width: 36, height: "auto", marginBottom: -2 }} />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: 13.5, fontWeight: 900, color: "#1E293B", margin: "0 0 2px" }}>AI зөвлөхөөс асуу</p>
-              <p style={{ fontSize: 11, color: "#64748B", margin: 0, lineHeight: 1.4 }}>Үр дүнгийнхээ талаар юу ч асууж болно</p>
+              <p style={{ fontSize: 13.5, fontWeight: 700, color: "#1F1B18", margin: "0 0 2px", letterSpacing: "-0.2px" }}>AI зөвлөхөөс асуух</p>
+              <p style={{ fontSize: 11, color: "#8A817A", margin: 0, lineHeight: 1.4 }}>Үр дүнгийнхээ талаар юу ч асууж болно</p>
             </div>
           </div>
           {/* Suggested question chips */}
-          <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 7 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {suggestions.map((q, i) => (
               <button key={i} onClick={() => onAskAI(q)} style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
-                width: "100%", background: "#fff", border: `1.5px solid ${accent.c}22`,
-                borderRadius: 14, padding: "11px 14px", cursor: "pointer", textAlign: "left",
-                transition: "all 0.2s", boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                width: "100%", background: "#FFFBF8", border: `1.5px solid #F2E7DF`,
+                borderRadius: 12, padding: "12px 14px", cursor: "pointer", textAlign: "left",
+                transition: "all 0.2s",
               }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#334155" }}>{q}</span>
-                <span style={{ width: 24, height: 24, borderRadius: "50%", background: accent.soft, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accent.c} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                </span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#43403C", letterSpacing: "-0.1px" }}>{q}</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={ORANGE.c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
               </button>
             ))}
           </div>
