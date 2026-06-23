@@ -96,7 +96,7 @@ export function UsageLimitPopup({ onClose }: UsageLimitPopupProps) {
           margin: '0 0 20px',
           lineHeight: 1.5,
         }}>
-          Та өнөөдрийн 20 асуултын эрхээ бүгдийг нь ашигласан байна.
+          Та өнөөдрийн 10 асуултын эрхээ бүгдийг нь ашигласан байна.
         </p>
 
         {/* Countdown */}

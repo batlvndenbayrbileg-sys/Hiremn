@@ -13,7 +13,7 @@ interface UsageData {
   lockedUntil: number | null // timestamp when locked, null if not locked
 }
 
-const MESSAGE_LIMIT = 20
+const MESSAGE_LIMIT = 10
 const LOCK_DURATION = 8 * 60 * 60 * 1000 // 8 hours in milliseconds
 const STORAGE_KEY = 'hiremn_conversations'
 const ACTIVE_CONVERSATION_KEY = 'hiremn_active_conversation'

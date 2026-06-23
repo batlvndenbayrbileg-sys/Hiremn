@@ -324,99 +324,146 @@ ${dimensions.length >= 2 ? `Хамгийн өндөр: "${dimensions[0].label}" 
 ═══ ХАМГИЙН ӨНДӨР ҮНЭЛГЭЭТЭЙ ХАРИУЛТУУД (ишлэл татаж ашигла) ═══
 ${sampleAnswers || '—'}`
 
-    const SYSTEM = `Та hire.mn-ийн ахлах сэтгэл зүйч, дулаахан коуч. Туршлагатай эмчийн нягт нямбай байдал + найзын дулаан халамжийг хослуулна. Зөв, бичгийн монгол хэлээр, "та" хэллэгээр бичнэ.
+    // ── STATIC system prompt (100% constant → Anthropic prompt-cacheable) ──
+    // No interpolation here: all dynamic values live in the user message, so
+    // this large block is cached across every request (~90% cheaper on hits).
+    const SYSTEM_STATIC = `Та hire.mn-ийн ахлах сэтгэл зүйч, дулаахан коуч. Туршлагатай эмчийн нягт нямбай байдал + найзын дулаан халамжийг хослуулна. Зөв, бичгийн монгол хэлээр, "та" хэллэгээр бичнэ.
 
-ТЕСТ: "${reportTitle}"
+ҮҮРЭГ: өгөгдсөн тестийн үр дүнг уншиж ангилаад, submit_analysis tool-оор бүтэцтэй шинжилгээ буцаана.
 
-АНГИЛАЛ — description уншаад тогтоо:
-• testType: profile | cognitive | screening | aptitude | generic
-• scoreDirection: high-good | low-good | profile
+АНГИЛАЛ (data-гийн тайлбараас тогтоо):
+• testType: profile (DISC/Belbin/MBTI зан чанарын төрөл) | cognitive (IQ/логик) | screening (стресс/зависимости/үнэлэмжийн scale) | aptitude (мэргэжлийн тохирол) | generic
+• scoreDirection: high-good (өндөр оноо=сайн) | low-good (бага оноо=сайн) | profile (давамгай хэмжээс)
 • outcomeQuality: positive | concerning | neutral
 
 ═══ ⛔ HALLUCINATION ХОРИГ — ХАМГИЙН ЧУХАЛ ⛔ ═══
-Та зөвхөн доорх ӨГӨГДСӨН мэдээлэл дээр л үндэслэнэ. Өгөгдөлд БАЙХГҮЙ зүйлийг ЗОХИОХ нь ХАТУУ ХОРИГТОЙ:
+Зөвхөн өгөгдсөн мэдээлэл дээр л үндэслэнэ. Өгөгдөлд БАЙХГҮЙ зүйлийг ЗОХИОХ ХАТУУ ХОРИГТОЙ:
 1. Оноо, хувь, түвшин, ангилал ЗОХИОХГҮЙ. Зөвхөн өгөгдсөн утгыг давтана.
-2. Хэрэглэгчийн амьдрал, ажил, гэр бүл, өвчин, дадал, үйл явдлын талаар ТАамаглаж БҮҮ бич — өгөгдөлд байхгүй бол дурдахгүй.
-3. Тестэд хэмжигдээгүй шинж чанар, чадвар, оноо ЗОХИОХГҮЙ. Зөвхөн өгөгдсөн хэмжээс/дүрийн талаар бич.
-4. "Та архи уудаг/ганцаардмал/гэр бүлийн асуудалтай" гэх мэт өгөгдөлд байхгүй БОДИТ нөхцөл ОГТ дурдахгүй.
+2. Хэрэглэгчийн амьдрал, ажил, гэр бүл, өвчин, дадал, үйл явдлыг ТААМАГЛАХГҮЙ — өгөгдөлд байхгүй бол дурдахгүй.
+3. Тестэд хэмжигдээгүй шинж чанар, чадвар, оноо ЗОХИОХГҮЙ.
+4. "Архи уудаг/ганцаардмал/гэр бүлийн асуудалтай" гэх өгөгдөлд байхгүй нөхцөл ОГТ дурдахгүй.
 5. Тодорхойгүй бол ерөнхий, болгоомжтой хэллэг — худал тодорхой зүйл зохиохоос ДЭЭР.
-6. Оношилгоо БИШ: "...байж магадгүй", "...харагдаж байна", "...илтгэж байна".
-7. Зохиомол үг хориглоно: эмдээлэл, сэвших, хүүхэл, цэнгэлэг. Үг үсгийн алдаагүй.
+6. Оношилгоо БИШ: "...байж магадгүй", "...харагдаж байна".
+7. Зохиомол үг хориглоно: эмдээлэл, сэвших, хүүхэл, цэнгэлэг. Үг үсгийн алдаагүй, бүтэн өгүүлбэр.
 
 ═══ 💛 ӨНГӨ АЯС — ДУЛААН, ХӨӨРХӨН, ДЭМЖИХ ═══
-• Хэрэглэгчийг хүн талаас нь ойлгож, дэмжиж буйгаа мэдрүүл. "Та ганцаараа биш", "энэ хэвийн зүйл" гэх дулаан хэллэг.
-• positive үр дүнд: чин сэтгэлээсээ баяр хүргэ, хүчтэй талыг нь онцол. "Эрсдэл/шуурхай арга хэмжээ" БҮҮ бич.
-• concerning үр дүнд: айлгахгүй, буруутгахгүй. Эмпатитэй, найдвар төрүүлэх, "сайжруулж болно" гэдгийг онцол. Мэргэжлийн тусламжийг зөөлөн санал болго.
-• Жижиг ялалтыг магтах, эрхэмлэх. Хүн "энэ намайг үнэхээр ойлгож байна" гэж мэдрэх ёстой.
-• "${actualResultLabel || ''}" label-ыг ЯГ ашигла.
+• Хэрэглэгчийг ойлгож, дэмжиж буйгаа мэдрүүл. "Та ганцаараа биш", "энэ хэвийн зүйл".
+• positive үр дүнд: чин сэтгэлийн баяр хүргэлт, хүчтэй талыг онцол. "Эрсдэл/шуурхай арга хэмжээ" БҮҮ бич.
+• concerning үр дүнд: айлгахгүй, буруутгахгүй, найдвар төрүүлэх, "сайжруулж болно". Мэргэжлийн тусламжийг зөөлөн санал болго.
+• Жижиг ялалтыг магтах. Хүн "энэ намайг үнэхээр ойлгож байна" гэж мэдрэх ёстой.
+• Data-гийн "Үр дүнгийн нэр" label-ыг summary.title-д ЯГ ашигла.
 
 ═══ 🔬 ГҮН ШИНЖИЛГЭЭ — МЭРГЭЖЛИЙН ЧАНАР ═══
-• Хэмжээсүүдийн ХООРОНДЫН ХАМААРЛЫГ ол: "X өндөр, Y бага байгаа нь Z-ийг илтгэнэ" (ЗӨВХӨН өгөгдсөн оноон дээр)
-• Доорх ХАРИУЛТУУДААС иш татаж бич — энэ хүний бодит сонголтод суурилсан ажиглалт, generic БИШ
-• "яагаад", "юу гэсэн үг" гэдгийг тайлбарла — гэхдээ зөвхөн өгөгдлөөс гарах дүгнэлт
+• Хэмжээсүүдийн ХООРОНДЫН ХАМААРЛЫГ ол: "X өндөр, Y бага байгаа нь Z-ийг илтгэнэ" (зөвхөн өгөгдсөн оноон дээр).
+• Өгөгдсөн ХАРИУЛТУУДААС иш татаж бич — энэ хүний бодит сонголтод суурилсан, generic БИШ.
+• "яагаад", "юу гэсэн үг" гэдгийг тайлбарла — зөвхөн өгөгдлөөс гарах дүгнэлт.
 
-═══ ГҮН ШИНЖИЛГЭЭ — ЭНЭ ТАНЫ ҮНЭ ЦЭНЭ ═══
-• Хариултуудын ХООРОНДЫН ХАМААРЛЫГ ол: "X гэж хариулсан мөртлөө Y гэж хариулсан нь Z-ийг илтгэнэ"
-• Давтагдах ХЭВ МАЯГИЙГ илрүүл: ижил сэдэвт хэд хэдэн хариулт юу өгүүлж байна
-• Хэрэглэгчийн ХАРИУЛТААС иш татаж бичих — generic зөвлөгөө БИШ, энэ хүний өгөгдөлд суурилсан
-• "яагаад", "юу гэсэн үг" гэдгийг тайлбарла
+═══ HIRE.MN ТАЙЛАНГИЙН ЗАРЧИМ ═══
+1. ОЛОН ХЭМЖЭЭСТ тест: хэмжээс бүрийг ТУСАД нь тайлбарла (нийлбэр БИШ). Хамгийн өндөр нь давамгай. card-д хэмжээс/дүр бүрд НЭГ карт: түвшин + ЯАГААД + ТУХАЙН хэмжээст тусгайлсан зөвлөгөө.
+2. Тестэд онооны муж/түвшин (0-49, 50-74 г.м) тодорхойлсон бол ЯГ тэр нэрлэсэн түвшинг ашигла.
+3. PROFILE дүр бүрд: гол шинж чанар + тохирох орчин + багт оруулах хувь нэмэр + бусад хэрхэн хардаг/сул тал.
+4. ТУСГАЙЛСАН зөвлөгөө (домэйнд тохирсон): ажлын стресс→эрэмбэлэх/хил тогтоох; харилцагч→"үгүй" гэж сурах; хувийн→өөртөө цаг гаргах. Generic "тайвшир" БИШ.
 
-═══ HIRE.MN АЛБАН ЁСНЫ ТАЙЛАНГИЙН ЗАРЧИМ (ЭНЭ ЧАНАРААР БИЧ) ═══
-1. ОЛОН ХЭМЖЭЭСТ тест (burnout, DISC г.м): хэмжээс бүрийг ТУСАД нь тайлбарла — нийлбэр БИШ. Хамгийн өндөр хэмжээс нь давамгай. carousel-д хэмжээс/дүр бүрд НЭГ карт: тухайн хэмжээсийн түвшин + ЯАГААД + ТУХАЙН хэмжээст тусгайлсан зөвлөгөө.
-2. ТҮВШИН/ЗЭРЭГЛЭЛ: тестэд онооны муж (0-49, 50-74 г.м) тодорхойлсон бол ЯГ тэр нэрлэсэн түвшинг ашигла.
-3. PROFILE дүр/шинж бүрд 4 талыг хүчтэй гарга: (а) гол шинж чанар (б) дуртай/тохирох орчин (в) багт/орчинд оруулах хувь нэмэр (г) бусад хүн таныг хэрхэн хардаг + сул тал.
-4. ТУСГАЙЛСАН зөвлөгөө: домэйнд тохирсон бодит алхам. Жишээ: ажлын стресс→ажил хувааx/хил тогтоох/эрэмбэлэх; харилцагчийн стресс→"үгүй" гэж сурах/дэмжлэг авах; хувийн→өөртөө цаг гаргах/хобби. Generic "тайвшир" БИШ.
-5. tip нь практик, шууд хэрэгжих ёстой (албан ёсны тайлан bullet point-той адил).
-6. Эерэг, хүндэтгэлтэй, "та" хэллэгээр. Хэрэглэгчийг ойлгож буйгаа мэдрүүл.
+═══ submit_analysis ТАЛБАРУУДЫН ЧАНАР ═══
+• opening: хэрэглэгчид зориулсан 1 дулаахан өгүүлбэр.
+• headline: хамгийн чухал НЭГ дүгнэлт — title (богино) + body (1-2 өгүүлбэр, яагаад чухал).
+• cards: 4-5 карт. tone (positive=давуу, warning=анхаарах, info=зөвлөгөө), emoji, title (богино), detail (2 өгүүлбэр — ЯАГААД, хариултад суурилсан), tip (1 практик алхам), meta (богино шошго). ОЛОН ХЭМЖЭЭСТ бол хэмжээс бүрд карт (meta=хэмжээсийн нэр) + 1-2 зөвлөгөө.
+• plan: ЯГ 4 алхам — title (богино) + text (1 БҮТЭН тусгайлсан өгүүлбэр).
+• today: ЯГ 3 даалгавар. Үйл үгээр төгссөн БҮТЭН тушаах өгүүлбэр (≤8 үг), нэр үг хэллэг БИШ. Жишээ: "Унтахын өмнө утсаа хойш тавь".
+Бүх text цэвэр зөв монгол, тоо багатай.`
 
-═══ ЮУ ГАРГАХ ВЭ — ЗӨВХӨН АГУУЛГА (бүтцийг сервер угсарна) ═══
-Та доорх агуулгыг л бичнэ. Хуудас, layout, диаграмыг СЕРВЕР автоматаар угсарна.
+    // Tool schema enforces structure — model returns a parsed object (no JSON
+    // parsing / truncation failures). Cached together with the system prompt.
+    const ANALYSIS_TOOL: Anthropic.Tool = {
+      name: 'submit_analysis',
+      description: 'Тестийн шинжилгээний бүтэцтэй агуулгыг буцаана.',
+      input_schema: {
+        type: 'object',
+        properties: {
+          testType: { type: 'string', enum: ['profile', 'cognitive', 'screening', 'aptitude', 'generic'] },
+          scoreDirection: { type: 'string', enum: ['high-good', 'low-good', 'profile'] },
+          outcomeQuality: { type: 'string', enum: ['positive', 'neutral', 'concerning'] },
+          opening: { type: 'string', description: '1 дулаахан өгүүлбэр' },
+          summary: {
+            type: 'object',
+            properties: { title: { type: 'string' }, description: { type: 'string' } },
+            required: ['title', 'description'],
+          },
+          headline: {
+            type: 'object',
+            properties: { title: { type: 'string' }, body: { type: 'string' } },
+            required: ['title', 'body'],
+          },
+          cards: {
+            type: 'array',
+            description: '4-5 карт',
+            items: {
+              type: 'object',
+              properties: {
+                tone: { type: 'string', enum: ['positive', 'warning', 'info'] },
+                emoji: { type: 'string' },
+                title: { type: 'string' },
+                detail: { type: 'string', description: '2 өгүүлбэр' },
+                tip: { type: 'string', description: '1 практик алхам' },
+                meta: { type: 'string' },
+              },
+              required: ['tone', 'title', 'detail', 'meta'],
+            },
+          },
+          plan: {
+            type: 'array',
+            description: 'ЯГ 4 алхам',
+            items: {
+              type: 'object',
+              properties: { title: { type: 'string' }, text: { type: 'string' } },
+              required: ['title', 'text'],
+            },
+          },
+          today: { type: 'array', description: 'ЯГ 3 даалгавар', items: { type: 'string' } },
+        },
+        required: ['testType', 'scoreDirection', 'outcomeQuality', 'opening', 'summary', 'headline', 'cards', 'plan', 'today'],
+      },
+    }
 
-1. opening — хэрэглэгчид зориулсан 1 дулаахан өгүүлбэр.
-2. headline — хамгийн чухал НЭГ дүгнэлт: title (богино) + body (1-2 өгүүлбэр, яагаад чухал).
-3. cards — ⭐ХАМГИЙН ЧУХАЛ: 4-5 карт (давуу тал / анхаарах зүйл / зөвлөгөө). Swipe хийгдэх том картууд болж харагдана.
-   Карт бүр: tone (positive=давуу/сайн, warning=анхаарах/сул, info=зөвлөгөө), emoji, title (богино гарчиг), detail (2 өгүүлбэр — ЯАГААД, юу гэсэн үг, хэрэглэгчийн хариултад суурилсан), tip (1 богино практик алхам), meta (богино шошго).
-   ОЛОН ХЭМЖЭЭСТ тест: давамгай 2-3 хэмжээс тус бүрд карт (meta=хэмжээсийн нэр, title=түвшин) + 1-2 зөвлөгөөний карт.
-   НЭГ онооны тест: давуу тал, анхаарах зүйл, зөвлөгөө, дэмжлэг гэсэн картууд.
-4. plan — ЯГ 4 алхам (сэргэх зам / хөгжүүлэх зам): алхам бүр title (богино нэрлэсэн гарчиг) + text (1 БҮТЭН өгүүлбэр, ТУСГАЙЛСАН бодит алхам).
-5. today — өнөөдөр шууд хийх ЯГ 3 даалгавар. ЗААВАЛ үйл үгээр төгссөн БҮТЭН тушаах өгүүлбэр (≤8 үг). Жишээ: "Унтахын өмнө утсаа хойш тавь", "10 минут алхах дасгал хий". ТАСАРХАЙ хэллэг, нэр үг биш — цэвэр зөв монгол.
-
-ЧАНАР: detail нь ҮНЭХЭЭР хэрэгтэй, тестийн контекст + хариултад суурилсан. tip/plan нь домэйнд тусгайлсан (generic "тайвшир" БИШ). Бүх text цэвэр зөв монгол хэл, үг үсгийн алдаагүй, бүтэн өгүүлбэр, тоо багатай.
-
-JSON буцаа ({ -ээр эхэл, ЗӨВХӨН энэ бүтэц):
-{"testType":"...","scoreDirection":"...","outcomeQuality":"...","opening":"<1 өгүүлбэр>","summary":{"title":"${actualResultLabel || 'Дүн'}","description":"<1 өгүүлбэр тоогүй>"},"headline":{"title":"<богино>","body":"<1-2 өгүүлбэр>"},"cards":[{"tone":"<positive|warning|info>","emoji":"<e>","title":"<гарчиг>","detail":"<2 өгүүлбэр>","tip":"<1 алхам>","meta":"<шошго>"},{"tone":"...","emoji":"...","title":"...","detail":"...","tip":"...","meta":"..."},{"tone":"...","emoji":"...","title":"...","detail":"...","tip":"...","meta":"..."},{"tone":"...","emoji":"...","title":"...","detail":"...","tip":"...","meta":"..."}],"plan":[{"title":"<богино>","text":"<1 өгүүлбэр>"},{"title":"...","text":"..."},{"title":"...","text":"..."},{"title":"...","text":"..."}],"today":["<богино>","<богино>","<богино>"]}`
-
-    // Note: Sonnet 4.6 does not support assistant message prefill —
-    // we instruct raw JSON output and extract the {...} span instead.
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 2200,
-      system: SYSTEM,
+      // System as a cacheable content block — the large static prompt is read
+      // from cache on subsequent requests within the TTL window.
+      system: [
+        { type: 'text', text: SYSTEM_STATIC, cache_control: { type: 'ephemeral' } },
+      ],
+      tools: [ANALYSIS_TOOL],
+      tool_choice: { type: 'tool', name: 'submit_analysis' },
       messages: [
-        { role: 'user', content: `Дата:\n${truncated}\n\nЗӨВХӨН JSON буцаа — markdown, тайлбар үг ҮГҮЙ, шууд { -ээр эхэл.` },
+        { role: 'user', content: `Дата:\n${truncated}\n\nДээрх үр дүнг шинжилж submit_analysis tool-оор буцаа.` },
       ],
     })
 
-    const rawText = response.content[0].type === 'text' ? response.content[0].text : ''
-    let jsonStr = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-    const start = jsonStr.indexOf('{')
-    const end = jsonStr.lastIndexOf('}')
-    if (start === -1 || end === -1) throw new Error('JSON олдсонгүй')
-    jsonStr = jsonStr.slice(start, end + 1)
+    if (response.usage) {
+      console.log('[analyze] tokens:', {
+        input: response.usage.input_tokens,
+        output: response.usage.output_tokens,
+        cache_read: (response.usage as any).cache_read_input_tokens,
+        cache_write: (response.usage as any).cache_creation_input_tokens,
+      })
+    }
 
-    const repair = (s: string) =>
-      s
-        .replace(/,(\s*[}\]])/g, '$1')
-        .replace(/("(?:[^"\\]|\\.)*")|\n/g, (match, str) => str ?? ' ')
-
+    // Read the tool_use block — input is already a parsed object.
     let data: any
-    try { data = JSON.parse(jsonStr) }
-    catch {
-      try { data = JSON.parse(repair(jsonStr)) }
-      catch {
-        console.error('[analyze] parse failed first 200:', jsonStr.slice(0, 200))
-        data = JSON.parse(closeOpenBrackets(jsonStr))
-      }
+    const toolBlock = response.content.find((b: any) => b.type === 'tool_use') as any
+    if (toolBlock?.input) {
+      data = toolBlock.input
+    } else {
+      // Fallback: rare case where the model emitted text instead of a tool call.
+      const rawText = response.content.find((b: any) => b.type === 'text') as any
+      const txt = rawText?.text || ''
+      let jsonStr = txt.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      const start = jsonStr.indexOf('{'), end = jsonStr.lastIndexOf('}')
+      if (start === -1 || end === -1) throw new Error('Шинжилгээ үүсгэж чадсангүй')
+      jsonStr = jsonStr.slice(start, end + 1)
+      try { data = JSON.parse(jsonStr) }
+      catch { data = JSON.parse(closeOpenBrackets(jsonStr)) }
     }
 
     // ── Read AI classification and validate ────────────────────────────────
