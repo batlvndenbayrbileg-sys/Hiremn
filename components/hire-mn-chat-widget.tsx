@@ -20,6 +20,28 @@ import {
 import { UsageLimitPopup } from './usage-limit-popup'
 import { getCachedAnalysis, setCachedAnalysis } from '@/lib/analysis-cache'
 
+// Remove personally identifiable info from a report before it's sent for
+// analysis. The analysis needs only assessment/result/answers — never the
+// person's name, email or phone. Returns a deep clone with PII removed.
+function stripPII(reportData: any): any {
+  let clone: any
+  try { clone = JSON.parse(JSON.stringify(reportData ?? {})) } catch { return {} }
+  const PII = ['firstname', 'lastname', 'email', 'phone', 'name']
+  // The report payload may be at .report or .report.payload
+  const payloads = [clone?.report, clone?.report?.payload].filter(Boolean)
+  for (const p of payloads) {
+    // The whole `exam` block is identity metadata and unused by analysis
+    if (p.exam && typeof p.exam === 'object') {
+      for (const k of PII) delete p.exam[k]
+    }
+    // `result` carries the scored outcome but also echoes the name — scrub it
+    if (p.result && typeof p.result === 'object') {
+      for (const k of PII) delete p.result[k]
+    }
+  }
+  return clone
+}
+
 
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -3935,10 +3957,16 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     const timer = setTimeout(() => ctrl.abort(), 115000)
     const startedAt = Date.now()
 
+    // ── PRIVACY: strip personal data before it leaves the browser ──────────
+    // The analysis only needs assessment text, the result, and answers — never
+    // the user's name/email/phone. We remove PII so it is never sent over the
+    // network nor reaches the LLM.
+    const safeReportData = stripPII(reportData)
+
     fetch("/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reportData, reportTitle: testName }),
+      body: JSON.stringify({ reportData: safeReportData, reportTitle: testName }),
       signal: ctrl.signal,
     })
       .then(async res => {

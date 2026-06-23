@@ -124,6 +124,17 @@ export async function POST(request: Request) {
   try {
     const { reportData, reportTitle } = await request.json()
 
+    // ── PRIVACY (defense-in-depth): scrub any PII the client may have sent ──
+    // The analysis never needs name/email/phone. Strip it on arrival so it is
+    // never logged, processed, or forwarded to the LLM — even if an old client
+    // or a direct API call includes it.
+    const PII_FIELDS = ['firstname', 'lastname', 'email', 'phone', 'name']
+    for (const p of [(reportData as any)?.report, (reportData as any)?.report?.payload]) {
+      if (!p || typeof p !== 'object') continue
+      if (p.exam && typeof p.exam === 'object') for (const k of PII_FIELDS) delete p.exam[k]
+      if (p.result && typeof p.result === 'object') for (const k of PII_FIELDS) delete p.result[k]
+    }
+
     // ── New payload shape: reportData.report = { exam, assessment, result, answers } ──
     // Fall back to old shape for backward compatibility during deploy transition.
     const reportPayload: any =
