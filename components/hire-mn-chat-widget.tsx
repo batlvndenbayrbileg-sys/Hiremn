@@ -18,6 +18,7 @@ import {
   isUserLocked
 } from '@/lib/conversation-storage'
 import { UsageLimitPopup } from './usage-limit-popup'
+import { getCachedAnalysis, setCachedAnalysis } from '@/lib/analysis-cache'
 
 
 
@@ -3902,6 +3903,25 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     console.log("[analyze] starting:", testName, "id:", analysisId)
     setIsTyping(false)
 
+    // ── Cache hit: this exact result was already analyzed → reuse output,
+    //    skip the LLM call entirely (instant + free). A retake gets a new
+    //    code, so a changed result always produces a fresh analysis.
+    const cached = getCachedAnalysis(reportData)
+    if (cached) {
+      console.log("[analyze] cache hit — reusing previous output, no LLM call")
+      setMessages(prev => [...prev, {
+        role: "assistant",
+        content: "",
+        analysisData: cached.data,
+        analysisTitle: cached.title || testName,
+        analysisStatus: "done" as const,
+        fromLLM: true,
+        analysisId,
+      } as any])
+      setIsTyping(false)
+      return
+    }
+
     // Push loading placeholder
     setMessages(prev => [...prev, {
       role: "assistant",
@@ -3929,6 +3949,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         if (!res.ok || !json.success || !json.data) {
           throw new Error(json.error || `HTTP ${res.status}`)
         }
+        // Persist this result's analysis so re-analyzing the same code is
+        // instant and doesn't spend tokens again.
+        try { setCachedAnalysis(reportData, json.data, testName) } catch {}
         setMessages(prev => prev.map(m =>
           (m as any).analysisId === analysisId
             ? {
