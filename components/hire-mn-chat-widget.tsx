@@ -3825,6 +3825,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const [consentPayload, setConsentPayload] = useState<null | { reportData: any; testName: string }>(null)
   // Remember user's consent for this session so we don't ask twice
   const consentGrantedRef = useRef(false)
+  // In-flight lock — blocks duplicate analyses while one is already running
+  const analyzingRef = useRef(false)
 
   // Toggle a checkable action step inside the artifact (TODO behavior)
   const toggleArtifactStep = (stepIdx: number) => {
@@ -3921,6 +3923,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   // ══════════════════════════════════════════════════════════════════════════
   // Extracted analysis flow — runs after consent (or directly if already granted)
   const startAnalysisFlow = (reportData: any, testName: string) => {
+    // ── Guard: ignore clicks while an analysis is already running. No matter
+    //    how many times the user taps, only one analysis runs at a time.
+    if (analyzingRef.current) {
+      console.log("[analyze] already in progress — ignoring duplicate trigger")
+      return
+    }
     const analysisId = `analysis-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     console.log("[analyze] starting:", testName, "id:", analysisId)
     setIsTyping(false)
@@ -3943,6 +3951,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       setIsTyping(false)
       return
     }
+
+    // Lock — a real LLM analysis is now in flight
+    analyzingRef.current = true
 
     // Push loading placeholder
     setMessages(prev => [...prev, {
@@ -3993,6 +4004,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             : m
         ))
         setIsTyping(false)
+        analyzingRef.current = false
       })
       .catch(err => {
         clearTimeout(timer)
@@ -4011,6 +4023,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
             : m
         ))
         setIsTyping(false)
+        analyzingRef.current = false
       })
   }
 
