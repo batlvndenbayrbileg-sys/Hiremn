@@ -5711,18 +5711,20 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 boxShadow: "0 4px 14px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
               }} />
 
-              {/* Mascot — fully contained, popping up slightly */}
+              {/* Mascot — kept within the FAB bounds so it isn't clipped by
+                  the tight closed-state iframe on mobile (sits lower, pops up
+                  only on hover). */}
               <SplineMascot
-                width={62}
-                height={62}
+                width={58}
+                height={58}
                 borderRadius={0}
                 style={{
                   position: "absolute",
-                  top: -10,
-                  left: -2,
+                  top: 0,
+                  left: 0,
                   zIndex: 10,
                   overflow: "visible",
-                  filter: "drop-shadow(0 6px 8px rgba(0,0,0,0.18))",
+                  filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.18))",
                   transition: "transform 0.3s cubic-bezier(.16,1,.3,1)",
                   transform: isHovered ? "translateY(-3px) scale(1.06)" : "translateY(0) scale(1)",
                   pointerEvents: "none",
