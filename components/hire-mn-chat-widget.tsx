@@ -4990,84 +4990,59 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 }} />
               </div>
 
-              {/* ══════════ FUTURISTIC HEADER ══════════ */}
+              {/* ══════════ FLOATING GLASS HEADER ══════════ */}
               <div style={{
-                background: `linear-gradient(135deg, 
-                  #E8541A 0%, 
-                  #F06835 40%, 
-                  #FF8C42 100%)`,
-                backgroundSize: "200% 200%",
-                animation: "hw-gradient-shift 8s ease infinite",
-                padding: "18px 16px 16px",
-                flexShrink: 0, 
+                padding: "12px 12px 6px",
+                flexShrink: 0,
                 position: "relative",
-                borderRadius: "24px 24px 0 0",
-                overflow: "hidden",
+                zIndex: 2,
               }}>
-                {/* Header shimmer effect */}
+                {/* Floating glass title card */}
                 <div style={{
-                  position: "absolute", inset: 0, overflow: "hidden",
+                  display: "flex", alignItems: "center", gap: 11, position: "relative", zIndex: 1,
+                  padding: "10px 12px", borderRadius: 20,
+                  background: "linear-gradient(160deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.42) 100%)",
+                  backdropFilter: "blur(26px) saturate(185%)",
+                  WebkitBackdropFilter: "blur(26px) saturate(185%)",
+                  border: "1px solid rgba(255,255,255,0.75)",
+                  boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.9), 0 8px 24px rgba(31,38,75,0.1)",
                 }}>
+                  {/* Mascot */}
                   <div style={{
-                    position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%",
-                    background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)",
-                    animation: "hw-shimmer 3s ease-in-out infinite",
-                  }} />
-                </div>
-                
-                {/* Decorative circles */}
-                <div style={{
-                  position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: "50%",
-                  background: "rgba(255,255,255,0.1)",
-                  animation: "hw-breathe 4s ease-in-out infinite",
-                }} />
-                <div style={{
-                  position: "absolute", bottom: -20, left: 30, width: 60, height: 60, borderRadius: "50%",
-                  background: "rgba(255,255,255,0.08)",
-                  animation: "hw-breathe 5s ease-in-out infinite 1s",
-                }} />
-                
-                {/* Header content */}
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, position: "relative", zIndex: 1 }}>
-                  {/* Glowing Mascot Container */}
-                  <div style={{
-                    width: 44, height: 44, borderRadius: 14,
-                    background: "rgba(255,255,255,0.98)",
+                    width: 38, height: 38, borderRadius: 12,
+                    background: "linear-gradient(160deg, rgba(255,247,242,0.95), rgba(253,228,217,0.7))",
+                    border: "1px solid rgba(232,84,26,0.22)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.15), 0 0 0 2px rgba(255,255,255,0.5)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.85)",
                     overflow: "hidden",
-                    animation: "hw-pulse-ring 3s ease-in-out infinite",
                     flexShrink: 0,
                   }}>
-                    <SplineMascot width={82} height={82} borderRadius={22} />
+                    <SplineMascot width={66} height={66} borderRadius={18} />
                   </div>
                   
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                      <span style={{ 
-                        color: "#fff", fontWeight: 700, fontSize: 16, 
-                        textShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                      <span style={{
+                        color: "#1c2230", fontWeight: 700, fontSize: 15,
                         letterSpacing: "-0.3px"
                       }}>
                         hire.mn AI
                       </span>
-                      {/* Animated Online Badge */}
+                      {/* Online Badge */}
                       <span style={{
-                        fontSize: 8, fontWeight: 700, letterSpacing: "0.6px",
-                        color: "#fff", 
-                        background: "linear-gradient(135deg, rgba(34,197,94,0.9), rgba(74,222,128,0.9))",
-                        padding: "3px 8px", borderRadius: 10,
-                        display: "flex", alignItems: "center", gap: 4,
-                        boxShadow: "0 2px 8px rgba(34,197,94,0.4)",
+                        fontSize: 11, fontWeight: 500,
+                        color: "#8a9098",
+                        display: "flex", alignItems: "center", gap: 5,
                       }}>
-                        <span style={{ 
-                          width: 5, height: 5, borderRadius: "50%", background: "#fff",
-                          animation: "hw-sparkle 1.5s ease-in-out infinite" 
+                        <span style={{
+                          width: 6, height: 6, borderRadius: "50%", background: "#34c759",
+                          boxShadow: "0 0 0 3px rgba(52,199,89,0.15)",
+                          animation: "hw-sparkle 1.6s ease-in-out infinite"
                         }} />
-                        ONLINE
+                        Online
                       </span>
                     </div>
-                    <div style={{ color: "rgba(255,255,255,0.9)", fontSize: 11, marginTop: 2, fontWeight: 500 }}>
+                    <div style={{ color: "#9aa0ab", fontSize: 11, marginTop: 1, fontWeight: 500 }}>
                       24/7 танд туслахад бэлэн
                     </div>
                   </div>
@@ -5076,21 +5051,20 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   <button
                     onClick={() => setIsOpen(false)}
                     style={{
-                      width: 36, height: 36, borderRadius: 12,
-                      background: "rgba(255,255,255,0.15)", 
-                      backdropFilter: "blur(10px)",
-                      border: "1px solid rgba(255,255,255,0.25)",
-                      color: "#fff", cursor: "pointer",
+                      width: 32, height: 32, borderRadius: "50%",
+                      background: "rgba(255,255,255,0.55)",
+                      border: "1px solid rgba(255,255,255,0.7)",
+                      color: "#9aa0ab", cursor: "pointer",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
+                      transition: "all 0.3s cubic-bezier(.16,1,.3,1)", flexShrink: 0,
                     }}
                     onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.25)"
-                      ; (e.currentTarget as HTMLElement).style.transform = "rotate(90deg) scale(1.1)"
+                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.9)"
+                      ; (e.currentTarget as HTMLElement).style.transform = "rotate(90deg)"
                     }}
                     onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.15)"
-                      ; (e.currentTarget as HTMLElement).style.transform = "rotate(0deg) scale(1)"
+                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.55)"
+                      ; (e.currentTarget as HTMLElement).style.transform = "rotate(0deg)"
                     }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -5101,10 +5075,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
 
                 {/* ══════════ GLASS TAB NAVIGATION ══════════ */}
                 <div style={{
-                  display: "flex", gap: 6,
-                  background: "rgba(0,0,0,0.12)", 
-                  backdropFilter: "blur(8px)",
-                  borderRadius: 14, padding: 5,
+                  display: "flex", gap: 5, marginTop: 9,
+                  background: "rgba(255,255,255,0.5)",
+                  backdropFilter: "blur(18px) saturate(170%)",
+                  WebkitBackdropFilter: "blur(18px) saturate(170%)",
+                  borderRadius: 15, padding: 4,
+                  border: "1px solid rgba(255,255,255,0.6)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8)",
                   position: "relative", zIndex: 1,
                 }}>
                   {[
@@ -5121,7 +5098,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                           ? "linear-gradient(135deg, rgba(255,255,255,0.98), rgba(255,252,250,0.95))" 
                           : "transparent",
                         border: "none", cursor: "pointer",
-                        color: activeTab === i ? "#E8541A" : "rgba(255,255,255,0.85)",
+                        color: activeTab === i ? "#E8541A" : "#8a8f99",
                         fontSize: 12, fontWeight: 600,
                         display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                         transition: "all 0.35s cubic-bezier(.16,1,.3,1)",
@@ -5186,13 +5163,15 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     )}
 
                     {showQuickReplies && !isTyping && (
-                      <div style={{ 
+                      <div style={{
                         display: "flex", flexDirection: "column", gap: 8, marginTop: 14,
                         padding: "16px",
-                        background: "linear-gradient(145deg, rgba(255,255,255,0.95), rgba(255,252,250,0.9))",
+                        background: "linear-gradient(160deg, rgba(255,255,255,0.55), rgba(255,255,255,0.32))",
+                        backdropFilter: "blur(20px) saturate(180%)",
+                        WebkitBackdropFilter: "blur(20px) saturate(180%)",
                         borderRadius: 18,
-                        border: "1px solid rgba(232,84,26,0.06)",
-                        boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
+                        border: "1px solid rgba(255,255,255,0.65)",
+                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.85), 0 6px 18px rgba(31,38,75,0.05)",
                       }}>
                         <div style={{ 
                           fontSize: 11, fontWeight: 600, color: "#9CA3AF", 
@@ -5208,17 +5187,19 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                               className="hw-chip"
                               onClick={() => sendMessage(qr.text)}
                               style={{
-                                background: "#fff",
-                                border: "1.5px solid #E5E7EB",
-                                color: "#374151",
-                                borderRadius: 10, 
-                                padding: "8px 12px",
-                                fontSize: Math.max(fontSize - 2, 12), 
+                                background: "linear-gradient(160deg, rgba(255,255,255,0.62), rgba(255,255,255,0.35))",
+                                backdropFilter: "blur(14px) saturate(170%)",
+                                WebkitBackdropFilter: "blur(14px) saturate(170%)",
+                                border: "1px solid rgba(255,255,255,0.8)",
+                                color: "#6b5d54",
+                                borderRadius: 20,
+                                padding: "8px 13px",
+                                fontSize: Math.max(fontSize - 2, 12),
                                 fontWeight: 500,
-                                cursor: "pointer", 
+                                cursor: "pointer",
                                 whiteSpace: "nowrap",
                                 animation: `hw-chip-in 0.3s cubic-bezier(.16,1,.3,1) ${i * 0.06}s both`,
-                                boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), 0 3px 10px rgba(31,38,75,0.05)",
                                 display: "flex", alignItems: "center", gap: 8,
                                 transition: "all 0.25s cubic-bezier(.16,1,.3,1)",
                               }}
@@ -5230,11 +5211,11 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                                 ; (e.currentTarget as HTMLElement).style.boxShadow = "0 6px 16px rgba(232,84,26,0.2)"
                               }}
                               onMouseLeave={e => {
-                                (e.currentTarget as HTMLElement).style.background = "#fff"
-                                ; (e.currentTarget as HTMLElement).style.color = "#374151"
-                                ; (e.currentTarget as HTMLElement).style.borderColor = "#E5E7EB"
+                                (e.currentTarget as HTMLElement).style.background = "linear-gradient(160deg, rgba(255,255,255,0.62), rgba(255,255,255,0.35))"
+                                ; (e.currentTarget as HTMLElement).style.color = "#6b5d54"
+                                ; (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.8)"
                                 ; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
-                                ; (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)"
+                                ; (e.currentTarget as HTMLElement).style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.9), 0 3px 10px rgba(31,38,75,0.05)"
                               }}
                             >
                               <span style={{ opacity: 0.7 }}>
@@ -5492,11 +5473,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               }}>
                 <div style={{
                   display: "flex", gap: 8, alignItems: "center",
-                  background: "linear-gradient(135deg, #fff 0%, #FFFCFA 100%)",
-                  border: "2px solid rgba(232,84,26,0.1)",
-                  borderRadius: 16, padding: "4px 5px 4px 14px", 
+                  background: "linear-gradient(160deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.32) 100%)",
+                  backdropFilter: "blur(24px) saturate(190%)",
+                  WebkitBackdropFilter: "blur(24px) saturate(190%)",
+                  border: "1px solid rgba(255,255,255,0.85)",
+                  borderRadius: 24, padding: "4px 5px 4px 16px",
                   transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
-                  boxShadow: "0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+                  boxShadow: "inset 0 1.5px 1px rgba(255,255,255,0.95), inset 0 -2px 6px rgba(255,255,255,0.45), 0 10px 26px rgba(31,38,75,0.1)",
                 }}
                   onFocusCapture={e => {
                     (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
@@ -5527,17 +5510,17 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     onClick={() => sendMessage(input)}
                     disabled={!input.trim() || isTyping}
                     style={{
-                      width: 40, height: 40, borderRadius: 12,
-                      background: input.trim() && !isTyping 
-                        ? "linear-gradient(135deg, #E8541A 0%, #FF6B3D 100%)" 
+                      width: 42, height: 42, borderRadius: "50%",
+                      background: input.trim() && !isTyping
+                        ? "linear-gradient(135deg, #FF9259 0%, #F2591E 100%)"
                         : "linear-gradient(135deg, #E5E5E5 0%, #D9D9D9 100%)",
                       border: "none",
                       cursor: input.trim() && !isTyping ? "pointer" : "not-allowed",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0, 
+                      flexShrink: 0,
                       transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
-                      boxShadow: input.trim() && !isTyping 
-                        ? "0 4px 16px rgba(232,84,26,0.3)" 
+                      boxShadow: input.trim() && !isTyping
+                        ? "inset 0 1.5px 1px rgba(255,255,255,0.5), 0 8px 20px rgba(242,89,30,0.4)"
                         : "none",
                     }}
                     onMouseEnter={e => {
