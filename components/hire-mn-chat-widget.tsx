@@ -78,6 +78,7 @@ interface Message {
   analysisData?: any                // New /api/analyze response shape
   analysisTitle?: string            // Test name for analysis card
   fromLLM?: boolean                 // True only for genuine LLM replies (controls feedback widget)
+  typewriter?: boolean              // Animate this message with a typewriter reveal (welcome greeting)
 }
 
 interface FollowUpMessage {
@@ -2716,12 +2717,14 @@ function TypingIndicator() {
     <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
       <BrainAvatar />
       <div style={{
-        background: "linear-gradient(135deg, #fff 0%, #FFFCFA 100%)", 
-        border: "1px solid rgba(232,84,26,0.1)",
+        background: "linear-gradient(155deg, rgba(255,255,255,0.78) 0%, rgba(255,250,247,0.55) 100%)",
+        backdropFilter: "blur(14px) saturate(170%)",
+        WebkitBackdropFilter: "blur(14px) saturate(170%)",
+        border: "1px solid rgba(232,84,26,0.35)",
         borderRadius: 16, borderBottomLeftRadius: 4,
         padding: "14px 18px",
         display: "flex", gap: 6, alignItems: "center",
-        boxShadow: "0 4px 16px rgba(0,0,0,.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.85), 0 6px 18px rgba(31,38,75,0.06)",
       }}>
         {[0, 1, 2].map(i => (
           <div key={i} style={{
@@ -3190,6 +3193,52 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
 
 // ── Bot Message ──────────────────────────────────────────────────────────────
 
+// Plays once per page load — prevents the welcome typewriter from replaying
+// every time the user switches back to the Chat tab.
+let hwWelcomeTyped = false
+
+// Typewriter reveal for the welcome greeting: types the intro sentences
+// character-by-character (with a blinking caret), then fades the bullets in
+// one by one. The bullets use the parent's markdown renderer so bold stays intact.
+function TypewriterGreeting({ text, renderFormatted }: { text: string; renderFormatted: (t: string) => React.ReactNode }) {
+  const lines = text.split('\n')
+  const firstBullet = lines.findIndex(l => /^[-•*]\s/.test(l.trim()))
+  const intro = (firstBullet === -1 ? lines : lines.slice(0, firstBullet)).join('\n').replace(/\s+$/, '')
+  const bulletLines = firstBullet === -1 ? [] : lines.slice(firstBullet).filter(l => l.trim() !== '')
+
+  const [n, setN] = useState(hwWelcomeTyped ? intro.length : 0)
+  const [done, setDone] = useState(hwWelcomeTyped)
+
+  useEffect(() => {
+    if (done) return
+    if (n >= intro.length) {
+      setDone(true)
+      hwWelcomeTyped = true
+      return
+    }
+    const id = setTimeout(() => setN(c => c + 1), 24)
+    return () => clearTimeout(id)
+  }, [n, intro.length, done])
+
+  return (
+    <>
+      <div style={{ whiteSpace: 'pre-wrap' }}>
+        {done ? intro : intro.slice(0, n)}
+        {!done && <span className="hw-caret" aria-hidden="true" />}
+      </div>
+      {done && bulletLines.length > 0 && (
+        <div style={{ marginTop: 10 }}>
+          {bulletLines.map((bl, i) => (
+            <div key={i} style={{ animation: `hw-chip-in 0.45s cubic-bezier(.16,1,.3,1) ${i * 0.13}s both` }}>
+              {renderFormatted(bl)}
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  )
+}
+
 function BotMessage({ message, fontSize, userQuestion = "", showAvatar = true, onOpenArtifact }: { message: Message; fontSize: number; userQuestion?: string; showAvatar?: boolean; onOpenArtifact?: (m: Message) => void }) {
   // Parse [TEST:id] markers
   const parseTestMarkers = (text: string) => {
@@ -3362,16 +3411,20 @@ function BotMessage({ message, fontSize, userQuestion = "", showAvatar = true, o
           )}
           <div style={{
             maxWidth: "82%",
-            background: "linear-gradient(145deg, #fff 0%, #FFFCFA 100%)",
-            border: "1.5px solid rgba(232,84,26,0.08)",
+            background: "linear-gradient(155deg, rgba(255,255,255,0.78) 0%, rgba(255,250,247,0.55) 100%)",
+            backdropFilter: "blur(14px) saturate(170%)",
+            WebkitBackdropFilter: "blur(14px) saturate(170%)",
+            border: "1px solid rgba(232,84,26,0.40)",
             borderRadius: 18,
-            borderBottomLeftRadius: showAvatar ? 4 : 18,
+            borderBottomLeftRadius: showAvatar ? 6 : 18,
             padding: "14px 18px",
-            fontSize: fontSize, lineHeight: 1.65, color: "#1F2937",
-            boxShadow: "0 4px 16px rgba(0,0,0,.04), inset 0 1px 0 rgba(255,255,255,0.9)",
+            fontSize: fontSize, lineHeight: 1.65, color: "#2A2520",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 18px rgba(31,38,75,0.06)",
             wordBreak: "break-word",
           }}>
-            {renderFormattedText(cleanText)}
+            {message.typewriter
+              ? <TypewriterGreeting text={cleanText} renderFormatted={renderFormattedText} />
+              : renderFormattedText(cleanText)}
           </div>
         </div>
       )}
@@ -3748,15 +3801,16 @@ function UserMessage({ content, fontSize }: { content: string; fontSize: number 
     <div style={{ display: "flex", justifyContent: "flex-end", animation: "hw-msg-in 0.35s cubic-bezier(.16,1,.3,1)" }}>
       <div style={{
         maxWidth: "82%",
-        background: "linear-gradient(135deg, #E8541A 0%, #F06835 50%, #FF8C42 100%)",
-        backgroundSize: "200% 200%",
-        color: "#fff",
+        background: "linear-gradient(155deg, rgba(255,255,255,0.80) 0%, rgba(247,250,255,0.55) 100%)",
+        backdropFilter: "blur(14px) saturate(170%)",
+        WebkitBackdropFilter: "blur(14px) saturate(170%)",
+        color: "#1F2733",
+        border: "1px solid rgba(45,108,223,0.50)",
         borderRadius: 18, borderBottomRightRadius: 4,
         padding: "13px 17px",
         fontSize: fontSize, lineHeight: 1.65, wordBreak: "break-word",
         fontWeight: 500,
-        boxShadow: "0 6px 20px rgba(232,84,26,.22), inset 0 1px 0 rgba(255,255,255,0.15)",
-        textShadow: "0 1px 2px rgba(0,0,0,0.1)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 18px rgba(31,38,75,0.07)",
       }}>
         {content}
       </div>
@@ -3795,6 +3849,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       {
         role: "assistant",
         content: "Сайн байна уу!\n\nБи бол hire.mn-ийн AI туслагч. Та надаас дараах зүйлсийг асууж болно:\n\n- **Тест санал болгох:** Танд тохирсон тестүүдийг олж өгнө\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг шинжилж, зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, ажлын байрны асуудлаар туслана",
+        typewriter: true,
       },
     ]
 
@@ -4523,6 +4578,16 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         @keyframes hw-bounce {
           0%, 60%, 100% { transform: translateY(0) scale(1); }
           30% { transform: translateY(-10px) scale(0.92); }
+        }
+        @keyframes hw-caret-blink {
+          0%, 100% { opacity: 1; }
+          50%      { opacity: 0; }
+        }
+        .hw-caret {
+          display: inline-block; width: 2px; height: 1.05em;
+          margin-left: 2px; vertical-align: -2px; border-radius: 1px;
+          background: linear-gradient(180deg, #E8541A, #FF8C42);
+          animation: hw-caret-blink 0.9s step-end infinite;
         }
         @keyframes hw-spin {
           to { transform: rotate(360deg); }
