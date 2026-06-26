@@ -3239,6 +3239,101 @@ function TypewriterGreeting({ text, renderFormatted }: { text: string; renderFor
   )
 }
 
+// Plays the full-screen cinematic intro once per page load when the widget
+// first opens: types the greeting on an empty canvas, reveals the bullets,
+// then dissolves to hand off to the live chat underneath.
+let hwIntroPlayed = false
+
+function IntroLetters({ text, step = 0.035, base = 0 }: { text: string; step?: number; base?: number }) {
+  return (
+    <>
+      {Array.from(text).map((ch, i) => (
+        <span key={i} style={{
+          display: "inline-block", whiteSpace: "pre", opacity: 0,
+          animation: `hw-rise 0.5s cubic-bezier(.21,1,.36,1) ${(base + i * step).toFixed(3)}s forwards`,
+        }}>{ch === " " ? " " : ch}</span>
+      ))}
+    </>
+  )
+}
+
+function IntroSequence({ onDone }: { onDone: () => void }) {
+  const [phase, setPhase] = useState(0) // 0: hello, 1: intro + bullets, 2: exit
+  useEffect(() => {
+    const t = [
+      setTimeout(() => setPhase(1), 1600),
+      setTimeout(() => setPhase(2), 5200),
+      setTimeout(() => onDone(), 5850),
+    ]
+    return () => t.forEach(clearTimeout)
+  }, [])
+
+  const bullets = [
+    { t: "Тест санал болгох:", d: "Танд тохирсон тестүүдийг олж өгнө" },
+    { t: "Тестийн үр дүн тайлбарлах:", d: "Авсан тестийн хариуг шинжилж, зөвлөгөө өгнө" },
+    { t: "Мэргэжлийн зөвлөгөө:", d: "Сэтгэл зүй, ажлын байрны асуудлаар туслана" },
+  ]
+
+  return (
+    <div style={{
+      position: "absolute", inset: 0, zIndex: 30, borderRadius: 24, overflow: "hidden",
+      display: "flex", alignItems: "center", justifyContent: "center", padding: "0 30px",
+      background: "linear-gradient(165deg, rgba(255,255,255,0.98) 0%, rgba(255,250,246,0.98) 100%)",
+      transition: "opacity 0.6s cubic-bezier(.21,1,.36,1)",
+      opacity: phase === 2 ? 0 : 1,
+      pointerEvents: phase === 2 ? "none" : "auto",
+    }}>
+      <div style={{
+        position: "absolute", top: "14%", left: "50%", transform: "translateX(-50%)",
+        width: 240, height: 240, borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(255,138,76,0.15), transparent 70%)", pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute", bottom: "18%", left: "50%", transform: "translateX(-50%)",
+        width: 200, height: 200, borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(255,170,115,0.10), transparent 72%)", pointerEvents: "none",
+      }} />
+
+      <div style={{
+        position: "relative", width: "100%", maxWidth: 280,
+        transition: "all 0.6s cubic-bezier(.21,1,.36,1)",
+        transform: phase === 2 ? "translateY(-24px)" : "none",
+        opacity: phase === 2 ? 0 : 1,
+      }}>
+        {phase === 0 ? (
+          <div style={{ fontSize: 24, fontWeight: 700, color: "#1c2230", textAlign: "center", lineHeight: 1.4 }}>
+            <IntroLetters text="Сайн байна уу!" step={0.045} base={0.2} />
+          </div>
+        ) : (
+          <div>
+            <div style={{ fontSize: 21, fontWeight: 700, color: "#1c2230", textAlign: "center", lineHeight: 1.45 }}>
+              <IntroLetters text="Би бол hire.mn-ийн AI туслагч." step={0.028} />
+            </div>
+            <div style={{
+              marginTop: 18, marginBottom: 4, fontSize: 13, color: "#7a8294", opacity: 0,
+              animation: "hw-rise 0.6s cubic-bezier(.21,1,.36,1) 1.1s forwards",
+            }}>
+              Та надаас дараах зүйлсийг асууж болно:
+            </div>
+            {bullets.map((b, i) => (
+              <div key={i} style={{
+                display: "flex", gap: 10, marginTop: 12, opacity: 0,
+                animation: `hw-rise 0.6s cubic-bezier(.21,1,.36,1) ${(1.3 + i * 0.22).toFixed(2)}s forwards`,
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f2591e", marginTop: 7, flexShrink: 0 }} />
+                <div style={{ fontSize: 13, lineHeight: 1.5 }}>
+                  <span style={{ color: "#E0531F", fontWeight: 700 }}>{b.t}</span>{" "}
+                  <span style={{ color: "#46505f" }}>{b.d}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function BotMessage({ message, fontSize, userQuestion = "", showAvatar = true, onOpenArtifact }: { message: Message; fontSize: number; userQuestion?: string; showAvatar?: boolean; onOpenArtifact?: (m: Message) => void }) {
   // Parse [TEST:id] markers
   const parseTestMarkers = (text: string) => {
@@ -3828,6 +3923,14 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const [showSidebar, setShowSidebar] = useState(false)
   const [activeTab, setActiveTab] = useState(0) // 0: Chat, 1: FAQs, 2: Contact
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null) // FAQ accordion state
+  const [introPlaying, setIntroPlaying] = useState(false) // Cinematic first-open intro overlay
+  useEffect(() => {
+    if (isOpen && !hwIntroPlayed) {
+      hwIntroPlayed = true
+      hwWelcomeTyped = true // greeting is shown in the intro; keep the chat bubble static
+      setIntroPlaying(true)
+    }
+  }, [isOpen])
 
   // Notify parent window of open/close state for iframe resizing
   // ✅ ЗӨВ — 2 тусдаа useEffect
@@ -4589,6 +4692,10 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           background: linear-gradient(180deg, #E8541A, #FF8C42);
           animation: hw-caret-blink 0.9s step-end infinite;
         }
+        @keyframes hw-rise {
+          from { opacity: 0; transform: translateY(8px); filter: blur(5px); }
+          to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
         @keyframes hw-spin {
           to { transform: rotate(360deg); }
         }
@@ -4989,6 +5096,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   animation: "hw-orb-float 25s ease-in-out infinite reverse",
                 }} />
               </div>
+
+              {/* ══════════ CINEMATIC FIRST-OPEN INTRO ══════════ */}
+              {introPlaying && <IntroSequence onDone={() => setIntroPlaying(false)} />}
 
               {/* ══════════ FLOATING GLASS HEADER ══════════ */}
               <div style={{
