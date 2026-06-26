@@ -146,8 +146,8 @@ function ScoreRing({
           strokeWidth={size * 0.07} strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round" />
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontSize: numSize, fontWeight: 900, color: "#1E293B", lineHeight: 1 }}>{disp}</span>
-        <span style={{ fontSize: size * 0.1, color: "#94A3B8", fontWeight: 600 }}>/{targetDen}</span>
+        <span style={{ fontSize: numSize, fontWeight: 900, color: "#2A2520", lineHeight: 1 }}>{disp}</span>
+        <span style={{ fontSize: size * 0.1, color: "#A89E96", fontWeight: 600 }}>/{targetDen}</span>
       </div>
     </div>
   )
@@ -186,7 +186,7 @@ function ListDetailSheet({
       }}>
         {/* Drag handle */}
         <div style={{ padding: "10px 0 0", display: "flex", justifyContent: "center", flexShrink: 0 }}>
-          <div style={{ width: 42, height: 5, background: "#CBD5E1", borderRadius: 3 }}/>
+          <div style={{ width: 42, height: 5, background: "#DED5CD", borderRadius: 3 }}/>
         </div>
 
         {/* Gradient hero header */}
@@ -214,11 +214,11 @@ function ListDetailSheet({
               {data.items.length} зүйл
             </div>
             <h2 style={{
-              fontSize: 24, fontWeight: 900, color: "#0F172A",
+              fontSize: 24, fontWeight: 900, color: "#1F1B18",
               margin: "0 0 6px", letterSpacing: -0.5, lineHeight: 1.15,
             }}>{data.title}</h2>
             <p style={{
-              fontSize: 12, color: "#475569", lineHeight: 1.5, margin: 0,
+              fontSize: 12, color: "#5B5650", lineHeight: 1.5, margin: 0,
             }}>
               {data.kind === "strengths"
                 ? "Танд илрэх давуу талуудыг ашиглан үр дүнгээ улам сайжруулна уу."
@@ -261,12 +261,12 @@ function ListDetailSheet({
                   <div style={{ flex: 1, minWidth: 0 }}>
                     {itemTitle && (
                       <div style={{
-                        fontSize: 13, fontWeight: 800, color: "#0F172A",
+                        fontSize: 13, fontWeight: 800, color: "#1F1B18",
                         marginBottom: 4, lineHeight: 1.3,
                       }}>{itemTitle}</div>
                     )}
                     <div style={{
-                      fontSize: 12.5, color: itemTitle ? "#475569" : "#1F2937",
+                      fontSize: 12.5, color: itemTitle ? "#5B5650" : "#2A2520",
                       lineHeight: 1.6,
                     }}>{itemBody}</div>
                   </div>
@@ -279,7 +279,7 @@ function ListDetailSheet({
         {/* CTA footer */}
         <div style={{
           padding: "8px 18px 24px", flexShrink: 0,
-          borderTop: "1px solid #F1F5F9",
+          borderTop: "1px solid #FAF6F3",
           background: "#fff",
         }}>
           <button onClick={() => {
@@ -351,7 +351,7 @@ function Sheet({ insight, onClose, onAskAI }: {
       }}>
         {/* Drag handle */}
         <div style={{ padding: "10px 0 0", display: "flex", justifyContent: "center", flexShrink: 0 }}>
-          <div style={{ width: 42, height: 5, background: "#CBD5E1", borderRadius: 3 }}/>
+          <div style={{ width: 42, height: 5, background: "#DED5CD", borderRadius: 3 }}/>
         </div>
 
         {/* Gradient hero */}
@@ -402,9 +402,9 @@ function Sheet({ insight, onClose, onAskAI }: {
         {/* Why important */}
         <div style={{ padding: "16px 20px 0" }}>
           <div style={{
-            background: "linear-gradient(135deg, #F8FAFF, #FFFFFF)",
+            background: "linear-gradient(135deg, #FFF7F2, #FFFFFF)",
             borderRadius: 16, padding: "16px",
-            border: "1.5px solid #E2E8F0",
+            border: "1.5px solid #F0EAE6",
             marginBottom: 16,
             position: "relative",
           }}>
@@ -412,16 +412,16 @@ function Sheet({ insight, onClose, onAskAI }: {
               position: "absolute", top: -10, left: 14,
               background: "#fff",
               padding: "2px 10px", borderRadius: 999,
-              border: "1.5px solid #E2E8F0",
+              border: "1.5px solid #F0EAE6",
               display: "flex", alignItems: "center", gap: 5,
             }}>
               <span style={{ fontSize: 11 }}>💡</span>
-              <span style={{ fontSize: 9, fontWeight: 800, color: "#475569", letterSpacing: 0.6, textTransform: "uppercase" }}>
+              <span style={{ fontSize: 9, fontWeight: 800, color: "#5B5650", letterSpacing: 0.6, textTransform: "uppercase" }}>
                 Яагаад чухал вэ
               </span>
             </div>
             <p style={{
-              fontSize: 13.5, color: "#334155", lineHeight: 1.7,
+              fontSize: 13.5, color: "#43403C", lineHeight: 1.7,
               margin: "6px 0 0", fontWeight: 500,
             }}>{insight.detail}</p>
           </div>
@@ -434,16 +434,16 @@ function Sheet({ insight, onClose, onAskAI }: {
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ fontSize: 14 }}>📋</span>
-                <span style={{ fontSize: 11, fontWeight: 800, color: "#475569", letterSpacing: 0.6, textTransform: "uppercase" }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: "#5B5650", letterSpacing: 0.6, textTransform: "uppercase" }}>
                   Хийж болох алхмууд
                 </span>
               </div>
               <div style={{
-                background: doneCount > 0 ? "#F0FDF4" : "#F1F5F9",
-                color: doneCount > 0 ? PRIMARY : "#94A3B8",
+                background: doneCount > 0 ? "#F0FDF4" : "#FAF6F3",
+                color: doneCount > 0 ? PRIMARY : "#A89E96",
                 fontSize: 10, fontWeight: 800,
                 padding: "3px 10px", borderRadius: 999,
-                border: `1px solid ${doneCount > 0 ? "#BBF7D0" : "#E2E8F0"}`,
+                border: `1px solid ${doneCount > 0 ? "#BBF7D0" : "#F0EAE6"}`,
               }}>{doneCount}/{totalActions}</div>
             </div>
           )}
@@ -451,7 +451,7 @@ function Sheet({ insight, onClose, onAskAI }: {
           {/* Progress bar visual */}
           {totalActions > 0 && (
             <div style={{
-              background: "#F1F5F9", borderRadius: 8, height: 5,
+              background: "#FAF6F3", borderRadius: 8, height: 5,
               marginBottom: 10, overflow: "hidden",
             }}>
               <div style={{
@@ -472,7 +472,7 @@ function Sheet({ insight, onClose, onAskAI }: {
                 display: "flex", gap: 12, marginBottom: 8,
                 padding: "12px 14px",
                 background: isDone ? "#F0FDF4" : "#fff",
-                border: `1.5px solid ${isDone ? PRIMARY + "40" : "#E2E8F0"}`,
+                border: `1.5px solid ${isDone ? PRIMARY + "40" : "#F0EAE6"}`,
                 borderRadius: 14, cursor: "pointer",
                 alignItems: "flex-start",
                 transition: "all 0.2s",
@@ -482,7 +482,7 @@ function Sheet({ insight, onClose, onAskAI }: {
                 <div style={{
                   width: 22, height: 22, borderRadius: "50%",
                   background: isDone ? PRIMARY : "#fff",
-                  border: `2px solid ${isDone ? PRIMARY : "#CBD5E1"}`,
+                  border: `2px solid ${isDone ? PRIMARY : "#DED5CD"}`,
                   flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
                   marginTop: 1,
                   transition: "all 0.2s",
@@ -494,7 +494,7 @@ function Sheet({ insight, onClose, onAskAI }: {
                   )}
                 </div>
                 <span style={{
-                  fontSize: 13, color: isDone ? "#059669" : "#374151",
+                  fontSize: 13, color: isDone ? "#059669" : "#5B5650",
                   lineHeight: 1.6, fontWeight: isDone ? 600 : 500,
                   textDecoration: isDone ? "line-through" : "none",
                   flex: 1,
@@ -509,13 +509,13 @@ function Sheet({ insight, onClose, onAskAI }: {
         {/* Footer CTA */}
         <div style={{
           padding: "10px 20px 24px", flexShrink: 0,
-          borderTop: "1px solid #F1F5F9",
+          borderTop: "1px solid #FAF6F3",
           marginTop: 12,
           display: "flex", gap: 8,
         }}>
           <button onClick={onClose} style={{
             flex: 1, padding: "13px",
-            background: "#F1F5F9", color: "#475569",
+            background: "#FAF6F3", color: "#5B5650",
             border: "none", borderRadius: 14,
             fontSize: 13, fontWeight: 700, cursor: "pointer",
             fontFamily: "inherit",
@@ -593,7 +593,7 @@ export function AnalysisLoadingCard({ title }: { title: string }) {
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: PRIMARY, boxShadow: `0 0 6px ${PRIMARY}`, animation: "ar-pulse 1.6s ease-in-out infinite" }}/>
             <span style={{ fontSize: 9, fontWeight: 800, color: PRIMARY, letterSpacing: 0.6 }}>AI ШИНЖИЛЖ БАЙНА</span>
           </div>
-          <p style={{ fontSize: 13, fontWeight: 800, color: "#1E293B", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <p style={{ fontSize: 13, fontWeight: 800, color: "#2A2520", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {title}
           </p>
         </div>
@@ -602,7 +602,7 @@ export function AnalysisLoadingCard({ title }: { title: string }) {
       {/* Progress bar */}
       <div style={{ marginBottom: 14 }}>
         <div style={{
-          background: "#F1F5F9", borderRadius: 8, height: 8, overflow: "hidden",
+          background: "#FAF6F3", borderRadius: 8, height: 8, overflow: "hidden",
           position: "relative",
         }}>
           <div style={{
@@ -623,7 +623,7 @@ export function AnalysisLoadingCard({ title }: { title: string }) {
         </div>
         <div style={{
           display: "flex", justifyContent: "space-between",
-          marginTop: 5, fontSize: 9, color: "#94A3B8", fontWeight: 700,
+          marginTop: 5, fontSize: 9, color: "#A89E96", fontWeight: 700,
         }}>
           <span>Шинжилгээ үргэлжилж байна...</span>
           <span style={{ color: PRIMARY }}>{Math.round(progress)}%</span>
@@ -645,7 +645,7 @@ export function AnalysisLoadingCard({ title }: { title: string }) {
             }}>
               <div style={{
                 width: 20, height: 20, borderRadius: "50%",
-                background: isDone ? PRIMARY : isActive ? "#fff" : "#F1F5F9",
+                background: isDone ? PRIMARY : isActive ? "#fff" : "#FAF6F3",
                 border: isActive ? `2px solid ${PRIMARY}` : "none",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 flexShrink: 0,
@@ -662,7 +662,7 @@ export function AnalysisLoadingCard({ title }: { title: string }) {
               </div>
               <span style={{
                 fontSize: 11.5, fontWeight: isActive ? 700 : 600,
-                color: isDone ? "#059669" : isActive ? "#1E293B" : "#94A3B8",
+                color: isDone ? "#059669" : isActive ? "#2A2520" : "#A89E96",
                 flex: 1,
               }}>
                 <span style={{ marginRight: 4 }}>{s.emoji}</span>{s.label}
@@ -713,7 +713,7 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
   const stats = [
     { label: kpi.metric1Label || "Түвшин", value: data.metrics[0] ? `${data.metrics[0].score}/${data.metrics[0].maxScore}` : (data.displayScore != null ? `${data.displayScore}/${displayMax}` : "—"), color: "#16A34A", bg: "#ECFDF3",
       icon: <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 12h6M9 16h6" /> },
-    { label: kpi.riskLabel || "Эрсдэл", value: data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : "Өндөр", color: riskColor(data.riskLevel), bg: "#EFF6FF",
+    { label: kpi.riskLabel || "Эрсдэл", value: data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : "Өндөр", color: riskColor(data.riskLevel), bg: "#FFF4EC",
       icon: <path d="M3 17l6-6 4 4 8-8M21 7v4M21 7h-4" /> },
     { label: kpi.potentialLabel || "Боломж", value: data.quitPotential === "High" ? "Өндөр" : data.quitPotential === "Medium" ? "Дунд" : "Бага", color: "#F59E0B", bg: "#FFFBEB",
       icon: <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3" /> },
@@ -722,7 +722,7 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
   const dimIcons = ["M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z", "M2 4h2v16M22 4h-2v16M4 8h16v6H4zM7 14v3M17 14v3", "M12 2a7 7 0 0 0-7 7c0 2 1 3 2 4M12 2a7 7 0 0 1 7 7c0 2-1 3-2 4M9 17h6M10 21h4"]
 
   return (
-    <div onClick={onExpand} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{ background: "#F6F8FB", borderRadius: 20, overflow: "hidden", cursor: "pointer", padding: 7, boxShadow: hov ? `0 14px 36px rgba(15,23,42,0.08), 0 0 0 1px ${acc.c}33` : "0 4px 16px rgba(15,23,42,0.06)", transform: hov ? "translateY(-2px)" : "translateY(0)", transition: "all 0.25s cubic-bezier(.16,1,.3,1)" }}>
+    <div onClick={onExpand} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{ background: "#FAF6F3", borderRadius: 20, overflow: "hidden", cursor: "pointer", padding: 7, boxShadow: hov ? `0 14px 36px rgba(15,23,42,0.08), 0 0 0 1px ${acc.c}33` : "0 4px 16px rgba(15,23,42,0.06)", transform: hov ? "translateY(-2px)" : "translateY(0)", transition: "all 0.25s cubic-bezier(.16,1,.3,1)" }}>
       {/* Hero */}
       <div style={{ position: "relative", overflow: "hidden", background: `linear-gradient(150deg, ${acc.soft} 0%, ${acc.soft2} 100%)`, borderRadius: 16, padding: "14px 14px 15px", display: "flex", gap: 11, alignItems: "center" }}>
         <div style={{ position: "absolute", top: -30, right: 60, width: 80, height: 80, borderRadius: "50%", background: acc.glow, filter: "blur(24px)", pointerEvents: "none", opacity: 0.7 }} />
@@ -733,8 +733,8 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
             <circle cx="30" cy="30" r="24" fill="none" stroke={color} strokeWidth="5" strokeDasharray={2 * Math.PI * 24} strokeDashoffset={(2 * Math.PI * 24) * (1 - Math.min(data.healthScore, 100) / 100 * (bar ? 1 : 0))} strokeLinecap="round" style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1)" }} />
           </svg>
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", lineHeight: 1, letterSpacing: "-0.3px" }}>{scoreDisp}</span>
-            <span style={{ fontSize: 8, color: "#94A3B8", fontWeight: 500, marginTop: 1 }}>/{displayMax}</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#1F1B18", lineHeight: 1, letterSpacing: "-0.3px" }}>{scoreDisp}</span>
+            <span style={{ fontSize: 8, color: "#A89E96", fontWeight: 500, marginTop: 1 }}>/{displayMax}</span>
           </div>
         </div>
         {/* Title + badge */}
@@ -743,10 +743,10 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
             <svg width="9" height="9" viewBox="0 0 24 24" fill={acc.c}><path d="M12 2L2 22h20L12 2zm0 4l7 14H5L12 6z"/></svg>
             AI ШИНЖИЛГЭЭ
           </p>
-          <p style={{ fontSize: 12.5, fontWeight: 600, color: "#0F172A", margin: "0 0 6px", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", letterSpacing: "-0.1px" }}>{title}</p>
+          <p style={{ fontSize: 12.5, fontWeight: 600, color: "#1F1B18", margin: "0 0 6px", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", letterSpacing: "-0.1px" }}>{title}</p>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(6px)", borderRadius: 10, padding: "4px 9px", border: "1px solid rgba(255,255,255,0.95)" }}>
             <svg width="9" height="9" viewBox="0 0 24 24" fill={acc.c} style={{ flexShrink: 0 }}><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21 8 14 2 9.4h7.6z"/></svg>
-            <span style={{ fontSize: 10, fontWeight: 600, color: "#475569", lineHeight: 1.3 }}>{data.summary.title}</span>
+            <span style={{ fontSize: 10, fontWeight: 600, color: "#5B5650", lineHeight: 1.3 }}>{data.summary.title}</span>
           </div>
         </div>
         {/* Mascot */}
@@ -756,13 +756,13 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
       {/* Stat tiles */}
       <div style={{ display: "flex", background: "#fff", borderRadius: 14, padding: "10px 4px", marginTop: 6 }}>
         {stats.map((k, i) => (
-          <div key={i} style={{ flex: 1, padding: "0 7px", display: "flex", alignItems: "center", gap: 8, borderRight: i < 2 ? "1px solid #F1F5F9" : "none", minWidth: 0 }}>
+          <div key={i} style={{ flex: 1, padding: "0 7px", display: "flex", alignItems: "center", gap: 8, borderRight: i < 2 ? "1px solid #FAF6F3" : "none", minWidth: 0 }}>
             <div style={{ width: 28, height: 28, borderRadius: 9, background: k.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={k.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{k.icon}</svg>
             </div>
             <div style={{ minWidth: 0 }}>
-              <p style={{ fontSize: 7.5, color: "#94A3B8", fontWeight: 600, margin: "0 0 1px", letterSpacing: "0.3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{k.label.toUpperCase()}</p>
-              <p style={{ fontSize: 12.5, fontWeight: 700, color: "#0F172A", margin: 0, letterSpacing: "-0.2px" }}>{k.value}</p>
+              <p style={{ fontSize: 7.5, color: "#A89E96", fontWeight: 600, margin: "0 0 1px", letterSpacing: "0.3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{k.label.toUpperCase()}</p>
+              <p style={{ fontSize: 12.5, fontWeight: 700, color: "#1F1B18", margin: 0, letterSpacing: "-0.2px" }}>{k.value}</p>
             </div>
           </div>
         ))}
@@ -782,10 +782,10 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, gap: 8 }}>
-                  <span style={{ fontSize: 10.5, fontWeight: 600, color: "#334155", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", letterSpacing: "-0.1px" }}>{m.label}</span>
-                  <span style={{ fontSize: 10.5, fontWeight: 700, color: "#64748B", flexShrink: 0, letterSpacing: "-0.2px" }}>{m.score}/{m.maxScore}</span>
+                  <span style={{ fontSize: 10.5, fontWeight: 600, color: "#43403C", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", letterSpacing: "-0.1px" }}>{m.label}</span>
+                  <span style={{ fontSize: 10.5, fontWeight: 700, color: "#8A817A", flexShrink: 0, letterSpacing: "-0.2px" }}>{m.score}/{m.maxScore}</span>
                 </div>
-                <div style={{ background: "#F1F5F9", borderRadius: 6, height: 5, overflow: "hidden" }}>
+                <div style={{ background: "#FAF6F3", borderRadius: 6, height: 5, overflow: "hidden" }}>
                   <div style={{ height: "100%", borderRadius: 6, width: bar ? `${ratio * 100}%` : "0%", background: barGrad, transition: "width 1.1s cubic-bezier(.16,1,.3,1)" }} />
                 </div>
               </div>
@@ -880,13 +880,13 @@ function RadarChart({ items, color }: { items: SectionItem[]; color: string }) {
         {rings.slice().reverse().map((rr, ri) => (
           <polygon key={ri}
             points={data.map((_, i) => pt(i, R * rr).join(',')).join(' ')}
-            fill={ri === 0 ? "#F8FAFC" : "none"}
-            stroke="#E5E9F0" strokeWidth={1} />
+            fill={ri === 0 ? "#FAF6F3" : "none"}
+            stroke="#F0EAE6" strokeWidth={1} />
         ))}
         {/* Axes */}
         {data.map((_, i) => {
           const [x, y] = pt(i, R)
-          return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#EAEEF4" strokeWidth={1} />
+          return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#F0EAE6" strokeWidth={1} />
         })}
         {/* Data polygon */}
         <polygon points={polyStr}
@@ -909,7 +909,7 @@ function RadarChart({ items, color }: { items: SectionItem[]; color: string }) {
           const lines = wrapLabel(it.title || '', 13)
           return (
             <text key={i} x={lx} y={ly - (lines.length - 1) * 5} textAnchor={anchor as any}
-              fontSize={9.5} fontWeight={isTop ? 800 : 600} fill={isTop ? color : "#64748B"}>
+              fontSize={9.5} fontWeight={isTop ? 800 : 600} fill={isTop ? color : "#8A817A"}>
               {lines.map((ln, li) => <tspan key={li} x={lx} dy={li === 0 ? 0 : 11}>{ln}</tspan>)}
             </text>
           )
@@ -918,13 +918,13 @@ function RadarChart({ items, color }: { items: SectionItem[]; color: string }) {
       {/* Ranked legend with mini bars */}
       <div style={{ width: "100%", marginTop: 6 }}>
         {data.slice(0, 8).map((it, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 9, padding: "6px 0", borderBottom: i < Math.min(data.length, 8) - 1 ? "1px solid #F4F6FB" : "none" }}>
-            <span style={{ width: 19, height: 19, borderRadius: 7, background: i === 0 ? color : "#F1F5F9", color: i === 0 ? "#fff" : "#94A3B8", fontSize: 9.5, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
-            <span style={{ flex: 1, fontSize: 12, fontWeight: i === 0 ? 800 : 600, color: i === 0 ? "#1E293B" : "#475569", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{it.title}</span>
-            <div style={{ width: 46, height: 5, borderRadius: 4, background: "#F1F5F9", overflow: "hidden", flexShrink: 0 }}>
-              <div style={{ height: "100%", width: `${Math.min(it.pct ?? 0, 100)}%`, background: i === 0 ? color : "#CBD5E1", borderRadius: 4 }} />
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 9, padding: "6px 0", borderBottom: i < Math.min(data.length, 8) - 1 ? "1px solid #FAF6F3" : "none" }}>
+            <span style={{ width: 19, height: 19, borderRadius: 7, background: i === 0 ? color : "#FAF6F3", color: i === 0 ? "#fff" : "#A89E96", fontSize: 9.5, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
+            <span style={{ flex: 1, fontSize: 12, fontWeight: i === 0 ? 800 : 600, color: i === 0 ? "#2A2520" : "#5B5650", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{it.title}</span>
+            <div style={{ width: 46, height: 5, borderRadius: 4, background: "#FAF6F3", overflow: "hidden", flexShrink: 0 }}>
+              <div style={{ height: "100%", width: `${Math.min(it.pct ?? 0, 100)}%`, background: i === 0 ? color : "#DED5CD", borderRadius: 4 }} />
             </div>
-            <span style={{ fontSize: 12, fontWeight: 800, color: i === 0 ? color : "#94A3B8", flexShrink: 0, minWidth: 34, textAlign: "right" }}>{it.meta}</span>
+            <span style={{ fontSize: 12, fontWeight: 800, color: i === 0 ? color : "#A89E96", flexShrink: 0, minWidth: 34, textAlign: "right" }}>{it.meta}</span>
           </div>
         ))}
       </div>
@@ -1003,26 +1003,26 @@ function AdviceCarousel({ items, onAskAI }: { items: SectionItem[]; onAskAI: (q:
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }}>
         <button onClick={() => go(idx - 1)} disabled={idx === 0} style={{
           width: 34, height: 34, borderRadius: "50%", border: "none",
-          background: idx === 0 ? "#F1F5F9" : "#fff", boxShadow: idx === 0 ? "none" : "0 2px 8px rgba(0,0,0,0.1)",
+          background: idx === 0 ? "#FAF6F3" : "#fff", boxShadow: idx === 0 ? "none" : "0 2px 8px rgba(0,0,0,0.1)",
           cursor: idx === 0 ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center",
         }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={idx === 0 ? "#CBD5E1" : "#475569"} strokeWidth="3" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={idx === 0 ? "#DED5CD" : "#5B5650"} strokeWidth="3" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
           {items.map((_, i) => (
             <button key={i} onClick={() => go(i)} style={{
               width: i === idx ? 22 : 7, height: 7, borderRadius: 4,
-              background: i === idx ? "#1E293B" : "#CBD5E1", border: "none", cursor: "pointer",
+              background: i === idx ? "#2A2520" : "#DED5CD", border: "none", cursor: "pointer",
               transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)", padding: 0,
             }} />
           ))}
         </div>
         <button onClick={() => go(idx + 1)} disabled={idx === n - 1} style={{
           width: 34, height: 34, borderRadius: "50%", border: "none",
-          background: idx === n - 1 ? "#F1F5F9" : "#fff", boxShadow: idx === n - 1 ? "none" : "0 2px 8px rgba(0,0,0,0.1)",
+          background: idx === n - 1 ? "#FAF6F3" : "#fff", boxShadow: idx === n - 1 ? "none" : "0 2px 8px rgba(0,0,0,0.1)",
           cursor: idx === n - 1 ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center",
         }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={idx === n - 1 ? "#CBD5E1" : "#475569"} strokeWidth="3" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={idx === n - 1 ? "#DED5CD" : "#5B5650"} strokeWidth="3" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
         </button>
       </div>
     </div>
@@ -1189,8 +1189,8 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
               padding: "12px 14px", marginBottom: 10, cursor: "pointer", textAlign: "left",
             }}>
               <span style={{ fontSize: 18 }}>{s.emoji}</span>
-              <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: "#1E293B" }}>{s.title}</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
+              <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: "#2A2520" }}>{s.title}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A89E96" strokeWidth="2.5" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
             </button>
           )
         }
@@ -1248,7 +1248,7 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
                 {s.items.map((it, ii) => (
                   <div key={ii} style={{ marginBottom: ii < s.items.length - 1 ? 12 : 0 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>{it.title}</span>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "#5B5650" }}>{it.title}</span>
                       <span style={{ fontSize: 12, fontWeight: 700, color: ORANGE.c }}>{it.meta}</span>
                     </div>
                     <div style={{ height: 8, background: "#F4F1EF", borderRadius: 6, overflow: "hidden" }}>
@@ -1262,7 +1262,7 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
             {s.layout === "quotes" && s.items.map((it, ii) => (
               <div key={ii} style={{ borderLeft: `3px solid ${t.main}`, background: t.bg, borderRadius: "0 12px 12px 0", padding: "10px 12px", marginBottom: ii < s.items.length - 1 ? 8 : 0 }}>
                 {it.title && <p style={{ fontSize: 11, fontWeight: 800, color: t.text, margin: "0 0 3px" }}>{it.title}</p>}
-                {it.text && <p style={{ fontSize: 12, color: "#475569", fontStyle: "italic", lineHeight: 1.5, margin: 0 }}>"{it.text}"</p>}
+                {it.text && <p style={{ fontSize: 12, color: "#5B5650", fontStyle: "italic", lineHeight: 1.5, margin: 0 }}>"{it.text}"</p>}
               </div>
             ))}
 
@@ -1276,8 +1276,8 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
               }}>
                 <span style={{ fontSize: 16, flexShrink: 0, lineHeight: 1.3 }}>{it.emoji || "•"}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  {it.title && <p style={{ fontSize: 12.5, fontWeight: 800, color: "#1E293B", margin: "0 0 2px", lineHeight: 1.35 }}>{it.title}</p>}
-                  {it.text && <p style={{ fontSize: 11.5, color: "#64748B", lineHeight: 1.5, margin: 0 }}>{it.text}</p>}
+                  {it.title && <p style={{ fontSize: 12.5, fontWeight: 800, color: "#2A2520", margin: "0 0 2px", lineHeight: 1.35 }}>{it.title}</p>}
+                  {it.text && <p style={{ fontSize: 11.5, color: "#8A817A", lineHeight: 1.5, margin: 0 }}>{it.text}</p>}
                 </div>
               </div>
             ))}
@@ -1287,8 +1287,8 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
                 {s.items.map((it, ii) => (
                   <div key={ii} style={{ background: t.bg, borderRadius: 14, padding: "12px 10px", textAlign: "center" }}>
                     <div style={{ fontSize: 20, marginBottom: 4 }}>{it.emoji || s.emoji}</div>
-                    <p style={{ fontSize: 11.5, fontWeight: 800, color: "#1E293B", margin: "0 0 2px" }}>{it.title}</p>
-                    {it.text && <p style={{ fontSize: 10.5, color: "#64748B", margin: 0, lineHeight: 1.4 }}>{it.text}</p>}
+                    <p style={{ fontSize: 11.5, fontWeight: 800, color: "#2A2520", margin: "0 0 2px" }}>{it.title}</p>
+                    {it.text && <p style={{ fontSize: 10.5, color: "#8A817A", margin: 0, lineHeight: 1.4 }}>{it.text}</p>}
                   </div>
                 ))}
               </div>
@@ -1326,7 +1326,7 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
                   {allDone && (
                     <div style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", gap: 10, background: "linear-gradient(135deg,#FFF7F1,#FFEEDF)", border: `1.5px solid #FBD9C4`, borderRadius: 16, padding: "10px 12px", marginBottom: 10, animation: "ar-pop-b 0.5s cubic-bezier(.16,1,.3,1) both" }}>
                       {[0,1,2,3,4,5].map(ci => (
-                        <span key={ci} style={{ position: "absolute", top: -6, left: `${12 + ci * 16}%`, width: 6, height: 6, borderRadius: 2, background: ["#00C48C","#FBBF24","#F97316","#6366F1","#EC4899","#22C55E"][ci], animation: `ar-confetti ${1.2 + ci * 0.15}s ease-in ${ci * 0.1}s infinite` }} />
+                        <span key={ci} style={{ position: "absolute", top: -6, left: `${12 + ci * 16}%`, width: 6, height: 6, borderRadius: 2, background: ["#00C48C","#FBBF24","#F97316","#EA580C","#E8541A","#22C55E"][ci], animation: `ar-confetti ${1.2 + ci * 0.15}s ease-in ${ci * 0.1}s infinite` }} />
                       ))}
                       <img src={CHARS.celebrate} alt="" style={{ width: 38, height: "auto", animation: "ar-float2 2.5s ease-in-out infinite" }} />
                       <div style={{ position: "relative" }}>
@@ -1337,10 +1337,10 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
                   )}
                   {/* Progress header */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: "#9CA3AF" }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#9A8E86" }}>
                       {allDone ? "Бүгдийг гүйцэтгэлээ!" : `${doneCount}/${total} гүйцэтгэсэн`}
                     </span>
-                    <span style={{ fontSize: 11, fontWeight: 800, color: allDone ? ORANGE.c : "#9CA3AF" }}>{pct}%</span>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: allDone ? ORANGE.c : "#9A8E86" }}>{pct}%</span>
                   </div>
                   <div style={{ height: 7, background: "#F2EFEC", borderRadius: 5, overflow: "hidden", marginBottom: 12 }}>
                     <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg, ${ORANGE.c}, ${ORANGE.c3})`, borderRadius: 5, transition: "width 0.5s cubic-bezier(.16,1,.3,1)", boxShadow: pct > 0 ? `0 0 8px ${ORANGE.glow}` : "none" }} />
@@ -1368,9 +1368,9 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
                         }}>
                           {checked
                             ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                            : <span style={{ fontSize: 10, fontWeight: 800, color: "#9CA3AF" }}>{ii + 1}</span>}
+                            : <span style={{ fontSize: 10, fontWeight: 800, color: "#9A8E86" }}>{ii + 1}</span>}
                         </div>
-                        <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: checked ? "#9CA3AF" : "#1F2937", textDecoration: checked ? "line-through" : "none", lineHeight: 1.4, transition: "color 0.2s" }}>
+                        <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: checked ? "#9A8E86" : "#2A2520", textDecoration: checked ? "line-through" : "none", lineHeight: 1.4, transition: "color 0.2s" }}>
                           {it.title || it.text}
                         </span>
                       </button>
@@ -1520,7 +1520,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
   const statCards = data.statCards || []
   const metricColor = (pct: number) => pct > 0.6 ? "#FF4444" : pct > 0.3 ? "#FF9800" : PRIMARY
   const metricGrad = (_pct: number) => `linear-gradient(90deg,${PRIMARY},#FB923C)`
-  const weekColors = ["#6C63FF", "#FF6B6B", PRIMARY, "#FF9800"]
+  const weekColors = ["#FB923C", "#FF6B6B", PRIMARY, "#FF9800"]
   const weekIcons = ["📋", "⚡", "🔄", "🏆"]
   const allGoalsDone = goals.filter(Boolean).length === todayGoals.length && todayGoals.length > 0
 
@@ -1564,7 +1564,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
       <div style={{ background: "#fff", borderBottom: hasJourney ? "none" : "1px solid #F1ECE8", padding: "10px 14px", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: hasJourney ? 0 : 10 }}>
           <button onClick={close} style={{ background: "#FAF6F3", border: "1px solid #F0E6DF", borderRadius: 20, padding: "6px 14px", fontSize: 12, color: "#7C6F66", cursor: "pointer", fontWeight: 600 }}>← Буцах</button>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#1F2937", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{reportTitle}</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#2A2520", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{reportTitle}</span>
           <button onClick={expand} style={{ background: "#FAF6F3", border: "1px solid #F0E6DF", borderRadius: 20, padding: "7px 10px", cursor: "pointer", color: "#B89A88", display: "flex", alignItems: "center" }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
               {expanded ? <path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3" /> : <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />}
@@ -1572,9 +1572,9 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
           </button>
         </div>
         {!hasJourney && (
-        <div style={{ display: "flex", background: "#F1F5F9", borderRadius: 12, padding: 3, gap: 2 }}>
+        <div style={{ display: "flex", background: "#FAF6F3", borderRadius: 12, padding: 3, gap: 2 }}>
           {PAGES.map((p, i) => (
-            <button key={i} onClick={() => setPage(i)} style={{ flex: 1, padding: "7px", fontSize: 11, fontWeight: 700, border: "none", borderRadius: 10, cursor: "pointer", background: page === i ? "#fff" : "transparent", color: page === i ? "#1E293B" : "#94A3B8", boxShadow: page === i ? "0 2px 8px rgba(0,0,0,0.08)" : "none", transition: "all 0.2s" }}>{p}</button>
+            <button key={i} onClick={() => setPage(i)} style={{ flex: 1, padding: "7px", fontSize: 11, fontWeight: 700, border: "none", borderRadius: 10, cursor: "pointer", background: page === i ? "#fff" : "transparent", color: page === i ? "#2A2520" : "#A89E96", boxShadow: page === i ? "0 2px 8px rgba(0,0,0,0.08)" : "none", transition: "all 0.2s" }}>{p}</button>
           ))}
         </div>
         )}
@@ -1596,13 +1596,13 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
                   <span style={{ fontSize: 11 }}>💙</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.4px" }}>HEALTH SCORE</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "#A89E96", letterSpacing: "0.4px" }}>HEALTH SCORE</span>
                 </div>
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: `${color}15`, borderRadius: 20, padding: "4px 12px", border: `1.5px solid ${color}25`, marginBottom: 8 }}>
                   <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, display: "inline-block" }} />
                   <span style={{ color, fontWeight: 800, fontSize: 13 }}>{data.summary.title}</span>
                 </div>
-                <p style={{ fontSize: 12, color: "#64748B", lineHeight: 1.6, margin: 0 }}>{data.summary.description}</p>
+                <p style={{ fontSize: 12, color: "#8A817A", lineHeight: 1.6, margin: 0 }}>{data.summary.description}</p>
               </div>
               <Char type={heroChar} size={72} style={{ flexShrink: 0 }} />
             </div>
@@ -1615,10 +1615,10 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                 { label: kpi.potentialLabel || "Боломж", value: data.quitPotential === "High" ? "High" : data.quitPotential === "Medium" ? "Mid" : "Low", sub: data.quitPotential === "High" ? "Өндөр" : data.quitPotential === "Medium" ? "Дунд" : "Бага", color: pc, bg: pc === GREEN ? "#F0FDF4" : pc === AMBER ? "#FFFBEB" : "#FFF2F2", border: `${pc}30`, barPct: data.quitPotential === "High" ? 85 : data.quitPotential === "Medium" ? 50 : 20 },
               ].map((k, i) => (
                 <div key={i} style={{ background: "#fff", borderRadius: 14, padding: "12px 10px", boxShadow: "0 2px 10px rgba(0,0,0,0.06)", border: `1.5px solid ${k.border}` }}>
-                  <p style={{ fontSize: 8, color: "#94A3B8", fontWeight: 700, margin: "0 0 4px", letterSpacing: "0.3px", lineHeight: 1.3 }}>{k.label.toUpperCase()}</p>
+                  <p style={{ fontSize: 8, color: "#A89E96", fontWeight: 700, margin: "0 0 4px", letterSpacing: "0.3px", lineHeight: 1.3 }}>{k.label.toUpperCase()}</p>
                   <p style={{ fontSize: 18, fontWeight: 900, color: k.color, margin: "0 0 1px", lineHeight: 1 }}>{k.value}</p>
-                  <p style={{ fontSize: 8, color: "#94A3B8", margin: "0 0 6px", lineHeight: 1.3 }}>{k.sub}</p>
-                  <div style={{ background: "#F1F5F9", borderRadius: 6, height: 4, overflow: "hidden" }}>
+                  <p style={{ fontSize: 8, color: "#A89E96", margin: "0 0 6px", lineHeight: 1.3 }}>{k.sub}</p>
+                  <div style={{ background: "#FAF6F3", borderRadius: 6, height: 4, overflow: "hidden" }}>
                     <div style={{ height: "100%", borderRadius: 6, width: bar ? `${k.barPct}%` : "0%", background: k.color, transition: "width 1s cubic-bezier(.16,1,.3,1)" }} />
                   </div>
                 </div>
@@ -1646,7 +1646,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               <div style={{
                 background: "#fff", borderRadius: 18, padding: "16px",
                 marginBottom: 10, boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-                border: "1px solid #F1F5F9",
+                border: "1px solid #FAF6F3",
               }}>
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -1655,7 +1655,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <div style={{
                       width: 28, height: 28, borderRadius: 9,
-                      background: "linear-gradient(135deg, #6C63FF, #4F46E5)",
+                      background: "linear-gradient(135deg, #FB923C, #C2410C)",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       boxShadow: "0 4px 10px rgba(108,99,255,0.3)",
                     }}>
@@ -1666,19 +1666,19 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                       </svg>
                     </div>
                     <div>
-                      <p style={{ fontSize: 13, fontWeight: 800, color: "#1E293B", margin: "0 0 1px" }}>
+                      <p style={{ fontSize: 13, fontWeight: 800, color: "#2A2520", margin: "0 0 1px" }}>
                         Хэмжээсүүдийн задаргаа
                       </p>
-                      <p style={{ fontSize: 9, color: "#94A3B8", margin: 0, letterSpacing: 0.3 }}>
+                      <p style={{ fontSize: 9, color: "#A89E96", margin: 0, letterSpacing: 0.3 }}>
                         {data.dimensions.length} хэмжээс • Бодит тестээс
                       </p>
                     </div>
                   </div>
                   <div style={{
-                    background: "#EEF2FF", color: "#4F46E5",
+                    background: "#FFF4EC", color: "#C2410C",
                     fontSize: 10, fontWeight: 800,
                     padding: "4px 10px", borderRadius: 999,
-                    border: "1px solid #C7D2FE",
+                    border: "1px solid #FED7AA",
                   }}>
                     {data.dimensions.length}/Х
                   </div>
@@ -1695,7 +1695,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                     <div key={i} style={{
                       display: "flex", alignItems: "center", gap: 12,
                       padding: "10px 0",
-                      borderBottom: i < data.dimensions!.length - 1 ? "1px solid #F1F5F9" : "none",
+                      borderBottom: i < data.dimensions!.length - 1 ? "1px solid #FAF6F3" : "none",
                       animation: `ci 0.4s ease ${i * 0.07}s both`,
                     }}>
                       {/* Letter badge */}
@@ -1714,17 +1714,17 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                           marginBottom: 4, gap: 6,
                         }}>
                           <span style={{
-                            fontSize: 12, fontWeight: 700, color: "#1E293B",
+                            fontSize: 12, fontWeight: 700, color: "#2A2520",
                             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                             flex: 1, minWidth: 0,
                           }}>{d.label.replace(/\s*\([A-ZА-ЯӨҮЁ]\)\s*/i, "")}</span>
                           <span style={{
                             fontSize: 13, fontWeight: 900, color: c, flexShrink: 0,
                             fontFeatureSettings: "'tnum'",
-                          }}>{d.score}<span style={{ fontSize: 10, color: "#94A3B8", fontWeight: 700 }}>/{d.maxScore}</span></span>
+                          }}>{d.score}<span style={{ fontSize: 10, color: "#A89E96", fontWeight: 700 }}>/{d.maxScore}</span></span>
                         </div>
                         <div style={{
-                          background: "#F1F5F9", borderRadius: 6, height: 6, overflow: "hidden",
+                          background: "#FAF6F3", borderRadius: 6, height: 6, overflow: "hidden",
                           position: "relative",
                         }}>
                           <div style={{
@@ -1742,10 +1742,10 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
 
                 <div style={{
                   marginTop: 14, padding: "8px 12px",
-                  background: "#F8FAFF", borderRadius: 10,
-                  fontSize: 10.5, color: "#64748B", fontWeight: 500,
+                  background: "#FFF7F2", borderRadius: 10,
+                  fontSize: 10.5, color: "#8A817A", fontWeight: 500,
                   lineHeight: 1.5, textAlign: "center",
-                  border: "1px dashed #E2E8F0",
+                  border: "1px dashed #F0EAE6",
                 }}>
                   💡 Хэмжээс тус бүрт өөрийн оноо, утга бий. Дэлгэрэнгүйг тайлангаас уншина уу.
                 </div>
@@ -1757,14 +1757,14 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               <div key={i} style={{ background: "#fff", borderRadius: 16, padding: "14px 16px", marginBottom: 8, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                   <div>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: "#1E293B", margin: "0 0 1px" }}>{m.label}</p>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: "#2A2520", margin: "0 0 1px" }}>{m.label}</p>
                     <p style={{ fontSize: 10, fontWeight: 700, color: metricColor(m.score / m.maxScore), margin: 0 }}>{m.status}</p>
                   </div>
                   <div style={{ background: `${metricColor(m.score / m.maxScore)}12`, borderRadius: 10, padding: "4px 10px", border: `1px solid ${metricColor(m.score / m.maxScore)}25` }}>
                     <span style={{ fontSize: 14, fontWeight: 900, color: metricColor(m.score / m.maxScore) }}>{m.score}/{m.maxScore}</span>
                   </div>
                 </div>
-                <div style={{ background: "#F1F5F9", borderRadius: 10, height: 10, overflow: "hidden" }}>
+                <div style={{ background: "#FAF6F3", borderRadius: 10, height: 10, overflow: "hidden" }}>
                   <div style={{ height: "100%", borderRadius: 10, width: bar ? `${(m.score / m.maxScore) * 100}%` : "0%", background: metricGrad(m.score / m.maxScore), transition: `width ${1.1 + i * 0.1}s cubic-bezier(.16,1,.3,1)` }} />
                 </div>
               </div>
@@ -1783,7 +1783,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                       <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#D1FAE5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
                         <span style={{ color: PRIMARY, fontSize: 10, fontWeight: 800 }}>✓</span>
                       </div>
-                      <span style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{s}</span>
+                      <span style={{ fontSize: 11, color: "#5B5650", lineHeight: 1.4 }}>{s}</span>
                     </div>
                   ))}
                 </div>
@@ -1794,7 +1794,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                       <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#FFF7ED", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
                         <span style={{ color: "#FF9800", fontSize: 10, fontWeight: 800 }}>!</span>
                       </div>
-                      <span style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{r}</span>
+                      <span style={{ fontSize: 11, color: "#5B5650", lineHeight: 1.4 }}>{r}</span>
                     </div>
                   ))}
                 </div>
@@ -1808,15 +1808,15 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                   {statCards.map((s, i) => (
                     <div key={i}>
                       <div style={{ fontSize: 20, marginBottom: 3 }}>{s.icon}</div>
-                      <p style={{ fontSize: 13, fontWeight: 900, color: "#1E293B", margin: "0 0 1px", lineHeight: 1 }}>{s.value}</p>
-                      <p style={{ fontSize: 8, color: "#94A3B8", margin: 0, lineHeight: 1.3 }}>{s.sub}</p>
+                      <p style={{ fontSize: 13, fontWeight: 900, color: "#2A2520", margin: "0 0 1px", lineHeight: 1 }}>{s.value}</p>
+                      <p style={{ fontSize: 8, color: "#A89E96", margin: 0, lineHeight: 1.3 }}>{s.sub}</p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            <button onClick={() => setPage(1)} style={{ width: "100%", padding: "12px", background: "#F1F5F9", border: "1.5px solid #E2E8F0", borderRadius: 14, color: "#475569", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+            <button onClick={() => setPage(1)} style={{ width: "100%", padding: "12px", background: "#FAF6F3", border: "1.5px solid #F0EAE6", borderRadius: 14, color: "#5B5650", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
               AI Дүн шинжилгээ харах →
             </button>
           </div>
@@ -2012,9 +2012,9 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                     // Map index -> icon + color
                     const icons = [
                       { color: "#E8541A", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#E8541A" opacity="0.18"/><circle cx="12" cy="12" r="6" fill="none" stroke="#E8541A" strokeWidth="2"/><circle cx="12" cy="12" r="2.5" fill="#E8541A"/></svg> },
-                      { color: "#3B82F6", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="13" width="4" height="8" rx="1" fill="#3B82F6" opacity="0.5"/><rect x="10" y="8" width="4" height="13" rx="1" fill="#3B82F6" opacity="0.75"/><rect x="17" y="4" width="4" height="17" rx="1" fill="#3B82F6"/></svg> },
+                      { color: "#EA580C", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="13" width="4" height="8" rx="1" fill="#EA580C" opacity="0.5"/><rect x="10" y="8" width="4" height="13" rx="1" fill="#EA580C" opacity="0.75"/><rect x="17" y="4" width="4" height="17" rx="1" fill="#EA580C"/></svg> },
                       { color: "#F59E0B", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="#F59E0B"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> },
-                      { color: "#8B5CF6", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#8B5CF6" opacity="0.18"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="12" r="3" fill="#8B5CF6"/></svg> },
+                      { color: "#FB923C", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#FB923C" opacity="0.18"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" stroke="#FB923C" strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="12" r="3" fill="#FB923C"/></svg> },
                     ]
                     const ic = icons[i] || icons[0]
                     return (
@@ -2024,7 +2024,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                       }}>
                         {ic.svg}
                         <div style={{
-                          fontSize: 8, fontWeight: 800, color: "#64748B",
+                          fontSize: 8, fontWeight: 800, color: "#8A817A",
                           letterSpacing: 0.3, textTransform: "uppercase",
                           lineHeight: 1.2, marginTop: 1,
                           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -2051,7 +2051,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ fontSize: 18 }}>✨</span>
-                <span style={{ fontSize: 14, fontWeight: 800, color: "#1E293B" }}>AI-ийн дүгнэлт</span>
+                <span style={{ fontSize: 14, fontWeight: 800, color: "#2A2520" }}>AI-ийн дүгнэлт</span>
               </div>
               <button onClick={() => current.key === "tips" && data.insights[0] && setInsDetail(data.insights[0])} style={{
                 background: "none", border: "none",
@@ -2076,9 +2076,9 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                   style={{
                     position: "absolute", left: -8, top: "45%", transform: "translateY(-50%)",
                     zIndex: 5, width: 36, height: 36, borderRadius: "50%",
-                    background: "#fff", border: "1.5px solid #E2E8F0",
+                    background: "#fff", border: "1.5px solid #F0EAE6",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer", color: "#64748B",
+                    cursor: "pointer", color: "#8A817A",
                     boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
                     fontFamily: "inherit",
                   }}>
@@ -2098,9 +2098,9 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                   style={{
                     position: "absolute", right: -8, top: "45%", transform: "translateY(-50%)",
                     zIndex: 5, width: 36, height: 36, borderRadius: "50%",
-                    background: "#fff", border: "1.5px solid #E2E8F0",
+                    background: "#fff", border: "1.5px solid #F0EAE6",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer", color: "#64748B",
+                    cursor: "pointer", color: "#8A817A",
                     boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
                     fontFamily: "inherit",
                   }}>
@@ -2204,13 +2204,13 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                             <div style={{ minWidth: 0, flex: 1 }}>
                               {itemTitle && (
                                 <div style={{
-                                  fontSize: 11, fontWeight: 800, color: "#1F2937",
+                                  fontSize: 11, fontWeight: 800, color: "#2A2520",
                                   marginBottom: 2, lineHeight: 1.3,
                                   whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                                 }}>{itemTitle}</div>
                               )}
                               <div style={{
-                                fontSize: 10.5, color: itemTitle ? "#475569" : "#374151",
+                                fontSize: 10.5, color: itemTitle ? "#5B5650" : "#5B5650",
                                 lineHeight: 1.45,
                                 display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                               }}>{itemBody}</div>
@@ -2268,7 +2268,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                     width: i === insCarousel ? 22 : 7, height: 7, borderRadius: 4,
                     background: i === insCarousel
                       ? (cards[insCarousel].titleColor === "#EA580C" ? "#EA580C" : "#10B981")
-                      : "#E2E8F0",
+                      : "#F0EAE6",
                     border: "none", cursor: "pointer", padding: 0,
                     transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
                     fontFamily: "inherit",
@@ -2330,7 +2330,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
           <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
             {/* ── Hero AI banner with stats ── */}
             <div style={{
-              background: "linear-gradient(135deg, #667EEA 0%, #764BA2 100%)",
+              background: "linear-gradient(135deg, #FB923C 0%, #C2410C 100%)",
               borderRadius: 20, padding: "18px 16px 14px", marginBottom: 12,
               position: "relative", overflow: "hidden",
             }}>
@@ -2397,9 +2397,9 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                 <div key={i} style={{
                   flexShrink: 0,
                   display: "inline-flex", alignItems: "center", gap: 6,
-                  background: f.active ? "#1E293B" : "#fff",
-                  color: f.active ? "#fff" : "#64748B",
-                  border: f.active ? "none" : "1.5px solid #E2E8F0",
+                  background: f.active ? "#2A2520" : "#fff",
+                  color: f.active ? "#fff" : "#8A817A",
+                  border: f.active ? "none" : "1.5px solid #F0EAE6",
                   borderRadius: 999, padding: "6px 12px",
                   fontSize: 11, fontWeight: 700, cursor: "pointer",
                   whiteSpace: "nowrap",
@@ -2408,8 +2408,8 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                 }}>
                   {f.label}
                   <span style={{
-                    background: f.active ? "rgba(255,255,255,0.2)" : "#F1F5F9",
-                    color: f.active ? "#fff" : "#94A3B8",
+                    background: f.active ? "rgba(255,255,255,0.2)" : "#FAF6F3",
+                    color: f.active ? "#fff" : "#A89E96",
                     borderRadius: 999, padding: "0 6px",
                     fontSize: 9, fontWeight: 800, minWidth: 14, textAlign: "center",
                   }}>{f.count}</span>
@@ -2422,7 +2422,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               const palettes = [
                 { bg: "#F0FDF4", border: "#BBF7D0", color: PRIMARY, text: "Маш сайн", priority: "Өндөр" },
                 { bg: "#FFF5F0", border: "#FFD0B8", color: BRAND, text: "Анхаарал", priority: "Дунд" },
-                { bg: "#F0F4FF", border: "#C7D2FE", color: "#6366F1", text: "Боломж", priority: "Чухал" },
+                { bg: "#FFF7F2", border: "#FED7AA", color: "#EA580C", text: "Боломж", priority: "Чухал" },
               ]
               const p = palettes[i % palettes.length]
               return (
@@ -2474,15 +2474,15 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                           </span>
                           <span style={{
                             display: "inline-block",
-                            background: "#F1F5F9", color: "#64748B",
+                            background: "#FAF6F3", color: "#8A817A",
                             fontSize: 8, fontWeight: 700,
                             padding: "2px 7px", borderRadius: 999,
                           }}>
                             #{i + 1}
                           </span>
                         </div>
-                        <p style={{ fontSize: 13, fontWeight: 800, color: "#1E293B", margin: "0 0 4px", lineHeight: 1.3 }}>{ins.title}</p>
-                        <p style={{ fontSize: 11.5, color: "#64748B", margin: 0, lineHeight: 1.5 }}>{ins.description}</p>
+                        <p style={{ fontSize: 13, fontWeight: 800, color: "#2A2520", margin: "0 0 4px", lineHeight: 1.3 }}>{ins.title}</p>
+                        <p style={{ fontSize: 11.5, color: "#8A817A", margin: 0, lineHeight: 1.5 }}>{ins.description}</p>
                       </div>
                     </div>
 
@@ -2491,12 +2491,12 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                       <div style={{
                         display: "flex", gap: 5, flexWrap: "wrap",
                         marginBottom: 8, padding: "8px 0 0",
-                        borderTop: "1px dashed #E2E8F0",
+                        borderTop: "1px dashed #F0EAE6",
                       }}>
                         {ins.actions.slice(0, 2).map((a, j) => (
                           <span key={j} style={{
-                            background: "#F8FAFF", color: "#475569",
-                            border: "1px solid #E2E8F0",
+                            background: "#FFF7F2", color: "#5B5650",
+                            border: "1px solid #F0EAE6",
                             borderRadius: 8, padding: "4px 8px",
                             fontSize: 10, fontWeight: 600,
                             display: "inline-flex", alignItems: "center", gap: 4,
@@ -2544,7 +2544,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               background: "#fff", borderRadius: 18, padding: "14px",
               marginTop: 4, marginBottom: 10,
               boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-              border: "1.5px solid #F1F5F9",
+              border: "1.5px solid #FAF6F3",
               display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12,
             }}>
               <div>
@@ -2552,7 +2552,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                 {data.strengths.slice(0, 3).map((s, i) => (
                   <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "flex-start" }}>
                     <span style={{ color: PRIMARY, fontSize: 10, fontWeight: 800, marginTop: 1 }}>✓</span>
-                    <span style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{s}</span>
+                    <span style={{ fontSize: 11, color: "#5B5650", lineHeight: 1.4 }}>{s}</span>
                   </div>
                 ))}
               </div>
@@ -2561,7 +2561,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                 {data.risks.slice(0, 3).map((r, i) => (
                   <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "flex-start" }}>
                     <span style={{ color: "#FF9800", fontSize: 10, fontWeight: 800, marginTop: 1 }}>!</span>
-                    <span style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{r}</span>
+                    <span style={{ fontSize: 11, color: "#5B5650", lineHeight: 1.4 }}>{r}</span>
                   </div>
                 ))}
               </div>
@@ -2589,23 +2589,23 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontSize: 20 }}>🎯</span>
                   <div>
-                    <p style={{ fontSize: 13, fontWeight: 800, color: "#1E293B", margin: "0 0 1px" }}>Өнөөдрийн зорилго</p>
-                    <p style={{ fontSize: 10, color: "#94A3B8", margin: 0 }}>Зорилгоо тэмдэглэж явна уу</p>
+                    <p style={{ fontSize: 13, fontWeight: 800, color: "#2A2520", margin: "0 0 1px" }}>Өнөөдрийн зорилго</p>
+                    <p style={{ fontSize: 10, color: "#A89E96", margin: 0 }}>Зорилгоо тэмдэглэж явна уу</p>
                   </div>
                 </div>
                 <div style={{ background: "#F0FDF4", borderRadius: 20, padding: "4px 12px", border: `1px solid ${PRIMARY}30` }}>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: PRIMARY }}>{goals.filter(Boolean).length}<span style={{ color: "#94A3B8", fontWeight: 400 }}>/{todayGoals.length}</span></span>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: PRIMARY }}>{goals.filter(Boolean).length}<span style={{ color: "#A89E96", fontWeight: 400 }}>/{todayGoals.length}</span></span>
                 </div>
               </div>
-              <div style={{ background: "#F1F5F9", borderRadius: 8, height: 6, marginBottom: 14, overflow: "hidden" }}>
+              <div style={{ background: "#FAF6F3", borderRadius: 8, height: 6, marginBottom: 14, overflow: "hidden" }}>
                 <div style={{ height: "100%", borderRadius: 8, background: `linear-gradient(90deg, ${PRIMARY}, #F97316)`, width: todayGoals.length > 0 ? `${(goals.filter(Boolean).length / todayGoals.length) * 100}%` : "0%", transition: "width 0.4s ease" }} />
               </div>
               {todayGoals.map((task, i) => (
-                <div key={i} onClick={() => toggleGoal(i)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", marginBottom: 8, cursor: "pointer", borderRadius: 14, background: goals[i] ? "#F0FDF4" : "#FAFAFA", border: `1.5px solid ${goals[i] ? PRIMARY + "40" : "#E2E8F0"}`, transition: "all 0.25s ease", userSelect: "none" }}>
-                  <div style={{ width: 24, height: 24, borderRadius: "50%", flexShrink: 0, background: goals[i] ? PRIMARY : "#fff", border: `2px solid ${goals[i] ? PRIMARY : "#CBD5E1"}`, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.25s ease" }}>
+                <div key={i} onClick={() => toggleGoal(i)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", marginBottom: 8, cursor: "pointer", borderRadius: 14, background: goals[i] ? "#F0FDF4" : "#FAFAFA", border: `1.5px solid ${goals[i] ? PRIMARY + "40" : "#F0EAE6"}`, transition: "all 0.25s ease", userSelect: "none" }}>
+                  <div style={{ width: 24, height: 24, borderRadius: "50%", flexShrink: 0, background: goals[i] ? PRIMARY : "#fff", border: `2px solid ${goals[i] ? PRIMARY : "#DED5CD"}`, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.25s ease" }}>
                     {goals[i] && <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M3 8l4 4 6-7" /></svg>}
                   </div>
-                  <span style={{ fontSize: 13, color: goals[i] ? "#059669" : "#374151", fontWeight: goals[i] ? 700 : 500, textDecoration: goals[i] ? "line-through" : "none", flex: 1, transition: "all 0.2s" }}>{task}</span>
+                  <span style={{ fontSize: 13, color: goals[i] ? "#059669" : "#5B5650", fontWeight: goals[i] ? 700 : 500, textDecoration: goals[i] ? "line-through" : "none", flex: 1, transition: "all 0.2s" }}>{task}</span>
                   {goals[i] && <span style={{ fontSize: 14 }}>✅</span>}
                 </div>
               ))}
@@ -2621,16 +2621,16 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             <div style={{ background: "#fff", borderRadius: 18, padding: "16px", marginBottom: 12, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
                 <span style={{ fontSize: 18 }}>📅</span>
-                <p style={{ fontSize: 13, fontWeight: 800, color: "#1E293B", margin: 0 }}>30 Хоногийн Төлөвлөгөө</p>
+                <p style={{ fontSize: 13, fontWeight: 800, color: "#2A2520", margin: 0 }}>30 Хоногийн Төлөвлөгөө</p>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
                 {data.roadmap.map((_, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", flex: i < data.roadmap.length - 1 ? 1 : 0 }}>
-                    <button onClick={() => setRoadWeek(i)} style={{ width: 32, height: 32, borderRadius: "50%", border: "none", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 12, background: i === roadWeek ? weekColors[i % weekColors.length] : i < roadWeek ? `${weekColors[i % weekColors.length]}30` : "#F1F5F9", color: i === roadWeek ? "#fff" : i < roadWeek ? weekColors[i % weekColors.length] : "#94A3B8", transition: "all 0.25s ease", boxShadow: i === roadWeek ? `0 4px 12px ${weekColors[i % weekColors.length]}50` : "none" }}>
+                    <button onClick={() => setRoadWeek(i)} style={{ width: 32, height: 32, borderRadius: "50%", border: "none", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 12, background: i === roadWeek ? weekColors[i % weekColors.length] : i < roadWeek ? `${weekColors[i % weekColors.length]}30` : "#FAF6F3", color: i === roadWeek ? "#fff" : i < roadWeek ? weekColors[i % weekColors.length] : "#A89E96", transition: "all 0.25s ease", boxShadow: i === roadWeek ? `0 4px 12px ${weekColors[i % weekColors.length]}50` : "none" }}>
                       {i < roadWeek ? "✓" : i + 1}
                     </button>
                     {i < data.roadmap.length - 1 && (
-                      <div style={{ flex: 1, height: 3, marginLeft: 4, background: i < roadWeek ? weekColors[i % weekColors.length] : "#E2E8F0", borderRadius: 2, transition: "background 0.3s" }} />
+                      <div style={{ flex: 1, height: 3, marginLeft: 4, background: i < roadWeek ? weekColors[i % weekColors.length] : "#F0EAE6", borderRadius: 2, transition: "background 0.3s" }} />
                     )}
                   </div>
                 ))}
@@ -2642,23 +2642,23 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                       {weekIcons[roadWeek % weekIcons.length]}
                     </div>
                     <div>
-                      <p style={{ fontSize: 10, color: "#94A3B8", fontWeight: 700, margin: "0 0 1px", letterSpacing: "0.4px" }}>{data.roadmap[roadWeek].week.toUpperCase()}</p>
-                      <p style={{ fontSize: 15, fontWeight: 900, color: "#1E293B", margin: 0 }}>{data.roadmap[roadWeek].title}</p>
+                      <p style={{ fontSize: 10, color: "#A89E96", fontWeight: 700, margin: "0 0 1px", letterSpacing: "0.4px" }}>{data.roadmap[roadWeek].week.toUpperCase()}</p>
+                      <p style={{ fontSize: 15, fontWeight: 900, color: "#2A2520", margin: 0 }}>{data.roadmap[roadWeek].title}</p>
                     </div>
                   </div>
                   {data.roadmap[roadWeek].tasks.map((task, i) => (
-                    <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, padding: "10px 12px", background: "#fff", borderRadius: 12, border: "1px solid #E2E8F0", animation: `ci 0.3s ease ${i * 0.06}s both` }}>
+                    <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, padding: "10px 12px", background: "#fff", borderRadius: 12, border: "1px solid #F0EAE6", animation: `ci 0.3s ease ${i * 0.06}s both` }}>
                       <div style={{ width: 22, height: 22, borderRadius: "50%", background: `${weekColors[roadWeek % weekColors.length]}20`, border: `1.5px solid ${weekColors[roadWeek % weekColors.length]}40`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
                         <span style={{ color: weekColors[roadWeek % weekColors.length], fontSize: 10, fontWeight: 800 }}>✓</span>
                       </div>
-                      <span style={{ fontSize: 13, color: "#374151", lineHeight: 1.5 }}>{task}</span>
+                      <span style={{ fontSize: 13, color: "#5B5650", lineHeight: 1.5 }}>{task}</span>
                     </div>
                   ))}
                 </div>
               )}
               <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-                <button onClick={() => setRoadWeek(w => Math.max(0, w - 1))} disabled={roadWeek === 0} style={{ flex: 1, padding: "11px", borderRadius: 14, border: "1.5px solid #E2E8F0", background: "#fff", color: roadWeek === 0 ? "#CBD5E1" : "#475569", fontSize: 13, fontWeight: 700, cursor: roadWeek === 0 ? "not-allowed" : "pointer", transition: "all 0.2s" }}>← Өмнөх</button>
-                <button onClick={() => setRoadWeek(w => Math.min(data.roadmap.length - 1, w + 1))} disabled={roadWeek === data.roadmap.length - 1} style={{ flex: 1, padding: "11px", borderRadius: 14, border: "none", background: roadWeek === data.roadmap.length - 1 ? "#F1F5F9" : `linear-gradient(135deg, ${weekColors[roadWeek % weekColors.length]}, ${weekColors[(roadWeek + 1) % weekColors.length]})`, color: roadWeek === data.roadmap.length - 1 ? "#CBD5E1" : "#fff", fontSize: 13, fontWeight: 700, cursor: roadWeek === data.roadmap.length - 1 ? "not-allowed" : "pointer", boxShadow: roadWeek === data.roadmap.length - 1 ? "none" : `0 4px 14px ${weekColors[roadWeek % weekColors.length]}40`, transition: "all 0.2s" }}>Дараах →</button>
+                <button onClick={() => setRoadWeek(w => Math.max(0, w - 1))} disabled={roadWeek === 0} style={{ flex: 1, padding: "11px", borderRadius: 14, border: "1.5px solid #F0EAE6", background: "#fff", color: roadWeek === 0 ? "#DED5CD" : "#5B5650", fontSize: 13, fontWeight: 700, cursor: roadWeek === 0 ? "not-allowed" : "pointer", transition: "all 0.2s" }}>← Өмнөх</button>
+                <button onClick={() => setRoadWeek(w => Math.min(data.roadmap.length - 1, w + 1))} disabled={roadWeek === data.roadmap.length - 1} style={{ flex: 1, padding: "11px", borderRadius: 14, border: "none", background: roadWeek === data.roadmap.length - 1 ? "#FAF6F3" : `linear-gradient(135deg, ${weekColors[roadWeek % weekColors.length]}, ${weekColors[(roadWeek + 1) % weekColors.length]})`, color: roadWeek === data.roadmap.length - 1 ? "#DED5CD" : "#fff", fontSize: 13, fontWeight: 700, cursor: roadWeek === data.roadmap.length - 1 ? "not-allowed" : "pointer", boxShadow: roadWeek === data.roadmap.length - 1 ? "none" : `0 4px 14px ${weekColors[roadWeek % weekColors.length]}40`, transition: "all 0.2s" }}>Дараах →</button>
               </div>
             </div>
           </div>
@@ -2666,12 +2666,12 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
       </div>
 
       {/* AI Chat bar */}
-      <div style={{ background: "#fff", borderTop: "1px solid #E2E8F0", padding: "10px 14px", flexShrink: 0, boxShadow: "0 -4px 20px rgba(0,0,0,0.06)" }}>
+      <div style={{ background: "#fff", borderTop: "1px solid #F0EAE6", padding: "10px 14px", flexShrink: 0, boxShadow: "0 -4px 20px rgba(0,0,0,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
           <Char type="phone" size={36} style={{ flexShrink: 0 }} />
           <div>
-            <p style={{ fontSize: 11, fontWeight: 800, color: "#1E293B", margin: "0 0 1px" }}>AI Таны туслах</p>
-            <p style={{ fontSize: 9, color: "#94A3B8", margin: 0 }}>Асуултаа асуугарай, би танд туслахад бэлэн байна!</p>
+            <p style={{ fontSize: 11, fontWeight: 800, color: "#2A2520", margin: "0 0 1px" }}>AI Таны туслах</p>
+            <p style={{ fontSize: 9, color: "#A89E96", margin: 0 }}>Асуултаа асуугарай, би танд туслахад бэлэн байна!</p>
           </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
@@ -2680,14 +2680,14 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             onChange={e => setChatInput(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter") handleAI() }}
             placeholder="Жишээ нь: Хэрхэн сайжрах вэ?"
-            style={{ flex: 1, background: "#F1F5F9", border: "1.5px solid #E2E8F0", borderRadius: 22, padding: "9px 16px", color: "#1E293B", fontSize: 12, outline: "none", fontFamily: "inherit", transition: "border-color 0.2s" }}
+            style={{ flex: 1, background: "#FAF6F3", border: "1.5px solid #F0EAE6", borderRadius: 22, padding: "9px 16px", color: "#2A2520", fontSize: 12, outline: "none", fontFamily: "inherit", transition: "border-color 0.2s" }}
             onFocus={e => (e.target as HTMLInputElement).style.borderColor = PRIMARY}
-            onBlur={e => (e.target as HTMLInputElement).style.borderColor = "#E2E8F0"}
+            onBlur={e => (e.target as HTMLInputElement).style.borderColor = "#F0EAE6"}
           />
-          <button onClick={handleAI} disabled={!chatInput.trim()} style={{ width: 38, height: 38, borderRadius: "50%", border: "none", background: chatInput.trim() ? `linear-gradient(135deg, ${PRIMARY}, #F97316)` : "#E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", cursor: chatInput.trim() ? "pointer" : "not-allowed", flexShrink: 0, boxShadow: chatInput.trim() ? `0 4px 12px ${PRIMARY}40` : "none", transition: "all 0.2s" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={chatInput.trim() ? "white" : "#94A3B8"} strokeWidth="2.5" strokeLinecap="round">
+          <button onClick={handleAI} disabled={!chatInput.trim()} style={{ width: 38, height: 38, borderRadius: "50%", border: "none", background: chatInput.trim() ? `linear-gradient(135deg, ${PRIMARY}, #F97316)` : "#F0EAE6", display: "flex", alignItems: "center", justifyContent: "center", cursor: chatInput.trim() ? "pointer" : "not-allowed", flexShrink: 0, boxShadow: chatInput.trim() ? `0 4px 12px ${PRIMARY}40` : "none", transition: "all 0.2s" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={chatInput.trim() ? "white" : "#A89E96"} strokeWidth="2.5" strokeLinecap="round">
               <line x1="22" y1="2" x2="11" y2="13" />
-              <polygon points="22 2 15 22 11 13 2 9 22 2" fill={chatInput.trim() ? "white" : "#94A3B8"} stroke="none" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" fill={chatInput.trim() ? "white" : "#A89E96"} stroke="none" />
             </svg>
           </button>
         </div>
@@ -2695,9 +2695,9 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
 
       {/* Page dots (legacy paged mode only) */}
       {!hasJourney && (
-      <div style={{ background: "#fff", padding: "6px 0 8px", display: "flex", justifyContent: "center", gap: 6, flexShrink: 0, borderTop: "1px solid #F1F5F9" }}>
+      <div style={{ background: "#fff", padding: "6px 0 8px", display: "flex", justifyContent: "center", gap: 6, flexShrink: 0, borderTop: "1px solid #FAF6F3" }}>
         {PAGES.map((_, i) => (
-          <button key={i} onClick={() => setPage(i)} style={{ width: i === page ? 20 : 7, height: 7, borderRadius: 4, background: i === page ? PRIMARY : "#E2E8F0", border: "none", cursor: "pointer", transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)", padding: 0 }} />
+          <button key={i} onClick={() => setPage(i)} style={{ width: i === page ? 20 : 7, height: 7, borderRadius: 4, background: i === page ? PRIMARY : "#F0EAE6", border: "none", cursor: "pointer", transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)", padding: 0 }} />
         ))}
       </div>
       )}
