@@ -5183,46 +5183,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   </button>
                 </div>
 
-                {/* ══════════ GLASS TAB NAVIGATION ══════════ */}
-                <div style={{
-                  display: "flex", gap: 5, marginTop: 9,
-                  background: "rgba(255,255,255,0.5)",
-                  backdropFilter: "blur(18px) saturate(170%)",
-                  WebkitBackdropFilter: "blur(18px) saturate(170%)",
-                  borderRadius: 15, padding: 4,
-                  border: "1px solid rgba(255,255,255,0.6)",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8)",
-                  position: "relative", zIndex: 1,
-                }}>
-                  {[
-                    { label: "Чат", icon: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" },
-                    { label: "FAQ", icon: "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 16v-4M12 8h.01" },
-                    { label: "Холбоо", icon: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72" },
-                  ].map((tab, i) => (
-                    <button
-                      key={tab.label}
-                      onClick={() => setActiveTab(i)}
-                      style={{
-                        flex: 1, padding: "10px 12px", borderRadius: 10,
-                        background: activeTab === i 
-                          ? "linear-gradient(135deg, rgba(255,255,255,0.98), rgba(255,252,250,0.95))" 
-                          : "transparent",
-                        border: "none", cursor: "pointer",
-                        color: activeTab === i ? "#E8541A" : "#8a8f99",
-                        fontSize: 12, fontWeight: 600,
-                        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                        transition: "all 0.35s cubic-bezier(.16,1,.3,1)",
-                        boxShadow: activeTab === i ? "0 4px 16px rgba(0,0,0,0.12)" : "none",
-                        transform: activeTab === i ? "translateY(-1px)" : "translateY(0)",
-                      }}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d={tab.icon} />
-                      </svg>
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
+                {/* Tabs removed — chat-only widget */}
               </div>
 
               {/* TAB CONTENT */}
@@ -5273,58 +5234,43 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     )}
 
                     {showQuickReplies && !isTyping && (
-                      <div style={{
-                        display: "flex", flexDirection: "column", gap: 8, marginTop: 14,
-                        padding: "16px",
-                        background: "linear-gradient(160deg, rgba(255,255,255,0.55), rgba(255,255,255,0.32))",
-                        backdropFilter: "blur(20px) saturate(180%)",
-                        WebkitBackdropFilter: "blur(20px) saturate(180%)",
-                        borderRadius: 18,
-                        border: "1px solid rgba(255,255,255,0.65)",
-                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.85), 0 6px 18px rgba(31,38,75,0.05)",
+                      <div className="hw-chiprow" style={{
+                        display: "flex", gap: 8, marginTop: "auto", paddingTop: 14,
+                        overflowX: "auto",
                       }}>
-                        <div style={{ 
-                          fontSize: 11, fontWeight: 600, color: "#9CA3AF", 
-                          marginBottom: 4, letterSpacing: "0.5px",
-                          textTransform: "uppercase" 
-                        }}>
-                          Түгээмэл асуултууд
-                        </div>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                          {QUICK_REPLIES.map((qr, i) => (
+                        {QUICK_REPLIES.map((qr, i) => {
+                          const accent = qr.iconType === "gift"
+                          return (
                             <button
                               key={qr.text}
                               className="hw-chip"
                               onClick={() => sendMessage(qr.text)}
                               style={{
-                                background: "linear-gradient(160deg, rgba(255,255,255,0.62), rgba(255,255,255,0.35))",
+                                flexShrink: 0,
+                                background: accent
+                                  ? "linear-gradient(160deg, rgba(255,238,230,0.78), rgba(253,224,210,0.52))"
+                                  : "linear-gradient(160deg, rgba(255,255,255,0.62), rgba(255,255,255,0.35))",
                                 backdropFilter: "blur(14px) saturate(170%)",
                                 WebkitBackdropFilter: "blur(14px) saturate(170%)",
-                                border: "1px solid rgba(255,255,255,0.8)",
-                                color: "#6b5d54",
+                                border: accent ? "1px solid rgba(232,84,26,0.45)" : "1px solid rgba(255,255,255,0.8)",
+                                color: accent ? "#E0531F" : "#6b5d54",
                                 borderRadius: 20,
-                                padding: "8px 13px",
+                                padding: "9px 14px",
                                 fontSize: Math.max(fontSize - 2, 12),
-                                fontWeight: 500,
+                                fontWeight: accent ? 600 : 500,
                                 cursor: "pointer",
                                 whiteSpace: "nowrap",
                                 animation: `hw-chip-in 0.3s cubic-bezier(.16,1,.3,1) ${i * 0.06}s both`,
                                 boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), 0 3px 10px rgba(31,38,75,0.05)",
-                                display: "flex", alignItems: "center", gap: 8,
+                                display: "flex", alignItems: "center", gap: 7,
                                 transition: "all 0.25s cubic-bezier(.16,1,.3,1)",
                               }}
                               onMouseEnter={e => {
-                                (e.currentTarget as HTMLElement).style.background = "#E8541A"
-                                ; (e.currentTarget as HTMLElement).style.color = "#fff"
-                                ; (e.currentTarget as HTMLElement).style.borderColor = "#E8541A"
-                                ; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
-                                ; (e.currentTarget as HTMLElement).style.boxShadow = "0 6px 16px rgba(232,84,26,0.2)"
+                                (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"
+                                ; (e.currentTarget as HTMLElement).style.boxShadow = "0 6px 16px rgba(232,84,26,0.18)"
                               }}
                               onMouseLeave={e => {
-                                (e.currentTarget as HTMLElement).style.background = "linear-gradient(160deg, rgba(255,255,255,0.62), rgba(255,255,255,0.35))"
-                                ; (e.currentTarget as HTMLElement).style.color = "#6b5d54"
-                                ; (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.8)"
-                                ; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
+                                (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
                                 ; (e.currentTarget as HTMLElement).style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.9), 0 3px 10px rgba(31,38,75,0.05)"
                               }}
                             >
@@ -5333,8 +5279,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                               </span>
                               {qr.text}
                             </button>
-                          ))}
-                        </div>
+                          )
+                        })}
                       </div>
                     )}
 
