@@ -2699,11 +2699,13 @@ function BrainAvatar() {
   return (
     <div style={{
       width: 40, height: 40, borderRadius: 12,
-      background: "linear-gradient(145deg, #FFF8F5, #FFE8DC)",
-      border: "1.5px solid rgba(232,84,26,0.15)",
+      background: "linear-gradient(160deg, rgba(255,247,242,0.72), rgba(253,228,217,0.45))",
+      backdropFilter: "blur(14px) saturate(170%)",
+      WebkitBackdropFilter: "blur(14px) saturate(170%)",
+      border: "1px solid rgba(232,84,26,0.25)",
       display: "flex", alignItems: "center", justifyContent: "center",
       flexShrink: 0,
-      boxShadow: "0 4px 12px rgba(232,84,26,0.1), inset 0 1px 0 rgba(255,255,255,0.8)",
+      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.85), 0 4px 12px rgba(31,38,75,0.06)",
     }}>
       <SplineMascot width={68} height={68} borderRadius={18} />
     </div>
@@ -3263,7 +3265,7 @@ function IntroSequence({ onDone }: { onDone: () => void }) {
     const t = [
       setTimeout(() => setPhase(1), 1600),
       setTimeout(() => setPhase(2), 5200),
-      setTimeout(() => onDone(), 5850),
+      setTimeout(() => onDone(), 6050),
     ]
     return () => t.forEach(clearTimeout)
   }, [])
@@ -3279,8 +3281,10 @@ function IntroSequence({ onDone }: { onDone: () => void }) {
       position: "absolute", inset: 0, zIndex: 30, borderRadius: 24, overflow: "hidden",
       display: "flex", alignItems: "center", justifyContent: "center", padding: "0 30px",
       background: "linear-gradient(165deg, rgba(255,255,255,0.98) 0%, rgba(255,250,246,0.98) 100%)",
-      transition: "opacity 0.6s cubic-bezier(.21,1,.36,1)",
+      transition: "opacity 0.7s cubic-bezier(.4,0,.2,1), transform 0.7s cubic-bezier(.4,0,.2,1), filter 0.7s ease",
       opacity: phase === 2 ? 0 : 1,
+      transform: phase === 2 ? "scale(1.06)" : "scale(1)",
+      filter: phase === 2 ? "blur(4px)" : "blur(0px)",
       pointerEvents: phase === 2 ? "none" : "auto",
     }}>
       <div style={{
@@ -4696,6 +4700,12 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           from { opacity: 0; transform: translateY(8px); filter: blur(5px); }
           to   { opacity: 1; transform: translateY(0); filter: blur(0); }
         }
+        @keyframes hw-chat-reveal {
+          from { opacity: 0; transform: translateY(10px); filter: blur(3px); }
+          to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+        .hw-chiprow { scrollbar-width: none; -ms-overflow-style: none; }
+        .hw-chiprow::-webkit-scrollbar { display: none; height: 0; }
         @keyframes hw-spin {
           to { transform: rotate(360deg); }
         }
@@ -5120,8 +5130,10 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   {/* Mascot */}
                   <div style={{
                     width: 38, height: 38, borderRadius: 12,
-                    background: "linear-gradient(160deg, rgba(255,247,242,0.95), rgba(253,228,217,0.7))",
-                    border: "1px solid rgba(232,84,26,0.22)",
+                    background: "linear-gradient(160deg, rgba(255,247,242,0.72), rgba(253,228,217,0.45))",
+                    backdropFilter: "blur(14px) saturate(170%)",
+                    WebkitBackdropFilter: "blur(14px) saturate(170%)",
+                    border: "1px solid rgba(232,84,26,0.25)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.85)",
                     overflow: "hidden",
