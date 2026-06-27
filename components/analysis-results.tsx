@@ -1479,16 +1479,19 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
 }
 
 // ── Full Results ──────────────────────────────────────────────────────────────
-// Warm liquid-glass overview — the approved dashboard redesign. Data-driven so
-// it works for any test: orange-glass hero (score ring + band + CTAs), subscale
-// breakdown bars, and two mini stat cards on a warm cream canvas.
-function WarmOverview({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: string) => void }) {
+// Warm liquid-glass analysis view — the approved dashboard redesign. Self-
+// contained (segmented tabs + bottom nav) and data-driven, so EVERY test gets
+// the same look (replaces the legacy overview / journey / insights pages).
+function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI: (q: string) => void; onClose?: () => void }) {
+  const [tab, setTab] = useState(0)
   const rawScore = data.displayScore != null ? data.displayScore : Math.round(data.healthScore)
   const rawMax = data.displayScore != null ? (data.displayMaxScore || 100) : 100
   const band = data.displayLabel || data.summary?.title || ""
   const message = data.highlightMessage || data.summary?.description || ""
-  const metrics = (data.metrics || []).slice(0, 6)
+  const metrics = data.metrics || []
   const riskLabel = data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : data.riskLevel === "High" ? "Өндөр" : (data.riskLevel || "—")
+  const weakest = metrics.length ? metrics.reduce((a, b) => ((b.maxScore ? b.score / b.maxScore : 0) < (a.maxScore ? a.score / a.maxScore : 0) ? b : a)) : null
+  const advice = (data.insights || []).filter(x => x && (x.title || x.description))
 
   const barC = (p: number) => p >= 70 ? "#E8541A" : p >= 45 ? "#F06835" : "#D9892B"
   const barC2 = (p: number) => p >= 70 ? "#FF8A4C" : p >= 45 ? "#FF9F5A" : "#F0C068"
@@ -1499,74 +1502,163 @@ function WarmOverview({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: stri
     border: "1px solid rgba(232,84,26,0.14)",
     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), 0 8px 22px rgba(176,80,30,0.06)",
   }
+  const TABS = ["Тойм", "Дэд бүлэг", "Зөвлэмж"]
+  const navBtn = { width: 44, height: 44, borderRadius: "50%", border: "none", background: "transparent", color: "#9A8E86", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }
 
   return (
-    <div style={{ position: "relative", padding: "30px 14px 18px", background: "#FAF6F2", minHeight: "100%", overflow: "hidden" }}>
-      <div style={{ position: "absolute", top: -40, right: -30, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,138,76,0.16), transparent 70%)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", bottom: 40, left: -40, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,170,115,0.12), transparent 72%)", pointerEvents: "none" }} />
+    <div style={{ position: "absolute", inset: 0, zIndex: 50, background: "#FAF6F2", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif", animation: "ar-in 0.3s ease" }}>
+      <style>{`@keyframes ar-in{from{opacity:0;transform:scale(0.985)}to{opacity:1;transform:none}}`}</style>
+      <div style={{ position: "absolute", top: -40, right: -30, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,138,76,0.16), transparent 70%)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: 110, left: -40, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,170,115,0.12), transparent 72%)", pointerEvents: "none" }} />
 
-      {/* Hero + score badge */}
-      <div style={{ position: "relative", display: "flex", justifyContent: "center", zIndex: 1 }}>
-        <div style={{ position: "absolute", top: -22, width: 66, height: 66, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 3, ...glass }}>
-          <ScoreRing score={data.healthScore} size={56} display={data.displayScore != null && data.displayMaxScore ? { score: data.displayScore, max: data.displayMaxScore } : undefined} />
+      <div style={{ position: "relative", zIndex: 1, flex: 1, overflowY: "auto", overflowX: "hidden", padding: "16px 15px 14px" }}>
+        {/* Segmented tabs */}
+        <div style={{ display: "flex", borderRadius: 18, padding: 5, marginBottom: tab === 0 ? 34 : 16, ...glass }}>
+          {TABS.map((t, i) => (
+            <button key={i} onClick={() => setTab(i)} style={{ flex: 1, padding: "9px 0", borderRadius: 14, border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "center", background: tab === i ? "linear-gradient(160deg,#fff,#FFF7F2)" : "transparent", fontSize: 13, fontWeight: tab === i ? 700 : 500, color: tab === i ? "#E8541A" : "#9A8E86", boxShadow: tab === i ? "0 3px 10px rgba(232,84,26,0.12)" : "none", transition: "all 0.25s" }}>{t}</button>
+          ))}
         </div>
-        <div style={{ position: "relative", width: "100%", background: "linear-gradient(150deg, #FF8A4C 0%, #E8541A 60%, #D9472A 100%)", borderRadius: 26, padding: "46px 22px 20px", overflow: "hidden", boxShadow: "0 14px 34px rgba(216,71,42,0.28)" }}>
-          <svg style={{ position: "absolute", top: -26, right: -26, opacity: 0.2 }} width="140" height="140" viewBox="0 0 140 140" fill="none" stroke="#fff" strokeWidth="2"><circle cx="70" cy="70" r="38"/><circle cx="70" cy="70" r="55"/><circle cx="70" cy="70" r="72"/></svg>
-          {band && <div style={{ position: "relative", display: "inline-block", background: "rgba(255,255,255,0.22)", color: "#fff", fontSize: 11, fontWeight: 600, padding: "4px 11px", borderRadius: 20, marginBottom: 10 }}>{band}</div>}
-          {message && <div style={{ position: "relative", color: "#fff", fontSize: 16, fontWeight: 700, lineHeight: 1.45 }}>{message}</div>}
-          <div style={{ position: "relative", display: "flex", gap: 10, marginTop: 18 }}>
-            <button onClick={() => onAskAI("Энэ үр дүнгийн талаар дэлгэрэнгүй тайлбарлаач")} style={{ flex: 1, border: "1.5px solid rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.12)", color: "#fff", borderRadius: 15, padding: "11px 0", fontSize: 13.5, fontWeight: 600, fontFamily: "inherit", cursor: "pointer" }}>Дэлгэрэнгүй</button>
-            <button onClick={() => onAskAI("Энэ үр дүнд тулгуурлан надад зөвлөгөө өгөөч")} style={{ flex: 1.25, border: "none", background: "#fff", color: "#D9472A", borderRadius: 15, padding: "11px 0", fontSize: 13.5, fontWeight: 700, fontFamily: "inherit", cursor: "pointer" }}>Зөвлөгөө авах</button>
-          </div>
-        </div>
-      </div>
 
-      {/* Subscale breakdown */}
-      {metrics.length > 0 && (
-        <div style={{ position: "relative", zIndex: 1, borderRadius: 24, padding: "17px 18px", marginTop: 14, ...glass }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#2A2520", marginBottom: 13 }}>Дэд бүлгийн задаргаа</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 13 }}>
+        {/* ── TAB 0: Тойм ── */}
+        {tab === 0 && (
+          <>
+            <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
+              <div style={{ position: "absolute", top: -22, width: 66, height: 66, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 3, ...glass }}>
+                <ScoreRing score={data.healthScore} size={56} display={data.displayScore != null && data.displayMaxScore ? { score: data.displayScore, max: data.displayMaxScore } : undefined} />
+              </div>
+              <div style={{ position: "relative", width: "100%", background: "linear-gradient(150deg, #FF8A4C 0%, #E8541A 60%, #D9472A 100%)", borderRadius: 26, padding: "46px 22px 20px", overflow: "hidden", boxShadow: "0 14px 34px rgba(216,71,42,0.28)" }}>
+                <svg style={{ position: "absolute", top: -26, right: -26, opacity: 0.2 }} width="140" height="140" viewBox="0 0 140 140" fill="none" stroke="#fff" strokeWidth="2"><circle cx="70" cy="70" r="38"/><circle cx="70" cy="70" r="55"/><circle cx="70" cy="70" r="72"/></svg>
+                {band && <div style={{ position: "relative", display: "inline-block", background: "rgba(255,255,255,0.22)", color: "#fff", fontSize: 11, fontWeight: 600, padding: "4px 11px", borderRadius: 20, marginBottom: 10 }}>{band}</div>}
+                {message && <div style={{ position: "relative", color: "#fff", fontSize: 16, fontWeight: 700, lineHeight: 1.45 }}>{message}</div>}
+                <div style={{ position: "relative", display: "flex", gap: 10, marginTop: 18 }}>
+                  <button onClick={() => onAskAI("Энэ үр дүнгийн талаар дэлгэрэнгүй тайлбарлаач")} style={{ flex: 1, border: "1.5px solid rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.12)", color: "#fff", borderRadius: 15, padding: "11px 0", fontSize: 13.5, fontWeight: 600, fontFamily: "inherit", cursor: "pointer" }}>Дэлгэрэнгүй</button>
+                  <button onClick={() => onAskAI("Энэ үр дүнд тулгуурлан надад зөвлөгөө өгөөч")} style={{ flex: 1.25, border: "none", background: "#fff", color: "#D9472A", borderRadius: 15, padding: "11px 0", fontSize: 13.5, fontWeight: 700, fontFamily: "inherit", cursor: "pointer" }}>Зөвлөгөө авах</button>
+                </div>
+              </div>
+            </div>
+
+            {metrics.length > 0 && (
+              <div style={{ borderRadius: 24, padding: "17px 18px", marginTop: 14, ...glass }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 13 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#2A2520" }}>Дэд бүлгийн задаргаа</span>
+                  <span style={{ fontSize: 11, color: "#9A8E86" }}>оноо</span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 13 }}>
+                  {metrics.slice(0, 6).map((m, i) => {
+                    const pct = m.maxScore > 0 ? Math.round((m.score / m.maxScore) * 100) : 0
+                    return (
+                      <div key={i}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, gap: 8 }}>
+                          <span style={{ fontSize: 12.5, color: "#43403C", display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+                            <span style={{ width: 8, height: 8, borderRadius: "50%", background: barC(pct), flexShrink: 0 }} />
+                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.label}</span>
+                          </span>
+                          <span style={{ fontSize: 12.5, fontWeight: 800, color: "#2A2520", flexShrink: 0 }}>{m.score}<span style={{ fontSize: 10, color: "#9A8E86", fontWeight: 500 }}>/{m.maxScore}</span></span>
+                        </div>
+                        <div style={{ height: 7, borderRadius: 5, background: "rgba(232,84,26,0.1)", overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${pct}%`, borderRadius: 5, background: `linear-gradient(90deg, ${barC2(pct)}, ${barC(pct)})` }} />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
+              <div style={{ borderRadius: 22, padding: 16, ...glass }}>
+                <div style={{ fontSize: 12, color: "#9A8E86" }}>Нийт оноо</div>
+                <div style={{ fontSize: 24, fontWeight: 800, margin: "1px 0 12px" }}>{rawScore}<span style={{ fontSize: 12, color: "#9A8E86", fontWeight: 500 }}>/{rawMax}</span></div>
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 5, height: 40 }}>
+                  {(metrics.length ? metrics : [{ score: 1, maxScore: 1, label: "", status: "" }]).slice(0, 5).map((m, i) => {
+                    const p = m.maxScore > 0 ? m.score / m.maxScore : 0
+                    return <div key={i} style={{ flex: 1, height: `${Math.max(14, Math.round(p * 100))}%`, borderRadius: 5, background: i === 0 ? "linear-gradient(180deg,#FF8A4C,#E8541A)" : "#F6DECE" }} />
+                  })}
+                </div>
+              </div>
+              <div style={{ borderRadius: 22, padding: 16, ...glass }}>
+                <div style={{ fontSize: 12, color: "#9A8E86" }}>Сул тал</div>
+                <div style={{ fontSize: 15, fontWeight: 800, margin: "3px 0 10px", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{weakest ? weakest.label : "—"}</div>
+                <svg width="100%" height="36" viewBox="0 0 120 38" fill="none">
+                  <path d="M4 9 L28 16 L46 11 L70 24 L92 20 L116 31" stroke="#E8541A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="116" cy="31" r="4" fill="#E8541A"/>
+                </svg>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ── TAB 1: Дэд бүлэг ── */}
+        {tab === 1 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {metrics.length === 0 && <div style={{ borderRadius: 20, padding: 18, textAlign: "center", color: "#9A8E86", fontSize: 13, ...glass }}>Дэд бүлгийн мэдээлэл алга.</div>}
             {metrics.map((m, i) => {
               const pct = m.maxScore > 0 ? Math.round((m.score / m.maxScore) * 100) : 0
               return (
-                <div key={i}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, gap: 8 }}>
-                    <span style={{ fontSize: 12.5, color: "#43403C", display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
-                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: barC(pct), flexShrink: 0 }} />
-                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.label}</span>
-                    </span>
-                    <span style={{ fontSize: 12.5, fontWeight: 800, color: "#2A2520", flexShrink: 0 }}>{m.score}<span style={{ fontSize: 10, color: "#9A8E86", fontWeight: 500 }}>/{m.maxScore}</span></span>
+                <div key={i} style={{ borderRadius: 20, padding: "15px 16px", ...glass }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8 }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 700, color: "#2A2520", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.label}</span>
+                    <span style={{ fontSize: 16, fontWeight: 900, color: barC(pct), flexShrink: 0 }}>{m.score}<span style={{ fontSize: 11, color: "#9A8E86", fontWeight: 600 }}>/{m.maxScore}</span></span>
                   </div>
-                  <div style={{ height: 7, borderRadius: 5, background: "rgba(232,84,26,0.1)", overflow: "hidden" }}>
+                  <div style={{ height: 8, borderRadius: 5, background: "rgba(232,84,26,0.1)", overflow: "hidden", marginBottom: m.status ? 8 : 0 }}>
                     <div style={{ height: "100%", width: `${pct}%`, borderRadius: 5, background: `linear-gradient(90deg, ${barC2(pct)}, ${barC(pct)})` }} />
                   </div>
+                  {m.status && <div style={{ fontSize: 12, color: "#7C6F66", lineHeight: 1.5 }}>{m.status}</div>}
                 </div>
               )
             })}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Mini stat cards */}
-      <div style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
-        <div style={{ borderRadius: 22, padding: 16, ...glass }}>
-          <div style={{ fontSize: 12, color: "#9A8E86" }}>Нийт оноо</div>
-          <div style={{ fontSize: 24, fontWeight: 800, margin: "1px 0 12px" }}>{rawScore}<span style={{ fontSize: 12, color: "#9A8E86", fontWeight: 500 }}>/{rawMax}</span></div>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 5, height: 40 }}>
-            {(metrics.length ? metrics : [{ score: 1, maxScore: 1, label: "", status: "" }]).slice(0, 5).map((m, i) => {
-              const p = m.maxScore > 0 ? m.score / m.maxScore : 0
-              return <div key={i} style={{ flex: 1, height: `${Math.max(14, Math.round(p * 100))}%`, borderRadius: 5, background: i === 0 ? "linear-gradient(180deg,#FF8A4C,#E8541A)" : "#F6DECE" }} />
-            })}
+        {/* ── TAB 2: Зөвлэмж ── */}
+        {tab === 2 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {advice.map((x, i) => (
+              <div key={i} style={{ borderRadius: 20, padding: "15px 16px", ...glass }}>
+                <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                  <span style={{ width: 30, height: 30, borderRadius: 10, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(160deg,#FFE9D8,#FBD9C4)", fontSize: 15 }}>{x.emoji || "💡"}</span>
+                  <div style={{ minWidth: 0 }}>
+                    {x.title && <div style={{ fontSize: 13.5, fontWeight: 700, color: "#2A2520", marginBottom: 4 }}>{x.title}</div>}
+                    {x.description && <div style={{ fontSize: 12.5, color: "#7C6F66", lineHeight: 1.55 }}>{x.description}</div>}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {data.strengths && data.strengths.length > 0 && (
+              <div style={{ borderRadius: 20, padding: "15px 16px", ...glass }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#E8541A", marginBottom: 10 }}>Давуу тал</div>
+                {data.strengths.map((s, i) => (
+                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, fontSize: 12.5, color: "#43403C", lineHeight: 1.5 }}><span style={{ color: "#E8541A", flexShrink: 0 }}>✓</span><span>{s}</span></div>
+                ))}
+              </div>
+            )}
+            {data.risks && data.risks.length > 0 && (
+              <div style={{ borderRadius: 20, padding: "15px 16px", ...glass }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#C2410C", marginBottom: 10 }}>Анхаарах</div>
+                {data.risks.map((r, i) => (
+                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, fontSize: 12.5, color: "#43403C", lineHeight: 1.5 }}><span style={{ color: "#C2410C", flexShrink: 0 }}>!</span><span>{r}</span></div>
+                ))}
+              </div>
+            )}
+            <button onClick={() => onAskAI("Энэ үр дүнд тулгуурлан надад дэлгэрэнгүй зөвлөгөө, төлөвлөгөө гаргаж өгөөч")} style={{ marginTop: 2, border: "none", borderRadius: 16, padding: "13px 0", background: "linear-gradient(135deg,#FF8A4C,#E8541A)", color: "#fff", fontSize: 14, fontWeight: 700, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 6px 16px rgba(232,84,26,0.3)" }}>AI-аас зөвлөгөө авах</button>
           </div>
-        </div>
-        <div style={{ borderRadius: 22, padding: 16, ...glass }}>
-          <div style={{ fontSize: 12, color: "#9A8E86" }}>Хүндрэлийн түвшин</div>
-          <div style={{ fontSize: 18, fontWeight: 800, margin: "3px 0 10px" }}>{riskLabel}</div>
-          <svg width="100%" height="38" viewBox="0 0 120 38" fill="none">
-            <path d="M4 9 L28 16 L46 11 L70 24 L92 20 L116 31" stroke="#E8541A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-            <circle cx="116" cy="31" r="4" fill="#E8541A"/>
-          </svg>
-        </div>
+        )}
+      </div>
+
+      {/* Bottom glass nav */}
+      <div style={{ position: "relative", zIndex: 2, margin: "0 15px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, borderRadius: 28, padding: 7, ...glass }}>
+        <button onClick={() => onClose?.()} aria-label="Буцах" style={navBtn}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button onClick={() => setTab(0)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, border: "none", borderRadius: 22, padding: "13px 0", background: "linear-gradient(135deg,#FF8A4C,#E8541A)", color: "#fff", fontSize: 14, fontWeight: 700, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 6px 16px rgba(232,84,26,0.3)" }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Тайлан
+        </button>
+        <button onClick={() => setTab(2)} aria-label="Зөвлэмж" style={navBtn}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg>
+        </button>
+        <button onClick={() => onAskAI("Энэ үр дүнгийн талаар асуумаар байна")} aria-label="AI асуух" style={navBtn}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </button>
       </div>
     </div>
   )
@@ -1651,941 +1743,6 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
   const rc = riskColor(data.riskLevel)
   const pc = potColor(data.quitPotential)
 
-  return (
-    <div style={{ position: "absolute", inset: 0, background: "#FFFFFF", display: "flex", flexDirection: "column", fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif", zIndex: 50, animation: "ar-in 0.3s ease" }}>
-      {/* Header */}
-      <div style={{ background: "#fff", borderBottom: hasJourney ? "none" : "1px solid #F1ECE8", padding: "10px 14px", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: hasJourney ? 0 : 10 }}>
-          <button onClick={close} style={{ background: "#FAF6F3", border: "1px solid #F0E6DF", borderRadius: 20, padding: "6px 14px", fontSize: 12, color: "#7C6F66", cursor: "pointer", fontWeight: 600 }}>← Буцах</button>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#2A2520", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{reportTitle}</span>
-          <button onClick={expand} style={{ background: "#FAF6F3", border: "1px solid #F0E6DF", borderRadius: 20, padding: "7px 10px", cursor: "pointer", color: "#B89A88", display: "flex", alignItems: "center" }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-              {expanded ? <path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3" /> : <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />}
-            </svg>
-          </button>
-        </div>
-        {!hasJourney && (
-        <div style={{ display: "flex", background: "#FAF6F3", borderRadius: 12, padding: 3, gap: 2 }}>
-          {PAGES.map((p, i) => (
-            <button key={i} onClick={() => setPage(i)} style={{ flex: 1, padding: "7px", fontSize: 11, fontWeight: 700, border: "none", borderRadius: 10, cursor: "pointer", background: page === i ? "#fff" : "transparent", color: page === i ? "#2A2520" : "#A89E96", boxShadow: page === i ? "0 2px 8px rgba(0,0,0,0.08)" : "none", transition: "all 0.2s" }}>{p}</button>
-          ))}
-        </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div style={{ flex: 1, overflowY: hasJourney ? "hidden" : "auto", overflowX: "hidden", display: hasJourney ? "flex" : "block", flexDirection: "column" }} onTouchStart={hasJourney ? undefined : onTS} onTouchEnd={hasJourney ? undefined : onTE}>
-        {/* JOURNEY MODE — AI-planned chapter-paged narrative */}
-        {hasJourney && <JourneyView data={data} onAskAI={onAskAI} />}
-
-        {/* PAGE 0 — Overview (warm liquid-glass redesign) */}
-        {!hasJourney && page === 0 && <WarmOverview data={data} onAskAI={onAskAI} />}
-
-
-        {/* PAGE 1 — AI Insights (carousel design) */}
-        {!hasJourney && page === 1 && (() => {
-          // Stats pills derived from statCards or computed
-          const heroStats = (data.statCards && data.statCards.length >= 4)
-            ? data.statCards.slice(0, 4)
-            : [
-                { icon: "🔥", label: "Хадгалсан", value: `${data.healthScore}%`, sub: "" },
-                { icon: "❤️", label: "Эрүүл мэнд", value: `+${Math.round(data.healthScore / 5)}%`, sub: "" },
-                { icon: "🫁", label: "Чадвар", value: `+${Math.round(data.healthScore / 4)}%`, sub: "" },
-                { icon: "⚡", label: "Эрч хүч", value: `+${Math.round(data.healthScore / 3)}%`, sub: "" },
-              ]
-
-          // 3 carousel cards data
-          const cards = [
-            {
-              key: "strengths",
-              title: "Давуу талууд",
-              titleColor: "#B45309",
-              bg: "linear-gradient(135deg, #FFF6EA, #FCEBD2)",
-              border: "#FBDFB3",
-              iconBg: "linear-gradient(135deg, #EFA53F, #B45309)",
-              iconShadow: "0 8px 20px rgba(34,197,94,0.35)",
-              icon: (
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2L4 6v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V6l-8-4z" fill="#fff" stroke="#D98324" strokeWidth="1.5"/>
-                  <path d="M9 12l2 2 4-5" stroke="#B45309" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              ),
-              items: data.strengths.slice(0, 3),
-              itemDot: "#D98324",
-              ctaLabel: `${data.strengths.length} давуу тал`,
-              ctaBg: "linear-gradient(135deg, #D98324, #B45309)",
-            },
-            {
-              key: "risks",
-              title: "Анхаарах зүйлс",
-              titleColor: "#EA580C",
-              bg: "linear-gradient(135deg, #FFF7ED, #FFEDD5)",
-              border: "#FED7AA",
-              iconBg: "linear-gradient(135deg, #FB923C, #EA580C)",
-              iconShadow: "0 8px 20px rgba(234,88,12,0.35)",
-              icon: (
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2L1 21h22L12 2z" fill="#FB923C" stroke="#EA580C" strokeWidth="1.5"/>
-                  <path d="M12 9v5M12 17h.01" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
-                </svg>
-              ),
-              items: data.risks.slice(0, 3),
-              itemDot: "#FB923C",
-              ctaLabel: `${data.risks.length} анхаарах зүйл`,
-              ctaBg: "linear-gradient(135deg, #FB923C, #EA580C)",
-            },
-            {
-              key: "tips",
-              title: "Зөвлөмж",
-              titleColor: "#B45309",
-              bg: "linear-gradient(135deg, #FFF6EA, #FCEBD2)",
-              border: "#FBDFB3",
-              iconBg: "linear-gradient(135deg, #EFA53F, #C2740C)",
-              iconShadow: "0 8px 20px rgba(16,185,129,0.35)",
-              icon: (
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                  <path d="M3 9h18v12H3z" fill="#C2740C" stroke="#B45309" strokeWidth="1.5"/>
-                  <path d="M3 9v3h18V9M12 21V9" stroke="#B45309" strokeWidth="1.5"/>
-                  <path d="M12 9c-3-3-6-1-6 1 0 2 3 2 6 0zM12 9c3-3 6-1 6 1 0 2-3 2-6 0z" fill="#fff" stroke="#B45309" strokeWidth="1.5"/>
-                </svg>
-              ),
-              items: (data.insights[0]?.actions || data.insights.map(i => i.description)).slice(0, 3),
-              itemDot: "#C2740C",
-              ctaLabel: "Дэлгэрэнгүй",
-              ctaBg: "linear-gradient(135deg, #C2740C, #B45309)",
-            },
-          ]
-
-          const goCard = (i: number) => setInsCarousel(Math.max(0, Math.min(cards.length - 1, i)))
-          const onCarouselTS = (e: React.TouchEvent) => { insCarouselTouchX.current = e.touches[0].clientX }
-          const onCarouselTE = (e: React.TouchEvent) => {
-            const d = insCarouselTouchX.current - e.changedTouches[0].clientX
-            if (Math.abs(d) > 40) {
-              if (d > 0) goCard(insCarousel + 1)
-              else goCard(insCarousel - 1)
-            }
-          }
-          const current = cards[insCarousel]
-
-          return (
-          <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
-            {/* ─── HERO: outcome-quality themed (not raw % themed) ─── */}
-            {(() => {
-              const s = data.healthScore  // wellbeing
-              const oq = data.outcomeQuality
-              // Prefer explicit outcomeQuality when available; fall back to score tiers
-              const tier: 'positive' | 'neutral' | 'concerning' =
-                oq === 'positive' ? 'positive'
-                : oq === 'concerning' ? 'concerning'
-                : oq === 'neutral' ? 'neutral'
-                : s >= 70 ? 'positive' : s >= 40 ? 'neutral' : 'concerning'
-              const labelByType: Record<TestType, { good: string; mid: string; bad: string }> = {
-                profile:   { good: 'Тод profile',       mid: 'Тэнцвэртэй profile', bad: 'Тэнцвэрт анхаарах' },
-                cognitive: { good: 'Сайн чадвар',       mid: 'Дундаж',             bad: 'Хөгжүүлэх боломж' },
-                screening: { good: 'Эерэг үр дүн',      mid: 'Анхаарал хандуул',   bad: 'Тусламж шаарддаг' },
-                aptitude:  { good: 'Тохиромжтой',       mid: 'Боломжтой',          bad: 'Хөгжүүлэх ёстой' },
-                generic:   { good: 'Эерэг үр дүн',      mid: 'Тэнцвэртэй',         bad: 'Анхаарал хандуул' },
-              }
-              const labels = labelByType[testType]
-              const theme = tier === 'positive'
-                ? {
-                    bg: "linear-gradient(135deg, #FFF6EA 0%, #FCEBD2 50%, #FBDFB3 100%)",
-                    border: "#FBDFB3", shadow: "rgba(34,197,94,0.12)",
-                    label: "#B45309", num: "#5C2A12", body: "#7C3A1E",
-                    chip: "💚", decor: ["#FBD89B", "#EFA53F", "#D98324"],
-                    progressLabel: labels.good,
-                  }
-                : tier === 'neutral'
-                ? {
-                    bg: "linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 50%, #FDE68A 100%)",
-                    border: "#FDE68A", shadow: "rgba(245,158,11,0.12)",
-                    label: "#B45309", num: "#78350F", body: "#92400E",
-                    chip: "⚖️", decor: ["#FCD34D", "#FBBF24", "#F59E0B"],
-                    progressLabel: labels.mid,
-                  }
-                : {
-                    bg: "linear-gradient(135deg, #FFF2EE 0%, #FCE0D6 50%, #FBD3C2 100%)",
-                    border: "#FBD3C2", shadow: "rgba(239,68,68,0.12)",
-                    label: "#9A3412", num: "#7C2D12", body: "#7C2D12",
-                    chip: "🫶", decor: ["#F0A07A", "#E0703F", "#C2410C"],
-                    progressLabel: labels.bad,
-                  }
-              return (
-              <div style={{
-                background: theme.bg,
-                borderRadius: 24, padding: "18px 16px 14px", marginBottom: 14,
-                border: `1.5px solid ${theme.border}`,
-                boxShadow: `0 4px 16px ${theme.shadow}`,
-                position: "relative", overflow: "hidden",
-              }}>
-                {/* Decorative shapes themed to score */}
-                <div style={{
-                  position: "absolute", top: -10, right: -20,
-                  width: 130, height: 130, pointerEvents: "none",
-                  opacity: 0.5,
-                }}>
-                  <svg width="130" height="130" viewBox="0 0 100 100" fill="none">
-                    <ellipse cx="55" cy="40" rx="14" ry="22" fill={theme.decor[0]} transform="rotate(30 55 40)"/>
-                    <ellipse cx="70" cy="55" rx="13" ry="20" fill={theme.decor[1]} transform="rotate(60 70 55)"/>
-                    <ellipse cx="60" cy="65" rx="11" ry="18" fill={theme.decor[2]} transform="rotate(-20 60 65)"/>
-                    <ellipse cx="75" cy="30" rx="9" ry="14" fill={theme.decor[0]} transform="rotate(45 75 30)"/>
-                  </svg>
-                </div>
-
-                {/* Top: Score ring + main metric */}
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12, position: "relative" }}>
-                  <div style={{ flexShrink: 0 }}>
-                    <ScoreRing score={data.healthScore} size={106} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: theme.label }}>{theme.progressLabel}</span>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={theme.label} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                        <polyline points="17 6 23 6 23 12"/>
-                      </svg>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 3 }}>
-                      <span style={{ fontSize: 28, fontWeight: 900, color: theme.num, lineHeight: 1 }}>
-                        {data.displayScore != null ? data.displayScore : data.healthScore}
-                      </span>
-                      <span style={{ fontSize: 13, color: theme.body, fontWeight: 700 }}>
-                        /{data.displayMaxScore || 100} оноо
-                      </span>
-                    </div>
-                    <p style={{ fontSize: 11, color: theme.body, lineHeight: 1.4, margin: 0, fontWeight: 600 }}>
-                      {data.summary.title}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Bottom: 4 stat pills with SVG icons */}
-                <div style={{
-                  background: "rgba(255,255,255,0.7)",
-                  backdropFilter: "blur(8px)",
-                  borderRadius: 16, padding: "10px 8px",
-                  display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6,
-                  position: "relative",
-                  border: "1px solid rgba(255,255,255,0.8)",
-                }}>
-                  {heroStats.map((stat, i) => {
-                    // Map index -> icon + color
-                    const icons = [
-                      { color: "#E8541A", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#E8541A" opacity="0.18"/><circle cx="12" cy="12" r="6" fill="none" stroke="#E8541A" strokeWidth="2"/><circle cx="12" cy="12" r="2.5" fill="#E8541A"/></svg> },
-                      { color: "#EA580C", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="13" width="4" height="8" rx="1" fill="#EA580C" opacity="0.5"/><rect x="10" y="8" width="4" height="13" rx="1" fill="#EA580C" opacity="0.75"/><rect x="17" y="4" width="4" height="17" rx="1" fill="#EA580C"/></svg> },
-                      { color: "#F59E0B", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="#F59E0B"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> },
-                      { color: "#FB923C", svg: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#FB923C" opacity="0.18"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" stroke="#FB923C" strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="12" r="3" fill="#FB923C"/></svg> },
-                    ]
-                    const ic = icons[i] || icons[0]
-                    return (
-                      <div key={i} style={{
-                        textAlign: "center", padding: "4px 2px",
-                        display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
-                      }}>
-                        {ic.svg}
-                        <div style={{
-                          fontSize: 8, fontWeight: 800, color: "#8A817A",
-                          letterSpacing: 0.3, textTransform: "uppercase",
-                          lineHeight: 1.2, marginTop: 1,
-                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                          maxWidth: "100%",
-                        }}>{stat.label}</div>
-                        <div style={{
-                          fontSize: 11, fontWeight: 900, color: ic.color,
-                          lineHeight: 1,
-                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                          maxWidth: "100%",
-                        }}>{stat.value}</div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-              )
-            })()}
-
-            {/* ─── AI INSIGHTS CAROUSEL ────────────────────────────────── */}
-            <div style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "0 4px", marginBottom: 10,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 18 }}>✨</span>
-                <span style={{ fontSize: 14, fontWeight: 800, color: "#2A2520" }}>AI-ийн дүгнэлт</span>
-              </div>
-              <button onClick={() => current.key === "tips" && data.insights[0] && setInsDetail(data.insights[0])} style={{
-                background: "none", border: "none",
-                fontSize: 11, fontWeight: 700, color: "#B45309",
-                cursor: "pointer", display: "flex", alignItems: "center", gap: 3,
-                fontFamily: "inherit",
-              }}>
-                Дэлгэрэнгүй →
-              </button>
-            </div>
-
-            {/* Horizontal-scroll container with 3 cards visible (snap to each) */}
-            <div style={{ position: "relative", marginBottom: 8 }}>
-              {/* Left arrow */}
-              {insCarousel > 0 && (
-                <button
-                  onClick={() => {
-                    goCard(insCarousel - 1)
-                    const el = document.getElementById("ai-ins-scroll")
-                    if (el) el.scrollTo({ left: (insCarousel - 1) * el.clientWidth * 0.92, behavior: "smooth" })
-                  }}
-                  style={{
-                    position: "absolute", left: -8, top: "45%", transform: "translateY(-50%)",
-                    zIndex: 5, width: 36, height: 36, borderRadius: "50%",
-                    background: "#fff", border: "1.5px solid #F0EAE6",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer", color: "#8A817A",
-                    boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
-                    fontFamily: "inherit",
-                  }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M15 18l-6-6 6-6"/>
-                  </svg>
-                </button>
-              )}
-              {/* Right arrow */}
-              {insCarousel < cards.length - 1 && (
-                <button
-                  onClick={() => {
-                    goCard(insCarousel + 1)
-                    const el = document.getElementById("ai-ins-scroll")
-                    if (el) el.scrollTo({ left: (insCarousel + 1) * el.clientWidth * 0.92, behavior: "smooth" })
-                  }}
-                  style={{
-                    position: "absolute", right: -8, top: "45%", transform: "translateY(-50%)",
-                    zIndex: 5, width: 36, height: 36, borderRadius: "50%",
-                    background: "#fff", border: "1.5px solid #F0EAE6",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer", color: "#8A817A",
-                    boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
-                    fontFamily: "inherit",
-                  }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 18l6-6-6-6"/>
-                  </svg>
-                </button>
-              )}
-
-              {/* Scroll container: shows all 3 cards horizontally, snap to each */}
-              <div
-                id="ai-ins-scroll"
-                onScroll={(e) => {
-                  const el = e.currentTarget
-                  const cardWidth = el.clientWidth * 0.92
-                  const idx = Math.round(el.scrollLeft / cardWidth)
-                  if (idx !== insCarousel) setInsCarousel(Math.max(0, Math.min(cards.length - 1, idx)))
-                }}
-                style={{
-                  display: "flex", gap: 10,
-                  overflowX: "auto",
-                  scrollSnapType: "x mandatory",
-                  scrollbarWidth: "none",
-                  msOverflowStyle: "none",
-                  WebkitOverflowScrolling: "touch",
-                  paddingBottom: 4,
-                  margin: "0 -4px",
-                  padding: "0 4px 4px",
-                }}
-              >
-                {cards.map((c) => (
-                  <div
-                    key={c.key}
-                    style={{
-                      flex: "0 0 88%",
-                      minWidth: 230,
-                      maxWidth: 320,
-                      scrollSnapAlign: "center",
-                      background: c.bg,
-                      borderRadius: 20, padding: "18px 16px 14px",
-                      border: `1.5px solid ${c.border}`,
-                      boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
-                      display: "flex", flexDirection: "column",
-                    }}
-                  >
-                    {/* Big 3D icon */}
-                    <div style={{
-                      width: 76, height: 76, borderRadius: 24,
-                      background: c.iconBg,
-                      margin: "0 auto 12px",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      boxShadow: c.iconShadow,
-                      position: "relative", overflow: "hidden",
-                    }}>
-                      <div style={{
-                        position: "absolute", top: 0, left: 0, right: 0, height: "45%",
-                        background: "linear-gradient(180deg, rgba(255,255,255,0.4), transparent)",
-                      }}/>
-                      <div style={{ position: "relative" }}>{c.icon}</div>
-                    </div>
-
-                    {/* Title */}
-                    <p style={{
-                      fontSize: 17, fontWeight: 900, color: c.titleColor,
-                      textAlign: "center", margin: "0 0 14px", letterSpacing: -0.3,
-                    }}>
-                      {c.title}
-                    </p>
-
-                    {/* Items (Title: detail split, show top 3 with truncation) */}
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 9, marginBottom: 14 }}>
-                      {c.items.slice(0, 3).map((rawItem, i) => {
-                        const item = String(rawItem || "")
-                        const split = item.match(/^([^:：]+)[:：]\s*(.+)$/)
-                        const itemTitle = split ? split[1].trim() : null
-                        const itemBody = split ? split[2].trim() : item
-                        return (
-                          <div key={i} style={{
-                            display: "flex", gap: 8, alignItems: "flex-start",
-                            background: "rgba(255,255,255,0.55)",
-                            borderRadius: 10, padding: "8px 10px",
-                            border: `1px solid ${c.border}66`,
-                          }}>
-                            <div style={{
-                              width: 18, height: 18, borderRadius: "50%",
-                              background: c.itemDot,
-                              display: "flex", alignItems: "center", justifyContent: "center",
-                              flexShrink: 0, marginTop: 1,
-                              boxShadow: `0 2px 6px ${c.itemDot}55`,
-                            }}>
-                              {c.key === "strengths" && (
-                                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                              )}
-                              {c.key === "risks" && (
-                                <span style={{ color: "#fff", fontSize: 10, fontWeight: 900, lineHeight: 1 }}>!</span>
-                              )}
-                              {c.key === "tips" && (
-                                <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#fff" }}/>
-                              )}
-                            </div>
-                            <div style={{ minWidth: 0, flex: 1 }}>
-                              {itemTitle && (
-                                <div style={{
-                                  fontSize: 11, fontWeight: 800, color: "#2A2520",
-                                  marginBottom: 2, lineHeight: 1.3,
-                                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                                }}>{itemTitle}</div>
-                              )}
-                              <div style={{
-                                fontSize: 10.5, color: itemTitle ? "#5B5650" : "#5B5650",
-                                lineHeight: 1.45,
-                                display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
-                              }}>{itemBody}</div>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-
-                    {/* CTA pill — opens list-detail modal */}
-                    <button onClick={() => {
-                      setListDetail({
-                        kind: c.key as any,
-                        title: c.title,
-                        items: c.items,
-                        color: c.titleColor,
-                        bg: c.bg as string,
-                        soft: c.border as string,
-                        grad: c.ctaBg as string,
-                        emoji: c.key === "strengths" ? "💪" : c.key === "risks" ? "⚠️" : "💡",
-                      })
-                    }} style={{
-                      background: c.ctaBg,
-                      border: "none", borderRadius: 999,
-                      padding: "10px 18px", color: "#fff",
-                      fontSize: 12, fontWeight: 800, cursor: "pointer",
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                      boxShadow: `0 6px 16px ${c.titleColor}44`,
-                      fontFamily: "inherit",
-                    }}>
-                      {c.ctaLabel}
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 18l6-6-6-6"/>
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {/* Hide scrollbar */}
-              <style>{`
-                #ai-ins-scroll::-webkit-scrollbar { display: none; }
-              `}</style>
-
-              {/* Pagination dots */}
-              <div style={{
-                display: "flex", justifyContent: "center", gap: 6, marginTop: 14,
-              }}>
-                {cards.map((_, i) => (
-                  <button key={i} onClick={() => {
-                    goCard(i)
-                    const el = document.getElementById("ai-ins-scroll")
-                    if (el) el.scrollTo({ left: i * el.clientWidth * 0.92, behavior: "smooth" })
-                  }} style={{
-                    width: i === insCarousel ? 22 : 7, height: 7, borderRadius: 4,
-                    background: i === insCarousel
-                      ? (cards[insCarousel].titleColor === "#EA580C" ? "#EA580C" : "#C2740C")
-                      : "#F0EAE6",
-                    border: "none", cursor: "pointer", padding: 0,
-                    transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
-                    fontFamily: "inherit",
-                  }}/>
-                ))}
-              </div>
-            </div>
-
-            {/* ─── ACTION PAGE CTA BANNER (hidden when no action page) ─── */}
-            {hasActionPage && (
-            <div style={{
-              background: "linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)",
-              borderRadius: 24, padding: "16px",
-              border: "1.5px solid #FED7AA",
-              boxShadow: "0 4px 16px rgba(251,146,60,0.12)",
-              display: "flex", alignItems: "center", gap: 12,
-              position: "relative", overflow: "hidden",
-              marginTop: 10,
-            }}>
-              <div style={{ fontSize: 44, flexShrink: 0, lineHeight: 1 }}>{testType === 'profile' ? '🌱' : testType === 'cognitive' ? '🧠' : testType === 'aptitude' ? '🎯' : '📅'}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 13, fontWeight: 900, color: "#7C2D12", margin: "0 0 3px", lineHeight: 1.3 }}>
-                  {testType === 'profile' ? 'Profile-аа хөгжүүлэх үү?' : testType === 'cognitive' ? 'Чадвараа сайжруулах уу?' : testType === 'aptitude' ? 'Карьерын алхмууд харах уу?' : '30 хоногийн төлөвлөгөө эхлүүлэх үү?'}
-                </p>
-                <p style={{ fontSize: 10, color: "#9A3412", margin: "0 0 8px", lineHeight: 1.4 }}>
-                  Алхам алхмаар хамтдаа урагшилцгаая! 🚀
-                </p>
-                <button onClick={() => setPage(maxPage)} style={{
-                  background: "linear-gradient(135deg, #F97316, #EA580C)",
-                  border: "none", borderRadius: 999,
-                  padding: "7px 16px", color: "#fff",
-                  fontSize: 11, fontWeight: 800, cursor: "pointer",
-                  display: "inline-flex", alignItems: "center", gap: 5,
-                  boxShadow: "0 6px 16px rgba(234,88,12,0.4)",
-                  fontFamily: "inherit",
-                }}>
-                  Эхлүүлэх →
-                </button>
-              </div>
-              {/* Target illustration */}
-              <div style={{ flexShrink: 0 }}>
-                <svg width="56" height="56" viewBox="0 0 60 60" fill="none">
-                  <circle cx="30" cy="30" r="26" fill="#FED7AA" stroke="#FB923C" strokeWidth="2"/>
-                  <circle cx="30" cy="30" r="18" fill="#FFEDD5" stroke="#FB923C" strokeWidth="1.5"/>
-                  <circle cx="30" cy="30" r="10" fill="#FB923C"/>
-                  <circle cx="30" cy="30" r="4" fill="#fff"/>
-                  <path d="M40 8 L36 12 L42 18 L46 14 Z" fill="#FBBF24" stroke="#F59E0B" strokeWidth="1"/>
-                  <line x1="38" y1="14" x2="32" y2="20" stroke="#92400E" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </div>
-            </div>
-            )}
-          </div>
-          )
-        })()}
-
-        {/* PAGE 1 — OLD CONTENT (unreachable, kept for reference) */}
-        {false && page === 1 && (
-          <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
-            {/* ── Hero AI banner with stats ── */}
-            <div style={{
-              background: "linear-gradient(135deg, #FB923C 0%, #C2410C 100%)",
-              borderRadius: 20, padding: "18px 16px 14px", marginBottom: 12,
-              position: "relative", overflow: "hidden",
-            }}>
-              {/* Decorative orbs */}
-              <div style={{
-                position: "absolute", top: -40, right: -30,
-                width: 130, height: 130, borderRadius: "50%",
-                background: "rgba(255,255,255,0.08)", pointerEvents: "none",
-              }}/>
-              <div style={{
-                position: "absolute", bottom: -30, left: -20,
-                width: 90, height: 90, borderRadius: "50%",
-                background: "rgba(255,255,255,0.06)", pointerEvents: "none",
-              }}/>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14, position: "relative" }}>
-                <Char type="phone" size={56} style={{ flexShrink: 0 }}/>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    display: "inline-flex", alignItems: "center", gap: 5,
-                    background: "rgba(255,255,255,0.18)",
-                    borderRadius: 999, padding: "3px 10px", marginBottom: 4,
-                  }}>
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#EFA53F", display: "inline-block", boxShadow: "0 0 6px #EFA53F" }}/>
-                    <span style={{ fontSize: 9, fontWeight: 800, color: "#fff", letterSpacing: 0.6 }}>POWERED BY AI</span>
-                  </div>
-                  <p style={{ fontSize: 16, fontWeight: 900, color: "#fff", margin: "0 0 2px" }}>AI Insights</p>
-                  <p style={{ fontSize: 10, color: "rgba(255,255,255,0.8)", margin: 0, lineHeight: 1.4 }}>
-                    {data.insights.length} дэлгэрэнгүй дүгнэлт
-                  </p>
-                </div>
-              </div>
-              {/* Mini stats row */}
-              <div style={{ display: "flex", gap: 8, position: "relative" }}>
-                {[
-                  { label: "Найдвартай", value: "97%", icon: "✓" },
-                  { label: "Гүн шинжилгээ", value: `${data.insights.length}+`, icon: "🔍" },
-                  { label: "Алхам", value: `${data.roadmap.length * 2}+`, icon: "→" },
-                ].map((s, i) => (
-                  <div key={i} style={{
-                    flex: 1, background: "rgba(255,255,255,0.12)",
-                    borderRadius: 12, padding: "8px 6px", textAlign: "center",
-                    backdropFilter: "blur(8px)",
-                  }}>
-                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 700, marginBottom: 2 }}>
-                      {s.icon} {s.label}
-                    </div>
-                    <div style={{ fontSize: 15, fontWeight: 900, color: "#fff", lineHeight: 1 }}>{s.value}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ── Filter chips ── */}
-            <div style={{
-              display: "flex", gap: 6, marginBottom: 12,
-              overflowX: "auto", paddingBottom: 2,
-            }}>
-              {[
-                { label: "Бүгд", count: data.insights.length, active: true },
-                { label: "💪 Хүч", count: data.strengths.length },
-                { label: "⚠️ Эрсдэл", count: data.risks.length },
-                { label: "💡 Зөвлөмж", count: data.insights.reduce((s, i) => s + (i.actions?.length || 0), 0) },
-              ].map((f, i) => (
-                <div key={i} style={{
-                  flexShrink: 0,
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                  background: f.active ? "#2A2520" : "#fff",
-                  color: f.active ? "#fff" : "#8A817A",
-                  border: f.active ? "none" : "1.5px solid #F0EAE6",
-                  borderRadius: 999, padding: "6px 12px",
-                  fontSize: 11, fontWeight: 700, cursor: "pointer",
-                  whiteSpace: "nowrap",
-                  transition: "all 0.2s",
-                  boxShadow: f.active ? "0 4px 12px rgba(30,41,59,0.2)" : "none",
-                }}>
-                  {f.label}
-                  <span style={{
-                    background: f.active ? "rgba(255,255,255,0.2)" : "#FAF6F3",
-                    color: f.active ? "#fff" : "#A89E96",
-                    borderRadius: 999, padding: "0 6px",
-                    fontSize: 9, fontWeight: 800, minWidth: 14, textAlign: "center",
-                  }}>{f.count}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* ── Insight cards (rich) ── */}
-            {data.insights.map((ins, i) => {
-              const palettes = [
-                { bg: "#FFF6EA", border: "#FBDFB3", color: PRIMARY, text: "Маш сайн", priority: "Өндөр" },
-                { bg: "#FFF5F0", border: "#FFD0B8", color: BRAND, text: "Анхаарал", priority: "Дунд" },
-                { bg: "#FFF7F2", border: "#FED7AA", color: "#EA580C", text: "Боломж", priority: "Чухал" },
-              ]
-              const p = palettes[i % palettes.length]
-              return (
-                <div key={i} className="hw-card-tilt" style={{
-                  background: "#fff", borderRadius: 18, padding: "0",
-                  marginBottom: 10, overflow: "hidden",
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-                  border: `1.5px solid ${p.border}`,
-                  animation: `ci 0.35s ease ${i * 0.08}s both`,
-                  cursor: "pointer",
-                  transition: "all 0.25s cubic-bezier(.16,1,.3,1)",
-                }}
-                onClick={() => setInsDetail(ins)}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"
-                  ;(e.currentTarget as HTMLElement).style.boxShadow = `0 10px 28px ${p.color}22`
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.transform = "translateY(0)"
-                  ;(e.currentTarget as HTMLElement).style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)"
-                }}
-                >
-                  {/* Top color strip */}
-                  <div style={{
-                    height: 4, background: `linear-gradient(90deg, ${p.color}, ${p.color}66)`,
-                  }}/>
-
-                  <div style={{ padding: "12px 14px" }}>
-                    {/* Header row: emoji + title + badges */}
-                    <div style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 10 }}>
-                      <div style={{
-                        width: 42, height: 42, borderRadius: 12,
-                        background: p.bg, fontSize: 20,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        flexShrink: 0,
-                        boxShadow: `0 4px 10px ${p.color}22`,
-                      }}>{ins.emoji}</div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: "flex", gap: 4, marginBottom: 3 }}>
-                          <span style={{
-                            display: "inline-block",
-                            background: p.bg, color: p.color,
-                            fontSize: 8, fontWeight: 800,
-                            padding: "2px 7px", borderRadius: 999,
-                            letterSpacing: 0.4, textTransform: "uppercase",
-                            border: `1px solid ${p.border}`,
-                          }}>
-                            {p.priority}
-                          </span>
-                          <span style={{
-                            display: "inline-block",
-                            background: "#FAF6F3", color: "#8A817A",
-                            fontSize: 8, fontWeight: 700,
-                            padding: "2px 7px", borderRadius: 999,
-                          }}>
-                            #{i + 1}
-                          </span>
-                        </div>
-                        <p style={{ fontSize: 13, fontWeight: 800, color: "#2A2520", margin: "0 0 4px", lineHeight: 1.3 }}>{ins.title}</p>
-                        <p style={{ fontSize: 11.5, color: "#8A817A", margin: 0, lineHeight: 1.5 }}>{ins.description}</p>
-                      </div>
-                    </div>
-
-                    {/* Quick action chips */}
-                    {ins.actions && ins.actions.length > 0 && (
-                      <div style={{
-                        display: "flex", gap: 5, flexWrap: "wrap",
-                        marginBottom: 8, padding: "8px 0 0",
-                        borderTop: "1px dashed #F0EAE6",
-                      }}>
-                        {ins.actions.slice(0, 2).map((a, j) => (
-                          <span key={j} style={{
-                            background: "#FFF7F2", color: "#5B5650",
-                            border: "1px solid #F0EAE6",
-                            borderRadius: 8, padding: "4px 8px",
-                            fontSize: 10, fontWeight: 600,
-                            display: "inline-flex", alignItems: "center", gap: 4,
-                            maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                          }}>
-                            <span style={{ color: p.color }}>✓</span> {a.length > 28 ? a.slice(0, 26) + "…" : a}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Bottom row */}
-                    <div style={{
-                      display: "flex", alignItems: "center", justifyContent: "space-between",
-                      paddingTop: 6,
-                    }}>
-                      <div style={{ display: "flex", gap: 4 }}>
-                        <button onClick={e => { e.stopPropagation(); onAskAI(`"${ins.title}" талаар илүү дэлгэрэнгүй тайлбарла`); close() }} style={{
-                          background: p.bg, color: p.color, border: "none",
-                          borderRadius: 8, padding: "5px 10px",
-                          fontSize: 10, fontWeight: 700, cursor: "pointer",
-                          display: "flex", alignItems: "center", gap: 4,
-                          fontFamily: "inherit",
-                        }}>
-                          ✨ AI-аас асуу
-                        </button>
-                      </div>
-                      <div style={{
-                        display: "flex", alignItems: "center", gap: 4,
-                        color: p.color, fontSize: 11, fontWeight: 800,
-                      }}>
-                        Дэлгэрэнгүй
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-
-            {/* Quick stats summary card */}
-            <div style={{
-              background: "#fff", borderRadius: 18, padding: "14px",
-              marginTop: 4, marginBottom: 10,
-              boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-              border: "1.5px solid #FAF6F3",
-              display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12,
-            }}>
-              <div>
-                <p style={{ fontSize: 11, fontWeight: 800, color: "#B45309", margin: "0 0 8px", display: "flex", alignItems: "center", gap: 5 }}>💪 Давуу талууд</p>
-                {data.strengths.slice(0, 3).map((s, i) => (
-                  <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "flex-start" }}>
-                    <span style={{ color: PRIMARY, fontSize: 10, fontWeight: 800, marginTop: 1 }}>✓</span>
-                    <span style={{ fontSize: 11, color: "#5B5650", lineHeight: 1.4 }}>{s}</span>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p style={{ fontSize: 11, fontWeight: 800, color: "#EA580C", margin: "0 0 8px", display: "flex", alignItems: "center", gap: 5 }}>⚠️ Анхаарал</p>
-                {data.risks.slice(0, 3).map((r, i) => (
-                  <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "flex-start" }}>
-                    <span style={{ color: "#FF9800", fontSize: 10, fontWeight: 800, marginTop: 1 }}>!</span>
-                    <span style={{ fontSize: 11, color: "#5B5650", lineHeight: 1.4 }}>{r}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <button onClick={() => setPage(2)} style={{
-              width: "100%", marginTop: 4, padding: "12px",
-              background: `linear-gradient(135deg, ${PRIMARY}, #F97316)`,
-              border: "none", borderRadius: 14, color: "#fff",
-              fontSize: 12, fontWeight: 800, cursor: "pointer",
-              boxShadow: `0 4px 14px ${PRIMARY}40`,
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-            }}>
-              📅 30 Хоногийн төлөвлөгөө харах →
-            </button>
-          </div>
-        )}
-
-        {/* PAGE 2 — 30 Day Plan + Goals */}
-        {!hasJourney && page === 2 && (
-          <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
-            {/* Goals card */}
-            <div style={{ background: "#fff", borderRadius: 18, padding: "16px", marginBottom: 12, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 20 }}>🎯</span>
-                  <div>
-                    <p style={{ fontSize: 13, fontWeight: 800, color: "#2A2520", margin: "0 0 1px" }}>Өнөөдрийн зорилго</p>
-                    <p style={{ fontSize: 10, color: "#A89E96", margin: 0 }}>Зорилгоо тэмдэглэж явна уу</p>
-                  </div>
-                </div>
-                <div style={{ background: "#FFF6EA", borderRadius: 20, padding: "4px 12px", border: `1px solid ${PRIMARY}30` }}>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: PRIMARY }}>{goals.filter(Boolean).length}<span style={{ color: "#A89E96", fontWeight: 400 }}>/{todayGoals.length}</span></span>
-                </div>
-              </div>
-              <div style={{ background: "#FAF6F3", borderRadius: 8, height: 6, marginBottom: 14, overflow: "hidden" }}>
-                <div style={{ height: "100%", borderRadius: 8, background: `linear-gradient(90deg, ${PRIMARY}, #F97316)`, width: todayGoals.length > 0 ? `${(goals.filter(Boolean).length / todayGoals.length) * 100}%` : "0%", transition: "width 0.4s ease" }} />
-              </div>
-              {todayGoals.map((task, i) => (
-                <div key={i} onClick={() => toggleGoal(i)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", marginBottom: 8, cursor: "pointer", borderRadius: 14, background: goals[i] ? "#FFF6EA" : "#FAFAFA", border: `1.5px solid ${goals[i] ? PRIMARY + "40" : "#F0EAE6"}`, transition: "all 0.25s ease", userSelect: "none" }}>
-                  <div style={{ width: 24, height: 24, borderRadius: "50%", flexShrink: 0, background: goals[i] ? PRIMARY : "#fff", border: `2px solid ${goals[i] ? PRIMARY : "#DED5CD"}`, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.25s ease" }}>
-                    {goals[i] && <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M3 8l4 4 6-7" /></svg>}
-                  </div>
-                  <span style={{ fontSize: 13, color: goals[i] ? "#B45309" : "#5B5650", fontWeight: goals[i] ? 700 : 500, textDecoration: goals[i] ? "line-through" : "none", flex: 1, transition: "all 0.2s" }}>{task}</span>
-                  {goals[i] && <span style={{ fontSize: 14 }}>✅</span>}
-                </div>
-              ))}
-              {allGoalsDone && (
-                <div style={{ background: "linear-gradient(135deg, #FFF6EA, #FCEBD2)", borderRadius: 14, padding: "12px 16px", border: `1px solid ${PRIMARY}30`, display: "flex", alignItems: "center", gap: 12, marginTop: 4 }}>
-                  <Char type="celebrate" size={56} />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#B45309" }}>🎉 Бүх зорилгоо биелүүллээ! Гайхалтай!</span>
-                </div>
-              )}
-            </div>
-
-            {/* Roadmap */}
-            <div style={{ background: "#fff", borderRadius: 18, padding: "16px", marginBottom: 12, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                <span style={{ fontSize: 18 }}>📅</span>
-                <p style={{ fontSize: 13, fontWeight: 800, color: "#2A2520", margin: 0 }}>30 Хоногийн Төлөвлөгөө</p>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
-                {data.roadmap.map((_, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", flex: i < data.roadmap.length - 1 ? 1 : 0 }}>
-                    <button onClick={() => setRoadWeek(i)} style={{ width: 32, height: 32, borderRadius: "50%", border: "none", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 12, background: i === roadWeek ? weekColors[i % weekColors.length] : i < roadWeek ? `${weekColors[i % weekColors.length]}30` : "#FAF6F3", color: i === roadWeek ? "#fff" : i < roadWeek ? weekColors[i % weekColors.length] : "#A89E96", transition: "all 0.25s ease", boxShadow: i === roadWeek ? `0 4px 12px ${weekColors[i % weekColors.length]}50` : "none" }}>
-                      {i < roadWeek ? "✓" : i + 1}
-                    </button>
-                    {i < data.roadmap.length - 1 && (
-                      <div style={{ flex: 1, height: 3, marginLeft: 4, background: i < roadWeek ? weekColors[i % weekColors.length] : "#F0EAE6", borderRadius: 2, transition: "background 0.3s" }} />
-                    )}
-                  </div>
-                ))}
-              </div>
-              {data.roadmap[roadWeek] && (
-                <div style={{ background: `${weekColors[roadWeek % weekColors.length]}08`, borderRadius: 16, padding: "16px", border: `1.5px solid ${weekColors[roadWeek % weekColors.length]}25`, animation: "si 0.2s ease" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: weekColors[roadWeek % weekColors.length], display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, boxShadow: `0 4px 12px ${weekColors[roadWeek % weekColors.length]}40` }}>
-                      {weekIcons[roadWeek % weekIcons.length]}
-                    </div>
-                    <div>
-                      <p style={{ fontSize: 10, color: "#A89E96", fontWeight: 700, margin: "0 0 1px", letterSpacing: "0.4px" }}>{data.roadmap[roadWeek].week.toUpperCase()}</p>
-                      <p style={{ fontSize: 15, fontWeight: 900, color: "#2A2520", margin: 0 }}>{data.roadmap[roadWeek].title}</p>
-                    </div>
-                  </div>
-                  {data.roadmap[roadWeek].tasks.map((task, i) => (
-                    <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, padding: "10px 12px", background: "#fff", borderRadius: 12, border: "1px solid #F0EAE6", animation: `ci 0.3s ease ${i * 0.06}s both` }}>
-                      <div style={{ width: 22, height: 22, borderRadius: "50%", background: `${weekColors[roadWeek % weekColors.length]}20`, border: `1.5px solid ${weekColors[roadWeek % weekColors.length]}40`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-                        <span style={{ color: weekColors[roadWeek % weekColors.length], fontSize: 10, fontWeight: 800 }}>✓</span>
-                      </div>
-                      <span style={{ fontSize: 13, color: "#5B5650", lineHeight: 1.5 }}>{task}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-                <button onClick={() => setRoadWeek(w => Math.max(0, w - 1))} disabled={roadWeek === 0} style={{ flex: 1, padding: "11px", borderRadius: 14, border: "1.5px solid #F0EAE6", background: "#fff", color: roadWeek === 0 ? "#DED5CD" : "#5B5650", fontSize: 13, fontWeight: 700, cursor: roadWeek === 0 ? "not-allowed" : "pointer", transition: "all 0.2s" }}>← Өмнөх</button>
-                <button onClick={() => setRoadWeek(w => Math.min(data.roadmap.length - 1, w + 1))} disabled={roadWeek === data.roadmap.length - 1} style={{ flex: 1, padding: "11px", borderRadius: 14, border: "none", background: roadWeek === data.roadmap.length - 1 ? "#FAF6F3" : `linear-gradient(135deg, ${weekColors[roadWeek % weekColors.length]}, ${weekColors[(roadWeek + 1) % weekColors.length]})`, color: roadWeek === data.roadmap.length - 1 ? "#DED5CD" : "#fff", fontSize: 13, fontWeight: 700, cursor: roadWeek === data.roadmap.length - 1 ? "not-allowed" : "pointer", boxShadow: roadWeek === data.roadmap.length - 1 ? "none" : `0 4px 14px ${weekColors[roadWeek % weekColors.length]}40`, transition: "all 0.2s" }}>Дараах →</button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* AI Chat bar */}
-      <div style={{ background: "#fff", borderTop: "1px solid #F0EAE6", padding: "10px 14px", flexShrink: 0, boxShadow: "0 -4px 20px rgba(0,0,0,0.06)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-          <Char type="phone" size={36} style={{ flexShrink: 0 }} />
-          <div>
-            <p style={{ fontSize: 11, fontWeight: 800, color: "#2A2520", margin: "0 0 1px" }}>AI Таны туслах</p>
-            <p style={{ fontSize: 9, color: "#A89E96", margin: 0 }}>Асуултаа асуугарай, би танд туслахад бэлэн байна!</p>
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <input
-            value={chatInput}
-            onChange={e => setChatInput(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter") handleAI() }}
-            placeholder="Жишээ нь: Хэрхэн сайжрах вэ?"
-            style={{ flex: 1, background: "#FAF6F3", border: "1.5px solid #F0EAE6", borderRadius: 22, padding: "9px 16px", color: "#2A2520", fontSize: 12, outline: "none", fontFamily: "inherit", transition: "border-color 0.2s" }}
-            onFocus={e => (e.target as HTMLInputElement).style.borderColor = PRIMARY}
-            onBlur={e => (e.target as HTMLInputElement).style.borderColor = "#F0EAE6"}
-          />
-          <button onClick={handleAI} disabled={!chatInput.trim()} style={{ width: 38, height: 38, borderRadius: "50%", border: "none", background: chatInput.trim() ? `linear-gradient(135deg, ${PRIMARY}, #F97316)` : "#F0EAE6", display: "flex", alignItems: "center", justifyContent: "center", cursor: chatInput.trim() ? "pointer" : "not-allowed", flexShrink: 0, boxShadow: chatInput.trim() ? `0 4px 12px ${PRIMARY}40` : "none", transition: "all 0.2s" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={chatInput.trim() ? "white" : "#A89E96"} strokeWidth="2.5" strokeLinecap="round">
-              <line x1="22" y1="2" x2="11" y2="13" />
-              <polygon points="22 2 15 22 11 13 2 9 22 2" fill={chatInput.trim() ? "white" : "#A89E96"} stroke="none" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* Page dots (legacy paged mode only) */}
-      {!hasJourney && (
-      <div style={{ background: "#fff", padding: "6px 0 8px", display: "flex", justifyContent: "center", gap: 6, flexShrink: 0, borderTop: "1px solid #FAF6F3" }}>
-        {PAGES.map((_, i) => (
-          <button key={i} onClick={() => setPage(i)} style={{ width: i === page ? 20 : 7, height: 7, borderRadius: 4, background: i === page ? PRIMARY : "#F0EAE6", border: "none", cursor: "pointer", transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)", padding: 0 }} />
-        ))}
-      </div>
-      )}
-
-      <Sheet insight={insDetail} onClose={() => setInsDetail(null)} onAskAI={onAskAI} />
-      <ListDetailSheet data={listDetail} onClose={() => setListDetail(null)} onAskAI={onAskAI} />
-
-      <style>{`
-        @keyframes ar-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes si { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes ci { from{opacity:0;transform:translateY(10px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
-        @keyframes chap-in { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:translateX(0)} }
-        @keyframes card-pop {
-          0%   { opacity: 0; transform: scale(0.92) translateY(8px); }
-          60%  { transform: scale(1.02) translateY(-3px); }
-          100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        @keyframes ar-float { 0%,100%{transform:translateY(0) rotate(-1.5deg)} 50%{transform:translateY(-7px) rotate(1.5deg)} }
-        @keyframes ar-float2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
-        @keyframes ar-orb { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(10px,-8px) scale(1.1)} 66%{transform:translate(-6px,6px) scale(0.95)} }
-        @keyframes ar-shimmer { 0%{transform:translateX(-120%)} 100%{transform:translateX(220%)} }
-        @keyframes ar-glow { 0%,100%{opacity:0.5;transform:scale(1)} 50%{opacity:0.85;transform:scale(1.08)} }
-        @keyframes ar-pop-b { 0%{opacity:0;transform:scale(0.5)} 55%{transform:scale(1.18)} 100%{opacity:1;transform:scale(1)} }
-        @keyframes ar-confetti { 0%{opacity:1;transform:translateY(0) rotate(0)} 100%{opacity:0;transform:translateY(120px) rotate(360deg)} }
-        @keyframes ar-ring-spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
-        @keyframes ar-sheen { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-        .hw-card-tilt { transition: transform 0.25s cubic-bezier(.16,1,.3,1), box-shadow 0.25s ease; }
-      `}</style>
-    </div>
-  )
+  // Every test now renders the warm liquid-glass view (journey + standard alike).
+  return <WarmOverview data={data} onAskAI={onAskAI} onClose={onClose} />
 }
