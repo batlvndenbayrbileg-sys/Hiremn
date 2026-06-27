@@ -79,7 +79,7 @@ const BRAND = "#E8541A"
 const scoreColor = (_s: number) => PRIMARY
 // KPI status colours stay SEMANTIC (green good / amber mid / red high) — this
 // is the one place colour carries real meaning, matching the approved mockup.
-const GREEN = "#16A34A", AMBER = "#F59E0B", RED = "#EF4444"
+const GREEN = "#B45309", AMBER = "#F59E0B", RED = "#C2410C"
 const riskColor = (r: string) => r === "Low" ? GREEN : r === "Medium" ? AMBER : RED
 const potColor = (p: string) => p === "High" ? GREEN : p === "Medium" ? AMBER : RED
 
@@ -356,7 +356,7 @@ function Sheet({ insight, onClose, onAskAI }: {
 
         {/* Gradient hero */}
         <div style={{
-          background: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)",
+          background: "linear-gradient(135deg, #FFF6EA 0%, #FCEBD2 100%)",
           padding: "20px 22px 18px",
           position: "relative", overflow: "hidden",
           flexShrink: 0,
@@ -372,7 +372,7 @@ function Sheet({ insight, onClose, onAskAI }: {
               padding: "4px 12px", borderRadius: 999,
               fontSize: 9, fontWeight: 800, letterSpacing: 0.8,
               textTransform: "uppercase", marginBottom: 10,
-              border: "1px solid #BBF7D0",
+              border: "1px solid #FBDFB3",
               boxShadow: "0 4px 10px rgba(0,196,140,0.15)",
             }}>
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: PRIMARY, boxShadow: `0 0 8px ${PRIMARY}` }}/>
@@ -383,16 +383,16 @@ function Sheet({ insight, onClose, onAskAI }: {
                 width: 56, height: 56, borderRadius: 18,
                 background: "#fff", fontSize: 28,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                border: "1.5px solid #BBF7D0", flexShrink: 0,
+                border: "1.5px solid #FBDFB3", flexShrink: 0,
                 boxShadow: "0 6px 16px rgba(0,196,140,0.2)",
               }}>{insight.emoji}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <h3 style={{
-                  fontSize: 19, fontWeight: 900, color: "#064E3B",
+                  fontSize: 19, fontWeight: 900, color: "#5C2A12",
                   margin: "0 0 4px", lineHeight: 1.25, letterSpacing: -0.3,
                 }}>{insight.title}</h3>
                 <p style={{
-                  fontSize: 12, color: "#065F46", margin: 0, lineHeight: 1.5,
+                  fontSize: 12, color: "#7C3A1E", margin: 0, lineHeight: 1.5,
                 }}>{insight.description}</p>
               </div>
             </div>
@@ -439,11 +439,11 @@ function Sheet({ insight, onClose, onAskAI }: {
                 </span>
               </div>
               <div style={{
-                background: doneCount > 0 ? "#F0FDF4" : "#FAF6F3",
+                background: doneCount > 0 ? "#FFF6EA" : "#FAF6F3",
                 color: doneCount > 0 ? PRIMARY : "#A89E96",
                 fontSize: 10, fontWeight: 800,
                 padding: "3px 10px", borderRadius: 999,
-                border: `1px solid ${doneCount > 0 ? "#BBF7D0" : "#F0EAE6"}`,
+                border: `1px solid ${doneCount > 0 ? "#FBDFB3" : "#F0EAE6"}`,
               }}>{doneCount}/{totalActions}</div>
             </div>
           )}
@@ -471,7 +471,7 @@ function Sheet({ insight, onClose, onAskAI }: {
               <div key={i} onClick={() => toggleAction(i)} style={{
                 display: "flex", gap: 12, marginBottom: 8,
                 padding: "12px 14px",
-                background: isDone ? "#F0FDF4" : "#fff",
+                background: isDone ? "#FFF6EA" : "#fff",
                 border: `1.5px solid ${isDone ? PRIMARY + "40" : "#F0EAE6"}`,
                 borderRadius: 14, cursor: "pointer",
                 alignItems: "flex-start",
@@ -494,7 +494,7 @@ function Sheet({ insight, onClose, onAskAI }: {
                   )}
                 </div>
                 <span style={{
-                  fontSize: 13, color: isDone ? "#059669" : "#5B5650",
+                  fontSize: 13, color: isDone ? "#B45309" : "#5B5650",
                   lineHeight: 1.6, fontWeight: isDone ? 600 : 500,
                   textDecoration: isDone ? "line-through" : "none",
                   flex: 1,
@@ -639,7 +639,7 @@ export function AnalysisLoadingCard({ title }: { title: string }) {
             <div key={i} style={{
               display: "flex", alignItems: "center", gap: 10,
               padding: "6px 10px",
-              background: isActive ? "#F0FDF4" : "transparent",
+              background: isActive ? "#FFF6EA" : "transparent",
               borderRadius: 10, transition: "all 0.3s",
               opacity: isDone || isActive ? 1 : 0.4,
             }}>
@@ -662,7 +662,7 @@ export function AnalysisLoadingCard({ title }: { title: string }) {
               </div>
               <span style={{
                 fontSize: 11.5, fontWeight: isActive ? 700 : 600,
-                color: isDone ? "#059669" : isActive ? "#2A2520" : "#A89E96",
+                color: isDone ? "#B45309" : isActive ? "#2A2520" : "#A89E96",
                 flex: 1,
               }}>
                 <span style={{ marginRight: 4 }}>{s.emoji}</span>{s.label}
@@ -711,7 +711,7 @@ export function AnalysisCard({ data, title, onExpand }: { data: AnalysisData; ti
 
   // Stat tiles
   const stats = [
-    { label: kpi.metric1Label || "Түвшин", value: data.metrics[0] ? `${data.metrics[0].score}/${data.metrics[0].maxScore}` : (data.displayScore != null ? `${data.displayScore}/${displayMax}` : "—"), color: "#16A34A", bg: "#ECFDF3",
+    { label: kpi.metric1Label || "Түвшин", value: data.metrics[0] ? `${data.metrics[0].score}/${data.metrics[0].maxScore}` : (data.displayScore != null ? `${data.displayScore}/${displayMax}` : "—"), color: "#B45309", bg: "#FFF6EA",
       icon: <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 12h6M9 16h6" /> },
     { label: kpi.riskLabel || "Эрсдэл", value: data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : "Өндөр", color: riskColor(data.riskLevel), bg: "#FFF4EC",
       icon: <path d="M3 17l6-6 4 4 8-8M21 7v4M21 7h-4" /> },
@@ -1326,7 +1326,7 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
                   {allDone && (
                     <div style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", gap: 10, background: "linear-gradient(135deg,#FFF7F1,#FFEEDF)", border: `1.5px solid #FBD9C4`, borderRadius: 16, padding: "10px 12px", marginBottom: 10, animation: "ar-pop-b 0.5s cubic-bezier(.16,1,.3,1) both" }}>
                       {[0,1,2,3,4,5].map(ci => (
-                        <span key={ci} style={{ position: "absolute", top: -6, left: `${12 + ci * 16}%`, width: 6, height: 6, borderRadius: 2, background: ["#00C48C","#FBBF24","#F97316","#EA580C","#E8541A","#22C55E"][ci], animation: `ar-confetti ${1.2 + ci * 0.15}s ease-in ${ci * 0.1}s infinite` }} />
+                        <span key={ci} style={{ position: "absolute", top: -6, left: `${12 + ci * 16}%`, width: 6, height: 6, borderRadius: 2, background: ["#C2740C","#FBBF24","#F97316","#EA580C","#E8541A","#D98324"][ci], animation: `ar-confetti ${1.2 + ci * 0.15}s ease-in ${ci * 0.1}s infinite` }} />
                       ))}
                       <img src={CHARS.celebrate} alt="" style={{ width: 38, height: "auto", animation: "ar-float2 2.5s ease-in-out infinite" }} />
                       <div style={{ position: "relative" }}>
@@ -1518,9 +1518,9 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
   const kpi = data.kpiLabels || {}
   const todayGoals = data.todayGoals || data.roadmap[0]?.tasks.slice(0, 3) || []
   const statCards = data.statCards || []
-  const metricColor = (pct: number) => pct > 0.6 ? "#FF4444" : pct > 0.3 ? "#FF9800" : PRIMARY
+  const metricColor = (pct: number) => pct > 0.6 ? "#C2410C" : pct > 0.3 ? "#FF9800" : PRIMARY
   const metricGrad = (_pct: number) => `linear-gradient(90deg,${PRIMARY},#FB923C)`
-  const weekColors = ["#FB923C", "#FF6B6B", PRIMARY, "#FF9800"]
+  const weekColors = ["#FB923C", "#E0703F", PRIMARY, "#FF9800"]
   const weekIcons = ["📋", "⚡", "🔄", "🏆"]
   const allGoalsDone = goals.filter(Boolean).length === todayGoals.length && todayGoals.length > 0
 
@@ -1611,8 +1611,8 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginBottom: 12 }}>
               {[
                 { label: kpi.metric1Label || "Хамаарал", value: data.metrics[0] ? `${data.metrics[0].score}/10` : "—", sub: data.metrics[0]?.status || "", color: BRAND, bg: "#FFF5F0", border: "#FFD0B8", barPct: data.metrics[0] ? (data.metrics[0].score / data.metrics[0].maxScore) * 100 : 0 },
-                { label: kpi.riskLabel || "Эрсдэл", value: data.riskLevel === "Low" ? "Low" : data.riskLevel === "Medium" ? "Mid" : "High", sub: data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : "Өндөр", color: rc, bg: rc === GREEN ? "#F0FDF4" : rc === AMBER ? "#FFFBEB" : "#FFF2F2", border: `${rc}30`, barPct: data.riskLevel === "Low" ? 20 : data.riskLevel === "Medium" ? 55 : 90 },
-                { label: kpi.potentialLabel || "Боломж", value: data.quitPotential === "High" ? "High" : data.quitPotential === "Medium" ? "Mid" : "Low", sub: data.quitPotential === "High" ? "Өндөр" : data.quitPotential === "Medium" ? "Дунд" : "Бага", color: pc, bg: pc === GREEN ? "#F0FDF4" : pc === AMBER ? "#FFFBEB" : "#FFF2F2", border: `${pc}30`, barPct: data.quitPotential === "High" ? 85 : data.quitPotential === "Medium" ? 50 : 20 },
+                { label: kpi.riskLabel || "Эрсдэл", value: data.riskLevel === "Low" ? "Low" : data.riskLevel === "Medium" ? "Mid" : "High", sub: data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : "Өндөр", color: rc, bg: rc === GREEN ? "#FFF6EA" : rc === AMBER ? "#FFFBEB" : "#FFF2F2", border: `${rc}30`, barPct: data.riskLevel === "Low" ? 20 : data.riskLevel === "Medium" ? 55 : 90 },
+                { label: kpi.potentialLabel || "Боломж", value: data.quitPotential === "High" ? "High" : data.quitPotential === "Medium" ? "Mid" : "Low", sub: data.quitPotential === "High" ? "Өндөр" : data.quitPotential === "Medium" ? "Дунд" : "Бага", color: pc, bg: pc === GREEN ? "#FFF6EA" : pc === AMBER ? "#FFFBEB" : "#FFF2F2", border: `${pc}30`, barPct: data.quitPotential === "High" ? 85 : data.quitPotential === "Medium" ? 50 : 20 },
               ].map((k, i) => (
                 <div key={i} style={{ background: "#fff", borderRadius: 14, padding: "12px 10px", boxShadow: "0 2px 10px rgba(0,0,0,0.06)", border: `1.5px solid ${k.border}` }}>
                   <p style={{ fontSize: 8, color: "#A89E96", fontWeight: 700, margin: "0 0 4px", letterSpacing: "0.3px", lineHeight: 1.3 }}>{k.label.toUpperCase()}</p>
@@ -1626,12 +1626,12 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             </div>
 
             {/* Dynamic highlight card */}
-            <div style={{ background: "linear-gradient(135deg, #E8FFF6, #D0F7EB)", borderRadius: 20, padding: "18px 16px", marginBottom: 12, border: "1.5px solid #A7F3D0", boxShadow: "0 4px 16px rgba(0,196,140,0.12)", display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ background: "linear-gradient(135deg, #FFF6EA, #FCEBD2)", borderRadius: 20, padding: "18px 16px", marginBottom: 12, border: "1.5px solid #FBDFB3", boxShadow: "0 4px 16px rgba(0,196,140,0.12)", display: "flex", alignItems: "center", gap: 14 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 16, fontWeight: 900, color: "#064E3B", margin: "0 0 6px" }}>
+                <p style={{ fontSize: 16, fontWeight: 900, color: "#5C2A12", margin: "0 0 6px" }}>
                   {data.highlightTitle || data.insights[0]?.title || "Сайн мэдээ!"}
                 </p>
-                <p style={{ fontSize: 12, color: "#065F46", lineHeight: 1.6, margin: "0 0 12px" }}>
+                <p style={{ fontSize: 12, color: "#7C3A1E", lineHeight: 1.6, margin: "0 0 12px" }}>
                   {data.highlightMessage || data.insights[0]?.description || data.summary.description}
                 </p>
                 <button onClick={() => data.insights[0] && setInsDetail(data.insights[0])} style={{ background: PRIMARY, border: "none", borderRadius: 22, padding: "9px 18px", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: `0 4px 14px ${PRIMARY}50` }}>
@@ -1777,10 +1777,10 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
-                  <p style={{ fontSize: 12, fontWeight: 800, color: "#059669", margin: "0 0 10px", display: "flex", alignItems: "center", gap: 5 }}>💪 Давуу талууд</p>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: "#B45309", margin: "0 0 10px", display: "flex", alignItems: "center", gap: 5 }}>💪 Давуу талууд</p>
                   {data.strengths.map((s, i) => (
                     <div key={i} style={{ display: "flex", gap: 7, marginBottom: 7 }}>
-                      <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#D1FAE5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
+                      <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#FCEBD2", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
                         <span style={{ color: PRIMARY, fontSize: 10, fontWeight: 800 }}>✓</span>
                       </div>
                       <span style={{ fontSize: 11, color: "#5B5650", lineHeight: 1.4 }}>{s}</span>
@@ -1839,21 +1839,21 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             {
               key: "strengths",
               title: "Давуу талууд",
-              titleColor: "#059669",
-              bg: "linear-gradient(135deg, #F0FDF4, #DCFCE7)",
-              border: "#BBF7D0",
-              iconBg: "linear-gradient(135deg, #4ADE80, #16A34A)",
+              titleColor: "#B45309",
+              bg: "linear-gradient(135deg, #FFF6EA, #FCEBD2)",
+              border: "#FBDFB3",
+              iconBg: "linear-gradient(135deg, #EFA53F, #B45309)",
               iconShadow: "0 8px 20px rgba(34,197,94,0.35)",
               icon: (
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2L4 6v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V6l-8-4z" fill="#fff" stroke="#22C55E" strokeWidth="1.5"/>
-                  <path d="M9 12l2 2 4-5" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 2L4 6v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V6l-8-4z" fill="#fff" stroke="#D98324" strokeWidth="1.5"/>
+                  <path d="M9 12l2 2 4-5" stroke="#B45309" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               ),
               items: data.strengths.slice(0, 3),
-              itemDot: "#22C55E",
+              itemDot: "#D98324",
               ctaLabel: `${data.strengths.length} давуу тал`,
-              ctaBg: "linear-gradient(135deg, #22C55E, #16A34A)",
+              ctaBg: "linear-gradient(135deg, #D98324, #B45309)",
             },
             {
               key: "risks",
@@ -1877,22 +1877,22 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             {
               key: "tips",
               title: "Зөвлөмж",
-              titleColor: "#059669",
-              bg: "linear-gradient(135deg, #ECFDF5, #D1FAE5)",
-              border: "#A7F3D0",
-              iconBg: "linear-gradient(135deg, #4ADE80, #10B981)",
+              titleColor: "#B45309",
+              bg: "linear-gradient(135deg, #FFF6EA, #FCEBD2)",
+              border: "#FBDFB3",
+              iconBg: "linear-gradient(135deg, #EFA53F, #C2740C)",
               iconShadow: "0 8px 20px rgba(16,185,129,0.35)",
               icon: (
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                  <path d="M3 9h18v12H3z" fill="#10B981" stroke="#059669" strokeWidth="1.5"/>
-                  <path d="M3 9v3h18V9M12 21V9" stroke="#059669" strokeWidth="1.5"/>
-                  <path d="M12 9c-3-3-6-1-6 1 0 2 3 2 6 0zM12 9c3-3 6-1 6 1 0 2-3 2-6 0z" fill="#fff" stroke="#059669" strokeWidth="1.5"/>
+                  <path d="M3 9h18v12H3z" fill="#C2740C" stroke="#B45309" strokeWidth="1.5"/>
+                  <path d="M3 9v3h18V9M12 21V9" stroke="#B45309" strokeWidth="1.5"/>
+                  <path d="M12 9c-3-3-6-1-6 1 0 2 3 2 6 0zM12 9c3-3 6-1 6 1 0 2-3 2-6 0z" fill="#fff" stroke="#B45309" strokeWidth="1.5"/>
                 </svg>
               ),
               items: (data.insights[0]?.actions || data.insights.map(i => i.description)).slice(0, 3),
-              itemDot: "#10B981",
+              itemDot: "#C2740C",
               ctaLabel: "Дэлгэрэнгүй",
-              ctaBg: "linear-gradient(135deg, #10B981, #059669)",
+              ctaBg: "linear-gradient(135deg, #C2740C, #B45309)",
             },
           ]
 
@@ -1929,10 +1929,10 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               const labels = labelByType[testType]
               const theme = tier === 'positive'
                 ? {
-                    bg: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 50%, #BBF7D0 100%)",
-                    border: "#BBF7D0", shadow: "rgba(34,197,94,0.12)",
-                    label: "#059669", num: "#064E3B", body: "#065F46",
-                    chip: "💚", decor: ["#86EFAC", "#4ADE80", "#22C55E"],
+                    bg: "linear-gradient(135deg, #FFF6EA 0%, #FCEBD2 50%, #FBDFB3 100%)",
+                    border: "#FBDFB3", shadow: "rgba(34,197,94,0.12)",
+                    label: "#B45309", num: "#5C2A12", body: "#7C3A1E",
+                    chip: "💚", decor: ["#FBD89B", "#EFA53F", "#D98324"],
                     progressLabel: labels.good,
                   }
                 : tier === 'neutral'
@@ -1944,10 +1944,10 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                     progressLabel: labels.mid,
                   }
                 : {
-                    bg: "linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 50%, #FECACA 100%)",
-                    border: "#FECACA", shadow: "rgba(239,68,68,0.12)",
-                    label: "#B91C1C", num: "#7F1D1D", body: "#991B1B",
-                    chip: "🫶", decor: ["#FCA5A5", "#F87171", "#EF4444"],
+                    bg: "linear-gradient(135deg, #FFF2EE 0%, #FCE0D6 50%, #FBD3C2 100%)",
+                    border: "#FBD3C2", shadow: "rgba(239,68,68,0.12)",
+                    label: "#9A3412", num: "#7C2D12", body: "#7C2D12",
+                    chip: "🫶", decor: ["#F0A07A", "#E0703F", "#C2410C"],
                     progressLabel: labels.bad,
                   }
               return (
@@ -2055,7 +2055,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               </div>
               <button onClick={() => current.key === "tips" && data.insights[0] && setInsDetail(data.insights[0])} style={{
                 background: "none", border: "none",
-                fontSize: 11, fontWeight: 700, color: "#059669",
+                fontSize: 11, fontWeight: 700, color: "#B45309",
                 cursor: "pointer", display: "flex", alignItems: "center", gap: 3,
                 fontFamily: "inherit",
               }}>
@@ -2267,7 +2267,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                   }} style={{
                     width: i === insCarousel ? 22 : 7, height: 7, borderRadius: 4,
                     background: i === insCarousel
-                      ? (cards[insCarousel].titleColor === "#EA580C" ? "#EA580C" : "#10B981")
+                      ? (cards[insCarousel].titleColor === "#EA580C" ? "#EA580C" : "#C2740C")
                       : "#F0EAE6",
                     border: "none", cursor: "pointer", padding: 0,
                     transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)",
@@ -2353,7 +2353,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                     background: "rgba(255,255,255,0.18)",
                     borderRadius: 999, padding: "3px 10px", marginBottom: 4,
                   }}>
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ADE80", display: "inline-block", boxShadow: "0 0 6px #4ADE80" }}/>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#EFA53F", display: "inline-block", boxShadow: "0 0 6px #EFA53F" }}/>
                     <span style={{ fontSize: 9, fontWeight: 800, color: "#fff", letterSpacing: 0.6 }}>POWERED BY AI</span>
                   </div>
                   <p style={{ fontSize: 16, fontWeight: 900, color: "#fff", margin: "0 0 2px" }}>AI Insights</p>
@@ -2420,7 +2420,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
             {/* ── Insight cards (rich) ── */}
             {data.insights.map((ins, i) => {
               const palettes = [
-                { bg: "#F0FDF4", border: "#BBF7D0", color: PRIMARY, text: "Маш сайн", priority: "Өндөр" },
+                { bg: "#FFF6EA", border: "#FBDFB3", color: PRIMARY, text: "Маш сайн", priority: "Өндөр" },
                 { bg: "#FFF5F0", border: "#FFD0B8", color: BRAND, text: "Анхаарал", priority: "Дунд" },
                 { bg: "#FFF7F2", border: "#FED7AA", color: "#EA580C", text: "Боломж", priority: "Чухал" },
               ]
@@ -2548,7 +2548,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
               display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12,
             }}>
               <div>
-                <p style={{ fontSize: 11, fontWeight: 800, color: "#059669", margin: "0 0 8px", display: "flex", alignItems: "center", gap: 5 }}>💪 Давуу талууд</p>
+                <p style={{ fontSize: 11, fontWeight: 800, color: "#B45309", margin: "0 0 8px", display: "flex", alignItems: "center", gap: 5 }}>💪 Давуу талууд</p>
                 {data.strengths.slice(0, 3).map((s, i) => (
                   <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "flex-start" }}>
                     <span style={{ color: PRIMARY, fontSize: 10, fontWeight: 800, marginTop: 1 }}>✓</span>
@@ -2593,7 +2593,7 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                     <p style={{ fontSize: 10, color: "#A89E96", margin: 0 }}>Зорилгоо тэмдэглэж явна уу</p>
                   </div>
                 </div>
-                <div style={{ background: "#F0FDF4", borderRadius: 20, padding: "4px 12px", border: `1px solid ${PRIMARY}30` }}>
+                <div style={{ background: "#FFF6EA", borderRadius: 20, padding: "4px 12px", border: `1px solid ${PRIMARY}30` }}>
                   <span style={{ fontSize: 13, fontWeight: 800, color: PRIMARY }}>{goals.filter(Boolean).length}<span style={{ color: "#A89E96", fontWeight: 400 }}>/{todayGoals.length}</span></span>
                 </div>
               </div>
@@ -2601,18 +2601,18 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
                 <div style={{ height: "100%", borderRadius: 8, background: `linear-gradient(90deg, ${PRIMARY}, #F97316)`, width: todayGoals.length > 0 ? `${(goals.filter(Boolean).length / todayGoals.length) * 100}%` : "0%", transition: "width 0.4s ease" }} />
               </div>
               {todayGoals.map((task, i) => (
-                <div key={i} onClick={() => toggleGoal(i)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", marginBottom: 8, cursor: "pointer", borderRadius: 14, background: goals[i] ? "#F0FDF4" : "#FAFAFA", border: `1.5px solid ${goals[i] ? PRIMARY + "40" : "#F0EAE6"}`, transition: "all 0.25s ease", userSelect: "none" }}>
+                <div key={i} onClick={() => toggleGoal(i)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", marginBottom: 8, cursor: "pointer", borderRadius: 14, background: goals[i] ? "#FFF6EA" : "#FAFAFA", border: `1.5px solid ${goals[i] ? PRIMARY + "40" : "#F0EAE6"}`, transition: "all 0.25s ease", userSelect: "none" }}>
                   <div style={{ width: 24, height: 24, borderRadius: "50%", flexShrink: 0, background: goals[i] ? PRIMARY : "#fff", border: `2px solid ${goals[i] ? PRIMARY : "#DED5CD"}`, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.25s ease" }}>
                     {goals[i] && <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M3 8l4 4 6-7" /></svg>}
                   </div>
-                  <span style={{ fontSize: 13, color: goals[i] ? "#059669" : "#5B5650", fontWeight: goals[i] ? 700 : 500, textDecoration: goals[i] ? "line-through" : "none", flex: 1, transition: "all 0.2s" }}>{task}</span>
+                  <span style={{ fontSize: 13, color: goals[i] ? "#B45309" : "#5B5650", fontWeight: goals[i] ? 700 : 500, textDecoration: goals[i] ? "line-through" : "none", flex: 1, transition: "all 0.2s" }}>{task}</span>
                   {goals[i] && <span style={{ fontSize: 14 }}>✅</span>}
                 </div>
               ))}
               {allGoalsDone && (
-                <div style={{ background: "linear-gradient(135deg, #F0FDF4, #DCFCE7)", borderRadius: 14, padding: "12px 16px", border: `1px solid ${PRIMARY}30`, display: "flex", alignItems: "center", gap: 12, marginTop: 4 }}>
+                <div style={{ background: "linear-gradient(135deg, #FFF6EA, #FCEBD2)", borderRadius: 14, padding: "12px 16px", border: `1px solid ${PRIMARY}30`, display: "flex", alignItems: "center", gap: 12, marginTop: 4 }}>
                   <Char type="celebrate" size={56} />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#059669" }}>🎉 Бүх зорилгоо биелүүллээ! Гайхалтай!</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#B45309" }}>🎉 Бүх зорилгоо биелүүллээ! Гайхалтай!</span>
                 </div>
               )}
             </div>
