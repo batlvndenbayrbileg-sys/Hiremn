@@ -3261,14 +3261,21 @@ function IntroLetters({ text, step = 0.035, base = 0 }: { text: string; step?: n
 
 function IntroSequence({ onDone }: { onDone: () => void }) {
   const [phase, setPhase] = useState(0) // 0: hello, 1: intro + bullets, 2: exit
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   useEffect(() => {
-    const t = [
+    timersRef.current = [
       setTimeout(() => setPhase(1), 1600),
       setTimeout(() => setPhase(2), 5200),
       setTimeout(() => onDone(), 6050),
     ]
-    return () => t.forEach(clearTimeout)
+    return () => timersRef.current.forEach(clearTimeout)
   }, [])
+  // Tap anywhere to skip the intro and jump straight to the live chat.
+  const skip = () => {
+    timersRef.current.forEach(clearTimeout)
+    setPhase(2)
+    timersRef.current = [setTimeout(() => onDone(), 600)]
+  }
 
   const bullets = [
     { t: "Тест санал болгох:", d: "Танд тохирсон тестүүдийг олж өгнө" },
@@ -3277,8 +3284,8 @@ function IntroSequence({ onDone }: { onDone: () => void }) {
   ]
 
   return (
-    <div style={{
-      position: "absolute", inset: 0, zIndex: 30, borderRadius: 24, overflow: "hidden",
+    <div onClick={skip} style={{
+      position: "absolute", inset: 0, zIndex: 30, borderRadius: 24, overflow: "hidden", cursor: "pointer",
       display: "flex", alignItems: "center", justifyContent: "center", padding: "0 30px",
       background: "linear-gradient(165deg, rgba(255,255,255,0.98) 0%, rgba(255,250,246,0.98) 100%)",
       transition: "opacity 0.7s cubic-bezier(.4,0,.2,1), transform 0.7s cubic-bezier(.4,0,.2,1), filter 0.7s ease",
@@ -3297,6 +3304,12 @@ function IntroSequence({ onDone }: { onDone: () => void }) {
         width: 200, height: 200, borderRadius: "50%",
         background: "radial-gradient(circle, rgba(255,170,115,0.10), transparent 72%)", pointerEvents: "none",
       }} />
+
+      <div style={{
+        position: "absolute", bottom: 16, left: 0, right: 0, textAlign: "center",
+        fontSize: 12, color: "#b8aea6", fontWeight: 500,
+        opacity: phase === 2 ? 0 : 1, transition: "opacity 0.4s ease",
+      }}>Алгасах</div>
 
       <div style={{
         position: "relative", width: "100%", maxWidth: 280,
