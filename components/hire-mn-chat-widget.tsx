@@ -78,7 +78,6 @@ interface Message {
   analysisData?: any                // New /api/analyze response shape
   analysisTitle?: string            // Test name for analysis card
   fromLLM?: boolean                 // True only for genuine LLM replies (controls feedback widget)
-  typewriter?: boolean              // Animate this message with a typewriter reveal (welcome greeting)
 }
 
 interface FollowUpMessage {
@@ -3195,56 +3194,9 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
 
 // ── Bot Message ──────────────────────────────────────────────────────────────
 
-// Plays once per page load — prevents the welcome typewriter from replaying
-// every time the user switches back to the Chat tab.
-let hwWelcomeTyped = false
-
-// Typewriter reveal for the welcome greeting: types the intro sentences
-// character-by-character (with a blinking caret), then fades the bullets in
-// one by one. The bullets use the parent's markdown renderer so bold stays intact.
-function TypewriterGreeting({ text, renderFormatted }: { text: string; renderFormatted: (t: string) => React.ReactNode }) {
-  const lines = text.split('\n')
-  const firstBullet = lines.findIndex(l => /^[-•*]\s/.test(l.trim()))
-  const intro = (firstBullet === -1 ? lines : lines.slice(0, firstBullet)).join('\n').replace(/\s+$/, '')
-  const bulletLines = firstBullet === -1 ? [] : lines.slice(firstBullet).filter(l => l.trim() !== '')
-
-  const [n, setN] = useState(hwWelcomeTyped ? intro.length : 0)
-  const [done, setDone] = useState(hwWelcomeTyped)
-
-  useEffect(() => {
-    if (done) return
-    if (n >= intro.length) {
-      setDone(true)
-      hwWelcomeTyped = true
-      return
-    }
-    const id = setTimeout(() => setN(c => c + 1), 24)
-    return () => clearTimeout(id)
-  }, [n, intro.length, done])
-
-  return (
-    <>
-      <div style={{ whiteSpace: 'pre-wrap' }}>
-        {done ? intro : intro.slice(0, n)}
-        {!done && <span className="hw-caret" aria-hidden="true" />}
-      </div>
-      {done && bulletLines.length > 0 && (
-        <div style={{ marginTop: 10 }}>
-          {bulletLines.map((bl, i) => (
-            <div key={i} style={{ animation: `hw-chip-in 0.45s cubic-bezier(.16,1,.3,1) ${i * 0.13}s both` }}>
-              {renderFormatted(bl)}
-            </div>
-          ))}
-        </div>
-      )}
-    </>
-  )
-}
-
-// Plays the full-screen cinematic intro once per page load when the widget
-// first opens: types the greeting on an empty canvas, reveals the bullets,
-// then dissolves to hand off to the live chat underneath.
-let hwIntroPlayed = false
+// Plays the full-screen cinematic intro the first time the widget is opened
+// (persisted in localStorage): types the greeting on an empty canvas, reveals
+// the bullets, then dissolves to hand off to the live chat underneath.
 
 function IntroLetters({ text, step = 0.035, base = 0 }: { text: string; step?: number; base?: number }) {
   return (
@@ -3534,9 +3486,7 @@ function BotMessage({ message, fontSize, userQuestion = "", showAvatar = true, o
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 18px rgba(31,38,75,0.06)",
             wordBreak: "break-word",
           }}>
-            {message.typewriter
-              ? <TypewriterGreeting text={cleanText} renderFormatted={renderFormattedText} />
-              : renderFormattedText(cleanText)}
+            {renderFormattedText(cleanText)}
           </div>
         </div>
       )}
@@ -3940,11 +3890,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const [showSidebar, setShowSidebar] = useState(false)
   const [activeTab, setActiveTab] = useState(0) // 0: Chat, 1: FAQs, 2: Contact
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null) // FAQ accordion state
-  const [introPlaying, setIntroPlaying] = useState(false) // Cinematic first-open intro overlay
+  const [introPlaying, setIntroPlaying] = useState(false) // Cinematic intro overlay (first ever open)
   useEffect(() => {
-    if (isOpen && !hwIntroPlayed) {
-      hwIntroPlayed = true
-      hwWelcomeTyped = true // greeting is shown in the intro; keep the chat bubble static
+    if (!isOpen) return
+    let seen = false
+    try { seen = localStorage.getItem('hw_intro_seen') === '1' } catch {}
+    if (!seen) {
+      try { localStorage.setItem('hw_intro_seen', '1') } catch {}
       setIntroPlaying(true)
     }
   }, [isOpen])
@@ -3969,7 +3921,6 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       {
         role: "assistant",
         content: "Сайн байна уу!\n\nБи бол hire.mn-ийн AI туслагч. Та надаас дараах зүйлсийг асууж болно:\n\n- **Тест санал болгох:** Танд тохирсон тестүүдийг олж өгнө\n- **Тестийн үр дүн тайлбарлах:** Авсан тестийн хариуг шинжилж, зөвлөгөө өгнө\n- **Мэргэжлийн зөвлөгөө:** Сэтгэл зүй, ажлын байрны асуудлаар туслана",
-        typewriter: true,
       },
     ]
 
