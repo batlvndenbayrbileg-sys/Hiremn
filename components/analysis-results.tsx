@@ -1479,6 +1479,44 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
 }
 
 // ── Full Results ──────────────────────────────────────────────────────────────
+// Animated background motif for the insight cards — cycles between a flowing
+// wave, pulsing neurons, and an expanding ring so each card feels alive.
+function InsightMotif({ idx }: { idx: number }) {
+  if (idx === 1) {
+    return (
+      <svg width="120" height="64" viewBox="0 0 120 64" style={{ position: "absolute", left: 10, bottom: 12 }}>
+        <line x1="28" y1="28" x2="58" y2="18" stroke="rgba(255,255,255,.4)" strokeWidth="2" />
+        <line x1="28" y1="28" x2="52" y2="46" stroke="rgba(255,255,255,.4)" strokeWidth="2" />
+        <line x1="58" y1="18" x2="88" y2="33" stroke="rgba(255,255,255,.4)" strokeWidth="2" />
+        <line x1="52" y1="46" x2="88" y2="33" stroke="rgba(255,255,255,.4)" strokeWidth="2" />
+        <circle cx="28" cy="28" r="6" fill="#fff"><animate attributeName="r" values="6;8;6" dur="1.6s" repeatCount="indefinite" /></circle>
+        <circle cx="58" cy="18" r="5" fill="#fff" opacity="0.85"><animate attributeName="opacity" values=".4;1;.4" dur="1.8s" repeatCount="indefinite" /></circle>
+        <circle cx="88" cy="33" r="6.5" fill="#fff"><animate attributeName="r" values="6.5;9;6.5" dur="2s" repeatCount="indefinite" begin="0.3s" /></circle>
+        <circle cx="52" cy="46" r="5" fill="#fff" opacity="0.8"><animate attributeName="opacity" values=".4;1;.4" dur="1.5s" repeatCount="indefinite" begin="0.6s" /></circle>
+      </svg>
+    )
+  }
+  if (idx === 2) {
+    return (
+      <svg width="84" height="74" viewBox="0 0 84 74" style={{ position: "absolute", left: 14, bottom: 8 }}>
+        <circle cx="34" cy="38" r="10" fill="none" stroke="#fff" strokeWidth="2.5" />
+        <circle cx="34" cy="38" r="10" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="2">
+          <animate attributeName="r" values="10;26;10" dur="2.4s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values=".7;0;.7" dur="2.4s" repeatCount="indefinite" />
+        </circle>
+        <path d="M34 32v6l4 3" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      </svg>
+    )
+  }
+  return (
+    <svg width="100%" height="56" viewBox="0 0 220 56" style={{ position: "absolute", left: 0, bottom: 16 }} fill="none">
+      <path d="M5 36 Q 30 36 40 20 T 80 30 T 120 14 T 160 34 T 215 22" stroke="rgba(255,255,255,.92)" strokeWidth="3.5" strokeLinecap="round" strokeDasharray="2 11">
+        <animate attributeName="stroke-dashoffset" values="0;-26" dur="1.3s" repeatCount="indefinite" />
+      </path>
+    </svg>
+  )
+}
+
 // Warm liquid-glass analysis view — the approved dashboard redesign. Self-
 // contained (segmented tabs + bottom nav) and data-driven, so EVERY test gets
 // the same look (replaces the legacy overview / journey / insights pages).
@@ -1492,6 +1530,17 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
   const riskLabel = data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : data.riskLevel === "High" ? "Өндөр" : (data.riskLevel || "—")
   const weakest = metrics.length ? metrics.reduce((a, b) => ((b.maxScore ? b.score / b.maxScore : 0) < (a.maxScore ? a.score / a.maxScore : 0) ? b : a)) : null
   const advice = (data.insights || []).filter(x => x && (x.title || x.description))
+  // Main concern = the dimension that most needs attention (highest ratio for
+  // symptom/low-good tests, lowest for high-good tests).
+  const concern = metrics.length ? metrics.reduce((a, b) => {
+    const ra = a.maxScore ? a.score / a.maxScore : 0, rb = b.maxScore ? b.score / b.maxScore : 0
+    return (data.scoreDirection === "high-good" ? rb < ra : rb > ra) ? b : a
+  }) : null
+  const concernPct = concern && concern.maxScore ? Math.round((concern.score / concern.maxScore) * 100) : 0
+  const concernLevel = concernPct >= 66 ? "Өндөр" : concernPct >= 33 ? "Дунд" : "Бага"
+  const todos = ((data.todayGoals && data.todayGoals.length ? data.todayGoals : (data.roadmap || []).flatMap(r => r.tasks || [])) || []).filter(Boolean).slice(0, 6)
+  const [done, setDone] = useState<number[]>([])
+  const toggleDone = (i: number) => setDone(d => d.includes(i) ? d.filter(x => x !== i) : [...d, i])
 
   const barC = (p: number) => p >= 70 ? "#E8541A" : p >= 45 ? "#F06835" : "#D9892B"
   const barC2 = (p: number) => p >= 70 ? "#FF8A4C" : p >= 45 ? "#FF9F5A" : "#F0C068"
@@ -1507,7 +1556,7 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
 
   return (
     <div style={{ position: "absolute", inset: 0, zIndex: 50, background: "#FAF6F2", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif", animation: "ar-in 0.3s ease" }}>
-      <style>{`@keyframes ar-in{from{opacity:0;transform:scale(0.985)}to{opacity:1;transform:none}}`}</style>
+      <style>{`@keyframes ar-in{from{opacity:0;transform:scale(0.985)}to{opacity:1;transform:none}}.ar-car{scrollbar-width:none}.ar-car::-webkit-scrollbar{display:none}`}</style>
       <div style={{ position: "absolute", top: -40, right: -30, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,138,76,0.16), transparent 70%)", pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: 110, left: -40, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,170,115,0.12), transparent 72%)", pointerEvents: "none" }} />
 
@@ -1578,7 +1627,7 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
               </div>
               <div style={{ borderRadius: 22, padding: 16, ...glass }}>
                 <div style={{ fontSize: 12, color: "#9A8E86" }}>Сул тал</div>
-                <div style={{ fontSize: 15, fontWeight: 800, margin: "3px 0 10px", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{weakest ? weakest.label : "—"}</div>
+                <div style={{ fontSize: 15, fontWeight: 800, margin: "3px 0 10px", lineHeight: 1.2, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{weakest ? weakest.label : "—"}</div>
                 <svg width="100%" height="36" viewBox="0 0 120 38" fill="none">
                   <path d="M4 9 L28 16 L46 11 L70 24 L92 20 L116 31" stroke="#E8541A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                   <circle cx="116" cy="31" r="4" fill="#E8541A"/>
@@ -1612,34 +1661,80 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
 
         {/* ── TAB 2: Зөвлэмж ── */}
         {tab === 2 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {advice.map((x, i) => (
-              <div key={i} style={{ borderRadius: 20, padding: "15px 16px", ...glass }}>
-                <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                  <span style={{ width: 30, height: 30, borderRadius: 10, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(160deg,#FFE9D8,#FBD9C4)", fontSize: 15 }}>{x.emoji || "💡"}</span>
-                  <div style={{ minWidth: 0 }}>
-                    {x.title && <div style={{ fontSize: 13.5, fontWeight: 700, color: "#2A2520", marginBottom: 4 }}>{x.title}</div>}
-                    {x.description && <div style={{ fontSize: 12.5, color: "#7C6F66", lineHeight: 1.55 }}>{x.description}</div>}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {/* Гол анхаарах (no score — that lives on the Тойм tab) */}
+            {concern && (
+              <div style={{ borderRadius: 22, padding: "15px 16px", ...glass }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#9A8E86", fontWeight: 700, letterSpacing: 0.4, marginBottom: 9 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#E8541A" }} />ГОЛ АНХААРАХ
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 9, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{concern.label}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                  <div style={{ flex: 1, height: 9, borderRadius: 6, background: "rgba(232,84,26,0.1)", overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${concernPct}%`, borderRadius: 6, background: "linear-gradient(90deg,#FF8A4C,#E8541A)" }} />
                   </div>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: "#E8541A", whiteSpace: "nowrap" }}>{concernLevel}</span>
                 </div>
               </div>
-            ))}
-            {data.strengths && data.strengths.length > 0 && (
-              <div style={{ borderRadius: 20, padding: "15px 16px", ...glass }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "#E8541A", marginBottom: 10 }}>Давуу тал</div>
-                {data.strengths.map((s, i) => (
-                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, fontSize: 12.5, color: "#43403C", lineHeight: 1.5 }}><span style={{ color: "#E8541A", flexShrink: 0 }}>✓</span><span>{s}</span></div>
-                ))}
+            )}
+
+            {/* Action plan — interactive checklist */}
+            {todos.length > 0 && (
+              <div style={{ borderRadius: 22, padding: "16px 17px", ...glass }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                  <div>
+                    <div style={{ fontSize: 13.5, fontWeight: 700 }}>Юунаас эхлэх вэ?</div>
+                    <div style={{ fontSize: 11, color: "#9A8E86", marginTop: 1 }}>Дарж тэмдэглээрэй</div>
+                  </div>
+                  <svg width="46" height="46" viewBox="0 0 46 46">
+                    <circle cx="23" cy="23" r="18" fill="none" stroke="rgba(232,84,26,0.12)" strokeWidth="5" />
+                    <circle cx="23" cy="23" r="18" fill="none" stroke="#E8541A" strokeWidth="5" strokeLinecap="round" strokeDasharray={2 * Math.PI * 18} strokeDashoffset={2 * Math.PI * 18 * (1 - done.length / todos.length)} transform="rotate(-90 23 23)" style={{ transition: "stroke-dashoffset 0.5s cubic-bezier(.34,1.56,.64,1)" }} />
+                    <text x="23" y="27" textAnchor="middle" fontSize="12" fontWeight="800" fill="#E8541A">{done.length}/{todos.length}</text>
+                  </svg>
+                </div>
+                <div style={{ marginTop: 4 }}>
+                  {todos.map((t, i) => {
+                    const on = done.includes(i)
+                    return (
+                      <div key={i} onClick={() => toggleDone(i)} style={{ display: "flex", alignItems: "flex-start", gap: 11, padding: "11px 0", cursor: "pointer", borderBottom: i < todos.length - 1 ? "1px solid rgba(232,84,26,0.07)" : "none" }}>
+                        <span style={{ width: 23, height: 23, borderRadius: 8, flexShrink: 0, marginTop: 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.3s cubic-bezier(.34,1.56,.64,1)", border: on ? "2px solid #E8541A" : "2px solid #E8BFA8", background: on ? "linear-gradient(135deg,#FF8A4C,#E8541A)" : "rgba(255,255,255,0.5)" }}>
+                          {on && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>}
+                        </span>
+                        <span style={{ fontSize: 13, lineHeight: 1.45, color: on ? "#B8AEA6" : "#43403C", textDecoration: on ? "line-through" : "none", transition: "color 0.3s" }}>{t}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+                {done.length === todos.length && (
+                  <div style={{ marginTop: 11, textAlign: "center", fontSize: 12.5, fontWeight: 700, color: "#E8541A", background: "linear-gradient(160deg,#FFEEE4,#FBD9C4)", borderRadius: 13, padding: 10 }}>Бүгдийг тэмдэглэлээ! Сайн эхлэл 🎉</div>
+                )}
               </div>
             )}
-            {data.risks && data.risks.length > 0 && (
-              <div style={{ borderRadius: 20, padding: "15px 16px", ...glass }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "#C2410C", marginBottom: 10 }}>Анхаарах</div>
-                {data.risks.map((r, i) => (
-                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, fontSize: 12.5, color: "#43403C", lineHeight: 1.5 }}><span style={{ color: "#C2410C", flexShrink: 0 }}>!</span><span>{r}</span></div>
-                ))}
+
+            {/* Гол ойлголтууд — animated swipeable carousel */}
+            {advice.length > 0 && (
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 11 }}>
+                  <div style={{ fontSize: 15, fontWeight: 800 }}>Гол ойлголтууд</div>
+                  <div style={{ fontSize: 11, color: "#B8AEA6", display: "flex", alignItems: "center", gap: 4 }}>гүйлгэх<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M9 6l6 6-6 6" /></svg></div>
+                </div>
+                <div className="ar-car" style={{ display: "flex", gap: 13, overflowX: "auto", scrollSnapType: "x mandatory", paddingBottom: 6 }}>
+                  {advice.map((x, i) => (
+                    <div key={i} style={{ flex: "0 0 76%", scrollSnapAlign: "center", borderRadius: 24, overflow: "hidden", ...glass }}>
+                      <div style={{ position: "relative", height: 104, padding: 13, display: "flex", alignItems: "flex-end", background: ["linear-gradient(135deg,#FF9259,#E8541A)", "linear-gradient(135deg,#FFA84C,#F06835)", "linear-gradient(135deg,#FF7A45,#D9472A)"][i % 3] }}>
+                        <span style={{ position: "absolute", top: 12, right: 14, fontSize: 30 }}>{x.emoji || "💡"}</span>
+                        <InsightMotif idx={i % 3} />
+                        {x.title && <span style={{ position: "relative", fontSize: 11, fontWeight: 700, color: "#fff", background: "rgba(255,255,255,0.25)", padding: "4px 10px", borderRadius: 20, maxWidth: "72%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{x.title}</span>}
+                      </div>
+                      <div style={{ padding: "14px 15px", background: "rgba(255,255,255,0.55)" }}>
+                        <div style={{ fontSize: 12.8, color: "#7C6F66", lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{x.description || x.detail || ""}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
+
             <button onClick={() => onAskAI("Энэ үр дүнд тулгуурлан надад дэлгэрэнгүй зөвлөгөө, төлөвлөгөө гаргаж өгөөч")} style={{ marginTop: 2, border: "none", borderRadius: 16, padding: "13px 0", background: "linear-gradient(135deg,#FF8A4C,#E8541A)", color: "#fff", fontSize: 14, fontWeight: 700, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 6px 16px rgba(232,84,26,0.3)" }}>AI-аас зөвлөгөө авах</button>
           </div>
         )}
