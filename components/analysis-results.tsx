@@ -1479,6 +1479,99 @@ function JourneyView({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: strin
 }
 
 // ── Full Results ──────────────────────────────────────────────────────────────
+// Warm liquid-glass overview — the approved dashboard redesign. Data-driven so
+// it works for any test: orange-glass hero (score ring + band + CTAs), subscale
+// breakdown bars, and two mini stat cards on a warm cream canvas.
+function WarmOverview({ data, onAskAI }: { data: AnalysisData; onAskAI: (q: string) => void }) {
+  const rawScore = data.displayScore != null ? data.displayScore : Math.round(data.healthScore)
+  const rawMax = data.displayScore != null ? (data.displayMaxScore || 100) : 100
+  const band = data.displayLabel || data.summary?.title || ""
+  const message = data.highlightMessage || data.summary?.description || ""
+  const metrics = (data.metrics || []).slice(0, 6)
+  const riskLabel = data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : data.riskLevel === "High" ? "Өндөр" : (data.riskLevel || "—")
+
+  const barC = (p: number) => p >= 70 ? "#E8541A" : p >= 45 ? "#F06835" : "#D9892B"
+  const barC2 = (p: number) => p >= 70 ? "#FF8A4C" : p >= 45 ? "#FF9F5A" : "#F0C068"
+  const glass = {
+    background: "linear-gradient(160deg, rgba(255,255,255,0.82), rgba(255,251,248,0.55))",
+    backdropFilter: "blur(20px) saturate(175%)",
+    WebkitBackdropFilter: "blur(20px) saturate(175%)",
+    border: "1px solid rgba(232,84,26,0.14)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), 0 8px 22px rgba(176,80,30,0.06)",
+  }
+
+  return (
+    <div style={{ position: "relative", padding: "30px 14px 18px", background: "#FAF6F2", minHeight: "100%", overflow: "hidden" }}>
+      <div style={{ position: "absolute", top: -40, right: -30, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,138,76,0.16), transparent 70%)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: 40, left: -40, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,170,115,0.12), transparent 72%)", pointerEvents: "none" }} />
+
+      {/* Hero + score badge */}
+      <div style={{ position: "relative", display: "flex", justifyContent: "center", zIndex: 1 }}>
+        <div style={{ position: "absolute", top: -22, width: 66, height: 66, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 3, ...glass }}>
+          <ScoreRing score={data.healthScore} size={56} display={data.displayScore != null && data.displayMaxScore ? { score: data.displayScore, max: data.displayMaxScore } : undefined} />
+        </div>
+        <div style={{ position: "relative", width: "100%", background: "linear-gradient(150deg, #FF8A4C 0%, #E8541A 60%, #D9472A 100%)", borderRadius: 26, padding: "46px 22px 20px", overflow: "hidden", boxShadow: "0 14px 34px rgba(216,71,42,0.28)" }}>
+          <svg style={{ position: "absolute", top: -26, right: -26, opacity: 0.2 }} width="140" height="140" viewBox="0 0 140 140" fill="none" stroke="#fff" strokeWidth="2"><circle cx="70" cy="70" r="38"/><circle cx="70" cy="70" r="55"/><circle cx="70" cy="70" r="72"/></svg>
+          {band && <div style={{ position: "relative", display: "inline-block", background: "rgba(255,255,255,0.22)", color: "#fff", fontSize: 11, fontWeight: 600, padding: "4px 11px", borderRadius: 20, marginBottom: 10 }}>{band}</div>}
+          {message && <div style={{ position: "relative", color: "#fff", fontSize: 16, fontWeight: 700, lineHeight: 1.45 }}>{message}</div>}
+          <div style={{ position: "relative", display: "flex", gap: 10, marginTop: 18 }}>
+            <button onClick={() => onAskAI("Энэ үр дүнгийн талаар дэлгэрэнгүй тайлбарлаач")} style={{ flex: 1, border: "1.5px solid rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.12)", color: "#fff", borderRadius: 15, padding: "11px 0", fontSize: 13.5, fontWeight: 600, fontFamily: "inherit", cursor: "pointer" }}>Дэлгэрэнгүй</button>
+            <button onClick={() => onAskAI("Энэ үр дүнд тулгуурлан надад зөвлөгөө өгөөч")} style={{ flex: 1.25, border: "none", background: "#fff", color: "#D9472A", borderRadius: 15, padding: "11px 0", fontSize: 13.5, fontWeight: 700, fontFamily: "inherit", cursor: "pointer" }}>Зөвлөгөө авах</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Subscale breakdown */}
+      {metrics.length > 0 && (
+        <div style={{ position: "relative", zIndex: 1, borderRadius: 24, padding: "17px 18px", marginTop: 14, ...glass }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#2A2520", marginBottom: 13 }}>Дэд бүлгийн задаргаа</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 13 }}>
+            {metrics.map((m, i) => {
+              const pct = m.maxScore > 0 ? Math.round((m.score / m.maxScore) * 100) : 0
+              return (
+                <div key={i}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, gap: 8 }}>
+                    <span style={{ fontSize: 12.5, color: "#43403C", display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: barC(pct), flexShrink: 0 }} />
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.label}</span>
+                    </span>
+                    <span style={{ fontSize: 12.5, fontWeight: 800, color: "#2A2520", flexShrink: 0 }}>{m.score}<span style={{ fontSize: 10, color: "#9A8E86", fontWeight: 500 }}>/{m.maxScore}</span></span>
+                  </div>
+                  <div style={{ height: 7, borderRadius: 5, background: "rgba(232,84,26,0.1)", overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${pct}%`, borderRadius: 5, background: `linear-gradient(90deg, ${barC2(pct)}, ${barC(pct)})` }} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Mini stat cards */}
+      <div style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
+        <div style={{ borderRadius: 22, padding: 16, ...glass }}>
+          <div style={{ fontSize: 12, color: "#9A8E86" }}>Нийт оноо</div>
+          <div style={{ fontSize: 24, fontWeight: 800, margin: "1px 0 12px" }}>{rawScore}<span style={{ fontSize: 12, color: "#9A8E86", fontWeight: 500 }}>/{rawMax}</span></div>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 5, height: 40 }}>
+            {(metrics.length ? metrics : [{ score: 1, maxScore: 1, label: "", status: "" }]).slice(0, 5).map((m, i) => {
+              const p = m.maxScore > 0 ? m.score / m.maxScore : 0
+              return <div key={i} style={{ flex: 1, height: `${Math.max(14, Math.round(p * 100))}%`, borderRadius: 5, background: i === 0 ? "linear-gradient(180deg,#FF8A4C,#E8541A)" : "#F6DECE" }} />
+            })}
+          </div>
+        </div>
+        <div style={{ borderRadius: 22, padding: 16, ...glass }}>
+          <div style={{ fontSize: 12, color: "#9A8E86" }}>Хүндрэлийн түвшин</div>
+          <div style={{ fontSize: 18, fontWeight: 800, margin: "3px 0 10px" }}>{riskLabel}</div>
+          <svg width="100%" height="38" viewBox="0 0 120 38" fill="none">
+            <path d="M4 9 L28 16 L46 11 L70 24 L92 20 L116 31" stroke="#E8541A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="116" cy="31" r="4" fill="#E8541A"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) {
   const [page, setPage] = useState(0)
   const [insDetail, setInsDetail] = useState<AnalysisData["insights"][0] | null>(null)
@@ -1585,242 +1678,9 @@ export function AnalysisResults({ data, reportTitle, onClose, onAskAI }: Props) 
         {/* JOURNEY MODE — AI-planned chapter-paged narrative */}
         {hasJourney && <JourneyView data={data} onAskAI={onAskAI} />}
 
-        {/* PAGE 0 — Overview */}
-        {!hasJourney && page === 0 && (
-          <div style={{ padding: "14px", animation: "si 0.25s ease" }}>
-            {/* Score + character */}
-            <div style={{ background: "#fff", borderRadius: 20, padding: "18px 16px", marginBottom: 12, boxShadow: "0 2px 14px rgba(0,0,0,0.07)", display: "flex", alignItems: "center", gap: 14 }}>
-              <div>
-                <ScoreRing score={data.healthScore} size={100} display={data.displayScore != null && data.displayMaxScore ? { score: data.displayScore, max: data.displayMaxScore } : undefined} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-                  <span style={{ fontSize: 11 }}>💙</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: "#A89E96", letterSpacing: "0.4px" }}>HEALTH SCORE</span>
-                </div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: `${color}15`, borderRadius: 20, padding: "4px 12px", border: `1.5px solid ${color}25`, marginBottom: 8 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, display: "inline-block" }} />
-                  <span style={{ color, fontWeight: 800, fontSize: 13 }}>{data.summary.title}</span>
-                </div>
-                <p style={{ fontSize: 12, color: "#8A817A", lineHeight: 1.6, margin: 0 }}>{data.summary.description}</p>
-              </div>
-              <Char type={heroChar} size={72} style={{ flexShrink: 0 }} />
-            </div>
+        {/* PAGE 0 — Overview (warm liquid-glass redesign) */}
+        {!hasJourney && page === 0 && <WarmOverview data={data} onAskAI={onAskAI} />}
 
-            {/* 3 KPI cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginBottom: 12 }}>
-              {[
-                { label: kpi.metric1Label || "Хамаарал", value: data.metrics[0] ? `${data.metrics[0].score}/10` : "—", sub: data.metrics[0]?.status || "", color: BRAND, bg: "#FFF5F0", border: "#FFD0B8", barPct: data.metrics[0] ? (data.metrics[0].score / data.metrics[0].maxScore) * 100 : 0 },
-                { label: kpi.riskLabel || "Эрсдэл", value: data.riskLevel === "Low" ? "Low" : data.riskLevel === "Medium" ? "Mid" : "High", sub: data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : "Өндөр", color: rc, bg: rc === GREEN ? "#FFF6EA" : rc === AMBER ? "#FFFBEB" : "#FFF2F2", border: `${rc}30`, barPct: data.riskLevel === "Low" ? 20 : data.riskLevel === "Medium" ? 55 : 90 },
-                { label: kpi.potentialLabel || "Боломж", value: data.quitPotential === "High" ? "High" : data.quitPotential === "Medium" ? "Mid" : "Low", sub: data.quitPotential === "High" ? "Өндөр" : data.quitPotential === "Medium" ? "Дунд" : "Бага", color: pc, bg: pc === GREEN ? "#FFF6EA" : pc === AMBER ? "#FFFBEB" : "#FFF2F2", border: `${pc}30`, barPct: data.quitPotential === "High" ? 85 : data.quitPotential === "Medium" ? 50 : 20 },
-              ].map((k, i) => (
-                <div key={i} style={{ background: "#fff", borderRadius: 14, padding: "12px 10px", boxShadow: "0 2px 10px rgba(0,0,0,0.06)", border: `1.5px solid ${k.border}` }}>
-                  <p style={{ fontSize: 8, color: "#A89E96", fontWeight: 700, margin: "0 0 4px", letterSpacing: "0.3px", lineHeight: 1.3 }}>{k.label.toUpperCase()}</p>
-                  <p style={{ fontSize: 18, fontWeight: 900, color: k.color, margin: "0 0 1px", lineHeight: 1 }}>{k.value}</p>
-                  <p style={{ fontSize: 8, color: "#A89E96", margin: "0 0 6px", lineHeight: 1.3 }}>{k.sub}</p>
-                  <div style={{ background: "#FAF6F3", borderRadius: 6, height: 4, overflow: "hidden" }}>
-                    <div style={{ height: "100%", borderRadius: 6, width: bar ? `${k.barPct}%` : "0%", background: k.color, transition: "width 1s cubic-bezier(.16,1,.3,1)" }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Dynamic highlight card */}
-            <div style={{ background: "linear-gradient(135deg, #FFF6EA, #FCEBD2)", borderRadius: 20, padding: "18px 16px", marginBottom: 12, border: "1.5px solid #FBDFB3", boxShadow: "0 4px 16px rgba(0,196,140,0.12)", display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 16, fontWeight: 900, color: "#5C2A12", margin: "0 0 6px" }}>
-                  {data.highlightTitle || data.insights[0]?.title || "Сайн мэдээ!"}
-                </p>
-                <p style={{ fontSize: 12, color: "#7C3A1E", lineHeight: 1.6, margin: "0 0 12px" }}>
-                  {data.highlightMessage || data.insights[0]?.description || data.summary.description}
-                </p>
-                <button onClick={() => data.insights[0] && setInsDetail(data.insights[0])} style={{ background: PRIMARY, border: "none", borderRadius: 22, padding: "9px 18px", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: `0 4px 14px ${PRIMARY}50` }}>
-                  Дэлгэрэнгүй үзэх →
-                </button>
-              </div>
-              <Char type={data.healthScore >= 70 ? "ok" : "thinking"} size={80} style={{ flexShrink: 0 }} />
-            </div>
-
-            {/* ─── DIMENSIONS BREAKDOWN (DISC, Big5 etc.) — only if 2+ real dims ─── */}
-            {data.dimensions && data.dimensions.length >= 2 && (
-              <div style={{
-                background: "#fff", borderRadius: 18, padding: "16px",
-                marginBottom: 10, boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-                border: "1px solid #FAF6F3",
-              }}>
-                <div style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  marginBottom: 14,
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{
-                      width: 28, height: 28, borderRadius: 9,
-                      background: "linear-gradient(135deg, #FB923C, #C2410C)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      boxShadow: "0 4px 10px rgba(108,99,255,0.3)",
-                    }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="13" width="4" height="8" rx="1"/>
-                        <rect x="10" y="8" width="4" height="13" rx="1"/>
-                        <rect x="17" y="4" width="4" height="17" rx="1"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <p style={{ fontSize: 13, fontWeight: 800, color: "#2A2520", margin: "0 0 1px" }}>
-                        Хэмжээсүүдийн задаргаа
-                      </p>
-                      <p style={{ fontSize: 9, color: "#A89E96", margin: 0, letterSpacing: 0.3 }}>
-                        {data.dimensions.length} хэмжээс • Бодит тестээс
-                      </p>
-                    </div>
-                  </div>
-                  <div style={{
-                    background: "#FFF4EC", color: "#C2410C",
-                    fontSize: 10, fontWeight: 800,
-                    padding: "4px 10px", borderRadius: 999,
-                    border: "1px solid #FED7AA",
-                  }}>
-                    {data.dimensions.length}/Х
-                  </div>
-                </div>
-
-                {data.dimensions.map((d, i) => {
-                  const pct = d.maxScore > 0 ? (d.score / d.maxScore) * 100 : 0
-                  const c = metricColor(d.score / d.maxScore)
-                  const g = metricGrad(d.score / d.maxScore)
-                  // Try to find single-letter code in label like "Давамгайлагч (D)"
-                  const codeMatch = d.label.match(/\(([A-ZА-ЯӨҮЁ])\)/i)
-                  const code = codeMatch ? codeMatch[1].toUpperCase() : (i + 1).toString()
-                  return (
-                    <div key={i} style={{
-                      display: "flex", alignItems: "center", gap: 12,
-                      padding: "10px 0",
-                      borderBottom: i < data.dimensions!.length - 1 ? "1px solid #FAF6F3" : "none",
-                      animation: `ci 0.4s ease ${i * 0.07}s both`,
-                    }}>
-                      {/* Letter badge */}
-                      <div style={{
-                        width: 36, height: 36, borderRadius: 10,
-                        background: g,
-                        color: "#fff", fontSize: 14, fontWeight: 900,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        flexShrink: 0,
-                        boxShadow: `0 4px 10px ${c}33`,
-                      }}>{code}</div>
-
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{
-                          display: "flex", justifyContent: "space-between", alignItems: "baseline",
-                          marginBottom: 4, gap: 6,
-                        }}>
-                          <span style={{
-                            fontSize: 12, fontWeight: 700, color: "#2A2520",
-                            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                            flex: 1, minWidth: 0,
-                          }}>{d.label.replace(/\s*\([A-ZА-ЯӨҮЁ]\)\s*/i, "")}</span>
-                          <span style={{
-                            fontSize: 13, fontWeight: 900, color: c, flexShrink: 0,
-                            fontFeatureSettings: "'tnum'",
-                          }}>{d.score}<span style={{ fontSize: 10, color: "#A89E96", fontWeight: 700 }}>/{d.maxScore}</span></span>
-                        </div>
-                        <div style={{
-                          background: "#FAF6F3", borderRadius: 6, height: 6, overflow: "hidden",
-                          position: "relative",
-                        }}>
-                          <div style={{
-                            height: "100%", borderRadius: 6,
-                            width: bar ? `${pct}%` : "0%",
-                            background: g,
-                            transition: `width ${1.2 + i * 0.08}s cubic-bezier(.16,1,.3,1)`,
-                            boxShadow: `0 0 6px ${c}66`,
-                          }}/>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-
-                <div style={{
-                  marginTop: 14, padding: "8px 12px",
-                  background: "#FFF7F2", borderRadius: 10,
-                  fontSize: 10.5, color: "#8A817A", fontWeight: 500,
-                  lineHeight: 1.5, textAlign: "center",
-                  border: "1px dashed #F0EAE6",
-                }}>
-                  💡 Хэмжээс тус бүрт өөрийн оноо, утга бий. Дэлгэрэнгүйг тайлангаас уншина уу.
-                </div>
-              </div>
-            )}
-
-            {/* Single-score metric bars (only when no dimensions) */}
-            {(!data.dimensions || data.dimensions.length < 2) && data.metrics.map((m, i) => (
-              <div key={i} style={{ background: "#fff", borderRadius: 16, padding: "14px 16px", marginBottom: 8, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                  <div>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: "#2A2520", margin: "0 0 1px" }}>{m.label}</p>
-                    <p style={{ fontSize: 10, fontWeight: 700, color: metricColor(m.score / m.maxScore), margin: 0 }}>{m.status}</p>
-                  </div>
-                  <div style={{ background: `${metricColor(m.score / m.maxScore)}12`, borderRadius: 10, padding: "4px 10px", border: `1px solid ${metricColor(m.score / m.maxScore)}25` }}>
-                    <span style={{ fontSize: 14, fontWeight: 900, color: metricColor(m.score / m.maxScore) }}>{m.score}/{m.maxScore}</span>
-                  </div>
-                </div>
-                <div style={{ background: "#FAF6F3", borderRadius: 10, height: 10, overflow: "hidden" }}>
-                  <div style={{ height: "100%", borderRadius: 10, width: bar ? `${(m.score / m.maxScore) * 100}%` : "0%", background: metricGrad(m.score / m.maxScore), transition: `width ${1.1 + i * 0.1}s cubic-bezier(.16,1,.3,1)` }} />
-                </div>
-              </div>
-            ))}
-
-            {/* Strengths + Risks with character */}
-            <div style={{ background: "#fff", borderRadius: 18, padding: "16px 14px", marginBottom: 8, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-                <Char type="thumbsup" size={70} />
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <div>
-                  <p style={{ fontSize: 12, fontWeight: 800, color: "#B45309", margin: "0 0 10px", display: "flex", alignItems: "center", gap: 5 }}>💪 Давуу талууд</p>
-                  {data.strengths.map((s, i) => (
-                    <div key={i} style={{ display: "flex", gap: 7, marginBottom: 7 }}>
-                      <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#FCEBD2", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
-                        <span style={{ color: PRIMARY, fontSize: 10, fontWeight: 800 }}>✓</span>
-                      </div>
-                      <span style={{ fontSize: 11, color: "#5B5650", lineHeight: 1.4 }}>{s}</span>
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <p style={{ fontSize: 12, fontWeight: 800, color: "#EA580C", margin: "0 0 10px", display: "flex", alignItems: "center", gap: 5 }}>⚠️ Анхаарах эрсдэлүүд</p>
-                  {data.risks.map((r, i) => (
-                    <div key={i} style={{ display: "flex", gap: 7, marginBottom: 7 }}>
-                      <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#FFF7ED", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
-                        <span style={{ color: "#FF9800", fontSize: 10, fontWeight: 800 }}>!</span>
-                      </div>
-                      <span style={{ fontSize: 11, color: "#5B5650", lineHeight: 1.4 }}>{r}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Dynamic stat cards */}
-            {statCards.length > 0 && (
-              <div style={{ background: "#fff", borderRadius: 16, padding: "14px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", marginBottom: 8 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, textAlign: "center" }}>
-                  {statCards.map((s, i) => (
-                    <div key={i}>
-                      <div style={{ fontSize: 20, marginBottom: 3 }}>{s.icon}</div>
-                      <p style={{ fontSize: 13, fontWeight: 900, color: "#2A2520", margin: "0 0 1px", lineHeight: 1 }}>{s.value}</p>
-                      <p style={{ fontSize: 8, color: "#A89E96", margin: 0, lineHeight: 1.3 }}>{s.sub}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <button onClick={() => setPage(1)} style={{ width: "100%", padding: "12px", background: "#FAF6F3", border: "1.5px solid #F0EAE6", borderRadius: 14, color: "#5B5650", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-              AI Дүн шинжилгээ харах →
-            </button>
-          </div>
-        )}
 
         {/* PAGE 1 — AI Insights (carousel design) */}
         {!hasJourney && page === 1 && (() => {
