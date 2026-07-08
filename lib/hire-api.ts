@@ -2,10 +2,10 @@
 // Endpoint: GET /api/v1/assessment/all?limit=50&page=1
 // Бодит response: { succeed: true, payload: { data: [ { data: {...}, user: {...}, category: {...} } ], count, total } }
 
-// Default to api.hire-test.cloud — current source of truth for assessments
-// (prod api.hire.mn has stale data; hire.mn website itself uses this host).
+// Production API — hire.mn now serves everything through api.hire.mn
+// (previously the test host api.hire-test.cloud during development).
 // Override via HIRE_API_URL env var if needed.
-const API_BASE = process.env.HIRE_API_URL || 'https://api.hire-test.cloud/api/v1'
+const API_BASE = process.env.HIRE_API_URL || 'https://api.hire.mn/api/v1'
 const API_KEY = process.env.HIRE_API_KEY || ''
 
 interface ApiOptions {
