@@ -323,6 +323,23 @@ export async function POST(req: Request) {
             : `\n\nUSER'S LATEST TEST RESULT (already in the system — never ask them to paste it):\n${clientExamContext.slice(0, 2500)}\n\nWhen the user refers to "my result" or asks for advice, ground your professional guidance in this result and answer directly without asking which test they mean.`)
         : ''
 
+    // Reply style contract. The widget renders **bold**, headings and bullets
+    // but NOT markdown tables, and the reply must fit the token budget below
+    // without getting cut off — so the model is told both explicitly.
+    const styleRules = lang === 'mn'
+      ? `\n\nХАРИУЛТЫН НАЙРУУЛГА (заавал мөрдөнө):
+- Мэргэжлийн, үг үсэг, найруулга зүйн алдаагүй монгол хэлээр бич. Зохиомол болон ярианы үг хэрэглэхгүй.
+- Emoji хэт их хэрэглэхгүй: гарчигт огт хэрэглэхгүй, нийт хариултад хамгийн ихдээ 1.
+- Markdown ХҮСНЭГТ (| ... | ... |) ОГТ хэрэглэхгүй — оронд нь "**Нэр:** товч тайлбар" хэлбэрийн жагсаалт ашигла.
+- Бүтэц: **тод гарчиг**, дараа нь • жагсаалт. Урт нуршсан догол мөр бичихгүй.
+- Хэмжээ: 250 үгээс хэтрэхгүй. Хариултаа ЗААВАЛ бүрэн өгүүлбэрээр төгсгө — хэзээ ч тас орхихгүй; багтахгүй бол агуулгаа хураангуйл.`
+      : `\n\nREPLY STYLE (mandatory):
+- Professional, grammatically correct language. No slang.
+- Minimal emoji: none in headings, at most 1 in the whole reply.
+- NEVER use markdown tables (| ... |) — use "**Label:** short text" bullet lines instead.
+- Structure: **bold headings** + • bullets. No long rambling paragraphs.
+- Length: at most ~250 words. ALWAYS end on a complete sentence — never cut off mid-thought; condense instead.`
+
     // Build system prompt with RAG knowledge retrieval and memory context
     const systemPrompt = buildSystemPrompt(
       intent,
@@ -331,7 +348,7 @@ export async function POST(req: Request) {
       detectedCategory,
       lastMessage,  // For RAG knowledge retrieval
       memory        // For personalization
-    ) + examContext + clientExamBlock
+    ) + examContext + clientExamBlock + styleRules
     const compressed = compressHistory(messages)
     const formattedMessages = compressed
       .filter((m: { role: string }) => ['user', 'assistant', 'bot'].includes(m.role))
@@ -348,7 +365,9 @@ export async function POST(req: Request) {
       // LLM call
       anthropic.messages.create({
         model,
-        max_tokens: 500,
+        // Mongolian is token-heavy (~2-3 tokens/word); 900 fits the ~250-word
+        // style budget with headroom so replies finish instead of truncating.
+        max_tokens: 900,
         system: systemPrompt,
         messages: formattedMessages,
       }),

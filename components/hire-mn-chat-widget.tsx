@@ -4468,17 +4468,15 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   }, [messages, isTyping])
 
   const sendMessage = async (text: string, opts?: { hidden?: boolean; skipStaticRouting?: boolean }) => {
-    // ── TEMP: Daily message limit disabled ────────────────────────────
-    // // Check if user is locked - popup will show automatically
-    // if (!canSendMessage()) {
-    //   return
-    // }
-
     if (!text.trim() || isTyping) return
 
-    // ── TEMP: Daily message limit disabled ────────────────────────────
-    // // Increment daily count
-    // incrementDailyCount()
+    // ── Usage limit: one person gets MESSAGE_LIMIT (10) chat messages, then an
+    // 8-hour lock. Only user-typed messages count — hidden analysis requests
+    // ride free. When locked, the UsageLimitPopup renders automatically.
+    if (!opts?.hidden) {
+      if (!canSendMessage()) return
+      incrementDailyCount()
+    }
 
     setShowQuickReplies(false)
     // Only add a visible user bubble when not hidden (analysis requests are hidden)
@@ -5627,8 +5625,8 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                   </button>
                 </div>
 
-                {/* TEMP: Daily limit warning hidden ─────────────────────────
-                {getRemainingMessages() <= 10 && getRemainingMessages() > 0 && (
+                {/* Usage limit warning — appears once 5 or fewer messages remain */}
+                {getRemainingMessages() <= 5 && getRemainingMessages() > 0 && (
                   <div style={{
                     display: "flex",
                     alignItems: "center",
@@ -5636,16 +5634,16 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     gap: 8,
                     marginTop: 10,
                     padding: "8px 14px",
-                    borderRadius: 8,
-                    backgroundColor: getRemainingMessages() <= 3 ? "#FEF2F2" : "#FFFBEB",
-                    border: `1px solid ${getRemainingMessages() <= 3 ? "#FECACA" : "#FDE68A"}`,
+                    borderRadius: 14,
+                    backgroundColor: getRemainingMessages() <= 2 ? "#FCE9E2" : "#FFF4E6",
+                    border: `1px solid ${getRemainingMessages() <= 2 ? "rgba(217,71,42,0.35)" : "rgba(232,140,26,0.3)"}`,
                   }}>
                     <svg
                       width="14"
                       height="14"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke={getRemainingMessages() <= 3 ? "#DC2626" : "#D97706"}
+                      stroke={getRemainingMessages() <= 2 ? "#D9472A" : "#C07716"}
                       strokeWidth="2"
                       style={{ flexShrink: 0 }}
                     >
@@ -5655,7 +5653,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     <span style={{
                       fontSize: 12,
                       fontWeight: 500,
-                      color: getRemainingMessages() <= 3 ? "#DC2626" : "#92400E",
+                      color: getRemainingMessages() <= 2 ? "#D9472A" : "#9A5B10",
                       whiteSpace: "nowrap",
                       lineHeight: 1.4,
                     }}>
@@ -5663,7 +5661,6 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     </span>
                   </div>
                 )}
-                ─────────────────────────────────────────────────────────── */}
 
                 <div style={{ textAlign: "center", marginTop: 10, fontSize: 10, color: "#aaa", fontWeight: 500 }}>
                   hire.mn AI
@@ -5671,7 +5668,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               </div>
               )}
 
-              {/* Usage Limit Popup — shows when user hits the daily 20-message limit */}
+              {/* Usage Limit Popup — shows while the 10-message limit lock is active */}
               {isUserLocked() && <UsageLimitPopup />}
 
               {/* Sidebar Overlay */}
