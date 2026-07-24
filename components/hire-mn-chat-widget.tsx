@@ -42,6 +42,38 @@ function stripPII(reportData: any): any {
   return clone
 }
 
+// Compact PII-free summary of an exam result (+ optional AI analysis output).
+// Attached to every /api/chat call so follow-up questions get grounded,
+// professional answers instead of "paste your result" replies.
+function buildExamChatContext(testName: string, reportData?: any, analysisData?: any): string {
+  const parts: string[] = [`Тест: ${testName}`]
+  try {
+    const r: any =
+      (reportData as any)?.report?.payload?.result ??
+      (reportData as any)?.report?.result ??
+      (reportData as any)?.result?.payload ??
+      (reportData as any)?.result ?? {}
+    const point = r.point ?? r.value
+    if (point != null) parts.push(`Оноо: ${point}${r.total != null ? `/${r.total}` : ''}`)
+    if (typeof r.result === 'string' && r.result) parts.push(`Үнэлгээ: ${r.result}`)
+    const details = Array.isArray(r.details) ? r.details : []
+    if (details.length) parts.push(`Дэд бүлгүүд: ${details.map((d: any) => `${d.value}: ${d.cause}`).join('; ')}`)
+  } catch {}
+  try {
+    const a: any = analysisData
+    if (a) {
+      const level = a.displayLabel || a.summary?.title
+      if (level) parts.push(`Түвшин: ${level}`)
+      if (Array.isArray(a.metrics) && a.metrics.length)
+        parts.push(`Хэмжүүр: ${a.metrics.map((m: any) => `${m.label} ${m.score}/${m.maxScore}${m.status ? ` — ${m.status}` : ''}`).join('; ')}`)
+      if (Array.isArray(a.strengths) && a.strengths.length) parts.push(`Давуу тал: ${a.strengths.slice(0, 3).join('; ')}`)
+      if (Array.isArray(a.risks) && a.risks.length) parts.push(`Анхаарах: ${a.risks.slice(0, 3).join('; ')}`)
+      if (a.summary?.description) parts.push(`Дүгнэлт: ${a.summary.description}`)
+    }
+  } catch {}
+  return parts.join('\n').slice(0, 2200)
+}
+
 
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -3953,6 +3985,17 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const consentGrantedRef = useRef(false)
   // In-flight lock — blocks duplicate analyses while one is already running
   const analyzingRef = useRef(false)
+  // Last analyzed exam summary — rides along on every /api/chat call so the AI
+  // keeps advising on this result instead of asking the user to re-paste it.
+  // Persisted per browser session (set only after the user consents to analysis).
+  const examChatContextRef = useRef<string>("")
+  useEffect(() => {
+    try { examChatContextRef.current = sessionStorage.getItem('hw_exam_ctx') || "" } catch {}
+  }, [])
+  const setExamChatContext = (ctx: string) => {
+    examChatContextRef.current = ctx
+    try { sessionStorage.setItem('hw_exam_ctx', ctx) } catch {}
+  }
 
   // Toggle a checkable action step inside the artifact (TODO behavior)
   const toggleArtifactStep = (stepIdx: number) => {
@@ -4059,12 +4102,16 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     console.log("[analyze] starting:", testName, "id:", analysisId)
     setIsTyping(false)
 
+    // From here the user has consented — remember this result as chat context
+    setExamChatContext(buildExamChatContext(testName, reportData))
+
     // ── Cache hit: this exact result was already analyzed → reuse output,
     //    skip the LLM call entirely (instant + free). A retake gets a new
     //    code, so a changed result always produces a fresh analysis.
     const cached = getCachedAnalysis(reportData)
     if (cached) {
       console.log("[analyze] cache hit — reusing previous output, no LLM call")
+      setExamChatContext(buildExamChatContext(cached.title || testName, reportData, cached.data))
       setMessages(prev => [...prev, {
         role: "assistant",
         content: "",
@@ -4117,6 +4164,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         // Persist this result's analysis so re-analyzing the same code is
         // instant and doesn't spend tokens again.
         try { setCachedAnalysis(reportData, json.data, testName) } catch {}
+        // Enrich the chat context with the finished analysis (levels, metrics,
+        // strengths/risks) so follow-up advice is grounded in the full picture.
+        setExamChatContext(buildExamChatContext(testName, reportData, json.data))
         setMessages(prev => prev.map(m =>
           (m as any).analysisId === analysisId
             ? {
@@ -4572,7 +4622,11 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history, lang: lang === "МН" ? "mn" : "en" }),
+        body: JSON.stringify({
+          messages: history,
+          lang: lang === "МН" ? "mn" : "en",
+          examContext: examChatContextRef.current || undefined,
+        }),
       })
 
       console.log("[hire-mn-chat] /api/chat status:", res.status)

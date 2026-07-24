@@ -96,7 +96,7 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Content-Type must be application/json' }, { status: 415 })
 
     const body = await req.json()
-    const { messages, lang: forcedLang, sessionId: providedSessionId } = body
+    const { messages, lang: forcedLang, sessionId: providedSessionId, examContext: clientExamContext } = body
     
     // Generate or use provided session ID for memory
     const sessionId = providedSessionId || `session_${Date.now()}_${Math.random().toString(36).slice(2)}`
@@ -313,15 +313,25 @@ export async function POST(req: Request) {
     // Category илрүүлсэн бол тэр категорийн тестүүдийг LLM-д өгч, карт ч шүүж харуулна
     const relevantAssessments = filterByDetectedCategory(liveAssessments, detectedCategory, cachedCategories)
     
+    // Widget-provided context: summary of the user's just-analyzed test result.
+    // With this in the system prompt the AI advises on the result directly
+    // instead of asking the user to paste it again.
+    const clientExamBlock =
+      typeof clientExamContext === 'string' && clientExamContext.trim()
+        ? (lang === 'mn'
+            ? `\n\nХЭРЭГЛЭГЧИЙН СҮҮЛД ӨГСӨН ТЕСТИЙН ҮР ДҮН (системд аль хэдийн байгаа — код нэхэх, үр дүн хуулж оруулахыг хүсэх ХЭРЭГГҮЙ):\n${clientExamContext.slice(0, 2500)}\n\nХэрэглэгч "энэ үр дүн", "миний тест", "зөвлөгөө өгөөч" гэх мэтээр хандвал ЭНЭ үр дүнд шууд тулгуурлан мэргэжлийн сэтгэл зүйчийн түвшинд тодорхой, хэрэгжихүйц зөвлөгөө өг. Аль тест болохыг дахин бүү асуу.`
+            : `\n\nUSER'S LATEST TEST RESULT (already in the system — never ask them to paste it):\n${clientExamContext.slice(0, 2500)}\n\nWhen the user refers to "my result" or asks for advice, ground your professional guidance in this result and answer directly without asking which test they mean.`)
+        : ''
+
     // Build system prompt with RAG knowledge retrieval and memory context
     const systemPrompt = buildSystemPrompt(
-      intent, 
-      lang, 
-      relevantAssessments, 
+      intent,
+      lang,
+      relevantAssessments,
       detectedCategory,
       lastMessage,  // For RAG knowledge retrieval
       memory        // For personalization
-    ) + examContext
+    ) + examContext + clientExamBlock
     const compressed = compressHistory(messages)
     const formattedMessages = compressed
       .filter((m: { role: string }) => ['user', 'assistant', 'bot'].includes(m.role))

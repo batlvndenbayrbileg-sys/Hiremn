@@ -1551,7 +1551,7 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
     border: "1px solid rgba(232,84,26,0.14)",
     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), 0 8px 22px rgba(176,80,30,0.06)",
   }
-  const TABS = ["Тойм", "Дэд бүлэг", "Зөвлэмж"]
+  const TABS = ["Тойм", "Дэд бүлэг", "Зөвлөмж"]
   const navBtn = { width: 44, height: 44, borderRadius: "50%", border: "none", background: "transparent", color: "#9A8E86", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }
 
   return (
@@ -1659,7 +1659,7 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
           </div>
         )}
 
-        {/* ── TAB 2: Зөвлэмж ── */}
+        {/* ── TAB 2: Зөвлөмж ── */}
         {tab === 2 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {/* Гол анхаарах (no score — that lives on the Тойм tab) */}
@@ -1748,7 +1748,7 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
         <button onClick={() => setTab(0)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, border: "none", borderRadius: 22, padding: "13px 0", background: "linear-gradient(135deg,#FF8A4C,#E8541A)", color: "#fff", fontSize: 14, fontWeight: 700, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 6px 16px rgba(232,84,26,0.3)" }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Тайлан
         </button>
-        <button onClick={() => setTab(2)} aria-label="Зөвлэмж" style={navBtn}>
+        <button onClick={() => setTab(2)} aria-label="Зөвлөмж" style={navBtn}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg>
         </button>
         <button onClick={() => onAskAI("Энэ үр дүнгийн талаар асуумаар байна")} aria-label="AI асуух" style={navBtn}>
