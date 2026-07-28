@@ -165,6 +165,42 @@ export async function POST(request: Request) {
     // Likert-style inference: if every Q can score up to maxPointSeen, total max = Qs × max
     const inferredLikertMax = totalQuestions * maxPointSeen
 
+    // ── Authoritative bounds from the platform, when provided ──────────────
+    // Everything else in this block is inference. These two optional fields
+    // remove the guesswork entirely; several field names/shapes are accepted so
+    // the code starts using them the moment hire.mn ships them, with no further
+    // change on our side. When absent we fall back to the inference below.
+    type Band = { min: number; max: number; label: string }
+    const parseBands = (src: any): Band[] => {
+      const raw = src?.bands ?? src?.ranges ?? src?.scoreBands ?? src?.levels
+      if (!Array.isArray(raw)) return []
+      const out: Band[] = []
+      for (const b of raw) {
+        if (!b || typeof b !== 'object') continue
+        const [lo, hi] = Array.isArray(b.range) && b.range.length >= 2
+          ? [b.range[0], b.range[1]]
+          : [b.min ?? b.from ?? b.start ?? b.low, b.max ?? b.to ?? b.end ?? b.high]
+        const nLo = Number(lo), nHi = Number(hi)
+        if (Number.isFinite(nLo) && Number.isFinite(nHi)) {
+          out.push({ min: nLo, max: nHi, label: String(b.label ?? b.name ?? b.result ?? '').trim() })
+        }
+      }
+      return out.sort((a, b) => a.min - b.min)
+    }
+    const bands: Band[] = parseBands(assessment).length ? parseBands(assessment) : parseBands(resultObj)
+    const bandMin: number | null = bands.length ? bands[0].min : null
+    const bandMax: number | null = bands.length ? bands[bands.length - 1].max : null
+
+    // Max points obtainable on a SINGLE question (the Likert ceiling). This is a
+    // per-test constant. Inferring it from one submission (maxPointSeen) inflates
+    // sub-scale percentages whenever the user never picked the top option — a
+    // 1.0-of-4 sub-scale would read as 50% if their highest answer was a 2.
+    const reportedQuestionMax = Number(
+      assessment.maxPointPerQuestion ?? assessment.questionMaxPoint ??
+      assessment.maxPoint ?? assessment.pointPerQuestion ?? 0
+    ) || 0
+    const perQuestionMax = reportedQuestionMax > 0 ? reportedQuestionMax : maxPointSeen
+
     // Score: prefer result.value (used for non-partialScore tests like RSES),
     // then result.point, then summed answers.
     // A reported score of exactly 0 is legitimate, so test for presence rather
@@ -193,7 +229,8 @@ export async function POST(request: Request) {
          maxPointSeen > 1 && inferredLikertMax > reportedMax)
       )
     const actualMaxScore: number =
-      reportedMaxLooksLikeCount && inferredLikertMax > 0 ? inferredLikertMax
+      bandMax != null && bandMax > 0 ? bandMax
+      : reportedMaxLooksLikeCount && inferredLikertMax > 0 ? inferredLikertMax
       : reportedMax > 0 ? reportedMax
       : inferredLikertMax > 0 ? inferredLikertMax
       : Number(resultObj.total ?? 0) || 0
@@ -205,15 +242,22 @@ export async function POST(request: Request) {
       assessmentTotalPoint: assessment.totalPoint,
       partialScore: assessment.partialScore,
       sumAnswerPoints, maxPointSeen, totalQuestions, inferredLikertMax,
-      picked: { score: actualScore, max: actualMaxScore },
+      // Platform-supplied bounds (null/0 until hire.mn ships them)
+      bandMin, bandMax, bandCount: bands.length, reportedQuestionMax, perQuestionMax,
+      picked: { score: actualScore, max: actualMaxScore, scaleMin: bandMin ?? 0 },
     })
     const assessmentDescription: string = stripHtml(assessment.description || '')
     const assessmentUsage: string = stripHtml(assessment.usage || '')
     const assessmentMeasure: string = stripHtml(assessment.measure || '')
     const assessmentAuthor: string = assessment.author || ''
 
-    const actualPct = actualMaxScore > 0
-      ? Math.round((actualScore / actualMaxScore) * 100)
+    // Percent is measured from the scale's floor, not from 0 — a scale that runs
+    // 20..80 must read 0% at 20, not 25%. The floor is only known when bands are
+    // supplied; without them 0 remains the (usual) assumption.
+    const scaleMin = bandMin != null ? bandMin : 0
+    const scaleSpan = actualMaxScore - scaleMin
+    const actualPct = scaleSpan > 0
+      ? Math.max(0, Math.min(100, Math.round(((actualScore - scaleMin) / scaleSpan) * 100)))
       : 50
 
     // ── Dimensions — primary source: result.details[] (pre-scored per dim) ──
@@ -268,8 +312,8 @@ export async function POST(request: Request) {
       const dimsSum = rawDims.reduce((s: number, d: { score: number }) => s + d.score, 0)
       const additive = actualScore > 0 &&
         Math.abs(dimsSum - actualScore) <= Math.max(1, actualScore * 0.02)
-      const perItemMean = !additive && maxPointSeen > 0 &&
-        rawDims.every((d: { score: number }) => d.score <= maxPointSeen + 1e-9)
+      const perItemMean = !additive && perQuestionMax > 0 &&
+        rawDims.every((d: { score: number }) => d.score <= perQuestionMax + 1e-9)
       // Equal split is valid only if the sum of dim scores doesn't exceed the
       // total — otherwise we'd display impossible percentages.
       const evenSplitValid = !perItemMean && evenSplit > 0 &&
@@ -280,7 +324,7 @@ export async function POST(request: Request) {
 
       dimensions = rawDims.map((d: { label: string; score: number; rawMax: number }) => {
         const m = d.rawMax > 0 ? d.rawMax
-                : perItemMean ? maxPointSeen
+                : perItemMean ? perQuestionMax
                 : evenSplitValid ? evenSplit
                 : fallbackMax
         return {
