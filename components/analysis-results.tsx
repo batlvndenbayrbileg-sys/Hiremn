@@ -1528,15 +1528,22 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
   const message = data.highlightMessage || data.summary?.description || ""
   const metrics = data.metrics || []
   const riskLabel = data.riskLevel === "Low" ? "Бага" : data.riskLevel === "Medium" ? "Дунд" : data.riskLevel === "High" ? "Өндөр" : (data.riskLevel || "—")
-  const weakest = metrics.length ? metrics.reduce((a, b) => ((b.maxScore ? b.score / b.maxScore : 0) < (a.maxScore ? a.score / a.maxScore : 0) ? b : a)) : null
   const advice = (data.insights || []).filter(x => x && (x.title || x.description))
-  // Main concern = the dimension that most needs attention (highest ratio for
-  // symptom/low-good tests, lowest for high-good tests).
+  // Which end of the scale needs attention depends on the test's direction.
+  // On a symptom test (low-good) the HIGHEST sub-score is the problem area; on a
+  // strength/profile test the LOWEST is the least developed one. Picking the
+  // lowest unconditionally labelled the mildest symptom as the "weak spot".
+  const symptomTest = data.scoreDirection === "low-good"
   const concern = metrics.length ? metrics.reduce((a, b) => {
     const ra = a.maxScore ? a.score / a.maxScore : 0, rb = b.maxScore ? b.score / b.maxScore : 0
-    return (data.scoreDirection === "high-good" ? rb < ra : rb > ra) ? b : a
+    return (symptomTest ? rb > ra : rb < ra) ? b : a
   }) : null
-  const concernPct = concern && concern.maxScore ? Math.round((concern.score / concern.maxScore) * 100) : 0
+  const weakest = concern
+  const weakestLabel = symptomTest ? "Хамгийн их анхаарах" : "Сул тал"
+  const concernScorePct = concern && concern.maxScore ? Math.round((concern.score / concern.maxScore) * 100) : 0
+  // How much attention this area needs — a high symptom score and a low strength
+  // score both mean "needs attention", so invert for non-symptom tests.
+  const concernPct = symptomTest ? concernScorePct : 100 - concernScorePct
   const concernLevel = concernPct >= 66 ? "Өндөр" : concernPct >= 33 ? "Дунд" : "Бага"
   const todos = ((data.todayGoals && data.todayGoals.length ? data.todayGoals : (data.roadmap || []).flatMap(r => r.tasks || [])) || []).filter(Boolean).slice(0, 6)
   const [done, setDone] = useState<number[]>([])
@@ -1626,7 +1633,7 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
                 </div>
               </div>
               <div style={{ borderRadius: 22, padding: 16, ...glass }}>
-                <div style={{ fontSize: 12, color: "#9A8E86" }}>Сул тал</div>
+                <div style={{ fontSize: 12, color: "#9A8E86" }}>{weakestLabel}</div>
                 <div style={{ fontSize: 15, fontWeight: 800, margin: "3px 0 10px", lineHeight: 1.2, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{weakest ? weakest.label : "—"}</div>
                 <svg width="100%" height="36" viewBox="0 0 120 38" fill="none">
                   <path d="M4 9 L28 16 L46 11 L70 24 L92 20 L116 31" stroke="#E8541A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>

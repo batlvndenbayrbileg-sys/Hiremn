@@ -166,17 +166,32 @@ export async function POST(request: Request) {
     const inferredLikertMax = totalQuestions * maxPointSeen
 
     // Score: prefer result.value (used for non-partialScore tests like RSES),
-    // then result.point, then summed answers
+    // then result.point, then summed answers.
+    // A reported score of exactly 0 is legitimate, so test for presence rather
+    // than truthiness — `Number("0") || sumAnswerPoints` would silently discard it.
+    const reportedScoreRaw = resultObj.value ?? resultObj.point ?? assessment.point
+    const reportedScoreNum = Number(reportedScoreRaw)
     const actualScore: number =
-      Number(resultObj.value ?? resultObj.point ?? assessment.point ?? 0) ||
-      sumAnswerPoints ||
-      0
+      reportedScoreRaw !== null && reportedScoreRaw !== undefined &&
+      reportedScoreRaw !== '' && Number.isFinite(reportedScoreNum)
+        ? reportedScoreNum
+        : sumAnswerPoints
 
     // Max: trust assessment.totalPoint ONLY if it's >= the achieved score and
     // we have no better signal. Otherwise prefer inferredLikertMax which is
     // grounded in real answer-level data.
+    // totalPoint is sometimes the QUESTION COUNT rather than the attainable
+    // maximum (a 10-question Likert test reporting totalPoint=10 when the real
+    // max is 10 x 4 = 40). Treat it as a count when it is below the achieved
+    // score, or when it equals the question count while questions score >1 point
+    // — otherwise an 8/40 result would be displayed as 8/10 (80% instead of 20%).
     const reportedMax = Number(assessment.totalPoint ?? assessment.total ?? 0) || 0
-    const reportedMaxLooksLikeCount = reportedMax > 0 && reportedMax < actualScore
+    const reportedMaxLooksLikeCount =
+      reportedMax > 0 && (
+        reportedMax < actualScore ||
+        (totalQuestions > 0 && reportedMax === totalQuestions &&
+         maxPointSeen > 1 && inferredLikertMax > reportedMax)
+      )
     const actualMaxScore: number =
       reportedMaxLooksLikeCount && inferredLikertMax > 0 ? inferredLikertMax
       : reportedMax > 0 ? reportedMax
@@ -204,6 +219,11 @@ export async function POST(request: Request) {
     // ── Dimensions — primary source: result.details[] (pre-scored per dim) ──
     type Dim = { label: string; score: number; maxScore: number; pct: number }
     let dimensions: Dim[] = []
+    // True when the per-dimension denominator is only the highest observed score,
+    // i.e. the percentages express relative standing, not attainment. The top
+    // dimension then always reads 100%, so such a pct must never be treated as a
+    // wellbeing figure.
+    let dimMaxIsRelative = false
 
     // Try to derive a per-dimension max from many possible fields.
     // Different test types put it in different places; we try them in order.
@@ -229,22 +249,38 @@ export async function POST(request: Request) {
         }))
         .filter((d: any) => d.label)
 
+      // Which shape are these sub-scores? This decides the denominator, and
+      // getting it wrong is what made a "3 out of 4" subscale read as "3/10".
+      //   (a) ADDITIVE — the sub-scores partition the total, so their sum matches
+      //       the total score. An equal split of the total max is then fair.
+      //   (b) PER-ITEM MEAN — each sub-score is the average of that sub-scale's
+      //       Likert items, so the sum sits far below the total and every value
+      //       fits inside a single question's maximum. The denominator is then
+      //       that per-question maximum (e.g. 4), NOT the total split.
       // Per-dim max priority:
       //   1. Explicit per-detail max field (rawMax) — best
-      //   2. Equal split of total max across dims — works for symmetric tests
-      //      like RSES where 2 sub-scales each have N questions × max-per-Q
-      //   3. Highest detail score (visible relativeness only) — last resort
+      //   2. Per-question max, when the sub-scores are per-item means
+      //   3. Equal split of total max across dims — symmetric additive tests
+      //   4. Highest detail score (visible relativeness only) — last resort
       const evenSplit = actualMaxScore > 0 && rawDims.length > 0
         ? actualMaxScore / rawDims.length
         : 0
       const dimsSum = rawDims.reduce((s: number, d: { score: number }) => s + d.score, 0)
+      const additive = actualScore > 0 &&
+        Math.abs(dimsSum - actualScore) <= Math.max(1, actualScore * 0.02)
+      const perItemMean = !additive && maxPointSeen > 0 &&
+        rawDims.every((d: { score: number }) => d.score <= maxPointSeen + 1e-9)
       // Equal split is valid only if the sum of dim scores doesn't exceed the
       // total — otherwise we'd display impossible percentages.
-      const evenSplitValid = evenSplit > 0 && rawDims.every((d: { score: number }) => d.score <= evenSplit)
+      const evenSplitValid = !perItemMean && evenSplit > 0 &&
+        rawDims.every((d: { score: number }) => d.score <= evenSplit)
       const fallbackMax = Math.max(...rawDims.map((d: { score: number }) => d.score), 1)
+      dimMaxIsRelative = !perItemMean && !evenSplitValid &&
+        rawDims.some((d: { rawMax: number }) => !(d.rawMax > 0))
 
       dimensions = rawDims.map((d: { label: string; score: number; rawMax: number }) => {
         const m = d.rawMax > 0 ? d.rawMax
+                : perItemMean ? maxPointSeen
                 : evenSplitValid ? evenSplit
                 : fallbackMax
         return {
@@ -255,7 +291,11 @@ export async function POST(request: Request) {
         }
       })
 
-      console.log('[analyze] dims:', { source: 'details', evenSplit, evenSplitValid, dimsSum, dims: dimensions.map(d => `${d.label}: ${d.score}/${d.maxScore}`) })
+      console.log('[analyze] dims:', {
+        source: 'details', shape: additive ? 'additive' : perItemMean ? 'per-item-mean' : 'relative',
+        evenSplit, evenSplitValid, dimsSum, maxPointSeen,
+        dims: dimensions.map(d => `${d.label}: ${d.score}/${d.maxScore}`),
+      })
     }
 
     // Fallback: derive dimensions from answers grouped by questionCategory.
@@ -277,7 +317,11 @@ export async function POST(request: Request) {
         dimMap.set(String(catId), cur)
       }
       if (dimMap.size >= 2) {
-        const arr = Array.from(dimMap.values()).map(v => ({
+        const groups = Array.from(dimMap.values())
+        // Without a per-question max we fall back to the group's own sum, which
+        // again only expresses relative standing.
+        dimMaxIsRelative = groups.some(v => !(v.max > 0))
+        const arr = groups.map(v => ({
           label: v.label,
           score: v.sum,
           maxScore: v.max > 0 ? v.max : Math.max(v.sum, 1),
@@ -486,11 +530,22 @@ ${sampleAnswers || '—'}`
     if (validQuals.includes(data.outcomeQuality)) outcomeQuality = data.outcomeQuality
     console.log('[analyze] AI classification:', { testType, scoreDirection, outcomeQuality })
 
-    // Compute wellbeing + risk from AI's classification
+    // Compute wellbeing + risk from AI's classification.
+    // A profile test has no good/bad axis. Its top dimension's pct is only
+    // meaningful when the denominator is a real maximum — with a relative
+    // denominator it is always 100%, which would paint every profile result as
+    // perfect. Fall back to a neutral midpoint in that case.
     const wellbeingScore =
       scoreDirection === 'low-good' ? (100 - actualPct) :
-      scoreDirection === 'profile'  ? (dimensions[0]?.pct ?? 50) :
+      scoreDirection === 'profile'  ? (dimMaxIsRelative ? 50 : (dimensions[0]?.pct ?? 50)) :
       actualPct
+
+    // The AI's outcome judgement must not contradict the measured score: a
+    // clinically concerning result can't be reported as positive, nor a strong
+    // result as concerning.
+    if (outcomeQuality === 'positive' && wellbeingScore < 35) outcomeQuality = 'neutral'
+    else if (outcomeQuality === 'concerning' && wellbeingScore > 75) outcomeQuality = 'neutral'
+
     const actualRiskLevel: 'Low' | 'Medium' | 'High' =
       outcomeQuality === 'positive'    ? 'Low' :
       outcomeQuality === 'concerning'  ? 'High' :

@@ -47,30 +47,56 @@ function stripPII(reportData: any): any {
 // professional answers instead of "paste your result" replies.
 function buildExamChatContext(testName: string, reportData?: any, analysisData?: any): string {
   const parts: string[] = [`Тест: ${testName}`]
+  const pct = (s: number, m: number) => (m > 0 ? ` (${Math.round((s / m) * 100)}%)` : '')
+
   try {
     const r: any =
       (reportData as any)?.report?.payload?.result ??
       (reportData as any)?.report?.result ??
       (reportData as any)?.result?.payload ??
       (reportData as any)?.result ?? {}
-    const point = r.point ?? r.value
-    if (point != null) parts.push(`Оноо: ${point}${r.total != null ? `/${r.total}` : ''}`)
+    const score = Number(r.value ?? r.point)
+    const max = Number(r.total)
+    if (Number.isFinite(score)) {
+      parts.push(Number.isFinite(max) && max > 0
+        ? `Нийт оноо: ${score}/${max}${pct(score, max)}`
+        : `Нийт оноо: ${score}`)
+    }
     if (typeof r.result === 'string' && r.result) parts.push(`Үнэлгээ: ${r.result}`)
+
+    // Raw sub-scores carry NO denominator in the source payload. Only send them
+    // when the analysis (which resolves the correct max) isn't available yet, and
+    // say so explicitly — otherwise the model invents a scale like "3/10".
     const details = Array.isArray(r.details) ? r.details : []
-    if (details.length) parts.push(`Дэд бүлгүүд: ${details.map((d: any) => `${d.value}: ${d.cause}`).join('; ')}`)
+    const haveMetrics = Array.isArray(analysisData?.metrics) && analysisData.metrics.length > 0
+    if (details.length && !haveMetrics) {
+      parts.push(
+        `Дэд бүлгийн түүхий оноо (дээд хязгаар нь тодорхойгүй — хувь болгож бүү тооц, "x/10" гэх мэт хуваарь бүү зохио): ` +
+        details.map((d: any) => `${d.value} = ${d.cause}`).join('; ')
+      )
+    }
   } catch {}
+
   try {
     const a: any = analysisData
     if (a) {
       const level = a.displayLabel || a.summary?.title
       if (level) parts.push(`Түвшин: ${level}`)
-      if (Array.isArray(a.metrics) && a.metrics.length)
-        parts.push(`Хэмжүүр: ${a.metrics.map((m: any) => `${m.label} ${m.score}/${m.maxScore}${m.status ? ` — ${m.status}` : ''}`).join('; ')}`)
+      if (Array.isArray(a.metrics) && a.metrics.length) {
+        parts.push(
+          `Дэд бүлгүүд (оноо/дээд оноо — яг эдгээр тоог ашигла): ` +
+          a.metrics.map((m: any) => {
+            const s = Number(m.score), mx = Number(m.maxScore)
+            return `${m.label} ${s}/${mx}${pct(s, mx)}`
+          }).join('; ')
+        )
+      }
       if (Array.isArray(a.strengths) && a.strengths.length) parts.push(`Давуу тал: ${a.strengths.slice(0, 3).join('; ')}`)
       if (Array.isArray(a.risks) && a.risks.length) parts.push(`Анхаарах: ${a.risks.slice(0, 3).join('; ')}`)
       if (a.summary?.description) parts.push(`Дүгнэлт: ${a.summary.description}`)
     }
   } catch {}
+
   return parts.join('\n').slice(0, 2200)
 }
 
