@@ -166,11 +166,26 @@ export async function POST(request: Request) {
     const inferredLikertMax = totalQuestions * maxPointSeen
 
     // ── Authoritative bounds from the platform, when provided ──────────────
-    // Everything else in this block is inference. These two optional fields
-    // remove the guesswork entirely; several field names/shapes are accepted so
-    // the code starts using them the moment hire.mn ships them, with no further
-    // change on our side. When absent we fall back to the inference below.
-    type Band = { min: number; max: number; label: string }
+    // hire.mn ships explicit bounds so we don't have to infer them:
+    //   scale:       { min, max }   — the TOTAL score range
+    //   subscaleMax: number         — ceiling a single sub-scale can reach
+    //   bands: [ { questionCategory, name, range: [min, max] } ]
+    //                               — per-SUB-SCALE ranges, keyed by category
+    // Careful: those bands describe sub-scales, NOT score-interpretation levels,
+    // so the last band's max is not the total maximum (four [0,7] sub-scales sit
+    // alongside a 0..28 total). Interpretation-style bands — a contiguous
+    // partition of the whole scale with no category key — are accepted too, for
+    // tests that expose those instead. Anything missing falls back to inference.
+    const boundsSrc: any[] = [resultObj, assessment]
+    const pickNum = (get: (s: any) => any): number => {
+      for (const s of boundsSrc) {
+        const n = Number(get(s))
+        if (Number.isFinite(n)) return n
+      }
+      return NaN
+    }
+
+    type Band = { min: number; max: number; label: string; category: string | null }
     const parseBands = (src: any): Band[] => {
       const raw = src?.bands ?? src?.ranges ?? src?.scoreBands ?? src?.levels
       if (!Array.isArray(raw)) return []
@@ -181,25 +196,48 @@ export async function POST(request: Request) {
           ? [b.range[0], b.range[1]]
           : [b.min ?? b.from ?? b.start ?? b.low, b.max ?? b.to ?? b.end ?? b.high]
         const nLo = Number(lo), nHi = Number(hi)
-        if (Number.isFinite(nLo) && Number.isFinite(nHi)) {
-          out.push({ min: nLo, max: nHi, label: String(b.label ?? b.name ?? b.result ?? '').trim() })
-        }
+        if (!Number.isFinite(nLo) || !Number.isFinite(nHi)) continue
+        const cat = b.questionCategory ?? b.questionCategoryId ?? b.category ?? b.categoryId
+        out.push({
+          min: nLo, max: nHi,
+          label: String(b.label ?? b.name ?? b.result ?? '').trim(),
+          category: cat === null || cat === undefined ? null : String(typeof cat === 'object' ? cat.id : cat),
+        })
       }
-      return out.sort((a, b) => a.min - b.min)
+      return out
     }
-    const bands: Band[] = parseBands(assessment).length ? parseBands(assessment) : parseBands(resultObj)
-    const bandMin: number | null = bands.length ? bands[0].min : null
-    const bandMax: number | null = bands.length ? bands[bands.length - 1].max : null
+    const allBands: Band[] = [...parseBands(resultObj), ...parseBands(assessment)]
+    const subscaleBands = allBands.filter(b => b.category !== null)
+    const interpBands = allBands.filter(b => b.category === null).sort((a, b) => a.min - b.min)
 
-    // Max points obtainable on a SINGLE question (the Likert ceiling). This is a
-    // per-test constant. Inferring it from one submission (maxPointSeen) inflates
-    // sub-scale percentages whenever the user never picked the top option — a
-    // 1.0-of-4 sub-scale would read as 50% if their highest answer was a 2.
-    const reportedQuestionMax = Number(
-      assessment.maxPointPerQuestion ?? assessment.questionMaxPoint ??
-      assessment.maxPoint ?? assessment.pointPerQuestion ?? 0
-    ) || 0
-    const perQuestionMax = reportedQuestionMax > 0 ? reportedQuestionMax : maxPointSeen
+    // Sub-scale ceilings, looked up per dimension by category id then by name.
+    const subscaleMaxByCategory = new Map<string, number>()
+    const subscaleMaxByName = new Map<string, number>()
+    for (const b of subscaleBands) {
+      if (b.category) subscaleMaxByCategory.set(b.category, b.max)
+      if (b.label) subscaleMaxByName.set(b.label.toLowerCase(), b.max)
+    }
+    const reportedSubscaleMax =
+      Number(pickNum(s => s?.subscaleMax ?? s?.subScaleMax ??
+        s?.maxPointPerQuestion ?? s?.questionMaxPoint ?? s?.pointPerQuestion)) || 0
+
+    // Total scale bounds — explicit `scale` wins, then interpretation bands.
+    const scaleMaxReported = pickNum(s => s?.scale?.max ?? s?.scale?.total)
+    const scaleMinReported = pickNum(s => s?.scale?.min)
+    const bandMax: number | null =
+      Number.isFinite(scaleMaxReported) && scaleMaxReported > 0 ? scaleMaxReported
+      : interpBands.length ? interpBands[interpBands.length - 1].max
+      : null
+    const bandMin: number | null =
+      Number.isFinite(scaleMinReported) ? scaleMinReported
+      : interpBands.length ? interpBands[0].min
+      : null
+
+    // Fallback ceiling for per-item-mean sub-scales when the platform sends no
+    // subscaleMax: the highest points seen on a single question. Inferred from
+    // one submission, so it inflates whenever the user never picked the top
+    // option — which is exactly why subscaleMax above takes priority.
+    const perQuestionMax = maxPointSeen
 
     // Score: prefer result.value (used for non-partialScore tests like RSES),
     // then result.point, then summed answers.
@@ -242,8 +280,9 @@ export async function POST(request: Request) {
       assessmentTotalPoint: assessment.totalPoint,
       partialScore: assessment.partialScore,
       sumAnswerPoints, maxPointSeen, totalQuestions, inferredLikertMax,
-      // Platform-supplied bounds (null/0 until hire.mn ships them)
-      bandMin, bandMax, bandCount: bands.length, reportedQuestionMax, perQuestionMax,
+      // Platform-supplied bounds (null/0 when the test doesn't expose them)
+      bandMin, bandMax, reportedSubscaleMax, perQuestionMax,
+      subscaleBandCount: subscaleBands.length, interpBandCount: interpBands.length,
       picked: { score: actualScore, max: actualMaxScore, scaleMin: bandMin ?? 0 },
     })
     const assessmentDescription: string = stripHtml(assessment.description || '')
@@ -284,13 +323,31 @@ export async function POST(request: Request) {
       return 0
     }
 
+    // Sub-scale ceiling supplied by the platform: the band for this dimension's
+    // question category first, then a name match, then the test-wide subscaleMax.
+    const platformDimMax = (d: any, label: string): number => {
+      const catRaw = d?.questionCategory ?? d?.questionCategoryId ?? d?.category ?? d?.categoryId
+      const cat = catRaw === null || catRaw === undefined
+        ? null
+        : String(typeof catRaw === 'object' ? catRaw.id : catRaw)
+      const byCat = cat ? subscaleMaxByCategory.get(cat) : undefined
+      if (byCat && byCat > 0) return byCat
+      const byName = label ? subscaleMaxByName.get(label.toLowerCase()) : undefined
+      if (byName && byName > 0) return byName
+      return reportedSubscaleMax > 0 ? reportedSubscaleMax : 0
+    }
+
     if (Array.isArray(resultObj.details) && resultObj.details.length > 0) {
       const rawDims = resultObj.details
-        .map((d: any) => ({
-          label: String(d.value || '').trim(),
-          score: Number(d.cause ?? d.point ?? 0) || 0,
-          rawMax: extractDimMax(d),
-        }))
+        .map((d: any) => {
+          const label = String(d.value || '').trim()
+          return {
+            label,
+            score: Number(d.cause ?? d.point ?? 0) || 0,
+            rawMax: extractDimMax(d),
+            platformMax: platformDimMax(d, label),
+          }
+        })
         .filter((d: any) => d.label)
 
       // Which shape are these sub-scores? This decides the denominator, and
@@ -303,9 +360,10 @@ export async function POST(request: Request) {
       //       that per-question maximum (e.g. 4), NOT the total split.
       // Per-dim max priority:
       //   1. Explicit per-detail max field (rawMax) — best
-      //   2. Per-question max, when the sub-scores are per-item means
-      //   3. Equal split of total max across dims — symmetric additive tests
-      //   4. Highest detail score (visible relativeness only) — last resort
+      //   2. Platform-supplied sub-scale ceiling (band by category, or subscaleMax)
+      //   3. Per-question max, when the sub-scores are per-item means
+      //   4. Equal split of total max across dims — symmetric additive tests
+      //   5. Highest detail score (visible relativeness only) — last resort
       const evenSplit = actualMaxScore > 0 && rawDims.length > 0
         ? actualMaxScore / rawDims.length
         : 0
@@ -320,10 +378,12 @@ export async function POST(request: Request) {
         rawDims.every((d: { score: number }) => d.score <= evenSplit)
       const fallbackMax = Math.max(...rawDims.map((d: { score: number }) => d.score), 1)
       dimMaxIsRelative = !perItemMean && !evenSplitValid &&
-        rawDims.some((d: { rawMax: number }) => !(d.rawMax > 0))
+        rawDims.some((d: { rawMax: number; platformMax: number }) =>
+          !(d.rawMax > 0) && !(d.platformMax > 0))
 
-      dimensions = rawDims.map((d: { label: string; score: number; rawMax: number }) => {
+      dimensions = rawDims.map((d: { label: string; score: number; rawMax: number; platformMax: number }) => {
         const m = d.rawMax > 0 ? d.rawMax
+                : d.platformMax > 0 ? d.platformMax
                 : perItemMean ? perQuestionMax
                 : evenSplitValid ? evenSplit
                 : fallbackMax
