@@ -4948,10 +4948,6 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           0%, 100% { transform: translateY(0) scale(1); }
           50% { transform: translateY(-8px) scale(1.02); }
         }
-        @keyframes hw-ring {
-          0% { transform: scale(1); opacity: 0.8; }
-          100% { transform: scale(2.2); opacity: 0; }
-        }
         @keyframes hw-online-pulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
           50% { box-shadow: 0 0 0 12px rgba(34,197,94,0); }
@@ -4979,11 +4975,6 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         @keyframes hw-shimmer {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }
-        }
-        @keyframes hw-pulse-ring {
-          0% { transform: scale(0.95); opacity: 1; }
-          50% { transform: scale(1.05); opacity: 0.8; }
-          100% { transform: scale(0.95); opacity: 1; }
         }
         @keyframes hw-gradient-shift {
           0% { background-position: 0% 50%; }
@@ -5832,21 +5823,10 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           boxSizing: "border-box",
           pointerEvents: "none",
         }}>
-          {/* Animated ring effects */}
+          {/* The launcher is just the mascot pill — the expanding halo that used
+              to sit behind it read as a square patch of light against the host
+              page, so it has been removed. */}
           <div style={{ position: "relative", pointerEvents: "none" }}>
-            <div style={{
-              position: "absolute", inset: -8, borderRadius: 30,
-              background: "linear-gradient(135deg, rgba(232,84,26,0.2), rgba(255,140,66,0.15))",
-              animation: "hw-ring 3s ease-out infinite",
-              pointerEvents: "none",
-            }} />
-            <div style={{
-              position: "absolute", inset: -3, borderRadius: 29,
-              background: "linear-gradient(135deg, rgba(232,84,26,0.15), rgba(255,107,61,0.1))",
-              animation: "hw-ring 3s ease-out 0.8s infinite",
-              pointerEvents: "none",
-            }} />
-
             <button
               className="hw-mascot"
               onClick={() => setIsOpen(o => !o)}
@@ -5867,13 +5847,11 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 // Reserve space on the left for the mascot bubble
                 paddingLeft: 58, paddingRight: 16,
                 flexShrink: 0, position: "relative",
+                // A plain, neutral drop shadow. The old wide orange one glowed
+                // into the host page and made the launcher look boxed-in.
                 boxShadow: isHovered
-                  ? `0 12px 32px rgba(232,84,26,0.4),
-                     0 6px 12px rgba(0,0,0,0.08),
-                     inset 0 1px 0 rgba(255,255,255,0.25)`
-                  : `0 8px 24px rgba(232,84,26,0.3),
-                     0 3px 8px rgba(0,0,0,0.06),
-                     inset 0 1px 0 rgba(255,255,255,0.15)`,
+                  ? `0 6px 16px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.25)`
+                  : `0 3px 10px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.15)`,
                 transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
                 transform: isHovered ? "scale(1.04) translateY(-2px)" : "scale(1) translateY(0)",
                 overflow: "visible",
