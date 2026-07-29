@@ -136,6 +136,20 @@ interface Message {
   analysisData?: any                // New /api/analyze response shape
   analysisTitle?: string            // Test name for analysis card
   fromLLM?: boolean                 // True only for genuine LLM replies (controls feedback widget)
+  hostStatusId?: string             // Marks a transient status bubble pushed by the host page
+}
+
+// hire.mn sometimes prefixes its own error with the same sentence it already
+// contains ("Тайлан татахад алдаа гарлаа: Тайлан татахад алдаа гарлаа (HTTP 404)").
+// Drop the duplicated lead so the user sees the message once.
+function dedupeHostMessage(s: string): string {
+  const i = s.indexOf(': ')
+  if (i > 0) {
+    const head = s.slice(0, i).trim()
+    const tail = s.slice(i + 2).trim()
+    if (head.length > 3 && tail.startsWith(head)) return tail
+  }
+  return s
 }
 
 interface FollowUpMessage {
@@ -4011,6 +4025,9 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
   const consentGrantedRef = useRef(false)
   // In-flight lock — blocks duplicate analyses while one is already running
   const analyzingRef = useRef(false)
+  // Id of the transient "loading" bubble pushed by the host page, so the
+  // following error/analysis replaces it instead of stacking underneath.
+  const hostStatusIdRef = useRef<string | null>(null)
   // Last analyzed exam summary — rides along on every /api/chat call so the AI
   // keeps advising on this result instead of asking the user to re-paste it.
   // Persisted per browser session (set only after the user consents to analysis).
@@ -4252,22 +4269,31 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
       
       // Loading state - show when fetching from API
       if (event.data.type === "HIREMN_LOADING") {
-        const loadingMsg: Message = {
+        const id = `host-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+        hostStatusIdRef.current = id
+        setMessages(prev => [...prev, {
           role: "assistant",
           content: `**${event.data.message || "Уншиж байна..."}**`,
-        }
-        setMessages(prev => [...prev, loadingMsg])
+          hostStatusId: id,
+        }])
         setIsTyping(true)
       }
-      
+
       // Error state - show API error
       if (event.data.type === "HIREMN_ERROR") {
         setIsTyping(false)
-        const errorMsg: Message = {
-          role: "assistant",
-          content: `**Алдаа:** ${event.data.message || "Өгөгдөл татахад алдаа гарлаа."}\n\nДахин оролдоно уу эсвэл hire.mn хэрэглэгчийн тусламжтай холбогдоно уу.`,
-        }
-        setMessages(prev => [...prev, errorMsg])
+        const raw = String(event.data.message || "Өгөгдөл татахад алдаа гарлаа.").trim()
+        const content = `**Алдаа:** ${dedupeHostMessage(raw)}\n\nДахин оролдоно уу эсвэл hire.mn хэрэглэгчийн тусламжтай холбогдоно уу.`
+        const pendingId = hostStatusIdRef.current
+        hostStatusIdRef.current = null
+        setMessages(prev => {
+          // Replace the "loading" bubble this error belongs to instead of
+          // stacking beneath it, and never repeat an identical error twice.
+          const base = pendingId ? prev.filter(m => m.hostStatusId !== pendingId) : prev
+          const last = base[base.length - 1]
+          if (last && last.role === "assistant" && last.content === content) return base
+          return [...base, { role: "assistant" as const, content }]
+        })
       }
       
       // AI Analysis request with report data (from API or direct)
@@ -4281,6 +4307,14 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
           examPayload.assessment?.name ||
           reportTitle ||
           "Тест"
+
+        // The report arrived — drop the host's "loading" bubble before the
+        // analysis pushes its own, so the two don't stack.
+        const pendingId = hostStatusIdRef.current
+        if (pendingId) {
+          hostStatusIdRef.current = null
+          setMessages(prev => prev.filter(m => m.hostStatusId !== pendingId))
+        }
 
         // Show consent modal first (or skip if user already approved this session)
         setIsTyping(false)

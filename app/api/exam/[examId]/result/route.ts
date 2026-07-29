@@ -1,66 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// hire.mn exposes results at /api/v1/userAnswer/code/code/{code}. The previous
+// URLs here (api.hire.mn/exam/{id}/result and /meta) do not exist on the
+// platform — they returned 404, which this route passed straight through to the
+// caller as "Тайлан татахад алдаа гарлаа (HTTP 404)".
+const API_BASE = process.env.HIRE_API_URL || 'https://api.hire.mn/api/v1'
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ examId: string }> }
 ) {
   try {
     const { examId } = await params
+    if (!examId) {
+      return NextResponse.json({ error: 'examId required' }, { status: 400 })
+    }
 
-    // Hire.mn API-аас exam результат авах
-    const resultResponse = await fetch(
-      `https://api.hire.mn/exam/${examId}/result`,
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.HIRE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    }
+    if (process.env.HIRE_API_KEY) {
+      headers.Authorization = `Bearer ${process.env.HIRE_API_KEY}`
+    }
+
+    const res = await fetch(
+      `${API_BASE}/userAnswer/code/code/${encodeURIComponent(examId)}`,
+      { headers, cache: 'no-store' }
     )
 
-    if (!resultResponse.ok) {
+    if (!res.ok) {
+      console.error(`[exam/result] upstream ${res.status} for code ${examId}`)
       return NextResponse.json(
-        { error: 'Failed to fetch exam result' },
-        { status: resultResponse.status }
+        { error: `Тайлангийн мэдээлэл авахад алдаа гарлаа (${res.status})` },
+        { status: res.status }
       )
     }
 
-    const examResult = await resultResponse.json()
+    const json = await res.json().catch(() => null)
+    // The endpoint answers { succeed, payload }. An unknown code yields an empty
+    // payload rather than an error status, so surface that as a clear 404.
+    const payload = json?.payload ?? json
+    const empty =
+      payload == null ||
+      (Array.isArray(payload) && payload.length === 0) ||
+      (typeof payload === 'object' && !Array.isArray(payload) && Object.keys(payload).length === 0)
 
-    // Exam metadata авах (тестийн нэр, тайлбар гэх мэт)
-    const examMetaResponse = await fetch(
-      `https://api.hire.mn/exam/${examId}/meta`,
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.HIRE_API_KEY}`,
-        },
-      }
-    )
+    if (empty) {
+      return NextResponse.json(
+        { error: 'Энэ кодоор тайлан олдсонгүй' },
+        { status: 404 }
+      )
+    }
 
-    const examMeta = examMetaResponse.ok 
-      ? await examMetaResponse.json() 
-      : null
+    const result = Array.isArray(payload) ? payload[0] : payload
 
     return NextResponse.json({
       success: true,
-      examResult,
-      examMeta,
-      // LLM-д илгээхээр үйл ажиллагаа нь энэ структур
+      examResult: result,
       data: {
-        assessmentId: examMeta?.assessmentId,
-        assessmentName: examMeta?.name,
-        userResponses: examResult.responses,
-        score: examResult.score,
-        scoreRange: examResult.scoreRange,
-        interpretation: examResult.interpretation,
-        timestamp: new Date().toISOString(),
-      }
+        code: examId,
+        assessmentId: result?.assessmentId,
+        assessmentName: result?.assessmentName,
+        score: result?.score ?? result?.point ?? result?.value,
+        level: result?.level ?? result?.levelName ?? result?.result,
+        completedAt: result?.completedAt ?? result?.createdAt,
+      },
     })
   } catch (error) {
-    console.error('Error fetching exam result:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('[exam/result] error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
