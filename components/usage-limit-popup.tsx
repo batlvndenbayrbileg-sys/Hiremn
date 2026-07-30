@@ -51,6 +51,36 @@ export function UsageLimitPopup({ onClose }: UsageLimitPopupProps) {
       borderRadius: 24,
       padding: 20,
     }}>
+      {/* Minimize / close — lets the user collapse the widget back to the launcher
+          even while the usage lock is active (the popup covers the header button). */}
+      {onClose && (
+        <button
+          onClick={onClose}
+          aria-label="Хаах"
+          style={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            width: 34,
+            height: 34,
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.85)',
+            border: '1px solid rgba(255,255,255,0.9)',
+            color: '#4B5563',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+
       <div style={{
         backgroundColor: '#fff',
         borderRadius: 20,

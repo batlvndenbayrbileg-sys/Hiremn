@@ -5720,7 +5720,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
               )}
 
               {/* Usage Limit Popup — shows while the 10-message limit lock is active */}
-              {isUserLocked() && <UsageLimitPopup />}
+              {isUserLocked() && <UsageLimitPopup onClose={() => setIsOpen(false)} />}
 
               {/* Sidebar Overlay */}
               {showSidebar && (
