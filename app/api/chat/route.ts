@@ -1,6 +1,6 @@
 // app/api/chat/route.ts
 import Anthropic from '@anthropic-ai/sdk'
-import { classify } from '@/lib/classifier'
+import { classify, detectCrisis } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/brain'
 import { parseTestMarkers, TEST_DATABASE } from '@/lib/test-db'
@@ -87,6 +87,40 @@ function extractExamCode(msg: string): string | null {
 function isListAllIntent(msg: string): boolean {
   return /^(ямар тест|тестүүд|жагсаалт|бүх тест|бүгдийг харуул|what tests|all tests|show all|list all)/i.test(msg.trim())
 }
+
+// ── CRISIS SAFETY ─────────────────────────────────────────────────────────────
+// Live tests whose text relates to mental health, so a crisis reply can gently
+// surface the free depression/anxiety screener instead of unrelated tests.
+const MENTAL_HEALTH_RE =
+  /депресс|depress|түгшүүр|anxiety|сэтгэц|сэтгэл\s*гутр|стресс|stress|dass|phq|gad|сэмүт|mental|уйтгар|гуниг|panic/i
+
+function pickMentalHealthTests(assessments: Assessment[], lang: 'mn' | 'en') {
+  return assessments
+    .filter(a =>
+      MENTAL_HEALTH_RE.test(
+        `${a.name} ${a.nameEn ?? ''} ${a.description ?? ''} ${a.usage ?? ''} ${a.measure ?? ''} ${a.category?.name ?? ''}`
+      )
+    )
+    .slice(0, 2)
+    .map(a => formatAssessmentForWidget(a, lang))
+}
+
+// Deterministic, supportive reply for self-harm / suicide messages. We never let
+// the LLM recommender run for these — leading with warmth + real help matters far
+// more than a test card, and it prevents unrelated tests from being surfaced.
+const CRISIS_REPLY_MN =
+  'Таны бичсэнийг уншаад санаа зовлоо. Эдгээр мэдрэмж хэцүү байдгийг ойлгож байна — та ганцаараа биш, тусламж авах бүрэн боломж бий.\n\n' +
+  '- Хэрэв яг одоо аюултай, эсвэл өөрийгөө гэмтээх бодол төрж байвал **103 (яаралтай тусламж)** руу залгах, эсвэл ойр дотны итгэдэг хүндээ яг одоо хэлээрэй.\n' +
+  '- **Сэтгэцийн Эрүүл Мэндийн Үндэсний Төв (СЭМҮТ)** зэрэг мэргэжлийн байгууллагад хандаж, сэтгэл зүйч эсвэл эмчтэй уулзвал бодит тус болно.\n' +
+  '- Ийм мэдрэмж мөнхийн биш — мэргэжлийн тусламж, дэмжлэгтэйгээр хөнгөрдөг.\n\n' +
+  'Хүсвэл сэтгэлийн байдлаа эхлээд үнэлэхэд доорх үнэгүй асуумж чиглүүлэг өгч болно. Гэхдээ энэ нь мэргэжлийн эмч/сэтгэл зүйчийг орлохгүй гэдгийг санаарай.'
+
+const CRISIS_REPLY_EN =
+  "I'm really glad you reached out, and I'm concerned about what you shared. You don't have to face this alone — help is available.\n\n" +
+  '- If you feel in danger right now or are thinking of harming yourself, please call **103 (emergency services)** or tell someone you trust immediately.\n' +
+  '- Reaching a mental-health professional — for example the **National Center for Mental Health** — and talking to a psychologist or doctor can genuinely help.\n' +
+  '- These feelings are not permanent; they ease with proper support.\n\n' +
+  'If it helps, the free screener below can be a first step to understand how you feel. It is not a substitute for a professional doctor or psychologist.'
 
 // ── Main handler ─────────────────────────────────────────────────────────────
 export async function POST(req: Request) {
@@ -182,6 +216,23 @@ export async function POST(req: Request) {
     // API-аас тестүүд татах
     const liveAssessments = await getAssessments()
     const assessmentMap = new Map(liveAssessments.map(a => [a.id, a]))
+
+    // ── CRISIS SAFETY: self-harm / suicide takes priority over everything ──────
+    // Skip the classifier/LLM recommender entirely (it was surfacing unrelated
+    // tests like team-role or alcohol). Respond with support + real resources
+    // and, at most, the free mental-health screener.
+    if (detectCrisis(lastMessage)) {
+      const mhTests = pickMentalHealthTests(liveAssessments, lang)
+      return Response.json({
+        reply: lang === 'en' ? CRISIS_REPLY_EN : CRISIS_REPLY_MN,
+        tests: mhTests,
+        categories: [...new Set(mhTests.map(t => t?.category).filter(Boolean))] as string[],
+        source: 'crisis',
+        intent: 'general',
+        tokens_used: 0,
+        sessionId,
+      })
+    }
 
     // Assessment ID → widget card (live data эсвэл static fallback)
     const shapeTest = (id: number) => {
@@ -440,8 +491,14 @@ export async function POST(req: Request) {
           }
         }
       }
-      // If still no tests, return top relevant assessments
-      if (tests.length === 0) {
+      // If still no tests: only fall back to a default list when the user is
+      // actually browsing (e.g. "show me tests", price/duration questions).
+      // For a described problem with no genuine match, show NO cards — the text
+      // reply guides instead. Surfacing a random slice here was exactly what
+      // produced unrelated recommendations.
+      const isBrowsing = isListAllIntent(lastMessage) || !!priceFilter ||
+        /үнэ|төлбөр|хэд|хэдэн минут|хугацаа|price|cost|how long|бүх тест|all tests/i.test(lastMessage)
+      if (tests.length === 0 && isBrowsing) {
         tests = relevantAssessments.slice(0, 6).map(a => formatAssessmentForWidget(a, lang))
       }
     }

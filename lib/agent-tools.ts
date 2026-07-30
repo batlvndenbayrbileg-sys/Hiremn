@@ -18,39 +18,46 @@ export interface ToolResult {
 
 export function searchTestsByProblem(problem: string, assessments: Assessment[]): ToolResult {
   const problemLower = problem.toLowerCase()
-  
-  // Search patterns
+  const problemWords = problemLower.split(/\s+/).filter(w => w.length > 2)
+
   const matchingTests: { id: number; name: string; score: number; reason: string }[] = []
-  
-  // Check knowledge base first
+
+  // 1. Score the LIVE assessments directly. This is the authoritative source —
+  //    the widget only shows tests that exist in the live API, so matches MUST
+  //    carry live ids. (The static KB below uses different ids and previously
+  //    never resolved against live data, which let unrelated tests slip in.)
+  for (const a of assessments ?? []) {
+    const haystack = [
+      a.name, a.nameEn ?? '', a.description ?? '', a.usage ?? '', a.measure ?? '',
+      a.category?.name ?? '', TEST_DATABASE[a.id]?.useCases ?? '',
+    ].join(' ').toLowerCase()
+
+    let score = 0
+    for (const w of problemWords) {
+      if (haystack.includes(w)) score += 2
+    }
+    if (score > 0) {
+      matchingTests.push({ id: a.id, name: a.name, score, reason: '' })
+    }
+  }
+
+  // 2. Supplement with the static knowledge base ONLY for ids that also exist in
+  //    the live set (so a match can actually be rendered).
+  const liveIds = new Set((assessments ?? []).map(a => a.id))
   const { tests: knowledgeMatches } = searchKnowledge(problem)
   for (const t of knowledgeMatches) {
+    if (!liveIds.has(t.id) || matchingTests.some(m => m.id === t.id)) continue
     matchingTests.push({
       id: t.id,
       name: t.name,
-      score: 10,
+      score: 4,
       reason: `${t.useCases.slice(0, 2).join(', ')}`,
     })
   }
-  
-  // Also check static database
-  for (const test of Object.values(TEST_DATABASE)) {
-    if (matchingTests.some(m => m.id === test.id)) continue
-    
-    const useCasesLower = test.useCases.toLowerCase()
-    if (useCasesLower.includes(problemLower) || problemLower.split(' ').some(w => useCasesLower.includes(w))) {
-      matchingTests.push({
-        id: test.id,
-        name: test.name,
-        score: 5,
-        reason: test.useCases.slice(0, 50),
-      })
-    }
-  }
-  
+
   // Sort by score
   matchingTests.sort((a, b) => b.score - a.score)
-  
+
   return {
     success: true,
     data: {

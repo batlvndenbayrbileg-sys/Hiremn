@@ -23,8 +23,8 @@ export const CATEGORY_KEYWORDS: Record<string, RegExp> = {
   'Психометрик тест':      /психометрик|psychometric|оюун ухаан|iq тест|оюуны чадвар|танин мэдэхүй/i,
   'Чадамжийн тест':        /чадамж|чадварын тест|competenc|skill.?test|мэргэжлийн чадвар|аналитик|verbal|numerical|логик сэтгэлгээ/i,
   
-  // Сэтгэл зүйн асуудлууд
-  'сэтгэл':                /сэтгэл зүй|сэтгэц|mental|stress|стресс|түгшүүр|сэтгэлийн|гутрал|депресс|санаа зов|уйтгар|burnout|шаталт/i,
+  // Сэтгэл зүйн асуудлууд — сэтгэл гутрал, түгшүүр, хямрал, өөрийгөө гэмтээх бодол
+  'сэтгэл':                /сэтгэл зүй|сэтгэц|mental|stress|стресс|түгшүүр|сэтгэлийн|гутрал|депресс|depress|санаа зов|уйтгар|гуниг|цөхөр|цөхрөл|найдваргүй|ганцаард|нойргүй|panic|сандрал|айдас|хямрал|burnout|шаталт|амиа хорл|амьдрахаас залх|үхмээр|өөрийгөө гэмт|суицид|suicide/i,
   
   // Харилцааны асуудлууд
   'харилцаа':              /харилцаа|communicat|эмпат|нийгмийн|social|хамт олон|найз нөхөд|хос|гэр бүл|хамтрагч/i,
@@ -65,6 +65,18 @@ const FAQ_PATTERNS: RegExp[] = [
   /хэрхэн ажилладаг|яаж.*ажилл|how.*work/i,
   /certificate|гэрчилгээ|баталгаа/i,
 ]
+
+// ── CRISIS DETECTION ──────────────────────────────────────────────────────────
+// Self-harm / suicide signals. When matched, the chat route must NOT run the
+// generic test recommender (it surfaces unrelated tests); it leads with support
+// and emergency resources instead. Kept deliberately broad — false positives here
+// are far safer than misses.
+export const CRISIS_PATTERN =
+  /амиа\s*хорл|амиа\s*тасл|амьдрахаас\s*залх|амьдрах\s*(хүсэлгүй|хүсэхгүй|дургүй)|амьдрахыг\s*хүсэхгүй|үхмээр|үхэхийг\s*хүс|үхэх\s*(бодол|гэж)|өөрийгөө\s*(гэмт|ал|устга)|амьд\s*байхаас\s*залх|цөхөрч\s*байна|суицид|suicide|kill\s*myself|killing\s*myself|end\s*(my\s*life|it\s*all)|self.?harm|want\s*to\s*die|hurt\s*myself/i
+
+export function detectCrisis(message: string): boolean {
+  return CRISIS_PATTERN.test(message)
+}
 
 function detectLang(message: string): 'mn' | 'en' {
   const cyrillicCount = (message.match(/[\u0400-\u04FF]/g) || []).length
