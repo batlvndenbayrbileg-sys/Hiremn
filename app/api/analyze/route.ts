@@ -687,13 +687,22 @@ ${sampleAnswers || '—'}`
 
     // Round display numbers to 1 decimal so the UI never shows "3.6666667".
     const round1 = (n: number) => Number.isFinite(n) ? Math.round(n * 10) / 10 : 0
+    // A faithful, DERIVED one-line label for a subscale — computed from its own
+    // score band and the test's direction, never invented. Gives the "Дэд бүлэг"
+    // tab a meaningful descriptor instead of a bare percentage.
+    const subscaleBand = (pct: number): string => {
+      if (scoreDirection === 'profile') return `${pct}%`
+      if (scoreDirection === 'low-good')
+        return pct <= 33 ? 'Эрсдэл багатай' : pct <= 66 ? 'Дунд зэрэг' : 'Анхаарах шаардлагатай'
+      return pct >= 66 ? 'Хүчтэй тал' : pct >= 33 ? 'Дундаж түвшин' : 'Хөгжүүлэх шаардлагатай'
+    }
     // Force dimensions metrics from real data
     if (dimensions.length >= 2) {
       data.metrics = dimensions.map(d => ({
         label: d.label,
         score: round1(d.score),
         maxScore: round1(d.maxScore),
-        status: `${d.pct}%`,
+        status: subscaleBand(d.pct),
       }))
       data.dimensions = dimensions.map(d => ({ ...d, score: round1(d.score), maxScore: round1(d.maxScore) }))
     } else {
@@ -835,6 +844,17 @@ ${sampleAnswers || '—'}`
         items: cardItems,
       })
     }
+
+    // Surface the same grounded card content as `insights` — the WarmOverview
+    // "Гол ойлголтууд" carousel reads this field. Without it that section
+    // rendered empty even though the explanation had already been generated.
+    data.insights = cardItems.slice(0, 6).map((c: any) => ({
+      emoji: c.emoji || '💡',
+      title: clip(c.title || c.meta || 'Дүгнэлт', 70),
+      description: clip(c.detail || '', 360),
+      detail: clip(c.tip || '', 160),
+      actions: c.tip ? [clip(c.tip, 160)] : [],
+    })).filter((x: any) => x.title || x.description)
 
     // 4) Recovery / development plan — timeline (chapter: plan)
     const rawPlan = Array.isArray(data.plan) ? data.plan : []
