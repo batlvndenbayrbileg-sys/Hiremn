@@ -1548,6 +1548,9 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
   const todos = ((data.todayGoals && data.todayGoals.length ? data.todayGoals : (data.roadmap || []).flatMap(r => r.tasks || [])) || []).filter(Boolean).slice(0, 6)
   const [done, setDone] = useState<number[]>([])
   const toggleDone = (i: number) => setDone(d => d.includes(i) ? d.filter(x => x !== i) : [...d, i])
+  // Tap-to-expand for the "Гол ойлголтууд" cards — cards clamp their text, the
+  // sheet shows the full insight.
+  const [openInsight, setOpenInsight] = useState<number | null>(null)
 
   const barC = (p: number) => p >= 70 ? "#E8541A" : p >= 45 ? "#F06835" : "#D9892B"
   const barC2 = (p: number) => p >= 70 ? "#FF8A4C" : p >= 45 ? "#FF9F5A" : "#F0C068"
@@ -1727,7 +1730,7 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
                 </div>
                 <div className="ar-car" style={{ display: "flex", gap: 13, overflowX: "auto", scrollSnapType: "x mandatory", paddingBottom: 6 }}>
                   {advice.map((x, i) => (
-                    <div key={i} style={{ flex: "0 0 76%", scrollSnapAlign: "center", borderRadius: 24, overflow: "hidden", ...glass }}>
+                    <div key={i} onClick={() => setOpenInsight(i)} style={{ flex: "0 0 76%", scrollSnapAlign: "center", borderRadius: 24, overflow: "hidden", cursor: "pointer", ...glass }}>
                       <div style={{ position: "relative", height: 104, padding: 13, display: "flex", alignItems: "flex-end", background: ["linear-gradient(135deg,#FF9259,#E8541A)", "linear-gradient(135deg,#FFA84C,#F06835)", "linear-gradient(135deg,#FF7A45,#D9472A)"][i % 3] }}>
                         <span style={{ position: "absolute", top: 12, right: 14, fontSize: 30 }}>{x.emoji || "💡"}</span>
                         <InsightMotif idx={i % 3} />
@@ -1735,6 +1738,10 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
                       </div>
                       <div style={{ padding: "14px 15px", background: "rgba(255,255,255,0.55)" }}>
                         <div style={{ fontSize: 12.8, color: "#7C6F66", lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{x.description || x.detail || ""}</div>
+                        <div style={{ marginTop: 9, display: "flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 700, color: "#E8541A" }}>
+                          Дэлгэрэнгүй
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M7 13l5 5 5-5M7 6l5 5 5-5" /></svg>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1746,6 +1753,55 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
           </div>
         )}
       </div>
+
+      {/* Гол ойлголт — tap-to-expand bottom sheet */}
+      {openInsight !== null && advice[openInsight] && (() => {
+        const x = advice[openInsight]
+        return (
+          <div
+            onClick={() => setOpenInsight(null)}
+            style={{ position: "absolute", inset: 0, zIndex: 60, background: "rgba(38,28,22,0.42)", backdropFilter: "blur(3px)", WebkitBackdropFilter: "blur(3px)", display: "flex", alignItems: "flex-end", animation: "ar-fade 0.2s ease" }}
+          >
+            <style>{`@keyframes ar-fade{from{opacity:0}to{opacity:1}}@keyframes ar-sheet{from{transform:translateY(100%)}to{transform:none}}`}</style>
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{ width: "100%", maxHeight: "82%", overflowY: "auto", background: "#FFFDFB", borderRadius: "26px 26px 0 0", boxShadow: "0 -12px 40px rgba(176,80,30,0.25)", animation: "ar-sheet 0.32s cubic-bezier(.16,1,.3,1)" }}
+            >
+              {/* Grab handle */}
+              <div style={{ display: "flex", justifyContent: "center", paddingTop: 10 }}>
+                <div style={{ width: 40, height: 5, borderRadius: 3, background: "rgba(232,84,26,0.22)" }} />
+              </div>
+              {/* Gradient header */}
+              <div style={{ position: "relative", margin: "12px 14px 0", borderRadius: 20, overflow: "hidden", padding: "18px 18px 16px", display: "flex", alignItems: "center", gap: 12, background: ["linear-gradient(135deg,#FF9259,#E8541A)", "linear-gradient(135deg,#FFA84C,#F06835)", "linear-gradient(135deg,#FF7A45,#D9472A)"][openInsight % 3] }}>
+                <span style={{ fontSize: 34, flexShrink: 0 }}>{x.emoji || "💡"}</span>
+                <div style={{ color: "#fff", fontSize: 16.5, fontWeight: 800, lineHeight: 1.3 }}>{x.title || "Гол ойлголт"}</div>
+                <button onClick={() => setOpenInsight(null)} aria-label="Хаах" style={{ position: "absolute", top: 12, right: 12, width: 30, height: 30, borderRadius: "50%", border: "none", background: "rgba(255,255,255,0.28)", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+              </div>
+              {/* Body */}
+              <div style={{ padding: "16px 18px 8px" }}>
+                {x.description && <div style={{ fontSize: 14, color: "#43403C", lineHeight: 1.6 }}>{x.description}</div>}
+                {x.detail && (
+                  <div style={{ marginTop: 14, borderRadius: 16, padding: "13px 15px", background: "#FFF3EC", border: "1px solid rgba(232,84,26,0.16)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 800, color: "#E8541A", letterSpacing: 0.3, marginBottom: 6 }}>
+                      <span style={{ fontSize: 13 }}>💡</span>ЗӨВЛӨМЖ
+                    </div>
+                    <div style={{ fontSize: 13.5, color: "#5C534C", lineHeight: 1.55 }}>{x.detail}</div>
+                  </div>
+                )}
+              </div>
+              {/* Ask AI about this insight */}
+              <div style={{ padding: "6px 18px 20px" }}>
+                <button
+                  onClick={() => { const q = x.title ? `"${x.title}" гэдгийг дэлгэрэнгүй тайлбарлаж, надад зөвлөгөө өгөөч` : "Энэ ойлголтыг дэлгэрэнгүй тайлбарлаач"; setOpenInsight(null); onAskAI(q) }}
+                  style={{ width: "100%", border: "none", borderRadius: 15, padding: "13px 0", background: "linear-gradient(135deg,#FF8A4C,#E8541A)", color: "#fff", fontSize: 13.5, fontWeight: 700, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 6px 16px rgba(232,84,26,0.28)" }}
+                >AI-аас энэ талаар асуух</button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Bottom glass nav */}
       <div style={{ position: "relative", zIndex: 2, margin: "0 15px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, borderRadius: 28, padding: 7, ...glass }}>
