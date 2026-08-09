@@ -5,7 +5,7 @@ import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/brain'
 import { parseTestMarkers, TEST_DATABASE } from '@/lib/test-db'
 import { getOrCreateMemory, updateMemoryFromMessage, type UserMemory } from '@/lib/memory'
-import { searchTestsByProblem } from '@/lib/agent-tools'
+import { rankAssessments } from '@/lib/test-ranker'
 import {
   getAllAssessments,
   getAssessmentCategories,
@@ -363,6 +363,12 @@ export async function POST(req: Request) {
     // ── ROUTE 4: LLM — тест санал болгох үндсэн зорилготой ─────────────
     // Category илрүүлсэн бол тэр категорийн тестүүдийг LLM-д өгч, карт ч шүүж харуулна
     const relevantAssessments = filterByDetectedCategory(liveAssessments, detectedCategory, cachedCategories)
+
+    // Relevance ranking over the FULL live set (not the category-filtered subset)
+    // so a strong cross-category match is never hidden. Drives both the prompt's
+    // shortlist and the no-marker fallback below.
+    const ranked = rankAssessments(lastMessage, liveAssessments, { category: detectedCategory })
+    const rankedShortlist = ranked.slice(0, 8)
     
     // Widget-provided context: summary of the user's just-analyzed test result.
     // With this in the system prompt the AI advises on the result directly
@@ -399,7 +405,8 @@ export async function POST(req: Request) {
       relevantAssessments,
       detectedCategory,
       lastMessage,  // For RAG knowledge retrieval
-      memory        // For personalization
+      memory,       // For personalization
+      rankedShortlist  // Relevance-ranked candidates for this query
     ) + examContext + clientExamBlock + styleRules
     const compressed = compressHistory(messages)
     const formattedMessages = compressed
@@ -411,23 +418,14 @@ export async function POST(req: Request) {
 
     const model = 'claude-sonnet-4-6'
 
-    // Parallel processing: LLM call + Agent search simultaneously
-    // Agent search runs for user's problem regardless of LLM markers
-    const [aiResponse, agentResult] = await Promise.all([
-      // LLM call
-      anthropic.messages.create({
-        model,
-        // Mongolian is token-heavy (~2-3 tokens/word); 900 fits the ~250-word
-        // style budget with headroom so replies finish instead of truncating.
-        max_tokens: 900,
-        system: systemPrompt,
-        messages: formattedMessages,
-      }),
-      // Pre-compute problem-based test search while LLM is thinking
-      priceFilter 
-        ? Promise.resolve({ success: true, data: { matches: [] } })
-        : Promise.resolve(searchTestsByProblem(lastMessage, relevantAssessments)),
-    ])
+    const aiResponse = await anthropic.messages.create({
+      model,
+      // Mongolian is token-heavy (~2-3 tokens/word); 900 fits the ~250-word
+      // style budget with headroom so replies finish instead of truncating.
+      max_tokens: 900,
+      system: systemPrompt,
+      messages: formattedMessages,
+    })
 
     const rawText = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text : ''
     const tokensUsed = (aiResponse.usage?.input_tokens ?? 0) + (aiResponse.usage?.output_tokens ?? 0)
@@ -447,10 +445,12 @@ export async function POST(req: Request) {
       })
       tests = filteredLive.map(a => formatAssessmentForWidget(a, lang))
     }
-    // Otherwise, get tests based on LLM markers from API
-    else if (testIds.length > 0 && relevantAssessments?.length > 0) {
+    // Otherwise, get tests based on LLM markers from API. Resolve against the
+    // FULL live set (not the category-filtered subset) so a valid cross-category
+    // pick from the ranked shortlist still renders.
+    else if (testIds.length > 0 && liveAssessments.length > 0) {
       for (const id of testIds) {
-        const liveTest = relevantAssessments.find(a => a.id === id)
+        const liveTest = assessmentMap.get(id)
         if (liveTest && !addedIds.has(id)) {
           tests.push(formatAssessmentForWidget(liveTest, lang))
           addedIds.add(id)
@@ -480,22 +480,22 @@ export async function POST(req: Request) {
         }
       }
     }
-    // If no LLM markers found, use pre-computed agent results
-    else if (testIds.length === 0 && relevantAssessments?.length > 0) {
-      if (agentResult.success && agentResult.data.matches?.length > 0) {
-        for (const match of agentResult.data.matches) {
-          const liveTest = relevantAssessments.find(a => a.id === match.id)
-          if (liveTest && !addedIds.has(match.id)) {
-            tests.push(formatAssessmentForWidget(liveTest, lang))
-            addedIds.add(match.id)
-          }
+    // If no LLM markers found, fall back to the relevance ranking — the top
+    // matches for THIS query, not a random slice. Only surface ones that clear
+    // a real relevance threshold so weak/incidental matches don't show.
+    else if (testIds.length === 0 && liveAssessments.length > 0) {
+      const STRONG = 6  // ≈ one strong field hit (e.g. a name/measure keyword)
+      for (const r of ranked) {
+        if (tests.length >= 3) break
+        if (r.score >= STRONG && !addedIds.has(r.assessment.id)) {
+          tests.push(formatAssessmentForWidget(r.assessment, lang))
+          addedIds.add(r.assessment.id)
         }
       }
-      // If still no tests: only fall back to a default list when the user is
-      // actually browsing (e.g. "show me tests", price/duration questions).
-      // For a described problem with no genuine match, show NO cards — the text
-      // reply guides instead. Surfacing a random slice here was exactly what
-      // produced unrelated recommendations.
+      // Still nothing? Only show a default list when the user is actually
+      // browsing (e.g. "show me tests", price/duration questions). For a
+      // described problem with no genuine match, show NO cards — the text reply
+      // guides instead. A random slice here was what produced unrelated results.
       const isBrowsing = isListAllIntent(lastMessage) || !!priceFilter ||
         /үнэ|төлбөр|хэд|хэдэн минут|хугацаа|price|cost|how long|бүх тест|all tests/i.test(lastMessage)
       if (tests.length === 0 && isBrowsing) {
