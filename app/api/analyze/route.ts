@@ -554,11 +554,12 @@ ${sampleAnswers || '—'}`
     try {
       const result = await withGeminiFallback(model => generateText({
         model,
-        maxOutputTokens: 3000,
+        maxOutputTokens: 4000,
         system: SYSTEM_STATIC,
         prompt: `Дата:\n${truncated}\n\nДээрх үр дүнг шинжилж, ЗӨВХӨН доорх бүтэцтэй JSON-оор буцаа. Markdown, \`\`\` тэмдэг, тайлбар бичихгүй — цэвэр JSON:\n${JSON_SHAPE}`,
-        // Force Gemini to emit raw JSON (no markdown fences).
-        providerOptions: { google: { responseMimeType: 'application/json' } },
+        // Force raw JSON (no markdown fences) AND disable thinking — thinking
+        // tokens were eating the budget and truncating the JSON (missing cards).
+        providerOptions: { google: { responseMimeType: 'application/json', thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } },
       }))
       rawText = result.text || ''
       if (result.usage) {
@@ -834,6 +835,23 @@ ${sampleAnswers || '—'}`
         title: testType === 'profile' ? 'Хөгжүүлэх алхмууд' : 'Цаашид юу хийх вэ',
         body: '', items: planItems,
       })
+    }
+
+    // "Гол ойлголтууд" must never be empty. If the model returned no cards,
+    // fall back to the (grounded) headline + summary + plan steps so the section
+    // still explains the result instead of vanishing.
+    if (!Array.isArray(data.insights) || data.insights.length === 0) {
+      const fb: any[] = []
+      if (data.headline?.title || data.headline?.body) {
+        fb.push({ emoji: '💡', title: clip(data.headline.title || 'Гол дүгнэлт', 70), description: clip(data.headline.body || data.summary?.description || '', 360), detail: '', actions: [] })
+      }
+      if (data.summary?.description) {
+        fb.push({ emoji: '📊', title: clip(data.summary.title || 'Тойм', 70), description: clip(data.summary.description, 360), detail: '', actions: [] })
+      }
+      for (const p of planItems.slice(0, 3)) {
+        fb.push({ emoji: '🎯', title: clip(p.title, 70), description: clip(p.text, 360), detail: '', actions: [] })
+      }
+      data.insights = fb.filter(x => x.title || x.description).slice(0, 5)
     }
 
     // 5) Today's checklist (chapter: plan) — test-specific, clean imperatives.

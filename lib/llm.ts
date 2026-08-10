@@ -35,6 +35,14 @@ export function geminiModel(model: string = GEMINI_MODEL) {
   return google(model)
 }
 
+// Disable Gemini "thinking". Newer models (2.5+, 3.x via gemini-flash-latest)
+// think by default, which BURNS the output-token budget — truncating replies
+// mid-sentence and cutting off structured JSON (missing cards/insights). We want
+// fast, complete answers, so thinking stays off. Spread into providerOptions.
+export const GEMINI_NO_THINKING = {
+  google: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } },
+} as const
+
 // True when an error means "this model id can't be used" (gated / deprecated /
 // missing) — as opposed to a real failure (quota, key, safety) we must surface.
 function isModelUnavailable(err: unknown): boolean {

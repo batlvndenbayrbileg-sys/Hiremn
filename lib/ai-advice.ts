@@ -1,5 +1,5 @@
 import { generateText } from 'ai'
-import { withGeminiFallback } from './llm'
+import { withGeminiFallback, GEMINI_NO_THINKING } from './llm'
 
 export async function getAIAdvice(examResult: {
   assessmentId: string
@@ -46,6 +46,7 @@ export async function getAIAdvice(examResult: {
         }
       ],
       temperature: 0.7,
+      providerOptions: GEMINI_NO_THINKING,
     }))
 
     return {
