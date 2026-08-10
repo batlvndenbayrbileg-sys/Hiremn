@@ -1716,7 +1716,7 @@ function WarmOverview({ data, onAskAI, onClose }: { data: AnalysisData; onAskAI:
                   })}
                 </div>
                 {done.length === todos.length && (
-                  <div style={{ marginTop: 11, textAlign: "center", fontSize: 12.5, fontWeight: 700, color: "#E8541A", background: "linear-gradient(160deg,#FFEEE4,#FBD9C4)", borderRadius: 13, padding: 10 }}>Бүгдийг тэмдэглэлээ! Сайн эхлэл 🎉</div>
+                  <div style={{ marginTop: 11, textAlign: "center", fontSize: 12.5, fontWeight: 700, color: "#E8541A", background: "linear-gradient(160deg,#FFEEE4,#FBD9C4)", borderRadius: 13, padding: 10 }}>Гурван алхмаа биелүүллээ — та зорилгодоо нэг алхам ойртлоо 👏</div>
                 )}
               </div>
             )}
