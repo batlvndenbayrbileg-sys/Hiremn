@@ -12,9 +12,10 @@ const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_AP
 
 const google = createGoogleGenerativeAI({ apiKey })
 
-// Overridable without a code change. 2.5-flash is fast, cheap and strong
-// multilingually; set GEMINI_MODEL to a pro model if more quality is needed.
-export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
+// Overridable without a code change. 2.0-flash is GA and available to all API
+// users (2.5-flash is gated to some accounts); set GEMINI_MODEL to a newer/pro
+// model (e.g. gemini-2.5-pro) if your key has access and you want more quality.
+export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash'
 
 export function geminiModel(model: string = GEMINI_MODEL) {
   return google(model)
