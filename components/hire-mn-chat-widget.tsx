@@ -4724,7 +4724,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
         friendly = "AI үйлчилгээ одоогоор идэвхгүй байна."
       else if (msg.includes("rate limit"))
         friendly = "Хэт олон хүсэлт. Түр хүлээгээд дахин оролдоно уу."
-      else if (msg.includes("ANTHROPIC_API_KEY") || msg.includes("api_key") || msg.includes("authentication"))
+      else if (msg.includes("GEMINI_API_KEY") || msg.includes("API_KEY") || msg.includes("api_key") || msg.includes("authentication"))
         friendly = "AI API key тохируулагдаагүй байна (Vercel env vars шалгана уу)."
       else if (msg.includes("HTTP 5"))
         friendly = `Серверийн алдаа: ${msg}`

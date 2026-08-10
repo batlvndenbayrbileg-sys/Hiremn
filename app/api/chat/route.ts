@@ -1,5 +1,6 @@
 // app/api/chat/route.ts
-import Anthropic from '@anthropic-ai/sdk'
+import { generateText } from 'ai'
+import { geminiModel, hasGeminiKey } from '@/lib/llm'
 import { classify, detectCrisis } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/brain'
@@ -19,7 +20,6 @@ import {
 // Vercel Hobby max is 10s. Keep this conservative.
 export const maxDuration = 60
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 // ── Cache ────────────────────────────────────────────────────────────────────
 let cachedAssessments: Assessment[] = []
@@ -143,13 +143,12 @@ export async function POST(req: Request) {
       return Response.json({ error: 'empty message' }, { status: 400 })
 
     // ── FAST PATH: Report analysis requests ─────────────────────────────
-    // Bypass classifier/test-lookup. Use Sonnet for high-quality Mongolian
-    // (Haiku produces awkward/made-up words). Keep token budget tight so we
-    // stay under Vercel's serverless timeout.
+    // Bypass classifier/test-lookup. Keep token budget tight so we stay under
+    // Vercel's serverless timeout.
     if (/^Тестийн үр дүнгийн дүн шинжилгээ хийнэ үү/i.test(lastMessage.trim())) {
       try {
-        if (!process.env.ANTHROPIC_API_KEY) {
-          return Response.json({ error: 'ANTHROPIC_API_KEY missing on server' }, { status: 503 })
+        if (!hasGeminiKey()) {
+          return Response.json({ error: 'GEMINI_API_KEY missing on server' }, { status: 503 })
         }
 
         // Trim huge prompts to keep latency predictable (max ~5k chars input)
@@ -187,18 +186,13 @@ export async function POST(req: Request) {
           '• **Алхам 3 нэр:** ямар үйлдэл хийх\n\n' +
           'ЗААВАЛ "Цаашдын алхам" хэсгийг үлдээх. Тон: эерэг, эмпатитэй, оношилгоо БИШ.'
 
-        const analysisResp = await anthropic.messages.create({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 900,
+        const { text } = await generateText({
+          model: geminiModel(),
+          maxOutputTokens: 1400,
           system: analysisSystem,
           messages: [{ role: 'user', content: trimmedPrompt }],
         })
-        const text = analysisResp.content
-          .filter((b: any) => b.type === 'text')
-          .map((b: any) => b.text)
-          .join('\n')
-          .trim()
-        return Response.json({ reply: text || 'Шинжилгээ хийж чадсангүй.' })
+        return Response.json({ reply: text.trim() || 'Шинжилгээ хийж чадсангүй.' })
       } catch (analysisErr: any) {
         const m = analysisErr?.message || String(analysisErr)
         console.error('[chat/route] analysis fast-path failed:', m)
@@ -416,19 +410,17 @@ export async function POST(req: Request) {
         content: String(m.content),
       }))
 
-    const model = 'claude-sonnet-4-6'
-
-    const aiResponse = await anthropic.messages.create({
-      model,
-      // Mongolian is token-heavy (~2-3 tokens/word); 900 fits the ~250-word
+    const aiResponse = await generateText({
+      model: geminiModel(),
+      // Mongolian is token-heavy (~2-3 tokens/word); this fits the ~250-word
       // style budget with headroom so replies finish instead of truncating.
-      max_tokens: 900,
+      maxOutputTokens: 1400,
       system: systemPrompt,
       messages: formattedMessages,
     })
 
-    const rawText = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text : ''
-    const tokensUsed = (aiResponse.usage?.input_tokens ?? 0) + (aiResponse.usage?.output_tokens ?? 0)
+    const rawText = aiResponse.text ?? ''
+    const tokensUsed = aiResponse.usage?.totalTokens ?? 0
 
     // Parse [TEST:id] markers from response
     const { cleanText, testIds } = parseTestMarkers(rawText)
@@ -530,8 +522,8 @@ export async function POST(req: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('[chat/route] error:', message)
-    if (message.includes('API key'))
-      return Response.json({ error: 'Anthropic API key missing.', code: 'API_KEY_ERROR' }, { status: 503 })
+    if (message.includes('API key') || message.includes('API_KEY'))
+      return Response.json({ error: 'Gemini API key missing or invalid.', code: 'API_KEY_ERROR' }, { status: 503 })
     return Response.json({ error: message }, { status: 500 })
   }
 }

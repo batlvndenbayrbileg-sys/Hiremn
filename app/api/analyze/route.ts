@@ -1,10 +1,10 @@
-import Anthropic from '@anthropic-ai/sdk'
+import { generateObject } from 'ai'
+import { z } from 'zod'
+import { geminiModel, hasGeminiKey } from '@/lib/llm'
 
-// 120s ceiling for the detailed Sonnet 4.6 analysis (applies on Vercel Pro;
-// Hobby caps at 60s). Frontend AbortController is aligned to this.
+// 120s ceiling for the detailed analysis (applies on Vercel Pro; Hobby caps at
+// 60s). Frontend AbortController is aligned to this.
 export const maxDuration = 120
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 // ── JSON repair for truncated LLM output ──────────────────────────────────
 function closeOpenBrackets(s: string): string {
@@ -122,6 +122,10 @@ const TYPE_CONFIG: Record<TestType, {
 
 export async function POST(request: Request) {
   try {
+    if (!hasGeminiKey()) {
+      return Response.json({ error: 'GEMINI_API_KEY missing on server' }, { status: 503 })
+    }
+
     const { reportData, reportTitle } = await request.json()
 
     // ── PRIVACY (defense-in-depth): scrub any PII the client may have sent ──
@@ -483,7 +487,7 @@ ${dimensions.length >= 2 ? `Хамгийн өндөр: "${dimensions[0].label}" 
 ═══ ХАМГИЙН ӨНДӨР ҮНЭЛГЭЭТЭЙ ХАРИУЛТУУД (ишлэл татаж ашигла) ═══
 ${sampleAnswers || '—'}`
 
-    // ── STATIC system prompt (100% constant → Anthropic prompt-cacheable) ──
+    // ── STATIC system prompt (100% constant) ──
     // No interpolation here: all dynamic values live in the user message, so
     // this large block is cached across every request (~90% cheaper on hits).
     const SYSTEM_STATIC = `Та hire.mn-ийн ахлах сэтгэл зүйч, дулаахан коуч. Туршлагатай эмчийн нягт нямбай байдал + найзын дулаан халамжийг хослуулна. Зөв, бичгийн монгол хэлээр, "та" хэллэгээр бичнэ.
@@ -531,98 +535,56 @@ ${sampleAnswers || '—'}`
 • today: ЯГ 3 даалгавар. Үйл үгээр төгссөн БҮТЭН тушаах өгүүлбэр (≤8 үг), нэр үг хэллэг БИШ. Жишээ: "Унтахын өмнө утсаа хойш тавь".
 Бүх text цэвэр зөв монгол, тоо багатай.`
 
-    // Tool schema enforces structure — model returns a parsed object (no JSON
-    // parsing / truncation failures). Cached together with the system prompt.
-    const ANALYSIS_TOOL: Anthropic.Tool = {
-      name: 'submit_analysis',
-      description: 'Тестийн шинжилгээний бүтэцтэй агуулгыг буцаана.',
-      input_schema: {
-        type: 'object',
-        properties: {
-          testType: { type: 'string', enum: ['profile', 'cognitive', 'screening', 'aptitude', 'generic'] },
-          scoreDirection: { type: 'string', enum: ['high-good', 'low-good', 'profile'] },
-          outcomeQuality: { type: 'string', enum: ['positive', 'neutral', 'concerning'] },
-          opening: { type: 'string', description: '1 дулаахан өгүүлбэр' },
-          summary: {
-            type: 'object',
-            properties: { title: { type: 'string' }, description: { type: 'string' } },
-            required: ['title', 'description'],
-          },
-          headline: {
-            type: 'object',
-            properties: { title: { type: 'string' }, body: { type: 'string' } },
-            required: ['title', 'body'],
-          },
-          cards: {
-            type: 'array',
-            description: '4-5 карт',
-            items: {
-              type: 'object',
-              properties: {
-                tone: { type: 'string', enum: ['positive', 'warning', 'info'] },
-                emoji: { type: 'string' },
-                title: { type: 'string' },
-                detail: { type: 'string', description: '2 өгүүлбэр' },
-                tip: { type: 'string', description: '1 практик алхам' },
-                meta: { type: 'string' },
-              },
-              required: ['tone', 'title', 'detail', 'meta'],
-            },
-          },
-          plan: {
-            type: 'array',
-            description: 'ЯГ 4 алхам',
-            items: {
-              type: 'object',
-              properties: { title: { type: 'string' }, text: { type: 'string' } },
-              required: ['title', 'text'],
-            },
-          },
-          today: { type: 'array', description: 'ЯГ 3 даалгавар', items: { type: 'string' } },
-        },
-        required: ['testType', 'scoreDirection', 'outcomeQuality', 'opening', 'summary', 'headline', 'cards', 'plan', 'today'],
-      },
-    }
-
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 2200,
-      // System as a cacheable content block — the large static prompt is read
-      // from cache on subsequent requests within the TTL window.
-      system: [
-        { type: 'text', text: SYSTEM_STATIC, cache_control: { type: 'ephemeral' } },
-      ],
-      tools: [ANALYSIS_TOOL],
-      tool_choice: { type: 'tool', name: 'submit_analysis' },
-      messages: [
-        { role: 'user', content: `Дата:\n${truncated}\n\nДээрх үр дүнг шинжилж submit_analysis tool-оор буцаа.` },
-      ],
+    // Zod schema enforces structure — generateObject validates and returns a
+    // typed object, so there is no JSON parsing / truncation to fail on.
+    const ANALYSIS_SCHEMA = z.object({
+      testType: z.enum(['profile', 'cognitive', 'screening', 'aptitude', 'generic']),
+      scoreDirection: z.enum(['high-good', 'low-good', 'profile']),
+      outcomeQuality: z.enum(['positive', 'neutral', 'concerning']),
+      opening: z.string().describe('1 дулаахан өгүүлбэр'),
+      summary: z.object({ title: z.string(), description: z.string() }),
+      headline: z.object({ title: z.string(), body: z.string() }),
+      cards: z.array(z.object({
+        tone: z.enum(['positive', 'warning', 'info']),
+        emoji: z.string().optional(),
+        title: z.string(),
+        detail: z.string().describe('2 өгүүлбэр'),
+        tip: z.string().optional().describe('1 практик алхам'),
+        meta: z.string(),
+      })).describe('4-5 карт'),
+      plan: z.array(z.object({ title: z.string(), text: z.string() })).describe('ЯГ 4 алхам'),
+      today: z.array(z.string()).describe('ЯГ 3 даалгавар'),
     })
 
-    if (response.usage) {
-      console.log('[analyze] tokens:', {
-        input: response.usage.input_tokens,
-        output: response.usage.output_tokens,
-        cache_read: (response.usage as any).cache_read_input_tokens,
-        cache_write: (response.usage as any).cache_creation_input_tokens,
-      })
-    }
-
-    // Read the tool_use block — input is already a parsed object.
     let data: any
-    const toolBlock = response.content.find((b: any) => b.type === 'tool_use') as any
-    if (toolBlock?.input) {
-      data = toolBlock.input
-    } else {
-      // Fallback: rare case where the model emitted text instead of a tool call.
-      const rawText = response.content.find((b: any) => b.type === 'text') as any
-      const txt = rawText?.text || ''
-      let jsonStr = txt.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      const start = jsonStr.indexOf('{'), end = jsonStr.lastIndexOf('}')
-      if (start === -1 || end === -1) throw new Error('Шинжилгээ үүсгэж чадсангүй')
-      jsonStr = jsonStr.slice(start, end + 1)
-      try { data = JSON.parse(jsonStr) }
-      catch { data = JSON.parse(closeOpenBrackets(jsonStr)) }
+    try {
+      const result = await generateObject({
+        model: geminiModel(),
+        maxOutputTokens: 3000,
+        schema: ANALYSIS_SCHEMA,
+        system: SYSTEM_STATIC,
+        prompt: `Дата:\n${truncated}\n\nДээрх үр дүнг шинжилж бүтэцтэй шинжилгээ буцаа.`,
+      })
+      data = result.object
+      if (result.usage) {
+        console.log('[analyze] tokens:', {
+          input: result.usage.inputTokens,
+          output: result.usage.outputTokens,
+          total: result.usage.totalTokens,
+        })
+      }
+    } catch (genErr: any) {
+      // Rare: schema/parse failure — try to recover JSON from the raw text.
+      const txt = genErr?.text || genErr?.value || ''
+      if (typeof txt === 'string' && txt.includes('{')) {
+        let jsonStr = txt.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+        const start = jsonStr.indexOf('{'), end = jsonStr.lastIndexOf('}')
+        jsonStr = jsonStr.slice(start, end + 1)
+        try { data = JSON.parse(jsonStr) }
+        catch { data = JSON.parse(closeOpenBrackets(jsonStr)) }
+      } else {
+        throw new Error('Шинжилгээ үүсгэж чадсангүй')
+      }
     }
 
     // ── Read AI classification and validate ────────────────────────────────

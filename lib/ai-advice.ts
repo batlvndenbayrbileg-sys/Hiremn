@@ -1,5 +1,5 @@
 import { generateText } from 'ai'
-import { openai } from '@ai-sdk/openai'
+import { geminiModel } from './llm'
 
 export async function getAIAdvice(examResult: {
   assessmentId: string
@@ -37,7 +37,7 @@ export async function getAIAdvice(examResult: {
 Миний үр дүнд үндэслээд ГҮНЗГИЙ, МЭРГЭЖЛИЙН зөвлөгөө өгөөч.`
 
     const response = await generateText({
-      model: openai('gpt-4-turbo'),
+      model: geminiModel(),
       system: systemPrompt,
       messages: [
         {
