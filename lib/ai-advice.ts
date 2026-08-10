@@ -1,5 +1,5 @@
 import { generateText } from 'ai'
-import { geminiModel } from './llm'
+import { withGeminiFallback } from './llm'
 
 export async function getAIAdvice(examResult: {
   assessmentId: string
@@ -36,8 +36,8 @@ export async function getAIAdvice(examResult: {
 
 Миний үр дүнд үндэслээд ГҮНЗГИЙ, МЭРГЭЖЛИЙН зөвлөгөө өгөөч.`
 
-    const response = await generateText({
-      model: geminiModel(),
+    const response = await withGeminiFallback(model => generateText({
+      model,
       system: systemPrompt,
       messages: [
         {
@@ -46,7 +46,7 @@ export async function getAIAdvice(examResult: {
         }
       ],
       temperature: 0.7,
-    })
+    }))
 
     return {
       success: true,

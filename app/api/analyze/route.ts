@@ -1,5 +1,5 @@
 import { generateText } from 'ai'
-import { geminiModel, hasGeminiKey } from '@/lib/llm'
+import { hasGeminiKey, withGeminiFallback } from '@/lib/llm'
 
 // 120s ceiling for the detailed analysis (applies on Vercel Pro; Hobby caps at
 // 60s). Frontend AbortController is aligned to this.
@@ -552,14 +552,14 @@ ${sampleAnswers || '—'}`
 
     let rawText = ''
     try {
-      const result = await generateText({
-        model: geminiModel(),
+      const result = await withGeminiFallback(model => generateText({
+        model,
         maxOutputTokens: 3000,
         system: SYSTEM_STATIC,
         prompt: `Дата:\n${truncated}\n\nДээрх үр дүнг шинжилж, ЗӨВХӨН доорх бүтэцтэй JSON-оор буцаа. Markdown, \`\`\` тэмдэг, тайлбар бичихгүй — цэвэр JSON:\n${JSON_SHAPE}`,
         // Force Gemini to emit raw JSON (no markdown fences).
         providerOptions: { google: { responseMimeType: 'application/json' } },
-      })
+      }))
       rawText = result.text || ''
       if (result.usage) {
         console.log('[analyze] tokens:', {

@@ -1,6 +1,6 @@
 // app/api/chat/route.ts
 import { generateText } from 'ai'
-import { geminiModel, hasGeminiKey } from '@/lib/llm'
+import { hasGeminiKey, withGeminiFallback } from '@/lib/llm'
 import { classify, detectCrisis } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/brain'
@@ -186,12 +186,12 @@ export async function POST(req: Request) {
           '• **Алхам 3 нэр:** ямар үйлдэл хийх\n\n' +
           'ЗААВАЛ "Цаашдын алхам" хэсгийг үлдээх. Тон: эерэг, эмпатитэй, оношилгоо БИШ.'
 
-        const { text } = await generateText({
-          model: geminiModel(),
+        const { text } = await withGeminiFallback(model => generateText({
+          model,
           maxOutputTokens: 1400,
           system: analysisSystem,
           messages: [{ role: 'user', content: trimmedPrompt }],
-        })
+        }))
         return Response.json({ reply: text.trim() || 'Шинжилгээ хийж чадсангүй.' })
       } catch (analysisErr: any) {
         const m = analysisErr?.message || String(analysisErr)
@@ -410,14 +410,14 @@ export async function POST(req: Request) {
         content: String(m.content),
       }))
 
-    const aiResponse = await generateText({
-      model: geminiModel(),
+    const aiResponse = await withGeminiFallback(model => generateText({
+      model,
       // Mongolian is token-heavy (~2-3 tokens/word); this fits the ~250-word
       // style budget with headroom so replies finish instead of truncating.
       maxOutputTokens: 1400,
       system: systemPrompt,
       messages: formattedMessages,
-    })
+    }))
 
     const rawText = aiResponse.text ?? ''
     const tokensUsed = aiResponse.usage?.totalTokens ?? 0
