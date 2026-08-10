@@ -4,6 +4,7 @@
 // for Mongolian output. Keeping the provider wiring here means the model id and
 // key handling live in one spot.
 
+import { generateText } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 
 // Accept either name so deployment isn't fussy: GEMINI_API_KEY is what we ask for
@@ -70,4 +71,28 @@ export async function withGeminiFallback<T>(run: (model: ReturnType<typeof googl
 
 export function hasGeminiKey(): boolean {
   return apiKey.length > 0
+}
+
+// Second-pass proofreader: fixes Mongolian grammar / spelling / phrasing without
+// touching meaning, structure, numbers, markdown, emoji or [TEST:id] markers.
+// Best-effort — on any failure it returns the original text unchanged so a
+// polishing error can never break the reply.
+const POLISH_SYSTEM = `Чи монгол хэлний мэргэжлийн хянан засварлагч. Доор өгсөн текстийн УТГА, санаа, өгүүлбэрийн дараалал, бүтэц, тоо, **тод** тэмдэглэгээ, • жагсаалт, эмодзи, [TEST:id] хэлбэрийн маркерыг ЯГ ХЭВЭЭР нь хадгал.
+Зөвхөн дараахыг зас: үг үсгийн алдаа, дүрмийн алдаа, найруулга зүйн эвгүй байдал, цэг таслал, буруу сонгосон үг (жишээ нь "амсарч"→"амарч"), албан бус ярианы хэллэг.
+Шинэ мэдээлэл, тоо, өгүүлбэр НЭМЭХГҮЙ, байгааг нь ХАСАХГҮЙ. Ямар нэг тайлбар, тэмдэглэл бичихгүй — ЗӨВХӨН засварласан эцсийн текстийг буцаа.`
+
+export async function polishMongolian(text: string): Promise<string> {
+  if (!text || text.trim().length === 0) return text
+  try {
+    const { text: out } = await withGeminiFallback(model => generateText({
+      model,
+      maxOutputTokens: 2500,
+      system: POLISH_SYSTEM,
+      messages: [{ role: 'user', content: text }],
+    }))
+    const cleaned = (out || '').trim()
+    return cleaned.length > 0 ? cleaned : text
+  } catch {
+    return text
+  }
 }
