@@ -1,6 +1,6 @@
 // app/api/chat/route.ts
 import { generateText } from 'ai'
-import { hasGeminiKey, withGeminiFallback, GEMINI_NO_THINKING } from '@/lib/llm'
+import { hasGeminiKey, withGeminiFallback } from '@/lib/llm'
 import { classify, detectCrisis } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/brain'
@@ -188,10 +188,11 @@ export async function POST(req: Request) {
 
         const { text } = await withGeminiFallback(model => generateText({
           model,
-          maxOutputTokens: 1600,
+          // Generous budget: thinking tokens (on 3.x models) count here too, so
+          // leave room for both the model's reasoning and the full answer.
+          maxOutputTokens: 3000,
           system: analysisSystem,
           messages: [{ role: 'user', content: trimmedPrompt }],
-          providerOptions: GEMINI_NO_THINKING,
         }))
         return Response.json({ reply: text.trim() || 'Шинжилгээ хийж чадсангүй.' })
       } catch (analysisErr: any) {
@@ -413,12 +414,11 @@ export async function POST(req: Request) {
 
     const aiResponse = await withGeminiFallback(model => generateText({
       model,
-      // Mongolian is token-heavy (~2-3 tokens/word); this fits the ~250-word
-      // style budget with headroom so replies finish instead of truncating.
-      maxOutputTokens: 1600,
+      // Mongolian is token-heavy (~2-3 tokens/word) and 3.x models spend tokens
+      // "thinking"; a generous budget lets the reply finish instead of truncating.
+      maxOutputTokens: 3000,
       system: systemPrompt,
       messages: formattedMessages,
-      providerOptions: GEMINI_NO_THINKING,
     }))
 
     const rawText = aiResponse.text ?? ''

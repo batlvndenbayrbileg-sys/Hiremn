@@ -554,12 +554,15 @@ ${sampleAnswers || '—'}`
     try {
       const result = await withGeminiFallback(model => generateText({
         model,
-        maxOutputTokens: 4000,
+        // Large budget: on 3.x models "thinking" tokens count here too, so give
+        // plenty of room for reasoning + the full JSON (avoids truncated JSON
+        // that dropped cards). We do NOT send thinkingConfig — flash-latest
+        // rejects thinkingBudget:0 with "invalid argument".
+        maxOutputTokens: 8000,
         system: SYSTEM_STATIC,
         prompt: `Дата:\n${truncated}\n\nДээрх үр дүнг шинжилж, ЗӨВХӨН доорх бүтэцтэй JSON-оор буцаа. Markdown, \`\`\` тэмдэг, тайлбар бичихгүй — цэвэр JSON:\n${JSON_SHAPE}`,
-        // Force raw JSON (no markdown fences) AND disable thinking — thinking
-        // tokens were eating the budget and truncating the JSON (missing cards).
-        providerOptions: { google: { responseMimeType: 'application/json', thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } },
+        // Force raw JSON (no markdown fences).
+        providerOptions: { google: { responseMimeType: 'application/json' } },
       }))
       rawText = result.text || ''
       if (result.usage) {
