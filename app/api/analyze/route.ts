@@ -1,5 +1,4 @@
-import { generateObject } from 'ai'
-import { z } from 'zod'
+import { generateText } from 'ai'
 import { geminiModel, hasGeminiKey } from '@/lib/llm'
 
 // 120s ceiling for the detailed analysis (applies on Vercel Pro; Hobby caps at
@@ -535,37 +534,33 @@ ${sampleAnswers || '—'}`
 • today: ЯГ 3 даалгавар. Үйл үгээр төгссөн БҮТЭН тушаах өгүүлбэр (≤8 үг), нэр үг хэллэг БИШ. Жишээ: "Унтахын өмнө утсаа хойш тавь".
 Бүх text цэвэр зөв монгол, тоо багатай.`
 
-    // Zod schema enforces structure — generateObject validates and returns a
-    // typed object, so there is no JSON parsing / truncation to fail on.
-    const ANALYSIS_SCHEMA = z.object({
-      testType: z.enum(['profile', 'cognitive', 'screening', 'aptitude', 'generic']),
-      scoreDirection: z.enum(['high-good', 'low-good', 'profile']),
-      outcomeQuality: z.enum(['positive', 'neutral', 'concerning']),
-      opening: z.string().describe('1 дулаахан өгүүлбэр'),
-      summary: z.object({ title: z.string(), description: z.string() }),
-      headline: z.object({ title: z.string(), body: z.string() }),
-      cards: z.array(z.object({
-        tone: z.enum(['positive', 'warning', 'info']),
-        emoji: z.string().optional(),
-        title: z.string(),
-        detail: z.string().describe('2 өгүүлбэр'),
-        tip: z.string().optional().describe('1 практик алхам'),
-        meta: z.string(),
-      })).describe('4-5 карт'),
-      plan: z.array(z.object({ title: z.string(), text: z.string() })).describe('ЯГ 4 алхам'),
-      today: z.array(z.string()).describe('ЯГ 3 даалгавар'),
-    })
+    // The exact JSON shape the model must return. We ask Gemini for raw JSON
+    // (responseMimeType below) and parse it ourselves — this is more robust
+    // across providers than schema-constrained structured output, which failed
+    // for this nested shape on Gemini.
+    const JSON_SHAPE = `{
+  "testType": "profile|cognitive|screening|aptitude|generic",
+  "scoreDirection": "high-good|low-good|profile",
+  "outcomeQuality": "positive|neutral|concerning",
+  "opening": "1 дулаахан өгүүлбэр",
+  "summary": { "title": "...", "description": "..." },
+  "headline": { "title": "...", "body": "..." },
+  "cards": [ { "tone": "positive|warning|info", "emoji": "💡", "title": "...", "detail": "2 өгүүлбэр", "tip": "1 практик алхам", "meta": "богино шошго" } ],
+  "plan": [ { "title": "...", "text": "1 бүтэн өгүүлбэр" } ],
+  "today": [ "үйлдэл 1", "үйлдэл 2", "үйлдэл 3" ]
+}`
 
-    let data: any
+    let rawText = ''
     try {
-      const result = await generateObject({
+      const result = await generateText({
         model: geminiModel(),
         maxOutputTokens: 3000,
-        schema: ANALYSIS_SCHEMA,
         system: SYSTEM_STATIC,
-        prompt: `Дата:\n${truncated}\n\nДээрх үр дүнг шинжилж бүтэцтэй шинжилгээ буцаа.`,
+        prompt: `Дата:\n${truncated}\n\nДээрх үр дүнг шинжилж, ЗӨВХӨН доорх бүтэцтэй JSON-оор буцаа. Markdown, \`\`\` тэмдэг, тайлбар бичихгүй — цэвэр JSON:\n${JSON_SHAPE}`,
+        // Force Gemini to emit raw JSON (no markdown fences).
+        providerOptions: { google: { responseMimeType: 'application/json' } },
       })
-      data = result.object
+      rawText = result.text || ''
       if (result.usage) {
         console.log('[analyze] tokens:', {
           input: result.usage.inputTokens,
@@ -574,17 +569,25 @@ ${sampleAnswers || '—'}`
         })
       }
     } catch (genErr: any) {
-      // Rare: schema/parse failure — try to recover JSON from the raw text.
-      const txt = genErr?.text || genErr?.value || ''
-      if (typeof txt === 'string' && txt.includes('{')) {
-        let jsonStr = txt.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-        const start = jsonStr.indexOf('{'), end = jsonStr.lastIndexOf('}')
-        jsonStr = jsonStr.slice(start, end + 1)
-        try { data = JSON.parse(jsonStr) }
-        catch { data = JSON.parse(closeOpenBrackets(jsonStr)) }
-      } else {
-        throw new Error('Шинжилгээ үүсгэж чадсангүй')
+      // Surface the real provider error (model access, quota, safety block…)
+      // instead of masking it — that was hiding the actual cause.
+      const m = genErr?.message || String(genErr)
+      console.error('[analyze] Gemini call failed:', m)
+      throw new Error(`Gemini дуудлага амжилтгүй: ${m}`)
+    }
+
+    // Parse the JSON (with repair for the rare truncation case).
+    let data: any
+    {
+      let jsonStr = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      const start = jsonStr.indexOf('{'), end = jsonStr.lastIndexOf('}')
+      if (start === -1) {
+        console.error('[analyze] no JSON in model output:', rawText.slice(0, 300))
+        throw new Error('Шинжилгээ үүсгэж чадсангүй (JSON хоосон)')
       }
+      jsonStr = jsonStr.slice(start, end === -1 ? undefined : end + 1)
+      try { data = JSON.parse(jsonStr) }
+      catch { data = JSON.parse(closeOpenBrackets(jsonStr)) }
     }
 
     // ── Read AI classification and validate ────────────────────────────────
