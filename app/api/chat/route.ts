@@ -89,38 +89,18 @@ function isListAllIntent(msg: string): boolean {
 }
 
 // ── CRISIS SAFETY ─────────────────────────────────────────────────────────────
-// Live tests whose text relates to mental health, so a crisis reply can gently
-// surface the free depression/anxiety screener instead of unrelated tests.
-const MENTAL_HEALTH_RE =
-  /депресс|depress|түгшүүр|anxiety|сэтгэц|сэтгэл\s*гутр|стресс|stress|dass|phq|gad|сэмүт|mental|уйтгар|гуниг|panic/i
-
-function pickMentalHealthTests(assessments: Assessment[], lang: 'mn' | 'en') {
-  return assessments
-    .filter(a =>
-      MENTAL_HEALTH_RE.test(
-        `${a.name} ${a.nameEn ?? ''} ${a.description ?? ''} ${a.usage ?? ''} ${a.measure ?? ''} ${a.category?.name ?? ''}`
-      )
-    )
-    .slice(0, 2)
-    .map(a => formatAssessmentForWidget(a, lang))
-}
-
 // Deterministic, supportive reply for self-harm / suicide messages. We never let
 // the LLM recommender run for these — leading with warmth + real help matters far
 // more than a test card, and it prevents unrelated tests from being surfaced.
 const CRISIS_REPLY_MN =
-  'Таны бичсэнийг уншаад санаа зовлоо. Эдгээр мэдрэмж хэцүү байдгийг ойлгож байна — та ганцаараа биш, тусламж авах бүрэн боломж бий.\n\n' +
-  'Танд сэтгэл зүйн тусламж хэрэгтэй бол өөрийн оршин сууж буй аймаг, дүүргийн нэгдсэн эмнэлэг болон **Сэтгэцийн Эрүүл Мэндийн Үндэсний Төв (СЭМҮТ)**-ийн сэтгэцийн эмч, сэтгэл зүйчид хандаж үнэ төлбөргүй үйлчилгээ авах боломжтой.\n\n' +
-  'Мөн олон жилийн туршлагатай мэргэжлийн эмч нар **1800-2000** утсаар дамжуулан энгийн тарифаар, 24 цагийн турш эрүүл мэндийн зөвлөгөө, мэдээллийг үнэ төлбөргүй өгч байна.\n\n' +
-  'Яаралтай тохиолдолд **103 (Яаралтай түргэн тусламж)** эсвэл **102 (Цагдаагийн байгууллага)**-д нэн даруй хандаарай.\n\n' +
+  'Таны бичсэнийг уншаад санаа зовлоо. Та ганцаараа биш — тусламж авах бүрэн боломжтой.\n\n' +
+  'Танд сэтгэл зүйн тусламж хэрэгтэй бол өөрийн оршин сууж буй аймаг, дүүргийн нэгдсэн эмнэлэг болон **Сэтгэцийн Эрүүл Мэндийн Үндэсний Төв (СЭМҮТ)**-ийн сэтгэцийн эмч, сэтгэл зүйч нарт хандаж үнэ төлбөргүй үйлчилгээ авах боломжтой. Мөн олон жилийн туршлагатай мэргэжлийн эмч нар **1800-2000** утсаар дамжуулан, энгийн тарифаар, 24 цагийн туршид эрүүл мэндийн зөвлөгөө, мэдээллийг үнэ төлбөргүй өгч байна. Мөн яаралтай тохиолдолд та **103 (Яаралтай түргэн тусламж)** эсвэл **102 (Цагдаагийн байгууллага)**-д хандаарай.\n\n' +
   'Ийм мэдрэмж мөнхийн биш — мэргэжлийн тусламж, дэмжлэгтэйгээр хөнгөрдөг. Энэ бол анхан шатны мэдээлэл бөгөөд мэргэжлийн эмч, сэтгэл зүйчийг орлохгүй.'
 
 const CRISIS_REPLY_EN =
   "I'm really glad you reached out, and I'm concerned about what you shared. You don't have to face this alone — help is available.\n\n" +
-  '- If you feel in danger right now or are thinking of harming yourself, please call **103 (emergency services)** or tell someone you trust immediately.\n' +
-  '- Reaching a mental-health professional — for example the **National Center for Mental Health** — and talking to a psychologist or doctor can genuinely help.\n' +
-  '- These feelings are not permanent; they ease with proper support.\n\n' +
-  'If it helps, the free screener below can be a first step to understand how you feel. It is not a substitute for a professional doctor or psychologist.'
+  'If you need mental-health support, you can get free care from your local general hospital or the **National Center for Mental Health (NCMH)** — from a psychiatrist or psychologist. Experienced doctors also give free health advice 24/7 via the **1800-2000** line (standard call rate). In an emergency, call **103 (ambulance)** or **102 (police)** right away.\n\n' +
+  'These feelings are not permanent; they ease with proper support. This is general information and not a substitute for a professional doctor or psychologist.'
 
 // ── Main handler ─────────────────────────────────────────────────────────────
 export async function POST(req: Request) {
@@ -215,14 +195,13 @@ export async function POST(req: Request) {
 
     // ── CRISIS SAFETY: self-harm / suicide takes priority over everything ──────
     // Skip the classifier/LLM recommender entirely (it was surfacing unrelated
-    // tests like team-role or alcohol). Respond with support + real resources
-    // and, at most, the free mental-health screener.
+    // tests). Respond with support + real resources only — NO test card, since
+    // offering "take a test" during an acute crisis is inappropriate.
     if (detectCrisis(lastMessage)) {
-      const mhTests = pickMentalHealthTests(liveAssessments, lang)
       return Response.json({
         reply: lang === 'en' ? CRISIS_REPLY_EN : CRISIS_REPLY_MN,
-        tests: mhTests,
-        categories: [...new Set(mhTests.map(t => t?.category).filter(Boolean))] as string[],
+        tests: [],
+        categories: [],
         source: 'crisis',
         intent: 'general',
         tokens_used: 0,
