@@ -2491,7 +2491,7 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
           textAlign: "center", fontSize: 10, color: "#9CA3AF",
           padding: "24px 12px 8px", fontWeight: 500, lineHeight: 1.5,
         }}>
-          💡 Энэ бол анхан шатны, чиглүүлэх зорилготой зөвлөгөө бөгөөд мэргэжлийн эмч/сэтгэл зүйчийг орлохгүй. Шаардлагатай бол мэргэжилтэнд хандаарай.
+          💡 Энэ бол анхан шатны, чиглүүлэх зорилготой зөвлөгөө бөгөөд мэргэжлийн эмч/сэтгэл зүйчийг орлохгүй. AI-ийн мэдээлэл алдаатай байж болзошгүй тул чухал зүйлийг баталгаажуулж, шаардлагатай бол мэргэжилтэнд хандаарай.
         </div>
       </div>
 
@@ -3200,7 +3200,7 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
                   : priceFilter === "paid" ? "rgba(255,255,255,.6)"
                     : "#9CA3AF",
               }} />
-              {priceFilter === "free" ? "Үнэгүй" : priceFilter === "paid" ? "өлбөртэй" : "Бүгд"}
+              {priceFilter === "free" ? "Үнэгүй" : priceFilter === "paid" ? "Төлбөртэй" : "Бүгд"}
               {/* Chevron */}
               <svg
                 width="10" height="10" viewBox="0 0 16 16" fill="none"
@@ -3987,6 +3987,10 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     }
   }, [isHovered, isOpen])
   const [conversation, setConversation] = useState<Conversation | null>(null)
+  // Usage-limit popup is shown only when the user TRIES to send while locked —
+  // never auto-shown on lock, so the reply to their last allowed message stays
+  // readable instead of being covered the instant the 10th message locks them.
+  const [showLockPopup, setShowLockPopup] = useState(false)
   const messageCountRef = useRef(0)
   const [messages, setMessages] = useState<Message[]>(() => {
     const initialMessages: Message[] = [
@@ -4534,7 +4538,7 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
     // 8-hour lock. Only user-typed messages count — hidden analysis requests
     // ride free. When locked, the UsageLimitPopup renders automatically.
     if (!opts?.hidden) {
-      if (!canSendMessage()) return
+      if (!canSendMessage()) { setShowLockPopup(true); return }
       incrementDailyCount()
     }
 
@@ -5714,13 +5718,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                 )}
 
                 <div style={{ textAlign: "center", marginTop: 10, fontSize: 10, color: "#aaa", fontWeight: 500, lineHeight: 1.5 }}>
-                  hire.mn AI · анхан шатны зөвлөгөө — мэргэжлийн эмч/сэтгэл зүйчийг орлохгүй
+                  hire.mn AI · анхан шатны зөвлөгөө, мэргэжлийн эмч/сэтгэл зүйчийг орлохгүй · мэдээлэл алдаатай байж болзошгүй тул чухал зүйлийг баталгаажуулна уу
                 </div>
               </div>
               )}
 
               {/* Usage Limit Popup — shows while the 10-message limit lock is active */}
-              {isUserLocked() && <UsageLimitPopup onClose={() => setIsOpen(false)} />}
+              {showLockPopup && isUserLocked() && <UsageLimitPopup onClose={() => setShowLockPopup(false)} />}
 
               {/* Sidebar Overlay */}
               {showSidebar && (
