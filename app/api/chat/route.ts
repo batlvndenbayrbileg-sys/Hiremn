@@ -1,6 +1,6 @@
 // app/api/chat/route.ts
 import { generateText } from 'ai'
-import { hasGeminiKey, withGeminiFallback, polishMongolian } from '@/lib/llm'
+import { hasGeminiKey, withGeminiFallback } from '@/lib/llm'
 import { classify, detectCrisis } from '@/lib/classifier'
 import { findFAQ } from '@/lib/faq-db'
 import { buildSystemPrompt, compressHistory } from '@/lib/brain'
@@ -194,8 +194,7 @@ export async function POST(req: Request) {
           system: analysisSystem,
           messages: [{ role: 'user', content: trimmedPrompt }],
         }))
-        const polished = await polishMongolian(text.trim())
-        return Response.json({ reply: polished || 'Шинжилгээ хийж чадсангүй.' })
+        return Response.json({ reply: text.trim() || 'Шинжилгээ хийж чадсангүй.' })
       } catch (analysisErr: any) {
         const m = analysisErr?.message || String(analysisErr)
         console.error('[chat/route] analysis fast-path failed:', m)
@@ -503,14 +502,6 @@ export async function POST(req: Request) {
       ? [...new Set(tests.map(t => t?.category).filter(Boolean))] as string[]
       : []
 
-    // Second-pass Mongolian proofread for substantial replies — Gemini flash
-    // still makes occasional grammar/word errors ("амсарч"→"амарч"), so a tight
-    // proofreader cleans them without touching meaning/structure. Short replies
-    // (greetings etc.) skip it to save latency.
-    const replyText = (lang === 'mn' && cleanText.trim().length > 120)
-      ? await polishMongolian(cleanText)
-      : cleanText
-
     // Update memory with this conversation turn
     const recommendedTestIds = tests.map(t => t.id).filter(Boolean)
     updateMemoryFromMessage(sessionId, lastMessage, {
@@ -521,7 +512,7 @@ export async function POST(req: Request) {
     })
 
     return Response.json({
-      reply: replyText,
+      reply: cleanText,
       tests,
       categories,
       source: 'llm',

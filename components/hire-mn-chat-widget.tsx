@@ -2668,10 +2668,12 @@ function ArtifactView({ message, onClose, fontSize, renderFormattedText, onAskFo
       }}>
         {/* Suggested chips (only when no follow-ups yet) */}
         {status === "done" && followUps.length === 0 && (
-          <div style={{
+          <div
+            onWheel={(e) => { const d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX; if (d) e.currentTarget.scrollLeft += d }}
+            style={{
             display: "flex", gap: 6, overflowX: "auto",
             paddingBottom: 8, marginBottom: 4,
-            scrollbarWidth: "none",
+            scrollbarWidth: "none", WebkitOverflowScrolling: "touch", touchAction: "pan-x",
           }}>
             {suggestedQuestions.map((q, i) => (
               <button
@@ -3064,9 +3066,12 @@ function TestCarousel({ tests, categories, fontSize }: { tests: Test[]; categori
     <div>
       {/* Category tabs — always on top */}
       {categories.length > 1 && (
-        <div style={{
+        <div
+          onWheel={(e) => { const d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX; if (d) e.currentTarget.scrollLeft += d }}
+          style={{
           display: "flex", gap: 5,
           overflowX: "auto", scrollbarWidth: "none",
+          WebkitOverflowScrolling: "touch", touchAction: "pan-x",
           marginBottom: 10,
         }}>
           {["Бүгд", ...categories].map(cat => {
@@ -5317,9 +5322,13 @@ export default function HireMnChatWidget({ initialContext }: HireMnChatWidgetPro
                     )}
 
                     {showQuickReplies && !isTyping && (
-                      <div className="hw-chiprow" style={{
+                      <div
+                        className="hw-chiprow"
+                        onWheel={(e) => { const d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX; if (d) e.currentTarget.scrollLeft += d }}
+                        style={{
                         display: "flex", gap: 8, marginTop: "auto", paddingTop: 14,
                         overflowX: "auto",
+                        WebkitOverflowScrolling: "touch", touchAction: "pan-x",
                       }}>
                         {QUICK_REPLIES.map((qr, i) => {
                           const accent = qr.iconType === "gift"
