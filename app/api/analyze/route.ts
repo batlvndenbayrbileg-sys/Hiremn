@@ -408,7 +408,10 @@ export async function POST(request: Request) {
     // Fallback: derive dimensions from answers grouped by questionCategory.
     // Compute per-dim max from per-question max if available.
     if (dimensions.length === 0 && Array.isArray(answersGrouped) && answersGrouped.length > 1) {
-      const dimMap = new Map<string, { label: string; sum: number; max: number; count: number }>()
+      // Platform-supplied per-sub-scale ceiling (from bands) keyed by category —
+      // reused here so the denominator is the REAL max (e.g. 42), not the summed
+      // score itself (which made every sub-scale read 100%, e.g. "41/41").
+      const dimMap = new Map<string, { label: string; sum: number; max: number; platformMax: number; count: number }>()
       for (const grp of answersGrouped) {
         const catId = grp?.questionCategoryId ?? 'misc'
         const catName: string = grp?.questionCategoryName || grp?.category?.name || `Бүлэг ${catId}`
@@ -417,21 +420,23 @@ export async function POST(request: Request) {
           const m = Number(a?.question?.point ?? a?.question?.maxValue ?? a?.maxPoint ?? 0)
           return acc + (Number.isFinite(m) && m > 0 ? m : 0)
         }, 0)
-        const cur = dimMap.get(String(catId)) || { label: catName, sum: 0, max: 0, count: 0 }
+        const platformMax = subscaleMaxByCategory.get(String(catId)) || 0
+        const cur = dimMap.get(String(catId)) || { label: catName, sum: 0, max: 0, platformMax: 0, count: 0 }
         cur.sum += sum
         cur.max += maxSum
+        if (platformMax > 0) cur.platformMax = platformMax
         cur.count += grp?.answers?.length || 0
         dimMap.set(String(catId), cur)
       }
       if (dimMap.size >= 2) {
         const groups = Array.from(dimMap.values())
-        // Without a per-question max we fall back to the group's own sum, which
-        // again only expresses relative standing.
-        dimMaxIsRelative = groups.some(v => !(v.max > 0))
+        // Relative only when NEITHER a platform ceiling NOR a per-question max is
+        // known — otherwise the sub-scale has a real denominator.
+        dimMaxIsRelative = groups.some(v => !(v.platformMax > 0) && !(v.max > 0))
         const arr = groups.map(v => ({
           label: v.label,
           score: v.sum,
-          maxScore: v.max > 0 ? v.max : Math.max(v.sum, 1),
+          maxScore: v.platformMax > 0 ? v.platformMax : v.max > 0 ? v.max : Math.max(v.sum, 1),
         }))
         dimensions = arr.map(d => ({
           ...d,
