@@ -213,11 +213,16 @@ export async function POST(request: Request) {
     const subscaleBands = allBands.filter(b => b.category !== null)
     const interpBands = allBands.filter(b => b.category === null).sort((a, b) => a.min - b.min)
 
-    // Sub-scale ceilings, looked up per dimension by category id then by name.
+    // Sub-scale ceilings + names, looked up per dimension by category id / name.
+    // bands[] are documented as { questionCategory, name, range } — so band.label
+    // (from b.name) IS the sub-scale's real name (e.g. "Нойргүйдэл"), which lets
+    // the answer-grouping fallback show it instead of "Бүлэг 217".
     const subscaleMaxByCategory = new Map<string, number>()
     const subscaleMaxByName = new Map<string, number>()
+    const subscaleNameByCategory = new Map<string, string>()
     for (const b of subscaleBands) {
       if (b.category) subscaleMaxByCategory.set(b.category, b.max)
+      if (b.category && b.label) subscaleNameByCategory.set(b.category, b.label)
       if (b.label) subscaleMaxByName.set(b.label.toLowerCase(), b.max)
     }
     const reportedSubscaleMax =
@@ -414,7 +419,8 @@ export async function POST(request: Request) {
       const dimMap = new Map<string, { label: string; sum: number; max: number; platformMax: number; count: number }>()
       for (const grp of answersGrouped) {
         const catId = grp?.questionCategoryId ?? 'misc'
-        const catName: string = grp?.questionCategoryName || grp?.category?.name || `Бүлэг ${catId}`
+        const catName: string = grp?.questionCategoryName || grp?.category?.name ||
+          subscaleNameByCategory.get(String(catId)) || `Бүлэг ${catId}`
         const sum = (grp?.answers || []).reduce((acc: number, a: any) => acc + (Number(a?.point) || 0), 0)
         const maxSum = (grp?.answers || []).reduce((acc: number, a: any) => {
           const m = Number(a?.question?.point ?? a?.question?.maxValue ?? a?.maxPoint ?? 0)
