@@ -1,5 +1,6 @@
 import { generateText } from 'ai'
 import { hasGeminiKey, withGeminiFallback } from '@/lib/llm'
+import { getAiExport } from '@/lib/hire-api'
 
 // 120s ceiling for the detailed analysis (applies on Vercel Pro; Hobby caps at
 // 60s). Frontend AbortController is aligned to this.
@@ -479,6 +480,28 @@ export async function POST(request: Request) {
       .map((x, i) => `${i + 1}. [${x.p}] ${x.q} → ${x.a}`)
       .join('\n')
 
+    // ── Official AI-export: the platform's own report structure (real sub-scale
+    // names, band ranges, interpretation text). This is the AUTHORITATIVE source
+    // for how to name and interpret this test, so the LLM stops guessing.
+    let aiExportBlock = ''
+    try {
+      const assessmentId = assessment?.id
+      const exp = assessmentId != null ? await getAiExport(assessmentId) : null
+      if (exp) {
+        const parts: string[] = []
+        if (exp.assessment?.about) parts.push(`Тайлбар: ${stripHtml(String(exp.assessment.about))}`)
+        if (exp.template) parts.push(`template: ${JSON.stringify(exp.template)}`)
+        if (exp.aiData) parts.push(`aiData: ${JSON.stringify(exp.aiData)}`)
+        if (exp.variables && Object.keys(exp.variables).length) parts.push(`variables: ${JSON.stringify(exp.variables)}`)
+        if (parts.length) {
+          aiExportBlock =
+            '\n\n═══ ТАЙЛАНГИЙН АЛБАН ЁСНЫ AI-EXPORT (ЖИНХЭНЭ дэд бүлгийн нэр, түвшин, тайлбар — дүгнэлт, нэршлээ ЭНД суурилуул) ═══\n' +
+            parts.join('\n').slice(0, 6000)
+        }
+      }
+    } catch (e) {
+      console.error('[analyze] ai-export fetch failed:', e)
+    }
 
     const truncated = `Тестийн нэр: ${reportTitle}
 Зохиогч: ${assessmentAuthor || '—'}
@@ -576,7 +599,7 @@ ${sampleAnswers || '—'}`
         // rejects thinkingBudget:0 with "invalid argument".
         maxOutputTokens: 8000,
         system: SYSTEM_STATIC,
-        prompt: `Дата:\n${truncated}\n\nДээрх үр дүнг шинжилж, ЗӨВХӨН доорх бүтэцтэй JSON-оор буцаа. Markdown, \`\`\` тэмдэг, тайлбар бичихгүй — цэвэр JSON:\n${JSON_SHAPE}`,
+        prompt: `Дата:\n${truncated}${aiExportBlock}\n\nДээрх үр дүнг шинжилж, ЗӨВХӨН доорх бүтэцтэй JSON-оор буцаа. Markdown, \`\`\` тэмдэг, тайлбар бичихгүй — цэвэр JSON:\n${JSON_SHAPE}`,
         // Force raw JSON (no markdown fences).
         providerOptions: { google: { responseMimeType: 'application/json' } },
       }))

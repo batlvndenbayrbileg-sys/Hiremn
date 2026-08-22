@@ -42,6 +42,41 @@ async function apiCall<T>(endpoint: string, options: ApiOptions = {}): Promise<T
 }
 
 // ─────────────────────────────────────────
+// AI export — official report structure for the LLM
+// GET /pdf-template/ai-export/{assessmentId}  (header: x-ai-agent-key)
+// Returns the assessment's real sub-scale names, bands and interpretation text
+// so the analysis is grounded in the platform's own report, not inference.
+// ─────────────────────────────────────────
+export interface AiExport {
+  assessment?: { id: number; name?: string; author?: string; about?: string; usage?: string; totalPoint?: number; type?: number }
+  template?: unknown
+  aiData?: unknown
+  variables?: Record<string, unknown>
+}
+
+export async function getAiExport(assessmentId: number | string): Promise<AiExport | null> {
+  if (assessmentId === null || assessmentId === undefined || assessmentId === '') return null
+  // Key is published in the platform's API docs; env overrides it per environment.
+  const key = process.env.HIRE_AI_AGENT_KEY || '488dc7d5ae43e8f90849a8e8d8ce96b2659ff8dbe792b526'
+  try {
+    const res = await fetch(`${API_BASE}/pdf-template/ai-export/${assessmentId}`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json', 'x-ai-agent-key': key },
+      next: { revalidate: 300 },
+    })
+    if (!res.ok) {
+      console.error(`[hire-api] ai-export ${assessmentId} → ${res.status}`)
+      return null
+    }
+    const json = await res.json()
+    return (json?.payload as AiExport) ?? null
+  } catch (err) {
+    console.error('[hire-api] ai-export error:', err)
+    return null
+  }
+}
+
+// ─────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────
 
